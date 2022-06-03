@@ -8,23 +8,23 @@
 class example2
 {
 public:
-	example2();
-	~example2();
-	std::vector< int > function1(){return dataMember1}
+    example2();
+    ~example2();
+    std::vector< int > function1(){return dataMember1}
 
-	std::list< std::string > function2(int i, string j);
+    std::list< std::string > function2(int i, string j);
 
-	Processor function3(int, double, string);
+    Processor function3(int, double, string);
 
-	void function4(Processor, int);
-	
-	void voidAccessor(int&);
+    void function4(Processor, int);
+    
+    void voidAccessor(int&);
 
-	Processor ProcessorFactory(int, double, string);
+    Processor ProcessorFactory(int, double, string);
 
 private:
-	std::vector< int> dataMember1;
-	string j;
-	Processor p1;
+    std::vector< int> dataMember1;
+    string j;
+    Processor p1;
 
 };

@@ -51,14 +51,14 @@ inverseTransform ( double & lon, double & lat ) const
   double z = sqrt ( 1.0 - lon_q * lon_q - lat_h * lat_h );
 
   lon = ( 180.0 / M_PI ) * 2.0 * atan ( ( z * lon_r ) / 
-					( 4.0 * z * z - 2.0 ) );
+                    ( 4.0 * z * z - 2.0 ) );
   lat = ( 180.0 / M_PI ) * asin ( lat_r * z );
 }
 
 /* virtual */
 /** @stereotype voidaccessor */ //Not recognized as a method.
 void HammerAito::transform ( vector< double > & lon,
-			     vector< double > & lat ) const
+                 vector< double > & lat ) const
 {
   assert ( lat.size() == lon.size() );
 
@@ -79,7 +79,7 @@ double HammerAito::aspectRatio () const
 
 /** @stereotype non-void-command collaborator */ //Not recognized as a method
 HippoRectangle HammerAito::calcRectangle ( const Range & lat,
-					   const Range & lon )
+                       const Range & lon )
 {
   double x_lo = lat.low ();
   double x_hi = lat.high ();

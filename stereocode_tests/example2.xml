@@ -11,22 +11,22 @@
 <class>class <name>example2</name>
 <block>{<private type="default">
 </private><public>public:
-	<constructor_decl><name>example2</name><parameter_list>()</parameter_list>;</constructor_decl>
-	<destructor_decl><name>~example2</name><parameter_list>()</parameter_list>;</destructor_decl>
-	<function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> &gt;</argument_list></name></type> <name>function1</name><parameter_list>()</parameter_list><block>{<block_content><return>return <expr><name>dataMember1</name></expr></return></block_content>}</block></function>
+    <constructor_decl><name>example2</name><parameter_list>()</parameter_list>;</constructor_decl>
+    <destructor_decl><name>~example2</name><parameter_list>()</parameter_list>;</destructor_decl>
+    <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> &gt;</argument_list></name></type> <name>function1</name><parameter_list>()</parameter_list><block>{<block_content><return>return <expr><name>dataMember1</name></expr></return></block_content>}</block></function>
 
-	<function_decl><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt; <argument><expr><name><name>std</name><operator>::</operator><name>string</name></name></expr></argument> &gt;</argument_list></name></type> <name>function2</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>j</name></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt; <argument><expr><name><name>std</name><operator>::</operator><name>string</name></name></expr></argument> &gt;</argument_list></name></type> <name>function2</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>j</name></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function_decl><type><name>Processor</name></type> <name>function3</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>, <parameter><decl><type><name>double</name></type></decl></parameter>, <parameter><decl><type><name>string</name></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>Processor</name></type> <name>function3</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>, <parameter><decl><type><name>double</name></type></decl></parameter>, <parameter><decl><type><name>string</name></type></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function_decl><type><name>void</name></type> <name>function4</name><parameter_list>(<parameter><decl><type><name>Processor</name></type></decl></parameter>, <parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>function4</name><parameter_list>(<parameter><decl><type><name>Processor</name></type></decl></parameter>, <parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function_decl><type><name>Processor</name></type> <name>ProcessorFactory</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>, <parameter><decl><type><name>double</name></type></decl></parameter>, <parameter><decl><type><name>string</name></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>Processor</name></type> <name>ProcessorFactory</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>, <parameter><decl><type><name>double</name></type></decl></parameter>, <parameter><decl><type><name>string</name></type></decl></parameter>)</parameter_list>;</function_decl>
 
 </public><private>private:
-	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></type> <name>dataMember1</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>string</name></type> <name>j</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>Processor</name></type> <name>p1</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></type> <name>dataMember1</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>string</name></type> <name>j</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>Processor</name></type> <name>p1</name></decl>;</decl_stmt>
 
 </private>}</block>;</class></unit>
 
@@ -40,44 +40,44 @@
 </block_content>}</block></destructor>
 
 <function><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt; <argument><expr><name><name>std</name><operator>::</operator><name>string</name></name></expr></argument> &gt;</argument_list></name></type> <name><name>example2</name><operator>::</operator><name>function2</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>j</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt;<argument><expr><name>string</name></expr></argument>&gt;</argument_list></name></type> <name>ret</name> <init>= <expr><block>{<expr><name>j</name></expr>}</block></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt;<argument><expr><name>string</name></expr></argument>&gt;</argument_list></name></type> <name>ret</name> <init>= <expr><block>{<expr><name>j</name></expr>}</block></expr></init></decl>;</decl_stmt>
 
-	<return>return <expr><name>ret</name></expr>;</return>
+    <return>return <expr><name>ret</name></expr>;</return>
 </block_content>}</block></function>
 
 <function><type><name>Processor</name></type> <name><name>example2</name><operator>::</operator><name>function3</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>j</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>s</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<decl_stmt><decl><type><name>Processor</name></type> <name>pil</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>Processor</name></type> <name>pil</name></decl>;</decl_stmt>
 
-	<expr_stmt><expr><call><name><name>p1</name><operator>.</operator><name>doSomething</name></name><argument_list>(<argument><expr><name>i</name></expr></argument>,<argument><expr><name>j</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><call><name><name>p1</name><operator>.</operator><name>doSomething</name></name><argument_list>(<argument><expr><name>i</name></expr></argument>,<argument><expr><name>j</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
 
-	<expr_stmt><expr><call><name><name>p1</name><operator>.</operator><name>doSomethingElse</name></name><argument_list>(<argument><expr><name>s</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><call><name><name>p1</name><operator>.</operator><name>doSomethingElse</name></name><argument_list>(<argument><expr><name>s</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
 
-	<expr_stmt><expr><call><name>outsideFunction</name><argument_list>(<argument><expr><name>p1</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><call><name>outsideFunction</name><argument_list>(<argument><expr><name>p1</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
 
-	<return>return <expr><name>pil</name></expr>;</return>
+    <return>return <expr><name>pil</name></expr>;</return>
 </block_content>}</block></function>
 
 <function><type><name>void</name></type> <name><name>example2</name><operator>::</operator><name>function4</name></name><parameter_list>(<parameter><decl><type><name>Processor</name></type> <name>p2</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>k</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<expr_stmt><expr><call><name><name>p2</name><operator>.</operator><name>doSomething</name></name><argument_list>(<argument><expr><name>k</name></expr></argument>, <argument><expr><literal type="number">11.5</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><call><name><name>p2</name><operator>.</operator><name>doSomething</name></name><argument_list>(<argument><expr><name>k</name></expr></argument>, <argument><expr><literal type="number">11.5</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
 
-	<expr_stmt><expr><name>k</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>k</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
 
-	<return>return;</return>
+    <return>return;</return>
 </block_content>}</block></function>
 <function><type><name>void</name></type> <name><name>example2</name><operator>::</operator><name>voidAccessor</name></name><parameter_list>(<parameter><decl><type><name>int</name><modifier>&amp;</modifier></type> <name>k</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<expr_stmt><expr><name>k</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
-	<if_stmt><if>if <condition>(<expr><literal type="boolean">true</literal></expr>)</condition>
-	<block>{<block_content>
-		<expr_stmt><expr><name>k</name> <operator>+=</operator> <literal type="number">100</literal></expr>;</expr_stmt>
-		<comment type="block">/* code */</comment>
-	</block_content>}</block></if></if_stmt>
+    <expr_stmt><expr><name>k</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
+    <if_stmt><if>if <condition>(<expr><literal type="boolean">true</literal></expr>)</condition>
+    <block>{<block_content>
+        <expr_stmt><expr><name>k</name> <operator>+=</operator> <literal type="number">100</literal></expr>;</expr_stmt>
+        <comment type="block">/* code */</comment>
+    </block_content>}</block></if></if_stmt>
 
 </block_content>}</block></function>
 
 <function><type><name>Processor</name></type> <name><name>example2</name><operator>::</operator><name>ProcessorFactory</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>j</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>k</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<decl_stmt><decl><type><name>Processor</name></type> <name>p</name> <init>= <expr><call><name>Processor</name><argument_list>(<argument><expr><name>i</name></expr></argument>,<argument><expr><name>j</name></expr></argument>,<argument><expr><name>k</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>Processor</name></type> <name>p</name> <init>= <expr><call><name>Processor</name><argument_list>(<argument><expr><name>i</name></expr></argument>,<argument><expr><name>j</name></expr></argument>,<argument><expr><name>k</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
 
-	<return>return <expr><name>p</name></expr>;</return>
+    <return>return <expr><name>p</name></expr>;</return>
 </block_content>}</block></function>
 
 </unit>

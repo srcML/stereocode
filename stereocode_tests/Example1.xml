@@ -15,38 +15,38 @@
 
 <class>class <name>Processor</name><block>{<private type="default">
 </private><public>public:
-	<function><type><name>string</name></type> <name>GetCacheState</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><name>state</name></expr>;</return></block_content>}</block></function>
-	<function><type><name>int</name></type> <name>GetID</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
-	<function><type><name>int</name></type> <name>GetCache</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</return></block_content>}</block></function>
-	<function><type><name>void</name></type> <name>setState</name><parameter_list>(<parameter><decl><type><name>string</name></type> <name>s</name></decl></parameter>)</parameter_list><block>{<block_content><expr_stmt><expr><name>state</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt></block_content>}</block></function>
-	<function><type><name>double</name></type> <name>testingMultipleReturns</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>j</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content><if_stmt><if>if <condition>(<expr><name>j</name> <operator>==</operator> <literal type="number">10</literal></expr>)</condition><block>{<block_content><return>return <expr><literal type="number">1.0</literal></expr>;</return></block_content>}</block></if> <else>else<block type="pseudo"><block_content> <return>return <expr><literal type="number">2.0</literal></expr>;</return></block_content></block></else></if_stmt></block_content>}</block></function>
-	<function><type><name>int</name></type> <name>GetCache2</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>)</parameter_list> <block>{<block_content><return>return <expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</return></block_content>}</block></function>
-	<function><type><name>int</name></type> <name>GetID2</name><parameter_list>()</parameter_list> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
+    <function><type><name>string</name></type> <name>GetCacheState</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><name>state</name></expr>;</return></block_content>}</block></function>
+    <function><type><name>int</name></type> <name>GetID</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
+    <function><type><name>int</name></type> <name>GetCache</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</return></block_content>}</block></function>
+    <function><type><name>void</name></type> <name>setState</name><parameter_list>(<parameter><decl><type><name>string</name></type> <name>s</name></decl></parameter>)</parameter_list><block>{<block_content><expr_stmt><expr><name>state</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt></block_content>}</block></function>
+    <function><type><name>double</name></type> <name>testingMultipleReturns</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>j</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content><if_stmt><if>if <condition>(<expr><name>j</name> <operator>==</operator> <literal type="number">10</literal></expr>)</condition><block>{<block_content><return>return <expr><literal type="number">1.0</literal></expr>;</return></block_content>}</block></if> <else>else<block type="pseudo"><block_content> <return>return <expr><literal type="number">2.0</literal></expr>;</return></block_content></block></else></if_stmt></block_content>}</block></function>
+    <function><type><name>int</name></type> <name>GetCache2</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>)</parameter_list> <block>{<block_content><return>return <expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</return></block_content>}</block></function>
+    <function><type><name>int</name></type> <name>GetID2</name><parameter_list>()</parameter_list> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
 
 
-	<constructor_decl><name>Processor</name><parameter_list>()</parameter_list>;</constructor_decl>
-	<constructor_decl><name>Processor</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list>;</constructor_decl>
-	<function_decl><type><name>void</name></type> <name>ModifyData</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>string</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>ReadData</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>*</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>ChangeCacheState</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>string</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><name>string</name></type> <name>TestingMultipleAttributeReturns</name><parameter_list>(<parameter><decl><type><name>bool</name></type></decl></parameter>, <parameter><decl><type><name>bool</name></type></decl></parameter>)</parameter_list>;</function_decl>
+    <constructor_decl><name>Processor</name><parameter_list>()</parameter_list>;</constructor_decl>
+    <constructor_decl><name>Processor</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list>;</constructor_decl>
+    <function_decl><type><name>void</name></type> <name>ModifyData</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>string</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>ReadData</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>*</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>ChangeCacheState</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>string</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>string</name></type> <name>TestingMultipleAttributeReturns</name><parameter_list>(<parameter><decl><type><name>bool</name></type></decl></parameter>, <parameter><decl><type><name>bool</name></type></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;
-	<argument><expr><name>int</name> 	<modifier>*</modifier></expr></argument>	&gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
+    <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;
+    <argument><expr><name>int</name>    <modifier>*</modifier></expr></argument>    &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
-	<function><type><name><name>std</name><operator>::</operator><name>map</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> , <argument><expr><name>char</name> <modifier>&amp;</modifier></expr></argument>	&gt;</argument_list></name></type> <name>TestingPrimitiveReturn</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>helloworld</name></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
+    <function><type><name><name>std</name><operator>::</operator><name>map</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> , <argument><expr><name>char</name> <modifier>&amp;</modifier></expr></argument> &gt;</argument_list></name></type> <name>TestingPrimitiveReturn</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>helloworld</name></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
-	<function_decl><type><name>void</name></type> <name>TestingCommand</name><parameter_list>()</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>IncrementDataMember</name><parameter_list>()</parameter_list>;</function_decl>
-	<friend>friend <function_decl type="operator"><type><name><name>std</name><operator>::</operator><name>ostream</name></name><modifier>&amp;</modifier></type> <name>operator<name>&lt;&lt;</name></name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>ostream</name></name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Processor</name> <modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl></friend>
-	<function_decl type="operator"><type><name>bool</name></type> <name>operator<name>==</name></name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Processor</name> <modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>TestingCommand</name><parameter_list>()</parameter_list>;</function_decl>
+    <function_decl><type><name>void</name></type> <name>IncrementDataMember</name><parameter_list>()</parameter_list>;</function_decl>
+    <friend>friend <function_decl type="operator"><type><name><name>std</name><operator>::</operator><name>ostream</name></name><modifier>&amp;</modifier></type> <name>operator<name>&lt;&lt;</name></name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>ostream</name></name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Processor</name> <modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl></friend>
+    <function_decl type="operator"><type><name>bool</name></type> <name>operator<name>==</name></name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Processor</name> <modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
 
 </public><private>private:
-	<decl_stmt><decl><type><name>string</name></type> <name>name</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>string</name></type> <name>state</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>int</name></type> <name><name>cache</name><index>[<expr><name>BLOCK_SIZE</name></expr>]</index></name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>int</name></type> <name>pid</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>int</name></type> <name>anotherDataMember</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>string</name></type> <name>name</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>string</name></type> <name>state</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>int</name></type> <name><name>cache</name><index>[<expr><name>BLOCK_SIZE</name></expr>]</index></name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>int</name></type> <name>pid</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>int</name></type> <name>anotherDataMember</name></decl>;</decl_stmt>
 </private>}</block>;</class>
 </unit>
 
@@ -55,89 +55,89 @@
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"Example1.hpp"</cpp:file></cpp:include>
 
 <constructor><name><name>Processor</name><operator>::</operator><name>Processor</name></name><parameter_list>()</parameter_list><block>{<block_content>
-	<expr_stmt><expr><name>state</name> <operator>=</operator> <literal type="string">"Invalid"</literal></expr>;</expr_stmt>
-	<for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
-		<expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr>;</expr_stmt>
-	</block_content>}</block></for>
-	<expr_stmt><expr><name>pid</name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>state</name> <operator>=</operator> <literal type="string">"Invalid"</literal></expr>;</expr_stmt>
+    <for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
+        <expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr>;</expr_stmt>
+    </block_content>}</block></for>
+    <expr_stmt><expr><name>pid</name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr>;</expr_stmt>
 </block_content>}</block></constructor>
 <constructor><name><name>Processor</name><operator>::</operator><name>Processor</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>id</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<expr_stmt><expr><name>state</name> <operator>=</operator> <literal type="string">"Invalid"</literal></expr>;</expr_stmt>
-	<for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
-		<expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr>;</expr_stmt>
-	</block_content>}</block></for>
-	<expr_stmt><expr><name>pid</name> <operator>=</operator> <name>id</name></expr>;</expr_stmt>
+    <expr_stmt><expr><name>state</name> <operator>=</operator> <literal type="string">"Invalid"</literal></expr>;</expr_stmt>
+    <for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
+        <expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr>;</expr_stmt>
+    </block_content>}</block></for>
+    <expr_stmt><expr><name>pid</name> <operator>=</operator> <name>id</name></expr>;</expr_stmt>
 </block_content>}</block></constructor>
 <function><type><name>void</name></type> <name><name>Processor</name><operator>::</operator><name>ModifyData</name></name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>&amp;</modifier></type> <name>n</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>&amp;</modifier></type> <name>i</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>string</name> <modifier>&amp;</modifier></type> <name>s</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <name>n</name></expr>;</expr_stmt>
-	<expr_stmt><expr><name>state</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt>
-	<return>return;</return>
+    <expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <name>n</name></expr>;</expr_stmt>
+    <expr_stmt><expr><name>state</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt>
+    <return>return;</return>
 </block_content>}</block></function>
 
 <function><type><name>void</name></type> <name><name>Processor</name><operator>::</operator><name>ReadData</name></name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>*</modifier></type> <name>m</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
-		<expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <name><name>m</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</expr_stmt>
-	</block_content>}</block></for>
-	<return>return;</return>
+    <for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
+        <expr_stmt><expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>=</operator> <name><name>m</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</expr_stmt>
+    </block_content>}</block></for>
+    <return>return;</return>
 </block_content>}</block></function>
 <function><type><name>void</name></type> <name><name>Processor</name><operator>::</operator><name>ChangeCacheState</name></name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>string</name> <modifier>&amp;</modifier></type> <name>s</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<comment type="line">//std::cout &lt;&lt;"Changing processor: " &lt;&lt; pid &lt;&lt; "'s state to: "&lt;&lt; s &lt;&lt; std::endl; </comment>
-	<expr_stmt><expr><name>state</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt>
-	<return>return;</return>
+    <comment type="line">//std::cout &lt;&lt;"Changing processor: " &lt;&lt; pid &lt;&lt; "'s state to: "&lt;&lt; s &lt;&lt; std::endl; </comment>
+    <expr_stmt><expr><name>state</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt>
+    <return>return;</return>
 </block_content>}</block></function>
 <function><type><name>string</name></type> <name><name>Processor</name><operator>::</operator><name>TestingMultipleAttributeReturns</name></name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>NAME</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>STATE</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<if_stmt><if>if <condition>(<expr><name>NAME</name></expr>)</condition>
-	<block>{<block_content>
-		<return>return <expr><name>name</name></expr>;</return>
-	</block_content>}</block></if>
-	<if type="elseif">else if <condition>(<expr><name>STATE</name></expr>)</condition>
-	<block>{<block_content>
-		<return>return <expr><name>state</name></expr>;</return>
-	</block_content>}</block></if>
-	<else>else <block>{<block_content>
-		<return>return <expr><literal type="string">"hello!"</literal></expr>;</return>
-	</block_content>}</block></else></if_stmt>
+    <if_stmt><if>if <condition>(<expr><name>NAME</name></expr>)</condition>
+    <block>{<block_content>
+        <return>return <expr><name>name</name></expr>;</return>
+    </block_content>}</block></if>
+    <if type="elseif">else if <condition>(<expr><name>STATE</name></expr>)</condition>
+    <block>{<block_content>
+        <return>return <expr><name>state</name></expr>;</return>
+    </block_content>}</block></if>
+    <else>else <block>{<block_content>
+        <return>return <expr><literal type="string">"hello!"</literal></expr>;</return>
+    </block_content>}</block></else></if_stmt>
 </block_content>}</block></function>
 
 <function type="operator"><type><name><name>std</name><operator>::</operator><name>ostream</name></name><modifier>&amp;</modifier></type> <name>operator<name>&lt;&lt;</name></name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>ostream</name></name><modifier>&amp;</modifier></type> <name>os</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Processor</name> <modifier>&amp;</modifier></type> <name>p</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<expr_stmt><expr><name>os</name> <operator>&lt;&lt;</operator> <literal type="string">"Processor "</literal> <operator>&lt;&lt;</operator> <name><name>p</name><operator>.</operator><name>pid</name></name> <operator>&lt;&lt;</operator> <literal type="string">" cache currently contains ... "</literal></expr>;</expr_stmt>
-	<for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
-		<expr_stmt><expr><name>os</name> <operator>&lt;&lt;</operator> <name><name>p</name><operator>.</operator><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>&lt;&lt;</operator> <literal type="string">" "</literal></expr>;</expr_stmt>
-	</block_content>}</block></for>
-	<expr_stmt><expr><name>os</name> <operator>&lt;&lt;</operator> <literal type="string">"and is in the '"</literal> <operator>&lt;&lt;</operator> <name><name>p</name><operator>.</operator><name>state</name></name> <operator>&lt;&lt;</operator> <literal type="string">"' state\n"</literal></expr>;</expr_stmt>
-	<return>return <expr><name>os</name></expr>;</return>
+    <expr_stmt><expr><name>os</name> <operator>&lt;&lt;</operator> <literal type="string">"Processor "</literal> <operator>&lt;&lt;</operator> <name><name>p</name><operator>.</operator><name>pid</name></name> <operator>&lt;&lt;</operator> <literal type="string">" cache currently contains ... "</literal></expr>;</expr_stmt>
+    <for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
+        <expr_stmt><expr><name>os</name> <operator>&lt;&lt;</operator> <name><name>p</name><operator>.</operator><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>&lt;&lt;</operator> <literal type="string">" "</literal></expr>;</expr_stmt>
+    </block_content>}</block></for>
+    <expr_stmt><expr><name>os</name> <operator>&lt;&lt;</operator> <literal type="string">"and is in the '"</literal> <operator>&lt;&lt;</operator> <name><name>p</name><operator>.</operator><name>state</name></name> <operator>&lt;&lt;</operator> <literal type="string">"' state\n"</literal></expr>;</expr_stmt>
+    <return>return <expr><name>os</name></expr>;</return>
 </block_content>}</block></function>
 <function type="operator"><type><name>bool</name></type> <name><name>Processor</name><operator>::</operator><name>operator<name>==</name></name></name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Processor</name> <modifier>&amp;</modifier></type> <name>rhs</name></decl></parameter>)</parameter_list><block>{<block_content>
-	<decl_stmt><decl><type><name>bool</name></type> <name>ret</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl>;</decl_stmt>
-	<for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
-		<if_stmt><if>if <condition>(<expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>!=</operator> <name><name>rhs</name><operator>.</operator><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>)</condition><block>{<block_content>
-			<expr_stmt><expr><name>ret</name> <operator>=</operator> <literal type="boolean">false</literal></expr>;</expr_stmt>
-			<break>break;</break>
-		</block_content>}</block></if></if_stmt>
-	</block_content>}</block></for>
-	<return>return <expr><name>ret</name></expr>;</return>
+    <decl_stmt><decl><type><name>bool</name></type> <name>ret</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl>;</decl_stmt>
+    <for>for <control>(<init><decl><type><name>int</name></type> <name>i</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</init> <condition><expr><name>i</name> <operator>&lt;</operator> <name>BLOCK_SIZE</name></expr>;</condition> <incr><expr><operator>++</operator><name>i</name></expr></incr>)</control><block>{<block_content>
+        <if_stmt><if>if <condition>(<expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name> <operator>!=</operator> <name><name>rhs</name><operator>.</operator><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>)</condition><block>{<block_content>
+            <expr_stmt><expr><name>ret</name> <operator>=</operator> <literal type="boolean">false</literal></expr>;</expr_stmt>
+            <break>break;</break>
+        </block_content>}</block></if></if_stmt>
+    </block_content>}</block></for>
+    <return>return <expr><name>ret</name></expr>;</return>
 </block_content>}</block></function>
 <function><type><name>void</name></type> <name><name>Processor</name><operator>::</operator><name>TestingCommand</name></name><parameter_list>()</parameter_list><block>{<block_content>
-	<decl_stmt><decl><type><name>int</name></type> <name>test2</name> <init>= <expr><literal type="number">2</literal></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>int</name></type> <name>test</name> <init>= <expr><name>dataMember</name> <operator>-</operator> <operator>++</operator><name>pid</name></expr></init></decl>;</decl_stmt>
-	<expr_stmt><expr><name><name>cache</name><index>[<expr><literal type="number">0</literal></expr>]</index></name><operator>--</operator></expr>;</expr_stmt>
-	<expr_stmt><expr><operator>--</operator><name><name>cache</name><index>[<expr><literal type="number">2</literal></expr>]</index></name></expr>;</expr_stmt>
+    <decl_stmt><decl><type><name>int</name></type> <name>test2</name> <init>= <expr><literal type="number">2</literal></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>int</name></type> <name>test</name> <init>= <expr><name>dataMember</name> <operator>-</operator> <operator>++</operator><name>pid</name></expr></init></decl>;</decl_stmt>
+    <expr_stmt><expr><name><name>cache</name><index>[<expr><literal type="number">0</literal></expr>]</index></name><operator>--</operator></expr>;</expr_stmt>
+    <expr_stmt><expr><operator>--</operator><name><name>cache</name><index>[<expr><literal type="number">2</literal></expr>]</index></name></expr>;</expr_stmt>
 
-	<expr_stmt><expr><name>test</name> <operator>=</operator> <name><name>cache</name><index>[<expr><literal type="number">0</literal></expr>]</index></name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>test</name> <operator>=</operator> <name><name>cache</name><index>[<expr><literal type="number">0</literal></expr>]</index></name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
 
-	<expr_stmt><expr><name>pid</name> <operator>=</operator> <name><name>cache</name><index>[<expr><literal type="number">1</literal></expr>]</index></name> <operator>=</operator> <name>anotherDataMember</name> <operator>+</operator> <name>pid</name> <operator>=</operator> <literal type="number">7</literal>
+    <expr_stmt><expr><name>pid</name> <operator>=</operator> <name><name>cache</name><index>[<expr><literal type="number">1</literal></expr>]</index></name> <operator>=</operator> <name>anotherDataMember</name> <operator>+</operator> <name>pid</name> <operator>=</operator> <literal type="number">7</literal>
 
-	<operator>++</operator><name>dataMember</name></expr>;</expr_stmt> <expr_stmt><expr><operator>++</operator><name>anotherDataMember</name><operator>++</operator></expr>;</expr_stmt>
+    <operator>++</operator><name>dataMember</name></expr>;</expr_stmt> <expr_stmt><expr><operator>++</operator><name>anotherDataMember</name><operator>++</operator></expr>;</expr_stmt>
 
-	<expr_stmt><expr><name>pid</name> <operator>=</operator> <literal type="number">2</literal></expr>;</expr_stmt>
-	<expr_stmt><expr><name>pid</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
-	<expr_stmt><expr><name>pid</name> <operator>*=</operator><literal type="number">20</literal></expr>;</expr_stmt>
-	<expr_stmt><expr><name>anotherDataMember</name> <operator>=</operator> <literal type="number">50</literal></expr>;</expr_stmt>
-	<expr_stmt><expr><name>anotherDataMember</name> <operator>/=</operator> <literal type="number">2</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>pid</name> <operator>=</operator> <literal type="number">2</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>pid</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>pid</name> <operator>*=</operator><literal type="number">20</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>anotherDataMember</name> <operator>=</operator> <literal type="number">50</literal></expr>;</expr_stmt>
+    <expr_stmt><expr><name>anotherDataMember</name> <operator>/=</operator> <literal type="number">2</literal></expr>;</expr_stmt>
 </block_content>}</block></function>
 
 <function><type><name>void</name></type> <name><name>Processor</name><operator>::</operator><name>IncrementDataMember</name></name><parameter_list>()</parameter_list><block>{<block_content>
-	<expr_stmt><expr><operator>++</operator><name>anotherDataMember</name></expr>;</expr_stmt>
+    <expr_stmt><expr><operator>++</operator><name>anotherDataMember</name></expr>;</expr_stmt>
 </block_content>}</block></function></unit>
 
 </unit>
