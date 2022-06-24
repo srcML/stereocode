@@ -28,8 +28,9 @@ file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v1.9.1/CLI11.h
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
 # libsrcml
+find_library(LIBSRCML_LINK NAMES libsrcml libsrcml.1 libsrcml.1.dylib libsrcml.so.1 libsrcml.so)
 target_link_directories(stereocode PRIVATE /usr/local/lib)
-target_link_libraries(stereocode libsrcml.a)
+target_link_libraries(stereocode ${LIBSRCML_LINK})
 
 # Turn on warnings
 add_compile_options(
