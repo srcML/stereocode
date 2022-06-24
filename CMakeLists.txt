@@ -17,7 +17,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # stereocode application
-add_executable(stereocode Stereocode.cpp)
+add_executable(stereocode Stereocode.cpp ClassInfo.cpp)
 
 # assumes srcml.h may be in this directory
 target_include_directories(stereocode PRIVATE /usr/local/include)

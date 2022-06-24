@@ -1,6 +1,11 @@
-
 #ifndef CLASS_INFO_HPP
 #define CLASS_INFO_HPP
+
+#include <string>
+#include <cstring>
+#include <vector>
+
+#include <srcml.h>
 
 class ClassInfo{
 public:

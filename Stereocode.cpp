@@ -15,7 +15,7 @@
 #include <algorithm>
 
 #include "CLI11.hpp"
-#include "ClassInfo.cpp"
+#include "ClassInfo.hpp"
 
 std::vector<std::string> readFileNames(const std::string&);
 

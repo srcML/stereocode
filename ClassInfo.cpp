@@ -1,6 +1,8 @@
 
 #include "ClassInfo.hpp"
-#include <cstring>
+
+#include <iostream>
+#include <fstream>
 
 ClassInfo::ClassInfo(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     findClassName(input_archive, hpp_unit);
