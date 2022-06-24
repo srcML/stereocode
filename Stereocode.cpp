@@ -101,9 +101,9 @@ int main(int argc, char const *argv[])
 
         srcml_archive* output_archive = srcml_archive_create();
 
-        error = srcml_archive_write_open_filename(output_archive, (base_directory + "annotated/" + file_names_list[i]).c_str());
+        error = srcml_archive_write_open_filename(output_archive, (file_names_list[i] + "-annotated").c_str());
         if (error != 0){
-            std::cout << "error opening " << base_directory + "annotated/" + file_names_list[i] << std::endl;
+            std::cout << "error opening " << (file_names_list[i] + "-annotated") << std::endl;
             return -1;
         }
         srcml_archive_write_unit(output_archive, hpp_unit);
