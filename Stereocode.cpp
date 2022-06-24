@@ -54,18 +54,19 @@ int main(int argc, char const *argv[])
     output_file.open("stereotypeReport.txt");
 
     for (int i = 0; i < file_names_list.size(); ++i){
-        std::string file_path = base_directory + file_names_list[i];
+        std::string file_path = file_names_list[i];
         srcml_archive* input_archive = srcml_archive_create();
 
         // read the srcml archive file.
-        //std::cout << "attempting to open file at " << file_path << std::endl;
+        // std::cout << "attempting to open file at " << file_path << std::endl;
         int error = srcml_archive_read_open_filename(input_archive, file_path.c_str());
         //assumes the hpp file is the first unit.
-        //std::cout << "ERROR OPENING FILE  "<< error << "\n" << std::endl;
+        // std::cout << "ERROR OPENING FILE  "<< error << "\n" << std::endl;
 
         srcml_unit* hpp_unit = srcml_archive_read_unit(input_archive);
         srcml_unit* cpp_unit = srcml_archive_read_unit(input_archive);
         ClassInfo class_representation = ClassInfo(input_archive, hpp_unit, cpp_unit);
+
         //class_representation.print_method_names();
         //class_representation.print_return_types();
         class_representation.stereotypeGetters(input_archive, hpp_unit, cpp_unit);
