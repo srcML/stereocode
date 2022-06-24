@@ -1,6 +1,6 @@
 
 #include "ClassInfo.hpp"
-
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 
