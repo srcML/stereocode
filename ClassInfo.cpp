@@ -1,9 +1,10 @@
+//ClassInfo for stereocode
+//
 
 #include "ClassInfo.hpp"
-#include <algorithm>
-#include <iostream>
-#include <fstream>
 
+//
+//
 ClassInfo::ClassInfo(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     findClassName(input_archive, hpp_unit);
     findParentClassName(input_archive, hpp_unit);
@@ -25,6 +26,8 @@ ClassInfo::ClassInfo(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_u
     readPrimitives();
 }
 
+//
+//
 void ClassInfo::findClassName(srcml_archive* input_archive, srcml_unit* unit){
 
     srcml_append_transform_xpath(input_archive, "//src:class/src:name");
@@ -47,6 +50,9 @@ void ClassInfo::findClassName(srcml_archive* input_archive, srcml_unit* unit){
     srcml_clear_transforms(input_archive);
     srcml_transform_free(result);
 }
+
+//
+//
 void ClassInfo::findParentClassName(srcml_archive* input_archive, srcml_unit* unit){
     srcml_append_transform_xpath(input_archive, "//src:class/src:super_list/src:super/src:name");
     
@@ -68,6 +74,8 @@ void ClassInfo::findParentClassName(srcml_archive* input_archive, srcml_unit* un
     srcml_transform_free(result);
 }
 
+//
+//
 void ClassInfo::findAttributeNames(srcml_archive* input_archive, srcml_unit* unit){
     // append xpath to archive, gives variable names
     srcml_append_transform_xpath(input_archive, "//src:class//src:decl_stmt[not(ancestor::src:function)]/src:decl/src:name");
@@ -100,6 +108,8 @@ void ClassInfo::findAttributeNames(srcml_archive* input_archive, srcml_unit* uni
     srcml_transform_free(result);
 }
 
+//
+//
 void ClassInfo::findAttributeTypes(srcml_archive* method_archive, srcml_unit* unit){
     srcml_append_transform_xpath(method_archive, "//src:class//src:decl_stmt[not(ancestor::src:function)]/src:decl/src:type");
     srcml_transform_result* result = nullptr;
@@ -136,6 +146,8 @@ void ClassInfo::findAttributeTypes(srcml_archive* method_archive, srcml_unit* un
     srcml_transform_free(result);
 }
 
+//
+//
 void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
 
     srcml_append_transform_xpath(method_archive, "//src:function");
@@ -183,6 +195,8 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
     srcml_transform_free(result);    
 }
 
+//
+//
 void ClassInfo::isConst(std::string function_srcml, bool inline_list){
     trimWhitespace(function_srcml);
     size_t end = function_srcml.find("{");
@@ -198,6 +212,9 @@ void ClassInfo::isConst(std::string function_srcml, bool inline_list){
         specifiers.push_back("");
     }
 }
+
+//
+//
 void ClassInfo::findMethodNames(srcml_archive* method_archive, srcml_unit* unit){
     srcml_append_transform_xpath(method_archive, "//src:function/src:name");
 
@@ -224,6 +241,8 @@ void ClassInfo::findMethodNames(srcml_archive* method_archive, srcml_unit* unit)
     srcml_transform_free(result);  
 }
 
+//
+//
 void ClassInfo::findParameterLists(srcml_archive* method_archive, srcml_unit* unit){
     srcml_append_transform_xpath(method_archive, "//src:function/src:parameter_list");
 
@@ -250,6 +269,8 @@ void ClassInfo::findParameterLists(srcml_archive* method_archive, srcml_unit* un
 }
 
 
+//
+//
 // collects return types for each function
 void ClassInfo::findMethodReturnTypes(srcml_archive* method_archive, srcml_unit* unit){
     srcml_append_transform_xpath(method_archive, "//src:function/src:type");
@@ -283,6 +304,8 @@ void ClassInfo::findMethodReturnTypes(srcml_archive* method_archive, srcml_unit*
     srcml_transform_free(result);    
 }
 
+//
+//
 void ClassInfo::readPrimitives(){
     std::ifstream primitives_file;
     primitives_file.open("PrimitiveTypes.txt");
@@ -302,13 +325,12 @@ void ClassInfo::readPrimitives(){
 // Stereotype get:
 // method is const,
 // contains at least 1 return statement that returns a data memeber
-    // return expression must be in the form 'return a;' or 'return *a;'
+// return expression must be in the form 'return a;' or 'return *a;'
 
 // Stereotype non-const get:
 // method is not const
 // contains at least 1 return statement that returns a data memeber
-    // return expression must be in the form 'return a;' or 'return *a;'
-
+// return expression must be in the form 'return a;' or 'return *a;'
 void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
 
     returnsDataMembers(method_archive, hpp_unit, inline_function_count, true);
@@ -329,6 +351,8 @@ void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp
     }
 
 }
+
+
 // Stereotype predicate:
 // method is const
 // returns boolean
@@ -390,6 +414,7 @@ void ClassInfo::stereotypePredicates(srcml_archive* method_archive, srcml_unit* 
     }
 
 }
+
 
 // Stereotype property:
 // method is const
@@ -541,31 +566,33 @@ void ClassInfo::stereotypeSetters(srcml_archive* method_archive, srcml_unit* hpp
     }
 }
 
-/* stereotype Command:
 
-    method is not const
-
-    return type contains void or bool
-
-    exactly one data member is written to and the number of calls
-    in expression statements or returns is at least 2
-
-    no data members are written to and there is a call not
-    in a throw statement that is a simple real call (not a constructor call)
-    or a complex call for a data member
-
-REAL CALL
- ~ does not following a new operator
- ~ is not inside a <throw> statement.
- ~ is not on the list of ignorable calls 
-    assert  assertEquals clone equals finalize getClass hashCode notify notifyAll toString wait $more_ignorable_calls
- ~ is not on the list of native types (string, vector, map, list)
-
-PURE CALL
- ~ does not contain . or ->
-*/
-
+// stereotype Command:
+//
+//    method is not const
+//
+//    return type contains void or bool
+//
+//    exactly one data member is written to and the number of calls
+//    in expression statements or returns is at least 2
+//
+//    no data members are written to and there is a call not
+//    in a throw statement that is a simple real call (not a constructor call)
+//    or a complex call for a data member
+//
+//REAL CALL
+//~ does not following a new operator
+// ~ is not inside a <throw> statement.
+// ~ is not on the list of ignorable calls
+//    assert  assertEquals clone equals finalize getClass hashCode notify notifyAll
+//    toString wait $more_ignorable_calls
+// ~ is not on the list of native types (string, vector, map, list)
+//
+//PURE CALL
+// ~ does not contain . or ->
+//
 // need to handle the case where 0 data members are written and there is a call on a data member.
+//
 void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     //std::cout << "STEREOTYPING COMMAND\n";
     int total = inline_function_count + outofline_function_count;
@@ -641,13 +668,16 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
         }
     }
 }
+
+
 //stereotype collaborational-command
 //method is not const and
 //no data members are written and
-    //no pure calls, a() a::b() and
-    //no calls on data members and
-      //at least 1 call or parameter or local variable is written
-      //Calls allowed:  f->g() where f is not a data member, new f() (which isn't a real call)
+//no pure calls, a() a::b() and
+//no calls on data members and
+//at least 1 call or parameter or local variable is written
+//Calls allowed:  f->g() where f is not a data member, new f() (which isn't a real call)
+//
 void ClassInfo::stereotypeCollaborationalCommand(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     //std::cout << "STEREOTYPING COLLABORATIONAL COMMAND\n";
     for (int i = 0; i < inline_function_count; ++i){
@@ -721,8 +751,9 @@ void ClassInfo::stereotypeCollaborationalCommand(srcml_archive* method_archive, 
 // makes a call to an attribute that is an object (only count pointers (* ->) [fix])
 // has a parameter that is an object.
 // has a local variable that is an object.
-
+//
 // what about returning an object attribtue !yes!
+//
 void ClassInfo::stereotypeCollaborators(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     std::string param = "/src:parameter_list//src:parameter";
     std::string local_var = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
@@ -795,6 +826,7 @@ void ClassInfo::stereotypeCollaborators(srcml_archive* method_archive, srcml_uni
 //  that was created in the body of the function.
 //  return type includes pointer to object
 //  a return statement includes a new operator or a local variable
+//
 void ClassInfo::stereotypeFactories(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     // for each function i need:
     // all non-primitive local variable names that match the return type of that function.
@@ -832,15 +864,18 @@ void ClassInfo::stereotypeEmpty(srcml_archive* method_archive, srcml_unit* hpp_u
         }
     }
 }
+
+
 // stereotype stateless
 // is not an empty method
 // has no real calls including new calls
 // does not use any data members
-
+//
 // stereotype wrapper
 // is not empty
 // has exactly 1 real call including new calls
 // does not use any data memebers
+//
 void ClassInfo::stereotypeStateless(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     for (int i = 0; i < inline_function_count; ++i){
         bool empty = isEmptyMethod(method_archive, hpp_unit, i);
@@ -895,6 +930,8 @@ void ClassInfo::stereotypeStateless(srcml_archive* method_archive, srcml_unit* h
     }
 }
 
+//
+//
 bool ClassInfo::isPrimitiveContainer(std::string return_type){
     // trim whitespace, specifiers and modifiers
     return_type = separateTypeName(return_type);
@@ -931,11 +968,15 @@ bool ClassInfo::isPrimitiveContainer(std::string return_type){
     
 }
 
+//
+//
 void ClassInfo::trimWhitespace(std::string& str) const{
     str.erase(std::remove_if(str.begin(), str.end(), [](char c) {
                             return (c == ' ' || c == '\t' || c == '\n');}), str.end());
 }
 
+//
+//
 bool ClassInfo::isPrimitive(const std::string& type){
 // check the primitives list for the type
     for (int j = 0; j < primitive_types.size(); ++j){
@@ -945,6 +986,9 @@ bool ClassInfo::isPrimitive(const std::string& type){
     }
     return false;
 }
+
+//
+//
 void ClassInfo::returnsDataMembers(srcml_archive* method_archive, srcml_unit* unit, const int& number_of_functions, bool inline_list){
     //std::cout << "finding returns data members\n";
     // for each function, find all return expressions and determine if they contain an attribute
@@ -980,6 +1024,9 @@ void ClassInfo::returnsDataMembers(srcml_archive* method_archive, srcml_unit* un
         //std::cout << "_________________________________________\n\n";
     }
 }
+
+//
+//
 bool ClassInfo::isAttribute(std::string& name) const{
     bool found = false; 
     trimWhitespace(name);
@@ -995,6 +1042,9 @@ bool ClassInfo::isAttribute(std::string& name) const{
     }
     return found;
 }
+
+//
+//
 bool ClassInfo::isInheritedMember(const std::vector<std::string>& parameter_names, const std::vector<std::string>& local_var_names, const std::string& expr){
 
     bool is_inherited = true;
@@ -1047,6 +1097,9 @@ bool ClassInfo::isInheritedMember(const std::vector<std::string>& parameter_name
     bool has_parent_class = parent_class_names.size() > 0;
     return is_inherited && has_parent_class;
 }
+
+//
+//
 std::string ClassInfo::separateTypeName(const std::string& type){
     std::string name = type;
     trimWhitespace(name);
@@ -1084,9 +1137,8 @@ std::string ClassInfo::separateTypeName(const std::string& type){
 }
 
 
-
-
-
+//
+//
 bool ClassInfo::isVoidAccessor(srcml_archive* method_archive, srcml_unit* unit, const int& func_index){
     std::vector<std::string> parameter_types = findParameterTypes(method_archive, unit, func_index);
     std::vector<std::string> parameter_names = findParameterNames(method_archive, unit, func_index);
@@ -1116,6 +1168,8 @@ bool ClassInfo::isVoidAccessor(srcml_archive* method_archive, srcml_unit* unit, 
     return false;
 }
 
+//
+//
 // returns a vector of strings containing the parameters type and specifiers of function #i
 std::vector<std::string> ClassInfo::findParameterTypes(srcml_archive* method_archive, srcml_unit* unit, const int& i){
     std::vector<std::string> parameter_types;
@@ -1153,6 +1207,8 @@ std::vector<std::string> ClassInfo::findParameterTypes(srcml_archive* method_arc
     return parameter_types;
 }
 
+//
+//
 // returns a vector of string containing the parameters name of function #i
 std::vector<std::string> ClassInfo::findParameterNames(srcml_archive* method_archive, srcml_unit* unit, const int& i){
     std::vector<std::string> parameter_names;
@@ -1187,6 +1243,9 @@ std::vector<std::string> ClassInfo::findParameterNames(srcml_archive* method_arc
     return parameter_names;
 }
 
+
+//
+//
 bool ClassInfo::variableChanged(srcml_archive* method_archive, srcml_unit* unit, const int& i, const std::string& var_name){
     bool var_changed = false;
     std::string xpath = "//src:function[string(src:name)='";
@@ -1224,6 +1283,7 @@ bool ClassInfo::variableChanged(srcml_archive* method_archive, srcml_unit* unit,
 
 }
 
+
 // need to count different data members and not the same one twice.
 // check with multiple changes with same opperator(same var), different operators(same var), same operator(dif var)
 // test ++data_member += 10;
@@ -1248,6 +1308,9 @@ void ClassInfo::countChangedDataMembers(srcml_archive* method_archive, srcml_uni
     }
 }
 
+
+//
+//
 int ClassInfo::findAssignOperatorDataMembers(srcml_archive* method_archive, srcml_unit* unit, const int& i, bool check_for_loop){
     const int number_of_operators = 12;
     std::string assignment_operators[number_of_operators] = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
@@ -1317,6 +1380,8 @@ int ClassInfo::findAssignOperatorDataMembers(srcml_archive* method_archive, srcm
     return data_members_changed;
 }
 
+//
+//
 int ClassInfo::findIncrementedDataMembers(srcml_archive* method_archive, srcml_unit* unit, const int& i, bool check_for_loop){
     const int number_of_operators = 2;
     std::string increment_operators[number_of_operators] = {"++", "--"};
@@ -1390,6 +1455,7 @@ int ClassInfo::findIncrementedDataMembers(srcml_archive* method_archive, srcml_u
 
 // returns a list of call names that are not below throw or following new: when pure_call is false
 // does not include calls following the . or -> operators: when pure_call is true
+//
 std::vector<std::string> ClassInfo::findCalls(srcml_archive* method_archive, srcml_unit* unit, const int& i, const std::string& call_type){
     std::vector<std::string> calls;
     std::string xpath = "//src:function[string(src:name)='";
@@ -1441,6 +1507,8 @@ std::vector<std::string> ClassInfo::findCalls(srcml_archive* method_archive, src
     srcml_clear_transforms(method_archive);
     return calls;
 }
+
+
 // dont count calls if
 // there is a . or -> somewhere in the name
 // or call is static and class name is the same
@@ -1463,6 +1531,9 @@ int ClassInfo::countPureCalls(const std::vector<std::string>& all_calls) const{
     }
     return pure_calls;
 }
+
+//
+//
 bool ClassInfo::callsAttributesMethod(const std::vector<std::string>& real_calls, const std::vector<std::string>& local_var_names, const std::vector<std::string>& param_names){
     bool ret = false;
     for (int i = 0; i < real_calls.size(); ++i){
@@ -1503,7 +1574,8 @@ bool ClassInfo::callsAttributesMethod(const std::vector<std::string>& real_calls
     return ret;
 }
 
-
+//
+//
 // checks for non primitive parameters and local variables
 bool ClassInfo::containsNonPrimitive(srcml_archive* method_archive, srcml_unit* unit, const int & i, const std::string& x){
     std::string xpath = "//src:function[string(src:name)='";
@@ -1551,6 +1623,8 @@ bool ClassInfo::containsNonPrimitive(srcml_archive* method_archive, srcml_unit* 
 
 }
 
+//
+//
 bool ClassInfo::usesAttributeObj(srcml_archive* method_archive, srcml_unit* unit, const int& i, const std::vector<std::string>& obj_names){
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method_names[i] + "' and string(src:type)='";
@@ -1588,6 +1662,9 @@ bool ClassInfo::usesAttributeObj(srcml_archive* method_archive, srcml_unit* unit
     srcml_transform_free(result);
     return false;
 }
+
+//
+//
 bool ClassInfo::usesAttribute(srcml_archive* method_archive, srcml_unit* unit, const int& i){
     //std::cout << "called usesAttribute!!!!\n";
     //std::cout << "method name \n\t" << headers[i] << "________________\n\n";
@@ -1641,6 +1718,8 @@ bool ClassInfo::usesAttribute(srcml_archive* method_archive, srcml_unit* unit, c
     return found_data_mem;
 }
 
+//
+//
 // returns true if method, specified by number and unit, is a factory
 bool ClassInfo::isFactory(srcml_archive* method_archive, srcml_unit* unit, const int& func_index){
     std::vector<std::string> return_expressions = findReturnExpressions(method_archive, unit, func_index, false);
@@ -1681,6 +1760,9 @@ bool ClassInfo::isFactory(srcml_archive* method_archive, srcml_unit* unit, const
     return is_factory;
 }
 
+
+//
+//
 std::vector<std::string> ClassInfo::findReturnExpressions(srcml_archive* method_archive, srcml_unit* unit, const int &i, bool getter){
     
     //std::cout << "\tfinding return expression with the header '" << return_types[i] + method_names[i];
@@ -1728,6 +1810,8 @@ std::vector<std::string> ClassInfo::findReturnExpressions(srcml_archive* method_
     return return_expressions;
 }
 
+//
+//
 std::vector<std::string> ClassInfo::findLocalNames(srcml_archive* method_archive, srcml_unit* unit, const int &i){
     std::vector<std::string> local_var_names;
     
@@ -1780,6 +1864,8 @@ std::vector<std::string> ClassInfo::findLocalNames(srcml_archive* method_archive
     return local_var_names;
 }
 
+//
+//
 // this function finds a constuctor call that is after a new operator that matches the class name
 bool ClassInfo::findConstructorCall(srcml_archive* method_archive, srcml_unit* unit, const int& i){
     std::string xpath = "//src:function[string(src:name)='";
@@ -1805,6 +1891,9 @@ bool ClassInfo::findConstructorCall(srcml_archive* method_archive, srcml_unit* u
     return found_constructor_call;
 }
 
+
+//
+//
 bool ClassInfo::isEmptyMethod(srcml_archive* method_archive, srcml_unit* unit, const int& i){
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method_names[i] + "' and string(src:type)='";
@@ -1825,6 +1914,8 @@ bool ClassInfo::isEmptyMethod(srcml_archive* method_archive, srcml_unit* unit, c
     return number_of_results == 1;
 }
 
+//
+//
 srcml_unit* ClassInfo::writeStereotypeAttribute(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
     //std::cout << "inside function of death " << std::endl;
 
@@ -1859,7 +1950,8 @@ srcml_unit* ClassInfo::writeStereotypeAttribute(srcml_archive* method_archive, s
 
 }
 
-
+//
+//
 void ClassInfo::printReturnTypes(){
     std::cout << "RETURN TYPES: \n";
     for (int i = 0; i < return_types.size(); ++i){
@@ -1868,6 +1960,8 @@ void ClassInfo::printReturnTypes(){
     std::cout << std::endl;
 }
 
+//
+//
 void ClassInfo::printStereotypes(){
     std::cout << "STEREOTYPES: \n";
     for (int i = 0; i < stereotypes.size(); ++i){
@@ -1876,12 +1970,17 @@ void ClassInfo::printStereotypes(){
     std::cout << std::endl;
 }
 
+//
+//
 void ClassInfo::printMethodHeaders(){
     std::cout << "METHOD HEADERS: \n";
     for (int i = 0; i < headers.size(); ++i){
         std::cout << "method header: " << headers[i] << std::endl; 
     }
 }
+
+//
+//
 void ClassInfo::printAttributes(){
     std::cout << "ATTRIBUTES: \n";
     std::cout << attribute_types.size() << "types " << attribute_names.size() << "names\n";
@@ -1889,6 +1988,9 @@ void ClassInfo::printAttributes(){
         std::cout << "TYPE: " << attribute_types[i] << " NAME: " << attribute_names[i] << std::endl;
     }
 }
+
+//
+//
 void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string& input_file_path){
     int func_count = inline_function_count + outofline_function_count;
     if (output_file.is_open()){
@@ -1897,3 +1999,5 @@ void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string&
         }
     }
 }
+
+

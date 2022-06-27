@@ -1,9 +1,15 @@
 #ifndef CLASS_INFO_HPP
 #define CLASS_INFO_HPP
 
+//ClassInfo for stereocode
+//
+
+#include <iostream>
+#include <fstream>
 #include <string>
 #include <cstring>
 #include <vector>
+#include <algorithm>
 
 #include <srcml.h>
 
