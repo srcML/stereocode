@@ -1,4 +1,3 @@
-# Zane-Doleh
 # Stereocode 1.0
 
 ## Prerequitsites
@@ -67,4 +66,3 @@ the report file is a CSV file that contains:
 3. assigned stereotype
 
 separated by the pipe symbol `|`
-
