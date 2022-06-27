@@ -1,25 +1,23 @@
+// Stereocode main
 //
-// compile with
-// c++ Stereocode.cpp -std=c++11 -l srcml -o stereocode.out
-
-// assumptions:
+// compile with cmake, then make
+//
+// Input assumptions:
 //  given cpp and hpp in 1 archive.
 //  only 1 class per file   
 
 #include <iostream>
-#include <srcml.h>
+#include <fstream>
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <fstream>
 #include <algorithm>
 
+#include <srcml.h>
 #include <CLI11.hpp>
-
 #include "ClassInfo.hpp"
 
 std::vector<std::string> readFileNames(const std::string&);
-
 
 int main(int argc, char const *argv[])
 {
@@ -30,13 +28,9 @@ int main(int argc, char const *argv[])
     app.add_option("-l,--list-file", file_list, "File name that contains a list of archives");
     app.add_option("-a,--archive", file_name,"File name of a single archive containing hpp and cpp units");
 
-
     CLI11_PARSE(app, argc, argv);
 
-
-
     std::string base_directory = "stereocode_tests/HippoDraw-1.11.1/";
-
 
     std::vector<std::string> file_names_list;
     if (file_name != "default"){
@@ -50,7 +44,6 @@ int main(int argc, char const *argv[])
         return -1;
     }
     
-
     std::ofstream output_file;
     output_file.open("stereotypeReport.txt");
 
@@ -92,18 +85,17 @@ int main(int argc, char const *argv[])
         //class_representation.printStereotypes();
         class_representation.printAttributes();
         //class_representation.printReturnTypes();
-        if (class_representation.get_inline_function_count() != 0){
+        if (class_representation.get_inline_function_count() != 0) {
             hpp_unit = class_representation.writeStereotypeAttribute(input_archive, hpp_unit, true);
         }
-        if (class_representation.get_outofline_function_count() != 0){
+        if (class_representation.get_outofline_function_count() != 0) {
             cpp_unit = class_representation.writeStereotypeAttribute(input_archive, cpp_unit, false);
         }
-
 
         srcml_archive* output_archive = srcml_archive_create();
 
         error = srcml_archive_write_open_filename(output_archive, (file_names_list[i] + ".annotated.xml").c_str());
-        if (error != 0){
+        if (error != 0) {
             std::cout << "error opening " << ( "" + file_names_list[i] + ".annotated.xml") << std::endl;
             return -1;
         }
