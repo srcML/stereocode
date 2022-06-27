@@ -66,7 +66,3 @@ the report file is a CSV file that contains:
 3. assigned stereotype
 
 separated by the pipe symbol `|`
-
-Developers:
-Zane Dohel - initial version
-
