@@ -16,8 +16,10 @@ if (NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+file(GLOB STEREOCODE_SOURCE *.cpp *.hpp)
+
 # stereocode application
-add_executable(stereocode Stereocode.cpp ClassInfo.cpp)
+add_executable(stereocode ${STEREOCODE_SOURCE})
 
 # assumes srcml.h may be in this directory
 target_include_directories(stereocode PRIVATE /usr/local/include)
