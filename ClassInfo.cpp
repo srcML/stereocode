@@ -152,7 +152,6 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
 
     srcml_append_transform_xpath(method_archive, "//src:function");
 
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(method_archive, unit, &result);
 
@@ -164,14 +163,12 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
     else{
         outofline_function_count = number_of_result_units;
     }
-    //std::cout << "number of results for find method headers:";
-    //std::cout << number_of_result_units << std::endl;
     srcml_unit* result_unit = nullptr;
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result,i);
 
         std::string function_srcml = srcml_unit_get_srcml(result_unit);
-        isConst(function_srcml, inline_list);
+        addConstSpecifier(function_srcml);
 
         char * unparsed = new char [function_srcml.size() + 1];
         size_t size = function_srcml.size() + 1;
@@ -184,8 +181,6 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
         //remove newline characters
         function_header.erase(std::remove(function_header.begin(), function_header.end(), '\n'), function_header.end());
 
-        //std::cout << function_header << std::endl;
-        //std::cout << "_______\n";
         headers.push_back(function_header);
         stereotypes.push_back("nothing-yet");
         //specifiers.push_back(false);
@@ -196,19 +191,17 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
 }
 
 //
-//
-void ClassInfo::isConst(std::string function_srcml, bool inline_list){
+// Adds const to specifiers list
+void ClassInfo::addConstSpecifier(std::string function_srcml){
     trimWhitespace(function_srcml);
     size_t end = function_srcml.find("{");
     std::string function_srcml_header = function_srcml.substr(0, end);
 
     if (function_srcml_header.find("<specifier>const</specifier><block>") != std::string::npos){
         specifiers.push_back("const");
-    }
-    else if(function_srcml_header.find("</parameter_list><specifier>const</specifier>") != std::string::npos){
+    } else if (function_srcml_header.find("</parameter_list><specifier>const</specifier>") != std::string::npos){
         specifiers.push_back("const");
-    }
-    else{
+    } else {
         specifiers.push_back("");
     }
 }
@@ -217,7 +210,6 @@ void ClassInfo::isConst(std::string function_srcml, bool inline_list){
 //
 void ClassInfo::findMethodNames(srcml_archive* method_archive, srcml_unit* unit){
     srcml_append_transform_xpath(method_archive, "//src:function/src:name");
-
 
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(method_archive, unit, &result);
@@ -968,12 +960,6 @@ bool ClassInfo::isPrimitiveContainer(std::string return_type){
     
 }
 
-//
-//
-void ClassInfo::trimWhitespace(std::string& str) const{
-    str.erase(std::remove_if(str.begin(), str.end(), [](char c) {
-                            return (c == ' ' || c == '\t' || c == '\n');}), str.end());
-}
 
 //
 //
@@ -1098,43 +1084,6 @@ bool ClassInfo::isInheritedMember(const std::vector<std::string>& parameter_name
     return is_inherited && has_parent_class;
 }
 
-//
-//
-std::string ClassInfo::separateTypeName(const std::string& type){
-    std::string name = type;
-    trimWhitespace(name);
-    size_t stat = name.find("static");
-    if (stat != std::string::npos){
-        name.erase(stat, 6);
-    }
-    size_t mut = name.find("mutable");
-    if (mut != std::string::npos){
-        name.erase(mut, 7);
-    }
-    size_t in = name.find("inline");
-    if(in != std::string::npos){
-        name.erase(in, 6);
-    }
-    size_t virt = name.find("virtual");
-    if (virt != std::string::npos){
-        name.erase(virt, 7);
-    }
-
-    size_t star = name.find("*");
-    if (star != std::string::npos){
-        name.erase(star, 1);
-    }
-    size_t amp = name.find("&");
-    if (amp != std::string::npos){
-        name.erase(amp, 1);
-    }
-
-    size_t con = name.find("const");
-    if (con != std::string::npos){
-        name.erase(con, 5);
-    }
-    return name;
-}
 
 
 //
@@ -2000,4 +1949,54 @@ void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string&
     }
 }
 
+
+//Free Functions
+
+//
+// TODO: Should return a string with no side effect. But this is efficent
+//
+void trimWhitespace(std::string& str) {
+    str.erase(std::remove_if(str.begin(),
+                             str.end(),
+                             [](char c) { return (c == ' ' || c == '\t' || c == '\n'); }),
+              str.end());
+}
+
+//
+//
+std::string separateTypeName(const std::string& type){
+    std::string name = type;
+    trimWhitespace(name);
+    size_t stat = name.find("static");
+    if (stat != std::string::npos){
+        name.erase(stat, 6);
+    }
+    size_t mut = name.find("mutable");
+    if (mut != std::string::npos){
+        name.erase(mut, 7);
+    }
+    size_t in = name.find("inline");
+    if(in != std::string::npos){
+        name.erase(in, 6);
+    }
+    size_t virt = name.find("virtual");
+    if (virt != std::string::npos){
+        name.erase(virt, 7);
+    }
+
+    size_t star = name.find("*");
+    if (star != std::string::npos){
+        name.erase(star, 1);
+    }
+    size_t amp = name.find("&");
+    if (amp != std::string::npos){
+        name.erase(amp, 1);
+    }
+
+    size_t con = name.find("const");
+    if (con != std::string::npos){
+        name.erase(con, 5);
+    }
+    return name;
+}
 

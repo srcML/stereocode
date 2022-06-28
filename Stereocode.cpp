@@ -81,16 +81,16 @@ int main(int argc, char const *argv[])
 
         class_representation.printReportToFile(output_file, file_names_list[i]);
 
-        std::cout << "Class name: " << class_representation.get_class_name() << std::endl;
+        std::cout << "Class name: " << class_representation.getClassName() << std::endl;
         //class_representation.printMethodHeaders();
         //class_representation.printStereotypes();
         //class_representation.printAttributes();
         //class_representation.printReturnTypes();
         
-        if (class_representation.get_inline_function_count() != 0) {
+        if (class_representation.getInlineFunctionCount() != 0) {
             hpp_unit = class_representation.writeStereotypeAttribute(input_archive, hpp_unit, true);
         }
-        if (class_representation.get_outofline_function_count() != 0) {
+        if (class_representation.getOutoflineFunctionCount() != 0) {
             cpp_unit = class_representation.writeStereotypeAttribute(input_archive, cpp_unit, false);
         }
 

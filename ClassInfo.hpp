@@ -14,17 +14,17 @@
 
 class ClassInfo{
 public:
-    ClassInfo(){};
-    ClassInfo(srcml_archive*, srcml_unit*, srcml_unit*);
+    ClassInfo () {};
+    ClassInfo (srcml_archive*, srcml_unit*, srcml_unit*);
 
-    std::string get_class_name              ()            const {return class_name;}
-    int         get_inline_function_count   ()            const {return inline_function_count;}
-    int         get_outofline_function_count()            const {return outofline_function_count;}
-    std::string get_return_type             (const int&i) const {return return_types[i];}
-    std::string get_method_header           (const int&i) const {return headers[i];}
-    int         get_num_methods             ()            const {return headers.size();}
+    std::string getClassName              ()      const { return class_name;               }
+    int         getInlineFunctionCount    ()      const { return inline_function_count;    }
+    int         getOutoflineFunctionCount ()      const { return outofline_function_count; }
+    std::string getReturnType             (int i) const { return return_types[i];          }
+    std::string getMethodHeader           (int i) const { return headers[i];               }
+    int         getNumberOfMethods        ()      const { return headers.size();           }
 
-    srcml_unit* writeStereotypeAttribute(srcml_archive*, srcml_unit*, bool);
+    srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
     void stereotypeGetters               (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypePredicates            (srcml_archive*, srcml_unit*, srcml_unit*);
@@ -69,8 +69,8 @@ private:
     bool isEmptyMethod                (srcml_archive*, srcml_unit*, const int&);
     void returnsDataMembers           (srcml_archive*, srcml_unit*, const int&, bool);
 
-    void isConst                      (std::string, bool);
-    bool isAttribute                  (std::string&) const; //???
+    void addConstSpecifier            (std::string);
+    bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
     bool isPrimitive                  (const std::string&);
     void methodsReturnPrimitive       (const std::vector<std::string>&, const int&, std::vector<bool>&);
@@ -84,8 +84,6 @@ private:
     std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, const int&, bool);
     std::vector<std::string> findLocalNames        (srcml_archive*, srcml_unit*, const int&);
 
-    void        trimWhitespace  (std::string&) const; //???
-    std::string separateTypeName(const std::string&); //???
 
 
 //Attributes:
@@ -106,4 +104,11 @@ private:
     std::vector<std::string> primitive_types;
 };
 
+
+void        trimWhitespace   (std::string&);
+std::string separateTypeName (const std::string&);
+
+
+
 #endif
+
