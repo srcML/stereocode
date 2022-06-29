@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <srcml.h>
 
+extern std::vector<std::string> primitiveTypes; //Not ideal
+
 class ClassInfo{
 public:
     ClassInfo () {};
@@ -46,7 +48,6 @@ public:
 
 
 private:
-    void readPrimitives();
 
     void findClassName                (srcml_archive*, srcml_unit*);
     void findParentClassName          (srcml_archive*, srcml_unit*);
@@ -72,7 +73,7 @@ private:
     void addConstSpecifier            (std::string);
     bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
-    bool isPrimitive                  (const std::string&);
+    //bool isPrimitive                  (const std::string&);
     void methodsReturnPrimitive       (const std::vector<std::string>&, const int&, std::vector<bool>&);
     bool isInheritedMember            (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
     int  countPureCalls               (const std::vector<std::string>&) const;
@@ -89,10 +90,14 @@ private:
 //Attributes:
     std::string              class_name;
     std::vector<std::string> parent_class_names;
-    int                      inline_function_count;
-    int                      outofline_function_count;
+
+    //Info on attributes
     std::vector<std::string> attribute_names;
     std::vector<std::string> attribute_types;
+
+    //Info on methods
+    int                      inline_function_count;
+    int                      outofline_function_count;
     std::vector<std::string> method_names;
     std::vector<std::string> parameter_lists;
     std::vector<std::string> headers;
@@ -101,13 +106,14 @@ private:
     std::vector<bool>        returns_data_members;
     std::vector<int>         changes_to_data_members;
     std::vector<std::string> stereotypes;
-    std::vector<std::string> primitive_types;
+
+    //std::vector<std::string> primitive_types;  //Move outside of class.
 };
 
 
-void        trimWhitespace   (std::string&);
-std::string separateTypeName (const std::string&);
-
+void         trimWhitespace   (std::string&);
+std::string  separateTypeName (const std::string&);
+bool         isPrimitive(const std::string&);
 
 
 #endif

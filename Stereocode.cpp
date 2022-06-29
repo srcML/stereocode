@@ -19,22 +19,24 @@
 
 std::vector<std::string> readFileNames(const std::string&);
 
+std::vector<std::string> primitiveTypes; //Not ideal
+std::vector<std::string> readPrimitives   (const char[]);
+
+
 int main(int argc, char const *argv[])
 {
-    CLI::App app{"App description"};
-
-    std::string file_list = "default";
-    std::string file_name = "default";
-    app.add_option("-l,--list-file", file_list, "File name that contains a list of archives");
-    app.add_option("-a,--archive", file_name,"File name of a single archive containing hpp and cpp units");
-
+    CLI::App app{"StereoCode: Determines method stereotypes"};
+    std::string file_list = "none";
+    std::string file_name = "none";
+    app.add_option("-l,--list-file", file_list, "File name that contains a list of srcML archives");
+    app.add_option("-a,--archive",   file_name, "File name of a single srcML archive containing hpp and cpp units");
     CLI11_PARSE(app, argc, argv);
 
     std::vector<std::string> file_names_list;
-    if (file_name != "default") {
+    if (file_name != "none") {
         file_names_list.push_back(file_name);
     }
-    else if(file_list != "default") {
+    else if(file_list != "none") {
         file_names_list = readFileNames(file_list);
     } else {
         std::cout << "Error, incorrect usage\n";
@@ -45,17 +47,21 @@ int main(int argc, char const *argv[])
         std::cout << "   Input: srcML archive of foo.hpp and foo.cpp\n";
       return -1;
     }
-    
+
+    std::cout << "Computing stereotypes for the following classes: " << std::endl;
+
+    primitiveTypes = readPrimitives("../PrimitiveTypes.txt");  //TODO: no hard coded file
+
     std::ofstream output_file;
     output_file.open("stereotypeReport.txt");  //Need to make this variable instead of hard coded.
 
     for (int i = 0; i < file_names_list.size(); ++i){
+        int error;
         srcml_archive* input_archive = srcml_archive_create();
 
         // read the srcml archive file
         //assumes the hpp file is the first unit
-
-        int error = srcml_archive_read_open_filename(input_archive, file_names_list[i].c_str());
+        error = srcml_archive_read_open_filename(input_archive, file_names_list[i].c_str());
         if (error) {
             std::cout << "Error: file not found: " << file_names_list[i] << ", error == " << error << "\n";
             return -1;
@@ -63,10 +69,9 @@ int main(int argc, char const *argv[])
 
         srcml_unit* hpp_unit = srcml_archive_read_unit(input_archive);
         srcml_unit* cpp_unit = srcml_archive_read_unit(input_archive);
+
         ClassInfo class_representation = ClassInfo(input_archive, hpp_unit, cpp_unit);
 
-        //class_representation.print_method_names();
-        //class_representation.print_return_types();
         class_representation.stereotypeGetters               (input_archive, hpp_unit, cpp_unit);
         class_representation.stereotypeSetters               (input_archive, hpp_unit, cpp_unit);
         class_representation.stereotypeCollaborationalCommand(input_archive, hpp_unit, cpp_unit);
@@ -82,6 +87,9 @@ int main(int argc, char const *argv[])
         class_representation.printReportToFile(output_file, file_names_list[i]);
 
         std::cout << "Class name: " << class_representation.getClassName() << std::endl;
+        //Output for testing
+        //class_representation.print_method_names();
+        //class_representation.print_return_types();
         //class_representation.printMethodHeaders();
         //class_representation.printStereotypes();
         //class_representation.printAttributes();
@@ -98,7 +106,7 @@ int main(int argc, char const *argv[])
 
         error = srcml_archive_write_open_filename(output_archive, (file_names_list[i] + ".annotated.xml").c_str());
         if (error) {
-            std::cout << "error opening " << ( "" + file_names_list[i] + ".annotated.xml") << std::endl;
+            std::cout << "Error opening " << file_names_list[i] << ".annotated.xml" << std::endl;
             return -1;
         }
         srcml_archive_write_unit(output_archive, hpp_unit);
@@ -112,7 +120,7 @@ int main(int argc, char const *argv[])
         srcml_archive_free(input_archive);
     }
     output_file.close();
-    std::cout << "Stereotyping completed." << std::endl;
+    std::cout << "StereoCode completed." << std::endl;
 
     return 0;
 }
@@ -134,3 +142,33 @@ std::vector<std::string> readFileNames(const std::string & file_name){
     }
     return list_of_archives;
 }
+
+
+
+// Reads a set of types to be used as primitives in the
+//  computation of stereotypes.
+// TODO: This needs to be improved to add new types and an option.
+//
+//  Currently NO error checking.
+//
+std::vector<std::string> readPrimitives(const char fname[]){
+    std::ifstream primitives_file;
+    primitives_file.open(fname);
+    std::vector<std::string> result;
+
+    if (primitives_file.is_open()){
+        std::string type;
+        std::getline(primitives_file, type); //Skip comments
+        std::getline(primitives_file, type);
+        std::getline(primitives_file, type);
+        std::getline(primitives_file, type);
+
+        while(std::getline(primitives_file, type)){
+            result.push_back(type);
+        }
+    } else
+        std::cout << "Primitives file not found. " << std::endl;
+    return result;
+}
+
+

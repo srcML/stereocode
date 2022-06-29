@@ -23,7 +23,7 @@ ClassInfo::ClassInfo(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_u
     
     findMethodReturnTypes(input_archive, hpp_unit);
     findMethodReturnTypes(input_archive, cpp_unit);
-    readPrimitives();
+    //readPrimitives();
 }
 
 //
@@ -296,23 +296,7 @@ void ClassInfo::findMethodReturnTypes(srcml_archive* method_archive, srcml_unit*
     srcml_transform_free(result);    
 }
 
-//
-//
-void ClassInfo::readPrimitives(){
-    std::ifstream primitives_file;
-    primitives_file.open("PrimitiveTypes.txt");
 
-    if (primitives_file.is_open()){
-        std::string type;
-        std::getline(primitives_file, type);
-        std::getline(primitives_file, type);
-        std::getline(primitives_file, type);
-
-        while(std::getline(primitives_file, type)){
-            primitive_types.push_back(type);
-        }
-    }
-}
 
 // Stereotype get:
 // method is const,
@@ -328,8 +312,6 @@ void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp
     returnsDataMembers(method_archive, hpp_unit, inline_function_count, true);
     returnsDataMembers(method_archive, cpp_unit, outofline_function_count, false);
     
-    //std::cout << "inside getters" << std::endl;
-
     int total = inline_function_count + outofline_function_count;
     for (int i = 0; i < total; ++i){
         if (returns_data_members[i]){
@@ -961,17 +943,6 @@ bool ClassInfo::isPrimitiveContainer(std::string return_type){
 }
 
 
-//
-//
-bool ClassInfo::isPrimitive(const std::string& type){
-// check the primitives list for the type
-    for (int j = 0; j < primitive_types.size(); ++j){
-        if (type == primitive_types[j]){
-            return true;
-        }
-    }
-    return false;
-}
 
 //
 //
@@ -1950,7 +1921,24 @@ void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string&
 }
 
 
+
+
+
+
 //Free Functions
+
+//
+// Checks against global primitiveTypes
+//
+bool isPrimitive(const std::string& type){
+    for (int j = 0; j < primitiveTypes.size(); ++j){
+        if (type == primitiveTypes[j]){
+            return true;
+        }
+    }
+    return false;
+}
+
 
 //
 // TODO: Should return a string with no side effect. But this is efficent
