@@ -1930,13 +1930,8 @@ void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string&
 //
 // Checks against global primitiveTypes
 //
-bool isPrimitive(const std::string& type){
-    for (int j = 0; j < primitiveTypes.size(); ++j){
-        if (type == primitiveTypes[j]){
-            return true;
-        }
-    }
-    return false;
+bool isPrimitive(const std::string& type) {
+    return primitiveTypes.find(type) != primitiveTypes.end();
 }
 
 

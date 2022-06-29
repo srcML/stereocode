@@ -9,10 +9,11 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <set>
 #include <algorithm>
 #include <srcml.h>
 
-extern std::vector<std::string> primitiveTypes; //Not ideal
+extern std::set<std::string> primitiveTypes; //Not ideal
 
 class ClassInfo{
 public:
@@ -73,7 +74,6 @@ private:
     void addConstSpecifier            (std::string);
     bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
-    //bool isPrimitive                  (const std::string&);
     void methodsReturnPrimitive       (const std::vector<std::string>&, const int&, std::vector<bool>&);
     bool isInheritedMember            (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
     int  countPureCalls               (const std::vector<std::string>&) const;
@@ -106,8 +106,6 @@ private:
     std::vector<bool>        returns_data_members;
     std::vector<int>         changes_to_data_members;
     std::vector<std::string> stereotypes;
-
-    //std::vector<std::string> primitive_types;  //Move outside of class.
 };
 
 

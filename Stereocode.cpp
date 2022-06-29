@@ -11,6 +11,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <set>
 #include <algorithm>
 
 #include <srcml.h>
@@ -19,8 +20,8 @@
 
 std::vector<std::string> readFileNames(const std::string&);
 
-std::vector<std::string> primitiveTypes; //Not ideal
-std::vector<std::string> readPrimitives   (const char[]);
+std::set<std::string> primitiveTypes; //Not ideal
+std::set<std::string> readPrimitives   (const char[]);
 
 
 int main(int argc, char const *argv[])
@@ -151,10 +152,10 @@ std::vector<std::string> readFileNames(const std::string & file_name){
 //
 //  Currently NO error checking.
 //
-std::vector<std::string> readPrimitives(const char fname[]){
+std::set<std::string> readPrimitives(const char fname[]){
     std::ifstream primitives_file;
     primitives_file.open(fname);
-    std::vector<std::string> result;
+    std::set<std::string> result;
 
     if (primitives_file.is_open()){
         std::string type;
@@ -164,7 +165,7 @@ std::vector<std::string> readPrimitives(const char fname[]){
         std::getline(primitives_file, type);
 
         while(std::getline(primitives_file, type)){
-            result.push_back(type);
+            result.insert(type);
         }
     } else
         std::cout << "Primitives file not found. " << std::endl;
