@@ -52,6 +52,12 @@ example archives can be found in the `stereocode_tests` folder
 -o \[relative path] - This option is to specifiy where to put the annotated archives that are created as part of the output
 
 
+## Primitive types
+
+Primitive types are specified via a file called `PrimitiveTypes.txt`
+
+
+
 
 ## Output
 
