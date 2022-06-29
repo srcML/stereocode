@@ -54,7 +54,7 @@ example archives can be found in the `stereocode_tests` folder
 
 ## Primitive types
 
-Primitive types are specified via a file called `PrimitiveTypes.txt`
+Primitive types are specified via a file called `PrimitiveTypes.txt`.  This file can be modified to reflect system specific primitive types.
 
 
 
