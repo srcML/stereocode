@@ -48,7 +48,7 @@ int main(int argc, char const *argv[])
         std::cerr << "            -p primitive-types-filename\n";
         //std::cerr << "            -o output-filename\n";
         std::cerr << "   Example: stereocode -a foo.xml \n";
-        std::cerr << "   Input: srcML archive of foo.hpp and foo.cpp\n";
+        std::cerr << "   Input:  srcML archive of foo.hpp and foo.cpp\n";
         std::cerr << "   Output: srcML archive foo.annotated.xml - in same path as foo.xml\n";
       return -1;
     }
@@ -65,8 +65,6 @@ int main(int argc, char const *argv[])
     }
 
     std::cerr << "Computing stereotypes for the following classes: " << std::endl;
-    std::ofstream output_file;
-    output_file.open("stereotypeReport.txt");  //Need to make this variable instead of hard coded.
 
     for (int i = 0; i < file_names_list.size(); ++i){
         int error;
@@ -97,7 +95,11 @@ int main(int argc, char const *argv[])
         class_representation.stereotypeCollaborators         (input_archive, hpp_unit, cpp_unit);
         class_representation.stereotypeStateless             (input_archive, hpp_unit, cpp_unit);
 
-        class_representation.printReportToFile(output_file, file_names_list[i]);
+        //Output stereotype report file
+        std::ofstream reportFile;
+        reportFile.open(file_names_list[i] + ".report.txt");
+        class_representation.printReportToFile(reportFile, file_names_list[i]);
+        reportFile.close();
 
         std::cerr << "Class name: " << class_representation.getClassName() << std::endl;
         //Output for testing
@@ -132,14 +134,15 @@ int main(int argc, char const *argv[])
         srcml_archive_free(output_archive);
         srcml_archive_free(input_archive);
     }
-    output_file.close();
+    
     std::cerr << "StereoCode completed." << std::endl;
-
     return 0;
 }
 
+
 //
-//
+// Read a file of file names for input.
+// Each file name is a srcML archive.
 std::vector<std::string> readFileNames(const std::string & file_name){
     std::vector<std::string> list_of_archives;
     std::ifstream archives_file;
