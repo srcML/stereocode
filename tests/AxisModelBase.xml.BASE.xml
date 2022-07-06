@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisModelBase.hpp" hash="5456ca997159f8068e501fc3708e63c57b7e39d4"><comment type="block">/* -*- mode: c++; -*- */</comment>
+
+<comment type="block" format="doxygen">/** @file
+
+AxisModelBase class interface
+
+Copyright (C) 2000-2003   The Board of Trustees of The Leland
+Stanford Junior University.  All Rights Reserved.
+
+$Id: AxisModelBase.h,v 1.120 2004/08/19 10:16:02 kaustuv Exp $ 
+
+*/</comment>
+
+<cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>_AxisModelBase_H_</name></cpp:ifndef>
+<cpp:define>#<cpp:directive>define</cpp:directive> <cpp:macro><name>_AxisModelBase_H_</name></cpp:macro></cpp:define>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisLoc.h"</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"Range.h"</cpp:file></cpp:include>
+
+<class_decl>class <name>AxisTick</name>;</class_decl>
+
+<comment type="block" format="doxygen">/** The AxisModelBase class represents how the axes are to be drawn.
+    It does not, however, do the drawing.  The class hierarchy manages
+    the placement and scaling of an axis on the plot.  This includes
+    the algorithms for the placement of the ticks.  It also decides,
+    depending on the range, whether to use scientific or normal notation.
+
+    @author Stephane Bonneaud &lt;gandalf@slac.stanford.edu&gt;
+    @author Kaustuv &lt;kaustuv@stanford.edu&gt;
+    @author Paul F. Kunz &lt;Paul_Kunz@slac.stanford.edu&gt;
+    @author Sanket Malde &lt;sanket@stanford.edu&gt;
+    @author Oded Wurman &lt;owurman@stanford.edu&gt;
+*/</comment>
+
+<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelBase</name>
+<block>{<private type="default">
+</private><protected>protected:
+
+  <comment type="block" format="doxygen">/** The current range of the axis. */</comment>
+  <decl_stmt><decl><type><name>Range</name></type> <name>m_range</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The scaled range. */</comment>
+  <decl_stmt><decl><type><specifier>mutable</specifier> <name>Range</name></type> <name>m_scaled_range</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The starting range before start of dragging events.  While
+      dragging, the setLow or setHigh member functions use this Range
+      value rather than the current value to set the new range. */</comment>
+  <decl_stmt><decl><type><name>Range</name></type> <name>m_start_range</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The current dragging state. */</comment>
+  <decl_stmt><decl><type><name>bool</name></type> <name>m_is_dragging</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The auto-range flag.  When set @c true, the range of the axis is
+      set to include all projected values. */</comment>
+  <decl_stmt><decl><type><name>bool</name></type> <name>m_auto_range</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** A flag to indicate whether the range is empty. */</comment>
+  <decl_stmt><decl><type><name>bool</name></type> <name>m_empty</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The scale factor.  For normal displays, the value is 1.0.
+      However, for something like histogram displays, the value will
+      be the bin width.  This is done so that instead of displaying
+      the density ,the number of entries will be displayed. */</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>m_scale_factor</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** If @c true, the axis is being scaled. */</comment>
+  <decl_stmt><decl><type><name>bool</name></type> <name>m_scaling_on</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The position of the first tick.
+      @todo Maybe it is not needed. 
+  */</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>m_first_tick</name></decl>;</decl_stmt>
+  
+  <comment type="block" format="doxygen">/** The distance between two consecutive ticks.  It has been scaled
+      by the scale factor. */</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>m_tick_step</name></decl>;</decl_stmt>
+  
+  <comment type="block" format="doxygen">/** The maximum number of ticks. */</comment>
+  <decl_stmt><decl><type><specifier>const</specifier> <name>int</name></type> <name>m_max_ticks</name></decl>;</decl_stmt>
+
+  <comment type="line">//The actual program doesn't represent nor support any minor</comment>
+  <comment type="line">//ticks.</comment>
+  <decl_stmt><decl><type><name>int</name></type> <name>m_num_minor_ticks</name></decl>;</decl_stmt> <comment type="line">// The Number of minor ticks between the major ones.</comment>
+
+  <decl_stmt><decl><type><name>AxisLoc</name></type> <name>m_label_location</name></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>AxisLoc</name></type> <name>m_scale_location</name></decl>;</decl_stmt>
+  
+  <comment type="block" format="doxygen">/** The value of the power of ten to be used to multiply the tick
+      labels.  It has been scaled by the scale factor. */</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>m_pmag</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** A flag to indicate that one will using scientific notation.
+      That is the member m_pmag becomes significant in the display of
+      the tick labels. */</comment>
+  <decl_stmt><decl><type><name>bool</name></type> <name>m_use_pmag</name></decl>;</decl_stmt>
+  
+  <comment type="block" format="doxygen">/** The value of the power of ten of the range to be used to
+      determine how many decimal places are needed. */</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>m_rmag</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The list of generated ticks. */</comment>
+  <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name></type> <name>m_ticks</name></decl>;</decl_stmt>
+  
+  <comment type="block" format="doxygen">/** Sets the member m_start_dragging to the current range if
+      dragging is starting. */</comment>
+  <function_decl><type><name>void</name></type> <name>startDragging</name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>;</function_decl>
+  
+</protected><public>public:
+
+  <comment type="block" format="doxygen">/** The constructor sets the location of the ticks, labels, and
+      scale. */</comment>
+  <constructor_decl><name>AxisModelBase</name> <parameter_list>( <parameter><decl><type><name>AxisLoc</name></type> <name>label</name></decl></parameter>, <parameter><decl><type><name>AxisLoc</name></type> <name>scale</name></decl></parameter> )</parameter_list>;</constructor_decl>
+
+  <comment type="block" format="doxygen">/** The copy constructor. */</comment>
+  <constructor_decl><name>AxisModelBase</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>AxisModelBase</name> <modifier>&amp;</modifier></type> <name>axis_model</name></decl></parameter> )</parameter_list>;</constructor_decl>
+  
+  <comment type="block" format="doxygen">/** The virtual destructor. */</comment>
+  <destructor_decl><specifier>virtual</specifier> <name>~AxisModelBase</name><parameter_list>()</parameter_list>;</destructor_decl>
+
+  <comment type="block" format="doxygen">/** Returns a copy of the object. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>AxisModelBase</name> <modifier>*</modifier></type> <name>clone</name> <parameter_list>()</parameter_list> <specifier>const</specifier> = <literal type="number">0</literal>;</function_decl>
+
+
+  <comment type="block" format="doxygen">/** Sets the tick step */</comment> 
+  <function_decl><type><name>void</name></type> <name>setTickStep</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>t_step</name></decl></parameter> )</parameter_list>;</function_decl>
+  
+  <comment type="block" format="doxygen">/** Returns the tick step in the true coordinate system.  It may be
+      scaled internally. */</comment>
+  <function_decl><type><name>double</name></type> <name>getTickStep</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the value for first tick step */</comment> 
+  <function_decl><type><name>void</name></type> <name>setFirstTick</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>first_tick</name></decl></parameter> )</parameter_list>;</function_decl>
+ 
+  <comment type="block" format="doxygen">/** Returns the value for the first tick step */</comment> 
+  <function_decl><type><name>double</name></type> <name>getFirstTick</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns the value for maximum number of ticks */</comment>
+  <function_decl><type><name>double</name></type> <name>getMaxTicks</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+  
+  <comment type="block" format="doxygen">/** Sets the magnitude of the range */</comment> 
+  <function_decl><type><name>void</name></type> <name>setRMag</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>rmag</name></decl></parameter> )</parameter_list>;</function_decl>
+  
+  <comment type="block" format="doxygen">/** Sets the magnitude of the range */</comment> 
+  <function_decl><type><name>double</name></type> <name>getRMag</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the magnitude  of the power of ten for the tick labels.*/</comment> 
+  <function_decl><type><name>void</name></type> <name>setPMag</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>pmag</name></decl></parameter> )</parameter_list>;</function_decl>
+  
+  <comment type="block" format="doxygen">/** Returns the magnitude of the power of ten for the tick labels. */</comment>
+  <function_decl><type><name>double</name></type> <name>getPMag</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+
+  <comment type="block" format="doxygen">/** Sets the Range to the @a low and @a high values. */</comment>
+  <function_decl><type><name>void</name></type> <name>setRange</name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>low</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>high</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** The function which changes the m_range member. The only possible
+      user is the plotter object. It sets the range equal to the range
+      of the projector object. */</comment>
+  <function_decl><type><name>void</name></type> <name>setRange</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>scaled</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the Range to overlap of the two ranges. */</comment>
+  <function_decl><type><name>void</name></type> <name>setIntersectRange</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** The function which changes the pos member of m_range. */</comment>
+  <function_decl><type><name>void</name></type> <name>setRangePos</name> <parameter_list>( <parameter><decl><type><name>double</name></type></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the range to be the union of the existing range and @a
+      range.  If the current range is empty, then set the range to @a
+      range. */</comment>
+  <function_decl><type><name>void</name></type> <name>setUnionRange</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the range to empty. */</comment>
+  <function_decl><type><name>void</name></type> <name>setEmpty</name> <parameter_list>()</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns the range represented by this @c AxisModel. The range is
+      multiplied by the scale factor if scaled is true. 
+
+      @todo Really should have separate function, getScaledRange, so
+      at the calling point it would be clear.
+  */</comment>  
+  <function_decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>getRange</name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter> )</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the auto-ranging flag to @a flag. */</comment>
+  <function_decl><type><name>void</name></type> <name>setAutoRanging</name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>flag</name></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns @c true if auto-ranging is enabled; otherwise, returns @c
+      false. */</comment>
+  <function_decl><type><name>bool</name></type> <name>isAutoRanging</name> <parameter_list>( )</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the value of the scale factor. */</comment>
+  <function_decl><type><name>void</name></type> <name>setScaleFactor</name> <parameter_list>( <parameter><decl><type><name>double</name></type></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns the scale factor.  Returns the scale factor if isScaling
+      returns @c true, otherwise returns 1.0.  @sa #m_scale_factor. */</comment>
+  <function_decl><type><name>double</name></type> <name>getScaleFactor</name> <parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns @c true if the axis is being scaled.  Use this member
+      instead of testing against @c 1.0 since 1.0 is a valid scale
+      factor. */</comment>
+  <function_decl><type><name>bool</name></type> <name>isScaling</name> <parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets axis scaling on if @a on is @c true. */</comment>
+  <function_decl><type><name>void</name></type> <name>setScaling</name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>on</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** The following functions are used by the AxisRepBase *
+   *  object. They enable the user to access the member fields needed to do
+   *  the actual drawing.  What they are doing is pretty obvious, so
+   *  no (or very little) documentation is added. 
+   */</comment>
+
+  <comment type="block" format="doxygen">/** Returns @c true if the labels generated for the ticks assume that
+      the magnitude of the exponent will be displayed.  The base class
+      implementation returns @c false.*/</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>bool</name></type> <name>needPMag</name> <parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Use to set the value of the member variable m_use_pmag */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>void</name></type> <name>setUsePMag</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>bool</name> <modifier>&amp;</modifier></type> <name>use_p_mag</name></decl></parameter> )</parameter_list>;</function_decl>
+  
+  <comment type="block" format="doxygen">/** Returns a boolean describing the type of the scale of the
+      axis. False for the linear scale and true for the logarithmic
+      one. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>bool</name></type> <name>isLog</name><parameter_list>()</parameter_list> <specifier>const</specifier> = <literal type="number">0</literal>;</function_decl>
+
+  <function_decl><type><name>AxisLoc</name></type> <name>getLabelLocation</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+  <function_decl><type><name>AxisLoc</name></type> <name>getScaleLocation</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the ticks for plotting. */</comment>
+  <function_decl><type><name>void</name></type> <name>setTicks</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>ticks</name></decl></parameter>)</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns a reference to the generated ticks. */</comment>
+  <function_decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>getTicks</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Adjusts the range on the axis to nice values within the Range @a
+      limit. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>adjustValues</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>limit</name></decl></parameter> )</parameter_list> = <literal type="number">0</literal>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Adjust the range for nice logging. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>adjustLogValues</name><parameter_list>()</parameter_list> = <literal type="number">0</literal>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the low end of the Range and returns the new Range.  The
+      parameter @a parm should be in the range 0 to 100. A value of 0
+      will leave the low end of the range unchanged, while a value of
+      100 will set it to value of the high. A derived class will
+      interpret the values in between so that the appearance is
+      linear. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>Range</name></type> <name>calcLow</name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter> )</parameter_list> = <literal type="number">0</literal>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the high end of the Range and returns the new Range.  The
+      parameter @a parm should be in the range 0 to 100. A value of 0
+      will high end of the range to the low end, while a value of
+      100 will leave the value unchanged. A derived class will
+      interpret the values in between so that the appearance is
+      linear. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>Range</name></type> <name>calcHigh</name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter> )</parameter_list> = <literal type="number">0</literal>;</function_decl>
+  
+</public>}</block>;</class>
+
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif> <comment type="line">// _AxisModel_H_</comment>
+</unit>
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisModelBase.cxx" hash="2ded11a35995d336a78174921fea6e8e1b8831b0"><comment type="block" format="doxygen">/** @file
+
+AxisModelBase class implementation
+
+Copyright (C) 2000-2004   The Board of Trustees of The Leland Stanford
+Junior University.  All Rights Reserved.
+
+$Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $ 
+
+*/</comment>
+
+<comment type="line">// for dll interface warning</comment>
+<cpp:ifdef>#<cpp:directive>ifdef</cpp:directive> <name>_MSC_VER</name></cpp:ifdef>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"msdevstudio/MSconfig.h"</cpp:file></cpp:include>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisModelBase.h"</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisTick.h"</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"graphics/FontBase.h"</cpp:file></cpp:include>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;algorithm&gt;</cpp:file></cpp:include>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;cassert&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;cmath&gt;</cpp:file></cpp:include>
+
+<using>using <name><name>std</name><operator>::</operator><name>string</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>vector</name></name>;</using>
+
+<constructor><name><name>AxisModelBase</name><operator>::</operator><name>AxisModelBase</name></name> <parameter_list>( <parameter><decl><type><name>AxisLoc</name></type> <name>label</name></decl></parameter>, <parameter><decl><type><name>AxisLoc</name></type> <name>scale</name></decl></parameter> )</parameter_list>
+  <member_init_list>: <call><name>m_range</name><argument_list>( <argument><expr><literal type="number">0.0</literal></expr></argument>, <argument><expr><literal type="number">1.0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_start_range</name> <argument_list>( <argument><expr><operator>-</operator><literal type="number">1.0</literal></expr></argument>, <argument><expr><literal type="number">1.0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_is_dragging</name> <argument_list>( <argument><expr><literal type="boolean">false</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_auto_range</name> <argument_list>( <argument><expr><literal type="boolean">true</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_empty</name><argument_list>( <argument><expr><literal type="boolean">true</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_scale_factor</name> <argument_list>( <argument><expr><literal type="number">1.0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_scaling_on</name> <argument_list>( <argument><expr><literal type="boolean">false</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_first_tick</name><argument_list>( <argument><expr><literal type="number">0.0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_max_ticks</name><argument_list>( <argument><expr><literal type="number">20</literal></expr></argument> )</argument_list></call>, 
+    <call><name>m_num_minor_ticks</name><argument_list>( <argument><expr><literal type="number">0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_label_location</name><argument_list>( <argument><expr><name>label</name></expr></argument> )</argument_list></call>,
+    <call><name>m_scale_location</name><argument_list>( <argument><expr><name>scale</name></expr></argument> )</argument_list></call>,
+    <call><name>m_pmag</name><argument_list>( <argument><expr><literal type="number">0.0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_use_pmag</name><argument_list>( <argument><expr><literal type="boolean">false</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_ticks</name><argument_list>( <argument><expr><name>m_max_ticks</name></expr></argument> )</argument_list></call>
+</member_init_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<constructor><name><name>AxisModelBase</name><operator>::</operator><name>AxisModelBase</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>AxisModelBase</name> <modifier>&amp;</modifier></type> <name>axis_model</name></decl></parameter> )</parameter_list>
+  <member_init_list>: <call><name>m_range</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_range</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_start_range</name> <argument_list>( <argument><expr><literal type="number">0.0</literal></expr></argument>, <argument><expr><literal type="number">1.0</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_is_dragging</name> <argument_list>( <argument><expr><literal type="boolean">false</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_auto_range</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_auto_range</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_empty</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_empty</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_scale_factor</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_scale_factor</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_scaling_on</name> <argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_scaling_on</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_first_tick</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_first_tick</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_tick_step</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_tick_step</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_max_ticks</name><argument_list>( <argument><expr><literal type="number">20</literal></expr></argument> )</argument_list></call>,
+    <call><name>m_num_minor_ticks</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_num_minor_ticks</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_label_location</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_label_location</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_scale_location</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_scale_location</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_pmag</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_pmag</name></name></expr></argument> )</argument_list></call>, 
+    <call><name>m_use_pmag</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_use_pmag</name></name></expr></argument> )</argument_list></call>,
+    <call><name>m_ticks</name><argument_list>( <argument><expr><name><name>axis_model</name><operator>.</operator><name>m_ticks</name></name></expr></argument> )</argument_list></call>
+  
+</member_init_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<destructor><name><name>AxisModelBase</name><operator>::</operator><name>~AxisModelBase</name></name><parameter_list>()</parameter_list>
+<block>{<block_content>
+</block_content>}</block></destructor>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setTickStep</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>t_step</name></decl></parameter> )</parameter_list> 
+<block>{<block_content>
+  <expr_stmt><expr><name>m_tick_step</name> <operator>=</operator> <name>t_step</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getTickStep</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_tick_step</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setFirstTick</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>first_tick</name></decl></parameter> )</parameter_list> 
+<block>{<block_content>
+  <expr_stmt><expr><name>m_first_tick</name> <operator>=</operator> <name>first_tick</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getFirstTick</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_first_tick</name></expr>;</return> 
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getMaxTicks</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_max_ticks</name></expr>;</return> 
+</block_content>}</block></function>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>rmag</name></decl></parameter> )</parameter_list> 
+<block>{<block_content>
+  <expr_stmt><expr><name>m_rmag</name> <operator>=</operator> <name>rmag</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_rmag</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setPMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>pmag</name></decl></parameter> )</parameter_list> 
+<block>{<block_content>
+  <expr_stmt><expr><name>m_pmag</name> <operator>=</operator> <name>pmag</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getPMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_pmag</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>needPMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_use_pmag</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUsePMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>bool</name> <modifier>&amp;</modifier></type> <name>use_p_mag</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_use_pmag</name> <operator>=</operator> <name>use_p_mag</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getLabelLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_label_location</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_scale_location</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="set collaborator"><type><name>void</name></type>
+<name><name>AxisModelBase</name><operator>::</operator>
+<name>setTicks</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name> <argument_list type="generic">&lt; <argument><expr><name>AxisTick</name></expr></argument> &gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>ticks</name></decl></parameter>)</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_ticks</name> <operator>=</operator> <name>ticks</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get collaborator"><type><specifier>const</specifier> <name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type>
+<name><name>AxisModelBase</name><operator>::</operator><name>getTicks</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_ticks</name></expr>;</return>
+</block_content>}</block></function>
+
+
+<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>low</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>high</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <if_stmt><if>if <condition>( <expr><name>low</name> <operator>&gt;</operator> <name>high</name></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><call><name><name>std</name><operator>::</operator><name>swap</name></name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument> )</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
+  <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setRange</name></name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument>, <argument><expr><name>pos</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <if_stmt><if>if <condition>( <expr><call><name><name>range</name><operator>.</operator><name>length</name></name> <argument_list>()</argument_list></call> <operator>&lt;</operator> <name>DBL_EPSILON</name></expr> )</condition> <block>{<block_content>
+    <return>return;</return>
+  </block_content>}</block></if></if_stmt>
+  <decl_stmt><decl><type><name>Range</name></type> <name>myrange</name> <init>= <expr><name>range</name></expr></init></decl>;</decl_stmt>
+  <if_stmt><if>if<condition>( <expr><name>scaled</name></expr> )</condition><block>{<block_content>
+    <decl_stmt><decl><type><name>Range</name></type> <name>newrange</name><argument_list>( <argument><expr><call><name><name>range</name><operator>.</operator><name>low</name></name><argument_list>()</argument_list></call> <operator>/</operator> <name>m_scale_factor</name></expr></argument>,
+		   <argument><expr><call><name><name>range</name><operator>.</operator><name>high</name></name><argument_list>()</argument_list></call> <operator>/</operator> <name>m_scale_factor</name></expr></argument>,
+		   <argument><expr><call><name><name>range</name><operator>.</operator><name>pos</name></name><argument_list>()</argument_list></call></expr></argument> )</argument_list></decl>;</decl_stmt>
+    <expr_stmt><expr><name>myrange</name> <operator>=</operator> <name>newrange</name></expr>;</expr_stmt>
+  </block_content>}</block></if></if_stmt>
+  
+  <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>myrange</name></expr>;</expr_stmt>
+
+  <comment type="line">// I could just call adjustLogValues() without a check, since linear</comment>
+  <comment type="line">// does nothing in that function.  However, this assures that the</comment>
+  <comment type="line">// graph actually has content, which may or may not be important in</comment>
+  <comment type="line">// adjustLogValues(), so I'm playing it on the safe side.</comment>
+  <comment type="line">// Note that this causes problems in binned axes, because this has</comment>
+  <comment type="line">// already bypassed the binner's dialogue. Therefore, this is only a</comment>
+  <comment type="line">// secondary backup, as adjustLogValues() would have already been</comment>
+  <comment type="line">// called for binned axes through the projector.</comment>
+  <if_stmt><if>if<condition>( <expr><call><name>isLog</name><argument_list>()</argument_list></call></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><call><name>adjustLogValues</name><argument_list>()</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
+
+  <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <literal type="boolean">false</literal></expr>;</expr_stmt>
+
+</block_content>}</block></function>
+
+<function src:stereotype="set collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setIntersectRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r1</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r2</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>r1</name></expr>;</expr_stmt>
+  <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setIntersect</name></name> <argument_list>( <argument><expr><name>r2</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="command"><type><name>void</name></type>
+<name><name>AxisModelBase</name><operator>::</operator>
+<name>setRangePos</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><call><name>assert</name><argument_list>( <argument><expr><name>pos</name> <operator>&gt;</operator> <literal type="number">0.0</literal></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+  <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setPos</name></name><argument_list>( <argument><expr><name>pos</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUnionRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <if_stmt><if>if<condition>( <expr><name>m_empty</name></expr> )</condition> <block>{<block_content>
+    <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>range</name></expr>;</expr_stmt>
+    <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setEmpty</name></name> <argument_list>( <argument><expr><literal type="boolean">false</literal></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <literal type="boolean">false</literal></expr>;</expr_stmt>
+  </block_content>}</block></if>
+  <else>else <block>{<block_content>
+    <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setUnion</name></name><argument_list>( <argument><expr><name>range</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+  </block_content>}</block></else></if_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setEmpty</name></name><parameter_list>()</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <literal type="boolean">true</literal></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRange</name></name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter>)</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+
+  <if_stmt><if>if<condition>(<expr><operator>!</operator><name>scaled</name></expr>)</condition><block type="pseudo"><block_content>
+    <return>return <expr><name>m_range</name></expr>;</return></block_content></block></if></if_stmt>
+  
+  <decl_stmt><decl><type><name>double</name></type> <name>low</name> <init>= <expr><call><name><name>m_range</name><operator>.</operator><name>low</name></name><argument_list>()</argument_list></call> <operator>*</operator> <name>m_scale_factor</name></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>high</name> <init>= <expr><call><name><name>m_range</name><operator>.</operator><name>high</name></name><argument_list>()</argument_list></call> <operator>*</operator> <name>m_scale_factor</name></expr></init></decl>;</decl_stmt>
+
+  <decl_stmt><decl><type><name>Range</name></type> <name>range</name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument> )</argument_list></decl>;</decl_stmt>
+  <expr_stmt><expr><name>m_scaled_range</name> <operator>=</operator> <name>range</name></expr>;</expr_stmt>
+
+  <return>return <expr><name>m_scaled_range</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setAutoRanging</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>flag</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_auto_range</name> <operator>=</operator> <name>flag</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>isAutoRanging</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_auto_range</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setScaleFactor</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>sf</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_scale_factor</name> <operator>=</operator> <name>sf</name></expr>;</expr_stmt>
+  <expr_stmt><expr><name>m_scaling_on</name> <operator>=</operator> <literal type="boolean">true</literal></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleFactor</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <if_stmt><if>if <condition>( <expr><name>m_scaling_on</name> <operator>==</operator> <literal type="boolean">false</literal></expr> )</condition><block type="pseudo"><block_content> <return>return <expr><literal type="number">1.0</literal></expr>;</return></block_content></block></if></if_stmt>
+  <comment type="line">// else</comment>
+  <return>return <expr><name>m_scale_factor</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator> <name>isScaling</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_scaling_on</name></expr>;</return>
+</block_content>}</block></function>
+
+<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator> <name>setScaling</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>on</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_scaling_on</name> <operator>=</operator> <name>on</name></expr>;</expr_stmt>
+  <if_stmt><if>if <condition>( <expr><name>on</name> <operator>==</operator> <literal type="boolean">false</literal></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><name>m_scale_factor</name> <operator>=</operator> <literal type="number">1.0</literal></expr>;</expr_stmt></block_content></block></if></if_stmt>
+</block_content>}</block></function>
+
+<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>startDragging</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <if_stmt><if>if <condition>( <expr><name>m_is_dragging</name> <operator>==</operator> <literal type="boolean">false</literal></expr>  )</condition> <block>{<block_content>
+    <expr_stmt><expr><name>m_start_range</name> <operator>=</operator> <name>m_range</name></expr>;</expr_stmt>
+  </block_content>}</block></if></if_stmt>
+  <expr_stmt><expr><name>m_is_dragging</name> <operator>=</operator> <name>dragging</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+</unit>
+
+</unit>

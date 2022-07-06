@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisTick.hpp" hash="058c354a538172d7b5dfa9832bfda079ad339d63"><comment type="block">/* HippoPlot AxisTick  class interface
+ *
+ * Copyright (C) 2000, 2003   The Board of Trustees of The Leland
+ * Stanford Junior University.  All Rights Reserved.
+ *
+ * $Id: AxisTick.h,v 1.5 2004/05/02 17:18:34 pfkeb Exp $
+ */</comment>
+
+<cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>_AxisTick_H_</name></cpp:ifndef>
+<cpp:define>#<cpp:directive>define</cpp:directive> <cpp:macro><name>_AxisTick_H_</name></cpp:macro></cpp:define>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"pattern/libhippo.h"</cpp:file></cpp:include>
+
+
+<comment type="block" format="doxygen">/** A class to maintain tick coordinates and string values.  
+    @author Paul_Kunz@slac.stanford.edu 
+*/</comment>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;string&gt;</cpp:file></cpp:include>
+
+<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisTick</name>
+<block>{<private type="default">
+
+</private><private>private:
+
+
+</private><protected>protected:
+
+  <comment type="block" format="doxygen">/** The value at the coordinate. */</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>m_v</name></decl>;</decl_stmt>
+
+  <comment type="block" format="doxygen">/** The content at the coordinate. */</comment>
+  <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>string</name></name></type> <name>m_c</name></decl>;</decl_stmt>
+
+</protected><public>public:
+
+  <comment type="block" format="doxygen">/** The default constructor. It is needed for initialization when it is
+      included in the STL container. */</comment>
+  <constructor_decl><name>AxisTick</name> <parameter_list>( )</parameter_list>;</constructor_decl>
+
+  <comment type="block" format="doxygen">/** The copy constructor. */</comment>
+  <constructor_decl><name>AxisTick</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>AxisTick</name> <modifier>&amp;</modifier></type></decl></parameter> )</parameter_list>;</constructor_decl>
+
+  <comment type="block" format="doxygen">/** The normal constructor. */</comment>
+  <constructor_decl><name>AxisTick</name><parameter_list>( <parameter><decl><type><name>double</name></type> <name>v</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name> <modifier>&amp;</modifier></type> <name>s</name></decl></parameter> )</parameter_list>;</constructor_decl>
+
+  <comment type="block" format="doxygen">/** Returns the value of the coordinate. */</comment>
+  <function_decl><type><name>double</name></type> <name>value</name> <parameter_list>( )</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the value of the coordinate. */</comment>
+  <function_decl><type><name>void</name></type> <name>setValue</name> <parameter_list>( <parameter><decl><type><name>double</name></type></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns the content at the coordinate. */</comment>
+  <function_decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name> <modifier>&amp;</modifier></type> <name>content</name> <parameter_list>( )</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the content at the coordinate. */</comment>
+  <function_decl><type><name>void</name></type> <name>setContent</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name> <modifier>&amp;</modifier></type></decl></parameter> )</parameter_list>;</function_decl>
+</public>}</block>;</class>
+
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif> <comment type="line">// _AxisTick_H_</comment>
+</unit>
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisTick.cxx" hash="aa8ed75dd72e60f71d2ec9886ce1f73c5624d4c9"><comment type="block">/* HippoPlot AxisTick  class implementation
+ *
+ * Copyright (C)  2000  The Board of Trustees of The Leland Stanford
+ * Junior University.  All Rights Reserved.
+ *
+ * $Id: AxisTick.cxx,v 1.8 2004/05/02 17:18:34 pfkeb Exp $
+ */</comment>
+
+<comment type="line">// for dll interface warning</comment>
+<cpp:ifdef>#<cpp:directive>ifdef</cpp:directive> <name>_MSC_VER</name></cpp:ifdef>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"msdevstudio/MSconfig.h"</cpp:file></cpp:include>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisTick.h"</cpp:file></cpp:include>
+
+<using>using <name><name>std</name><operator>::</operator><name>string</name></name>;</using>
+
+<constructor><name><name>AxisTick</name><operator>::</operator><name>AxisTick</name></name> <parameter_list>( )</parameter_list> <member_init_list>:
+  <call><name>m_v</name> <argument_list>( <argument><expr><literal type="number">0</literal></expr></argument> )</argument_list></call>,
+  <call><name>m_c</name> <argument_list>( <argument><expr><literal type="string">""</literal></expr></argument> )</argument_list></call>
+</member_init_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<constructor><name><name>AxisTick</name><operator>::</operator><name>AxisTick</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>AxisTick</name> <modifier>&amp;</modifier></type> <name>at</name></decl></parameter> )</parameter_list> <member_init_list>:
+  <call><name>m_v</name> <argument_list>( <argument><expr><name><name>at</name><operator>.</operator><name>m_v</name></name></expr></argument> )</argument_list></call>,
+  <call><name>m_c</name> <argument_list>( <argument><expr><name><name>at</name><operator>.</operator><name>m_c</name></name></expr></argument> )</argument_list></call>
+</member_init_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<constructor><name><name>AxisTick</name><operator>::</operator><name>AxisTick</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>v</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name> <modifier>&amp;</modifier></type> <name>s</name></decl></parameter> )</parameter_list> <member_init_list>: 
+  <call><name>m_v</name> <argument_list>( <argument><expr><name>v</name></expr></argument> )</argument_list></call>, 
+  <call><name>m_c</name> <argument_list>( <argument><expr><name>s</name></expr></argument> )</argument_list></call>
+</member_init_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<function><type><name>double</name></type>
+<name><name>AxisTick</name><operator>::</operator><name>value</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_v</name></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><name>void</name></type>
+<name><name>AxisTick</name><operator>::</operator><name>setValue</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>v</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_v</name> <operator>=</operator> <name>v</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function><type><specifier>const</specifier> <name>string</name> <modifier>&amp;</modifier></type> 
+<name><name>AxisTick</name><operator>::</operator><name>content</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_c</name></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><name>void</name></type>
+<name><name>AxisTick</name><operator>::</operator><name>setContent</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name> <modifier>&amp;</modifier></type> <name>s</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><name>m_c</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+</unit>
+
+</unit>
