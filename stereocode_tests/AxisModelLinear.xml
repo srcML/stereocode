@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisModelLinear.hpp" hash="01f3684df832b33e6a0ce509e81e3a5baa18f4e8"><comment type="block">/* -*- mode: c++ -*- */</comment>
+
+<comment type="block" format="doxygen">/** @file
+
+AxisModelLinear class interface
+
+Copyright (C) 2000, 2002-2004   The Board of Trustees of The Leland
+Stanford Junior University.  All Rights Reserved.
+
+$Id: AxisModelLinear.h,v 1.54 2004/06/28 23:39:11 pfkeb Exp $ 
+*/</comment>
+
+<cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>_AxisModelLinear_H_</name></cpp:ifndef>
+<cpp:define>#<cpp:directive>define</cpp:directive> <cpp:macro><name>_AxisModelLinear_H_</name></cpp:macro></cpp:define>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisModelBase.h"</cpp:file></cpp:include>
+
+<comment type="block" format="doxygen">/** Given a range, calculates a model for an axis with a linear scale.
+
+    @request On log scale, the labels should be 10^1, 10^2, etc.
+
+ *  @author Stephane Bonneaud &lt;gandalf@slac.stanford.edu&gt;
+ *  @author Paul F. Kunz &lt;Paul_Kunz@slac.stanford.edu&gt;
+ *  @author Oded Wurman &lt;oded@slac.stanford.edu&gt;
+ */</comment>
+
+<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLinear</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
+<block>{<private type="default">
+</private><public>public:
+
+  <comment type="block" format="doxygen">/** The constructor sets the location of the ticks, labels, and
+      scale. */</comment>
+  <constructor_decl><name>AxisModelLinear</name> <parameter_list>( <parameter><decl><type><name>AxisLoc</name></type> <name>label</name></decl></parameter>, <parameter><decl><type><name>AxisLoc</name></type> <name>scale</name></decl></parameter> )</parameter_list>;</constructor_decl>
+
+  <comment type="block" format="doxygen">/** The copy-like constructor allows conversion from the log axis
+      model. */</comment>
+  <constructor_decl><name>AxisModelLinear</name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>AxisModelBase</name> <modifier>&amp;</modifier></type> <name>axis_model</name></decl></parameter> )</parameter_list>;</constructor_decl>
+
+  <comment type="block" format="doxygen">/** The destructor. */</comment>
+  <destructor_decl><name>~AxisModelLinear</name><parameter_list>()</parameter_list>;</destructor_decl>
+
+  <comment type="block" format="doxygen">/** The clone function returns an object of its own kind which
+      is a copy of this object at this moment. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>AxisModelBase</name> <modifier>*</modifier></type> <name>clone</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <function_decl><type><specifier>virtual</specifier> <name>bool</name></type> <name>needPMag</name> <parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Returns false because this class represents a linear scale. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <name>bool</name></type> <name>isLog</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Sets the number of minor ticks that are between the major
+     ones.  */</comment>
+  <function_decl><type><specifier>virtual</specifier> <specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>adjustValues</name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type></decl></parameter> )</parameter_list>;</function_decl>
+
+  <comment type="block" format="doxygen">/** Adjusts the range for nice logging. */</comment>
+  <function_decl><type><specifier>virtual</specifier> <specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>adjustLogValues</name><parameter_list>()</parameter_list>;</function_decl>
+
+  <function_decl><type><specifier>virtual</specifier> <name>Range</name></type> <name>calcLow</name>  <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter> )</parameter_list>;</function_decl>
+  <function_decl><type><specifier>virtual</specifier> <name>Range</name></type> <name>calcHigh</name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter> )</parameter_list>;</function_decl>
+
+</public>}</block>;</class>
+
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif> <comment type="line">// _AxisModelLinear_H_</comment>
+</unit>
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisModelLinear.cxx" hash="5316c3558829177aafce3489783b85ed30470eea"><comment type="block" format="doxygen">/** @file
+
+AxisModelLinear class implementation
+
+Originally from C code written at SLAC by Jonas Karlsson in August
+1990. Modified substantially since August 1990 by Gravina, Kunz,
+Pavel, Rensing, and Oded Wurman.
+
+Copyright (C) 2000-2004   The Board of Trustees of The Leland Stanford
+Junior University.  All Rights Reserved.
+
+$Id: AxisModelLinear.cxx,v 1.108 2004/05/02 17:18:34 pfkeb Exp $
+
+*/</comment>
+
+<cpp:ifdef>#<cpp:directive>ifdef</cpp:directive> <name>_MSC_VER</name></cpp:ifdef>
+<comment type="line">// Include max() and min() missing from MicroSoft Visual C++.</comment>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"msdevstudio/MSconfig.h"</cpp:file></cpp:include>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif> <comment type="line">//_MSC_VER</comment>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisModelLinear.h"</cpp:file></cpp:include>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"AxisTick.h"</cpp:file></cpp:include>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;algorithm&gt;</cpp:file></cpp:include>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;cmath&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;cstdio&gt;</cpp:file></cpp:include>
+
+<using>using <name><name>std</name><operator>::</operator><name>abs</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>ceil</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>floor</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>log10</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>max</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>min</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>pow</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>string</name></name>;</using>
+<using>using <name><name>std</name><operator>::</operator><name>vector</name></name>;</using>
+
+<constructor><name><name>AxisModelLinear</name><operator>::</operator><name>AxisModelLinear</name></name> <parameter_list>( <parameter><decl><type><name>AxisLoc</name></type> <name>label_loc</name></decl></parameter>, 
+				   <parameter><decl><type><name>AxisLoc</name></type> <name>scale_loc</name></decl></parameter> )</parameter_list>
+  <member_init_list>: <call><name>AxisModelBase</name> <argument_list>( <argument><expr><name>label_loc</name></expr></argument>, <argument><expr><name>scale_loc</name></expr></argument> )</argument_list></call>
+</member_init_list><block>{<block_content>    
+</block_content>}</block></constructor>
+
+<constructor><name><name>AxisModelLinear</name><operator>::</operator><name>AxisModelLinear</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>AxisModelBase</name> <modifier>&amp;</modifier></type> <name>axis_model</name></decl></parameter> )</parameter_list>
+  <member_init_list>: <call><name>AxisModelBase</name><argument_list>( <argument><expr><name>axis_model</name></expr></argument> )</argument_list></call>
+</member_init_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<destructor><name><name>AxisModelLinear</name><operator>::</operator><name>~AxisModelLinear</name></name><parameter_list>()</parameter_list>
+<block>{<block_content>
+</block_content>}</block></destructor>
+
+<comment type="block">/* virtual */</comment>
+<function><type><name>AxisModelBase</name> <modifier>*</modifier></type> <name><name>AxisModelLinear</name><operator>::</operator><name>clone</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><operator>new</operator> <call><name>AxisModelLinear</name><argument_list>( <argument><expr><operator>*</operator><name>this</name></expr></argument> )</argument_list></call></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><name>bool</name></type> <name>FLT_EQUAL</name><parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>y</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <return>return <expr><operator>(</operator> <call><name>abs</name><argument_list>( <argument><expr><name>x</name> <operator>-</operator> <name>y</name></expr></argument> )</argument_list></call> <operator>&lt;=</operator> <literal type="number">100.0</literal> <operator>*</operator>  <name>DBL_EPSILON</name>  <operator>)</operator></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
+<block>{<block_content> 
+  <return>return <expr><literal type="boolean">false</literal></expr>;</return> 
+</block_content>}</block></function>
+
+<function><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>needPMag</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
+<block>{<block_content>
+  <return>return <expr><name>m_use_pmag</name></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type>
+<name><name>AxisModelLinear</name><operator>::</operator><name>adjustValues</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>limit</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <comment type="line">//Because the low value, the high value, and the length value of the</comment>
+  <comment type="line">//range were so frequently used, I added those three fields. There </comment>
+  <comment type="line">//should be an improvement in performance.</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>mylow</name></decl>, <decl><type ref="prev"/><name>myhigh</name></decl>;</decl_stmt>
+  
+  <comment type="line">//The use of a step field and of a mag field will be explained when</comment>
+  <comment type="line">//they are first initialized.</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>step</name></decl>, <decl><type ref="prev"/><name>magnitude</name></decl>;</decl_stmt>
+  
+  <expr_stmt><expr><call><name>adjustLogValues</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+  <decl_stmt><decl><type><specifier>const</specifier> <name>int</name></type> <name>N_NICE</name> <init>= <expr><literal type="number">6</literal></expr></init></decl>;</decl_stmt>
+<cpp:ifndef>#<cpp:directive>ifndef</cpp:directive> <name>__STDC__</name></cpp:ifndef>
+  <decl_stmt><decl><type><specifier>static</specifier>
+<cpp:endif>#<cpp:directive>endif</cpp:directive></cpp:endif>
+    <name>float</name></type> <name><name>nice</name><index>[<expr><name>N_NICE</name></expr>]</index></name> <init>= <expr><block>{ <expr><literal type="number">1.0</literal></expr>, <expr><literal type="number">2.0</literal></expr>, <expr><literal type="number">2.5</literal></expr>,
+			   <expr><literal type="number">4.0</literal></expr>, <expr><literal type="number">5.0</literal></expr>, <expr><literal type="number">7.5</literal></expr> }</block></expr></init></decl>;</decl_stmt>
+
+  <decl_stmt><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>init_range</name> <init>= <expr><call><name>getRange</name> <argument_list>( <argument><expr><literal type="boolean">false</literal></expr></argument> )</argument_list></call></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>low</name> <init>= <expr><call><name><name>init_range</name><operator>.</operator><name>low</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>high</name> <init>= <expr><call><name><name>init_range</name><operator>.</operator><name>high</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+  <if_stmt><if>if <condition>( <expr><name>low</name> <operator>==</operator> <name>high</name></expr> )</condition> <block>{<block_content>  <comment type="line">// all values in same bin</comment>
+    <if_stmt><if>if <condition>( <expr><name>low</name> <operator>&gt;</operator> <literal type="number">0.0</literal></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><name>low</name> <operator>*=</operator> <literal type="number">0.95</literal></expr>;</expr_stmt></block_content></block></if>
+    <else>else<block type="pseudo"><block_content>  <expr_stmt><expr><name>low</name> <operator>*=</operator> <literal type="number">1.05</literal></expr>;</expr_stmt></block_content></block></else></if_stmt>
+
+    <if_stmt><if>if <condition>( <expr><name>high</name> <operator>&gt;</operator> <literal type="number">0.0</literal></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><name>high</name> <operator>*=</operator> <literal type="number">1.05</literal></expr>;</expr_stmt></block_content></block></if>
+    <else>else<block type="pseudo"><block_content> <expr_stmt><expr><name>high</name> <operator>*=</operator> <literal type="number">0.95</literal></expr>;</expr_stmt></block_content></block></else></if_stmt>
+
+    <expr_stmt><expr><call><name>setRange</name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument>, <argument><expr><name>low</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+  </block_content>}</block></if></if_stmt>  
+  <comment type="line">//setTickStep();</comment>
+  <decl_stmt><decl><type><name>double</name></type> <name>range_length</name></decl>;</decl_stmt>
+  
+  <decl_stmt><decl><type><name>int</name></type> <name>i</name></decl>;</decl_stmt>
+  
+  <comment type="line">//double tick_step = getTickStep();</comment>
+  <comment type="line">//tick_step /= m_scale_factor;</comment>
+  <comment type="line">//myhigh = mylow = floor( low / tick_step ) * tick_step;</comment>
+
+  <comment type="line">// This increases myhigh so that "myrange" covers the whole range</comment>
+  <comment type="line">// and then some.</comment>
+  <comment type="line">//while( myhigh &lt;= high ) myhigh += tick_step;</comment>
+  <expr_stmt><expr><name>mylow</name>  <operator>=</operator> <name>low</name>  <operator>-</operator> <literal type="number">0.05</literal><operator>*</operator><operator>(</operator><name>high</name><operator>-</operator><name>low</name><operator>)</operator></expr>;</expr_stmt>
+  <expr_stmt><expr><name>myhigh</name> <operator>=</operator> <name>high</name> <operator>+</operator> <literal type="number">0.05</literal><operator>*</operator><operator>(</operator><name>high</name><operator>-</operator><name>low</name><operator>)</operator></expr>;</expr_stmt>
+
+  <expr_stmt><expr><name>range_length</name> <operator>=</operator> <name>myhigh</name> <operator>-</operator> <name>mylow</name></expr>;</expr_stmt>
+
+  <comment type="line">// We have now decided on a range.  This tries to move low/high a</comment>
+  <comment type="line">// little to end up on a nice number.</comment>
+
+  <comment type="line">// First checks if either end is near 0.0</comment>
+  <if_stmt><if>if<condition>( <expr><name>low</name> <operator>&gt;=</operator> <literal type="number">0.0</literal> <operator>&amp;&amp;</operator> <name>range_length</name> <operator>&gt;</operator> <operator>(</operator> <literal type="number">1.05</literal> <operator>*</operator> <name>high</name> <operator>)</operator></expr> )</condition> <block>{<block_content>
+    <decl_stmt><decl><type><name>Range</name></type> <name>range</name> <argument_list>( <argument><expr><literal type="number">0.0</literal></expr></argument>, <argument><expr><name>range_length</name></expr></argument> )</argument_list></decl>;</decl_stmt>
+    <expr_stmt><expr><call><name>setIntersectRange</name> <argument_list>( <argument><expr><name>range</name></expr></argument>, <argument><expr><name>limit</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+    <return>return <expr><name>m_range</name></expr>;</return>
+  </block_content>}</block></if></if_stmt>
+  <if_stmt><if>if<condition>( <expr><name>high</name> <operator>&lt;=</operator> <literal type="number">0.0</literal> <operator>&amp;&amp;</operator> <operator>-</operator><name>range_length</name> <operator>&lt;</operator> <operator>(</operator> <literal type="number">1.05</literal> <operator>*</operator> <name>low</name> <operator>)</operator></expr> )</condition> <block>{<block_content>
+    <decl_stmt><decl><type><name>Range</name></type> <name>range</name> <argument_list>( <argument><expr><operator>-</operator><name>range_length</name></expr></argument>, <argument><expr><literal type="number">0.0</literal></expr></argument> )</argument_list></decl>;</decl_stmt>
+    <expr_stmt><expr><call><name>setIntersectRange</name> <argument_list>( <argument><expr><name>range</name></expr></argument>, <argument><expr><name>limit</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+    <return>return <expr><name>m_range</name></expr>;</return>
+  </block_content>}</block></if></if_stmt>
+
+  <comment type="line">// magnitude is used to hold the magnitude of the high or low values.</comment>
+
+  <expr_stmt><expr><name>i</name> <operator>=</operator> <name>N_NICE</name> <operator>-</operator> <literal type="number">1</literal></expr>;</expr_stmt>
+  <if_stmt><if>if<condition>( <expr><name>myhigh</name> <operator>!=</operator> <literal type="number">0.0</literal></expr> )</condition><block type="pseudo"><block_content>
+    <expr_stmt><expr><name>magnitude</name> <operator>=</operator> <call><name>ceil</name><argument_list>( <argument><expr><call><name>log10</name><argument_list>( <argument><expr><call><name>abs</name><argument_list>( <argument><expr><name>myhigh</name></expr></argument> )</argument_list></call></expr></argument> )</argument_list></call></expr></argument> )</argument_list></call></expr>;</expr_stmt></block_content></block></if>
+  <else>else<block type="pseudo"><block_content>
+    <expr_stmt><expr><name>magnitude</name> <operator>=</operator> <call><name>ceil</name><argument_list>( <argument><expr><call><name>log10</name><argument_list>( <argument><expr><call><name>abs</name><argument_list>( <argument><expr><name>mylow</name></expr></argument> )</argument_list></call></expr></argument> )</argument_list></call></expr></argument> )</argument_list></call></expr>;</expr_stmt></block_content></block></else></if_stmt>
+  
+  <comment type="line">// What this part does is go through the low, giving it round</comment>
+  <comment type="line">// numbers first, but more coarse over time.</comment>
+
+  <do>do <block>{<block_content>
+    <expr_stmt><expr><name>step</name> <operator>=</operator> <name><name>nice</name><index>[<expr><name>i</name></expr>]</index></name> <operator>*</operator> <call><name>pow</name><argument_list>( <argument><expr><literal type="number">10.0</literal></expr></argument>, <argument><expr><name>magnitude</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><name>mylow</name> <operator>=</operator> <call><name>floor</name><argument_list>( <argument><expr><name>low</name> <operator>/</operator> <name>step</name></expr></argument> )</argument_list></call> <operator>*</operator> <name>step</name></expr>;</expr_stmt>
+    <expr_stmt><expr><name>myhigh</name> <operator>=</operator> <name>mylow</name> <operator>+</operator> <literal type="number">1.05</literal> <operator>*</operator> <name>range_length</name></expr>;</expr_stmt>
+    <expr_stmt><expr><name>i</name><operator>--</operator></expr>;</expr_stmt>
+    <if_stmt><if>if<condition>( <expr><name>i</name> <operator>&lt;</operator> <literal type="number">0</literal></expr> )</condition> <block>{<block_content>
+      <expr_stmt><expr><name>i</name> <operator>=</operator> <name>N_NICE</name> <operator>-</operator> <literal type="number">1</literal></expr>;</expr_stmt>
+      <expr_stmt><expr><name>magnitude</name><operator>--</operator></expr>;</expr_stmt>
+    </block_content>}</block></if></if_stmt>
+  </block_content>}</block> while<condition>( <expr><name>myhigh</name> <operator>&lt;</operator> <name>high</name></expr> )</condition>;</do>
+
+  <decl_stmt><decl><type><name>Range</name></type> <name>range</name> <argument_list>( <argument><expr><name>mylow</name></expr></argument>, <argument><expr><name>myhigh</name></expr></argument>, <argument><expr><call><name><name>init_range</name><operator>.</operator><name>pos</name></name><argument_list>()</argument_list></call></expr></argument> )</argument_list></decl>;</decl_stmt>  
+
+  <expr_stmt><expr><call><name>setIntersectRange</name> <argument_list>( <argument><expr><name>range</name></expr></argument>, <argument><expr><name>limit</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+
+  <return>return <expr><name>m_range</name></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type>
+<name><name>AxisModelLinear</name><operator>::</operator><name>adjustLogValues</name></name><parameter_list>()</parameter_list>
+<block>{<block_content>
+  <comment type="line">// This doesn't do jack.</comment>
+  <return>return <expr><call><name>getRange</name><argument_list>(<argument><expr><literal type="boolean">false</literal></expr></argument>)</argument_list></call></expr>;</return>
+</block_content>}</block></function>
+
+<comment type="block" format="doxygen">/** @todo We will have to put a check here to keep it from hitting a
+    length of 0. */</comment>
+<function><type><name>Range</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>calcLow</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><call><name>startDragging</name> <argument_list>( <argument><expr><name>dragging</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+
+  <decl_stmt><decl><type><name>double</name></type> <name>length</name> <init>= <expr><call><name><name>m_start_range</name><operator>.</operator><name>length</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>low</name> <init>= <expr><call><name><name>m_start_range</name><operator>.</operator><name>low</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>high</name> <init>= <expr><call><name><name>m_start_range</name><operator>.</operator><name>high</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+
+  <decl_stmt><decl><type><name>double</name></type> <name>multiplier</name> <init>= <expr><operator>(</operator> <name>parm</name> <operator>-</operator> <literal type="number">50</literal> <operator>)</operator> <operator>/</operator> <literal type="number">50.0</literal></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>new_low</name> <init>= <expr><call><name>min</name> <argument_list>( <argument><expr><name>low</name> <operator>+</operator> <name>length</name> <operator>*</operator> <name>multiplier</name></expr></argument>, <argument><expr><name>high</name></expr></argument> )</argument_list></call></expr></init></decl>;</decl_stmt>
+
+  <if_stmt><if>if<condition>( <expr><name>new_low</name> <operator>==</operator> <call><name><name>m_range</name><operator>.</operator><name>high</name></name><argument_list>()</argument_list></call></expr> )</condition><block type="pseudo"><block_content> <return>return <expr><name>m_range</name></expr>;</return></block_content></block></if></if_stmt>
+
+  <return>return <expr><call><name>Range</name> <argument_list>( <argument><expr><name>new_low</name></expr></argument>, <argument><expr><name>high</name></expr></argument>, <argument><expr><call><name><name>m_range</name><operator>.</operator><name>pos</name></name><argument_list>()</argument_list></call></expr></argument> )</argument_list></call></expr>;</return>
+</block_content>}</block></function>
+
+<comment type="block" format="doxygen">/** @todo We will have to put a check here to keep it from hitting a
+    length of 0. */</comment>
+<function><type><name>Range</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>calcHigh</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<block>{<block_content>
+  <expr_stmt><expr><call><name>startDragging</name> <argument_list>( <argument><expr><name>dragging</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
+
+  <decl_stmt><decl><type><name>double</name></type> <name>length</name> <init>= <expr><call><name><name>m_start_range</name><operator>.</operator><name>length</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>low</name> <init>= <expr><call><name><name>m_start_range</name><operator>.</operator><name>low</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>high</name> <init>= <expr><call><name><name>m_start_range</name><operator>.</operator><name>high</name></name> <argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
+
+  <decl_stmt><decl><type><name>double</name></type> <name>multiplier</name> <init>= <expr><operator>(</operator> <name>parm</name> <operator>-</operator> <literal type="number">50</literal> <operator>)</operator> <operator>/</operator> <literal type="number">50.0</literal></expr></init></decl>;</decl_stmt>
+  <decl_stmt><decl><type><name>double</name></type> <name>new_high</name> <init>= <expr><call><name>max</name> <argument_list>( <argument><expr><name>high</name> <operator>+</operator> <name>length</name> <operator>*</operator> <name>multiplier</name></expr></argument>, <argument><expr><name>low</name></expr></argument> )</argument_list></call></expr></init></decl>;</decl_stmt>
+
+  <if_stmt><if>if<condition>( <expr><name>new_high</name> <operator>==</operator> <call><name><name>m_range</name><operator>.</operator><name>low</name></name><argument_list>()</argument_list></call></expr> )</condition><block type="pseudo"><block_content> <return>return <expr><name>m_range</name></expr>;</return></block_content></block></if></if_stmt>
+
+  <return>return <expr><call><name>Range</name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>new_high</name></expr></argument>, <argument><expr><call><name><name>m_range</name><operator>.</operator><name>pos</name></name><argument_list>()</argument_list></call></expr></argument> )</argument_list></call></expr>;</return>
+</block_content>}</block></function>
+</unit>
+
+</unit>
