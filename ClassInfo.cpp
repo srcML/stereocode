@@ -934,11 +934,11 @@ bool ClassInfo::isPrimitiveContainer(std::string return_type){
 
         std::string key = return_type.substr(start, split-start);
         std::string value = return_type.substr(split + 1, end - split - 1);
-        return(isPrimitive(key) && isPrimitive(value));
+        return(primitives.isPrimitive(key) && primitives.isPrimitive(value));
     }
     // else check if primitive(NOT container).
     //std::cout << "testing the type against the file: " << return_type << "\n";    
-    return isPrimitive(return_type);
+    return primitives.isPrimitive(return_type);
     
 }
 
@@ -1617,7 +1617,7 @@ bool ClassInfo::usesAttribute(srcml_archive* method_archive, srcml_unit* unit, c
         std::string possible_attr(unparsed);
         delete[] unparsed;
 
-        if (isPrimitive(possible_attr)){
+        if (primitives.isPrimitive(possible_attr)){
             continue;
         }
         bool attr = isAttribute(possible_attr);
@@ -1926,13 +1926,6 @@ void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string&
 
 
 //Free Functions
-
-//
-// Checks against global primitiveTypes
-//
-bool isPrimitive(const std::string& type) {
-    return primitiveTypes.find(type) != primitiveTypes.end();
-}
 
 
 //

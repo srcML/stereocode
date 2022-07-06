@@ -17,11 +17,11 @@
 #include <srcml.h>
 #include <CLI11.hpp>
 #include "ClassInfo.hpp"
+#include "PrimitiveTypes.hpp"
 
 std::vector<std::string> readFileNames(const std::string&);
 
-std::set<std::string> primitiveTypes; //Not ideal
-std::set<std::string> readPrimitives   (const char[]);
+primitiveTypes primitives;  //Global set of primitives.  Need to fix.
 
 
 int main(int argc, char const *argv[])
@@ -51,7 +51,7 @@ int main(int argc, char const *argv[])
 
     std::cout << "Computing stereotypes for the following classes: " << std::endl;
 
-    primitiveTypes = readPrimitives("../PrimitiveTypes.txt");  //TODO: no hard coded file
+    //primitiveTypes = readPrimitives("../PrimitiveTypes.txt");  //TODO: no hard coded file
 
     std::ofstream output_file;
     output_file.open("stereotypeReport.txt");  //Need to make this variable instead of hard coded.
@@ -142,34 +142,6 @@ std::vector<std::string> readFileNames(const std::string & file_name){
         std::cout << "Error: file not found: " << file_name << "\n";
     }
     return list_of_archives;
-}
-
-
-
-// Reads a set of types to be used as primitives in the
-//  computation of stereotypes.
-// TODO: This needs to be improved to add new types and an option.
-//
-//  Currently NO error checking.
-//
-std::set<std::string> readPrimitives(const char fname[]){
-    std::ifstream primitives_file;
-    primitives_file.open(fname);
-    std::set<std::string> result;
-
-    if (primitives_file.is_open()){
-        std::string type;
-        std::getline(primitives_file, type); //Skip comments
-        std::getline(primitives_file, type);
-        std::getline(primitives_file, type);
-        std::getline(primitives_file, type);
-
-        while(std::getline(primitives_file, type)){
-            result.insert(type);
-        }
-    } else
-        std::cout << "Primitives file not found. " << std::endl;
-    return result;
 }
 
 

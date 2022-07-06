@@ -12,8 +12,10 @@
 #include <set>
 #include <algorithm>
 #include <srcml.h>
+#include "PrimitiveTypes.hpp"
 
-extern std::set<std::string> primitiveTypes; //Not ideal
+
+extern primitiveTypes primitives; //Not ideal
 
 class ClassInfo{
 public:
@@ -111,8 +113,6 @@ private:
 
 void         trimWhitespace   (std::string&);
 std::string  separateTypeName (const std::string&);
-bool         isPrimitive(const std::string&);
 
 
 #endif
-
