@@ -1,5 +1,7 @@
 STEREOCODE=$1
 TEST_FILE=$2
 
+rm -f $TEST_FILE.annotated.xml
+
 $STEREOCODE -a $TEST_FILE
-cmp $TEST_FILE $TEST_FILE.annotated.xml
+diff $TEST_FILE.BASE.xml $TEST_FILE.annotated.xml

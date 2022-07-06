@@ -55,4 +55,8 @@ add_custom_target(run
 
 enable_testing()
 FILE(COPY test.sh DESTINATION .)
-add_test(NAME range_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/stereocode_tests/range.xml)
+add_test(NAME AxisModelBase_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisModelBase.xml)
+add_test(NAME AxisModelLinear_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisModelLinear.xml)
+add_test(NAME AxisModelLog_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisModelLog.xml)
+add_test(NAME AxisTick_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisTick.xml)
+add_test(NAME Range_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/Range.xml)
