@@ -52,3 +52,7 @@ add_custom_target(run
         USES_TERMINAL
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+enable_testing()
+FILE(COPY test.sh DESTINATION .)
+add_test(NAME range_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/stereocode_tests/range.xml)
