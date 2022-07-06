@@ -49,23 +49,18 @@ example archives can be found in the `stereocode_tests` folder
 
  -a or -l options are required to provide input.
 
--o \[relative path] - This option is to specifiy where to put the annotated archives that are created as part of the output
-
-
-## Primitive types
-
-Primitive types are specified via a file called `PrimitiveTypes.txt`.  This file can be modified to reflect system specific primitive types.
-
+-p \--primitives[relative path] - Specifiy file name of user defined primitive types.  This is added to initial list of primitive types.
 
 
 
 ## Output
 
-stereocode outputs both an annotated archive for each input archive and a report file called `stereotypeReport.txt`
+stereocode outputs both an annotated archive for each input archive and a report file (CSV) 
 
-annotated archives will have the same names as the input archive with `Annotated` at the end of the name
+Annotated archives have the same name/path as the input archive with `annotated.xml` at the end of the name.  For each <function> tag there is a 
+stereotype attribute.
 
-the report file is a CSV file that contains:
+Report files have the same name/path as the input archive with `report.txt` at the end of the name.  The report file is a CSV file that contains:
 
 1. input file path
 2. method's header
