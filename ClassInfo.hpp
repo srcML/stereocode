@@ -17,7 +17,56 @@
 
 extern primitiveTypes primitives; //Not ideal
 
-class ClassInfo{
+//
+class attributeModel {
+public:
+                attributeModel(const std::string& s)                       { name = s;           };
+                attributeModel(const std::string& n, const std::string& t) { name = n; type = t; };
+    void        setType       (const std::string& s)                       { type = s;           };
+    std::string getName       () const                                     { return name;        };
+    std::string getType       () const                                     { return type;        };
+
+private:
+    std::string name;
+    std::string type;
+};
+
+
+//
+class methodModel {
+public:
+    methodModel(const std::string& n) { name = n; };
+
+    std::string getName() const { return name; };
+    std::string getReturnType() const { return returnType; };
+    std::string getParameters() const { return parameters; };
+    std::string getHeader() const { return header; };
+    std::string getConst() const { if (constMethod) return "const"; else return ""; };
+
+    bool isConst() const { return constMethod; };
+    bool returnsDataMember() const { return retDataMember; };
+
+    void setReturnType(const std::string& s) { returnType = s; };
+    void setParameters(const std::string& s) { parameters = s; };
+    void setHeader(const std::string& s) { header = s; };
+    void setConst(bool flag) { constMethod = flag; };
+    void setReturnsDataMember(bool flag) { retDataMember = flag; };
+
+
+private:
+    std::string name;
+    std::string parameters;
+    std::string header;
+    std::string returnType;
+    bool        constMethod;
+
+    bool        retDataMember;
+    int         modifiedDataMemberCount;
+    std::string stereotypes;
+};
+
+
+class ClassInfo {
 public:
     ClassInfo () {};
     ClassInfo (srcml_archive*, srcml_unit*, srcml_unit*);
@@ -25,9 +74,9 @@ public:
     std::string getClassName              ()      const { return class_name;               }
     int         getInlineFunctionCount    ()      const { return inline_function_count;    }
     int         getOutoflineFunctionCount ()      const { return outofline_function_count; }
-    std::string getReturnType             (int i) const { return return_types[i];          }
-    std::string getMethodHeader           (int i) const { return headers[i];               }
-    int         getNumberOfMethods        ()      const { return headers.size();           }
+    //std::string getReturnType             (int i) const { return return_types[i];          }
+    //std::string getMethodHeader           (int i) const { return headers[i];               }
+    //int         getNumberOfMethods        ()      const { return headers.size();           }
 
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
@@ -54,12 +103,15 @@ private:
 
     void findClassName                (srcml_archive*, srcml_unit*);
     void findParentClassName          (srcml_archive*, srcml_unit*);
+
     void findAttributeNames           (srcml_archive*, srcml_unit*);
     void findAttributeTypes           (srcml_archive*, srcml_unit*);
-    void findMethodHeaders            (srcml_archive*, srcml_unit*, bool);
-    void findMethodReturnTypes        (srcml_archive*, srcml_unit*);
+
     void findMethodNames              (srcml_archive*, srcml_unit*);
     void findParameterLists           (srcml_archive*, srcml_unit*);
+    void findMethodHeaders            (srcml_archive*, srcml_unit*, bool);
+    void findMethodReturnTypes        (srcml_archive*, srcml_unit*);
+
     bool isVoidAccessor               (srcml_archive*, srcml_unit*, const int&);
     bool variableChanged              (srcml_archive*, srcml_unit*, const int&, const std::string&);
     void countChangedDataMembers      (srcml_archive*, srcml_unit*, bool);
@@ -90,27 +142,23 @@ private:
 
 
 //Attributes:
-    std::string              class_name;
-    std::vector<std::string> parent_class_names;
-
-    //Info on attributes
-    std::vector<std::string> attribute_names;
-    std::vector<std::string> attribute_types;
+    std::string                 class_name;
+    std::vector<std::string>    parent_class_names;
+    std::vector<attributeModel> attribute;
 
     //Info on methods
     int                      inline_function_count;
     int                      outofline_function_count;
-    std::vector<std::string> method_names;
-    std::vector<std::string> parameter_lists;
-    std::vector<std::string> headers;
-    std::vector<std::string> return_types;
-    std::vector<std::string> specifiers;
-    std::vector<bool>        returns_data_members;
-    std::vector<int>         changes_to_data_members;
-    std::vector<std::string> stereotypes;
+
+    std::vector<methodModel> method;
+
+    //std::vector<std::string> headers;   //OLD
+    std::vector<int>         changes_to_data_members;   //OLD
+    std::vector<std::string> stereotypes;  //OLD
 };
 
 
+bool         checkConst       (std::string);
 void         trimWhitespace   (std::string&);
 std::string  separateTypeName (const std::string&);
 

@@ -102,14 +102,7 @@ int main(int argc, char const *argv[])
         reportFile.close();
 
         std::cerr << "Class name: " << class_representation.getClassName() << std::endl;
-        //Output for testing
-        //class_representation.print_method_names();
-        //class_representation.print_return_types();
-        //class_representation.printMethodHeaders();
-        //class_representation.printStereotypes();
-        //class_representation.printAttributes();
-        //class_representation.printReturnTypes();
-        
+         
         if (class_representation.getInlineFunctionCount() != 0) {
             hpp_unit = class_representation.writeStereotypeAttribute(input_archive, hpp_unit, true);
         }
