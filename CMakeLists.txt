@@ -54,9 +54,16 @@ add_custom_target(run
 )
 
 enable_testing()
-FILE(COPY test.sh DESTINATION .)
-add_test(NAME AxisModelBase_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisModelBase.xml)
-add_test(NAME AxisModelLinear_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisModelLinear.xml)
-add_test(NAME AxisModelLog_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisModelLog.xml)
-add_test(NAME AxisTick_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/AxisTick.xml)
-add_test(NAME Range_test COMMAND test.sh $<TARGET_FILE:stereocode> ${CMAKE_SOURCE_DIR}/tests/Range.xml)
+
+file(COPY tests DESTINATION .)
+
+# Add all tests
+file(GLOB TESTFILES tests/*.xml)
+list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|annotated.xml|runtests.cmake")
+foreach(TEST ${TESTFILES})
+    get_filename_component(BASENAME "${TEST}" NAME_WE)
+    message(STATUS "Add test case ${BASENAME}")
+    add_test(NAME "${BASENAME}_test"
+             COMMAND ${CMAKE_COMMAND} -DSTEREOCODE=$<TARGET_FILE:stereocode> -DTEST_FILE=${TEST}
+                     -P tests/runtests.cmake)
+endforeach()
