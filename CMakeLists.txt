@@ -55,13 +55,15 @@ add_custom_target(run
 
 enable_testing()
 
+file(COPY tests DESTINATION .)
+
 # Add all tests
-file(GLOB TESTFILES "${CMAKE_SOURCE_DIR}/tests/*.xml")
-list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|annotated.xml")
+file(GLOB TESTFILES tests/*.xml)
+list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|annotated.xml|runtests.cmake")
 foreach(TEST ${TESTFILES})
     get_filename_component(BASENAME "${TEST}" NAME_WE)
     message(STATUS "Add test case ${BASENAME}")
     add_test(NAME "${BASENAME}_test"
              COMMAND ${CMAKE_COMMAND} -DSTEREOCODE=$<TARGET_FILE:stereocode> -DTEST_FILE=${TEST}
-                     -P "${CMAKE_CURRENT_SOURCE_DIR}/runtests.cmake")
+                     -P tests/runtests.cmake)
 endforeach()
