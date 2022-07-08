@@ -35,7 +35,7 @@ private:
 //
 class methodModel {
 public:
-    methodModel(const std::string& n) { name = n; };
+                methodModel(const std::string& n) { name = n; };
 
     std::string getName() const { return name; };
     std::string getReturnType() const { return returnType; };
@@ -43,14 +43,15 @@ public:
     std::string getHeader() const { return header; };
     std::string getConst() const { if (constMethod) return "const"; else return ""; };
 
-    bool isConst() const { return constMethod; };
-    bool returnsDataMember() const { return retDataMember; };
+    bool        isConst() const { return constMethod; };
+    bool        returnsDataMember() const { return retDataMember; };
 
-    void setReturnType(const std::string& s) { returnType = s; };
-    void setParameters(const std::string& s) { parameters = s; };
-    void setHeader(const std::string& s) { header = s; };
-    void setConst(bool flag) { constMethod = flag; };
-    void setReturnsDataMember(bool flag) { retDataMember = flag; };
+    void        setReturnType(const std::string& s) { returnType = s; };
+    void        setParameters(const std::string& s) { parameters = s; };
+    void        setHeader(const std::string& s) { header = s; };
+    void        setConst(bool flag) { constMethod = flag; };
+    void        setReturnsDataMember(bool flag) { retDataMember = flag; };
+    void        setModifiesDataMemberCount(int n) { modifiesDataMemberCount = n; };
 
 
 private:
@@ -58,11 +59,12 @@ private:
     std::string parameters;
     std::string header;
     std::string returnType;
-    bool        constMethod;
+    bool        constMethod;   //Is it a const method?
+    bool        retDataMember; //Does it return a data member?
 
-    bool        retDataMember;
-    int         modifiedDataMemberCount;
-    std::string stereotypes;
+    int         modifiesDataMemberCount;  //# data members it modifies
+
+    std::string stereotype;
 };
 
 
@@ -152,7 +154,6 @@ private:
 
     std::vector<methodModel> method;
 
-    //std::vector<std::string> headers;   //OLD
     std::vector<int>         changes_to_data_members;   //OLD
     std::vector<std::string> stereotypes;  //OLD
 };

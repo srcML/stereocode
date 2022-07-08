@@ -204,29 +204,27 @@ bool checkConst(std::string function_srcml) {
 
 
 //
+// Find the name of all functions/methods in the archive
 //
-void ClassInfo::findMethodNames(srcml_archive* method_archive, srcml_unit* unit){
-    srcml_append_transform_xpath(method_archive, "//src:function/src:name");
+void ClassInfo::findMethodNames(srcml_archive* src, srcml_unit* unit){
+    srcml_append_transform_xpath(src, "//src:function/src:name");
+    srcml_transform_result* result      = nullptr;
+    srcml_unit*             result_unit = nullptr;
+    srcml_unit_apply_transforms(src, unit, &result);
+    int n = srcml_transform_get_unit_size(result);
 
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(method_archive, unit, &result);
-
-    int number_of_result_units = srcml_transform_get_unit_size(result);
-    srcml_unit* result_unit = nullptr;
-    
-    for (int i = 0; i < number_of_result_units; ++i){
-        result_unit = srcml_transform_get_unit(result,i);
-
+    for (int i = 0; i < n; ++i){
+        result_unit = srcml_transform_get_unit(result, i);
         std::string name_srcml = srcml_unit_get_srcml(result_unit);
         char * unparsed = new char [name_srcml.size() + 1];
         size_t size = name_srcml.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
-        std::string function_name(unparsed);
+        std::string name(unparsed);
         delete[] unparsed;
-        method.push_back(methodModel(function_name));
+
+        method.push_back(methodModel(name));
     }
-    srcml_clear_transforms(method_archive);
+    srcml_clear_transforms(src);
     srcml_transform_free(result);  
 }
 
@@ -336,7 +334,6 @@ void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp
 // does not use any data member in the method
 // has no pure calls 
 void ClassInfo::stereotypePredicates(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
-    //std::cout << "inside predicates\n";
     for (int i = 0; i < inline_function_count; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsDataMember() && method[i].isConst()){
@@ -1184,21 +1181,20 @@ bool ClassInfo::variableChanged(srcml_archive* method_archive, srcml_unit* unit,
 void ClassInfo::countChangedDataMembers(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
     int number_of_functions = inline_list ? inline_function_count : outofline_function_count;
     for (int i = 0; i < number_of_functions; ++i){
-
         int index = inline_list ? i : i + inline_function_count;
         
         //std::cout << "COUNTING CHANGED DATA MEMBERS FOR METHOD index " << index << "\n";
-        
-
         //std::cout << "finding data members changed for function number: " << i << std::endl;
+
         int data_members_changed = 0;
         data_members_changed += findIncrementedDataMembers(method_archive, unit, index, false);
         data_members_changed += findIncrementedDataMembers(method_archive, unit, index, true);
         data_members_changed += findAssignOperatorDataMembers(method_archive, unit, index, false);
         data_members_changed += findAssignOperatorDataMembers(method_archive, unit, index, true);
         //std::cout << "\tdata members changed is: " << data_members_changed << std::endl;
-        changes_to_data_members.push_back(data_members_changed);
 
+        method[i].setModifiesDataMemberCount(data_members_changed);
+        changes_to_data_members.push_back(data_members_changed);  //OLD
     }
 }
 
