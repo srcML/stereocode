@@ -142,7 +142,6 @@ private:
     std::vector<std::string> findLocalNames        (srcml_archive*, srcml_unit*, const int&);
 
 
-
 //Attributes:
     std::string                 class_name;
     std::vector<std::string>    parent_class_names;
@@ -153,7 +152,6 @@ private:
     int                      outofline_function_count;
 
     std::vector<methodModel> method;
-    std::vector<std::string> stereotypes;  //OLD
 };
 
 

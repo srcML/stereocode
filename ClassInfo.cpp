@@ -142,6 +142,7 @@ void ClassInfo::findAttributeTypes(srcml_archive* method_archive, srcml_unit* un
 }
 
 //
+//  MAY BE SOURCE OF BUG jm test 5 Range.xml
 //
 void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
 
@@ -178,8 +179,7 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
         function_header.erase(std::remove(function_header.begin(), function_header.end(), '\n'), function_header.end());
 
         method[i].setHeader(function_header);
-        //headers.push_back(function_header); //OLD
-        stereotypes.push_back("nothing-yet");
+        method[i].setStereotype("nothing-yet");
     }
 
     srcml_clear_transforms(method_archive);
@@ -311,10 +311,10 @@ void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp
     for (int i = 0; i < total; ++i){
         if (method[i].returnsAttribute()){
             if (method[i].isConst()){
-                stereotypes[i] = "get";
+                method[i].setStereotype("get");
             }
             else{
-                stereotypes[i] = "non-const-get";
+                method[i].setStereotype("non-const-get");
             }
         }
     }
@@ -348,10 +348,10 @@ void ClassInfo::stereotypePredicates(srcml_archive* method_archive, srcml_unit* 
             int pure_calls_count = countPureCalls(pure_calls);
 
             if (!data_members && pure_calls_count == 0){
-                stereotypes[i] = "collaborational-predicate";
+                method[i].setStereotype("collaborational-predicate");
             }
             else{
-                stereotypes[i] = "predicate";
+                method[i].setStereotype("predicate");
             }
 
         }
@@ -373,10 +373,10 @@ void ClassInfo::stereotypePredicates(srcml_archive* method_archive, srcml_unit* 
             int pure_calls_count = countPureCalls(pure_calls);
 
             if (!data_members && pure_calls_count == 0){
-                stereotypes[i] = "collaborational-predicate";
+                method[i].setStereotype("collaborational-predicate");
             }
             else{
-                stereotypes[i] = "predicate";
+                method[i].setStereotype("predicate");
             }
         }
     }
@@ -413,10 +413,10 @@ void ClassInfo::stereotypeProperties(srcml_archive* method_archive, srcml_unit* 
 
 
             if (!data_members && pure_calls_count == 0){
-                stereotypes[i] = "collaborational-property";
+                method[i].setStereotype("collaborational-property");
             }
             else{
-                stereotypes[i] = "property"; 
+                method[i].setStereotype("property");
             }
         }
     }
@@ -438,10 +438,10 @@ void ClassInfo::stereotypeProperties(srcml_archive* method_archive, srcml_unit* 
             int pure_calls_count = countPureCalls(pure_calls);
 
             if (!data_members && pure_calls_count == 0){
-                stereotypes[i] = "collaborational-property";
+                method[i].setStereotype("collaborational-property");
             }
             else{
-                stereotypes[i] = "property"; 
+                method[i].setStereotype("property");
             }
         }
     }
@@ -479,10 +479,10 @@ void ClassInfo::stereotypeVoidAccessor(srcml_archive* method_archive, srcml_unit
             //}
             //std::cout << "\t pure calls count:" << pure_calls_count << " data members?" << data_members << "\n"; 
             if (!data_members && pure_calls_count == 0){
-                stereotypes[i] = "collaborational-voidaccessor";
+                method[i].setStereotype("collaborational-voidaccessor");
             }
             else{
-                stereotypes[i] = "voidaccessor";
+                method[i].setStereotype("voidaccessor");
             }
         }
     }
@@ -501,10 +501,10 @@ void ClassInfo::stereotypeVoidAccessor(srcml_archive* method_archive, srcml_unit
             int pure_calls_count = countPureCalls(pure_calls);
 
             if (!data_members && pure_calls_count == 0){
-                stereotypes[i] = "collaborational-voidaccessor";
+                method[i].setStereotype("collaborational-voidaccessor");
             }
             else{
-                stereotypes[i] = "voidaccessor";
+                method[i].setStereotype("voidaccessor");
             }
             
         }
@@ -528,7 +528,7 @@ void ClassInfo::stereotypeSetters(srcml_archive* method_archive, srcml_unit* hpp
         std::string returnType = separateTypeName(method[i].getReturnType());
         bool void_or_bool = (returnType == "void" || returnType == "bool");
         if (method[i].getAttributesModified() == 1 && !method[i].isConst() && void_or_bool){
-            stereotypes[i] = "set";
+            method[i].setStereotype("set");
         }
     }
 }
@@ -578,19 +578,19 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
         bool case3 = method[i].getAttributesModified() > 1;
         if ((case1 || case2 || case3) && !method[i].isConst()){
             if (returnType == "void" || returnType == "bool"){
-                stereotypes[i] = "command";
+                method[i].setStereotype("command");
             }   
             else{
-                stereotypes[i] = "non-void-command";
+                method[i].setStereotype("non-void-command");
             }
         }
         // handles case of mutable data members
         else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
-            if (stereotypes[i] != "nothing-yet"){
-                stereotypes[i] += " command";
+            if (method[i].getStereotype() != "nothing-yet"){
+                method[i].setStereotype(method[i].getStereotype() + " command");
             }
             else{
-                stereotypes[i] = "command";
+                method[i].setStereotype("command");
             }
         }
     }
@@ -611,19 +611,17 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
         bool case3 = method[i].getAttributesModified() > 1;
         if ((case1 || case2 || case3) && !method[i].isConst()){
             if (returnType == "void" || returnType == "bool"){
-                stereotypes[i] = "command";
-            }
-            else{
-                stereotypes[i] = "non-void-command";
+                method[i].setStereotype("command");
+            } else {
+                method[i].setStereotype("non-void-command");
             }
         }
         // handles case of mutable data members
         else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
-            if (stereotypes[i] != "nothing-yet"){
-                stereotypes[i] += " command";
-            }
-            else{
-                stereotypes[i] = "command";
+            if (method[i].getStereotype() != "nothing-yet") {
+                method[i].setStereotype(method[i].getStereotype() + " command");
+            } else {
+                method[i].setStereotype("command");
             }
         }
     }
@@ -666,7 +664,7 @@ void ClassInfo::stereotypeCollaborationalCommand(srcml_archive* method_archive, 
 
             bool not_command =  pure_calls_count == 0 && !has_call_on_data_member;
             if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
-                stereotypes[i] = "collaborational-command";
+                method[i].setStereotype("collaborational-command");
             }       
         }
     }
@@ -697,7 +695,7 @@ void ClassInfo::stereotypeCollaborationalCommand(srcml_archive* method_archive, 
             
             bool not_command = pure_calls_count == 0 && !has_call_on_data_member;
             if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
-                stereotypes[i] = "collaborational-command";
+                method[i].setStereotype("collaborational-command");
             }
         }
     }
@@ -740,11 +738,11 @@ void ClassInfo::stereotypeCollaborators(srcml_archive* method_archive, srcml_uni
         //std::cout << "\tlocal obj " << local_obj << " param obj " << param_obj << " attr obj " << attr_obj << " ret obj " << ret_obj << std::endl;
 
         if (local_obj || param_obj || attr_obj || ret_obj){
-            if (stereotypes[i] == "nothing-yet" && !method[i].isConst()){
-                stereotypes[i] = "controller";
+            if (method[i].getStereotype() == "nothing-yet" && !method[i].isConst()){
+                method[i].setStereotype("controller");
             }
             else{
-                stereotypes[i] += " collaborator";
+                method[i].setStereotype(method[i].getStereotype() + " collaborator");
             }
         }
 
@@ -760,11 +758,10 @@ void ClassInfo::stereotypeCollaborators(srcml_archive* method_archive, srcml_uni
         bool ret_obj = !isPrimitiveContainer(returnType) && returnType != "void" && !matches_class_name;
 
         if (local_obj || param_obj || attr_obj || ret_obj){
-            if (stereotypes[i] == "nothing-yet" && !method[i].isConst()){
-                stereotypes[i] = "controller";
-            }
-            else{
-                stereotypes[i] += " collaborator";
+            if (method[i].getStereotype() == "nothing-yet" && !method[i].isConst()){
+                method[i].setStereotype("controller");
+            } else {
+                method[i].setStereotype(method[i].getStereotype() + " collaborator");
             }
         }
     }
@@ -785,16 +782,14 @@ void ClassInfo::stereotypeFactories(srcml_archive* method_archive, srcml_unit* h
     for (int i = 0; i < inline_function_count; ++i){
         bool method_is_factory = isFactory(method_archive, hpp_unit, i);
         if (method_is_factory){
-            //std::cout << "method is factory\n";
-            stereotypes[i] = "factory";
+            method[i].setStereotype("factory");
         }
     }   
     int total = inline_function_count + outofline_function_count;
     for (int i = inline_function_count; i < total; ++i){
         bool method_is_factory = isFactory(method_archive, cpp_unit, i);
         if (method_is_factory){
-            //std::cout << "method is factory\n";           
-            stereotypes[i] = "factory";
+            method[i].setStereotype("factory");
         }
     }   
 }
@@ -804,14 +799,14 @@ void ClassInfo::stereotypeEmpty(srcml_archive* method_archive, srcml_unit* hpp_u
         int index = i-1;
         //std::cout << "method index " << index << "\n";
         if (isEmptyMethod(method_archive, hpp_unit, index)){
-            stereotypes[index] = "empty";
+            method[index].setStereotype("empty");
         }
     }
     for (int i = 1; i <= outofline_function_count; ++i){
         int index = inline_function_count + i - 1;
         //std::cout << "method index " << index << "\n";
         if (isEmptyMethod(method_archive, cpp_unit, index)){
-            stereotypes[index] = "empty";
+            method[index].setStereotype("empty");
         }
     }
 }
@@ -838,15 +833,15 @@ void ClassInfo::stereotypeStateless(srcml_archive* method_archive, srcml_unit* h
         bool has_call_on_data_member = callsAttributesMethod(real_calls, local_var_names, param_names);
         usedAttr = usedAttr || has_call_on_data_member;
         if (!empty && calls.size() < 1 && !usedAttr){
-            stereotypes[i] += " stateless";
-            if (stereotypes[i] == "nothing-yet stateless"){
-                stereotypes[i] = "stateless";
+            method[i].setStereotype(method[i].getStereotype() + " stateless");
+            if (method[i].getStereotype() == "nothing-yet stateless"){
+                method[i].setStereotype("stateless");
             }
         }
         if (!empty && calls.size() == 1 && !usedAttr){
-            stereotypes[i] += " wrapper";
-            if (stereotypes[i] == "nothing-yet wrapper"){
-                stereotypes[i] = "wrapper";
+            method[i].setStereotype(method[i].getStereotype() + " wrapper");
+            if (method[i].getStereotype() == "nothing-yet wrapper"){
+                method[i].setStereotype("wrapper");
             }
         }
     }
@@ -863,15 +858,15 @@ void ClassInfo::stereotypeStateless(srcml_archive* method_archive, srcml_unit* h
         usedAttr = usedAttr || has_call_on_data_member;
 
         if (!empty && calls.size() < 1 && !usedAttr){
-            stereotypes[i] += " stateless";
-            if (stereotypes[i] == "nothing-yet stateless"){
-                stereotypes[i] = "stateless";
+            method[i].setStereotype(method[i].getStereotype() + " stateless");
+            if (method[i].getStereotype() == "nothing-yet stateless"){
+                method[i].setStereotype("stateless");
             }
         }
         if (!empty && calls.size() == 1 && !usedAttr){
-            stereotypes[i] += " wrapper";
-            if (stereotypes[i] == "nothing-yet wrapper"){
-                stereotypes[i] = "wrapper";
+            method[i].setStereotype(method[i].getStereotype() + " wrapper");
+            if (method[i].getStereotype() == "nothing-yet wrapper"){
+                method[i].setStereotype("wrapper");
             }
         }
     }
@@ -1042,14 +1037,14 @@ bool ClassInfo::isVoidAccessor(srcml_archive* method_archive, srcml_unit* unit, 
         if (reference && !constant && primitive && returnType == "void" && method[func_index].isConst()){
             bool param_changed = variableChanged(method_archive, unit, func_index, parameter_names[j]);
     
-                if (param_changed || stereotypes[func_index] == "nothing-yet"){
+                if (param_changed || method[func_index].getStereotype() == "nothing-yet"){
                 return true;
             }
         }
         
     }
     if (returnType == "void" && method[func_index].isConst() &&
-        stereotypes[func_index] == "nothing-yet"){
+        method[func_index].getStereotype() == "nothing-yet"){
         return true;
     }
     return false;
@@ -1790,7 +1785,7 @@ srcml_unit* ClassInfo::writeStereotypeAttribute(srcml_archive* method_archive, s
 
         //std::cout << "function index is " << function_index <<std::endl;
 
-        std::string stereotype = stereotypes[index];
+        std::string stereotype = method[index].getStereotype();
         //std::cout << "stereotype is " << stereotype << std::endl;
         if (stereotype == "nothing-yet" && inline_function_count + outofline_function_count == 1){
             return nullptr;
@@ -1827,8 +1822,8 @@ void ClassInfo::printReturnTypes(){
 //
 void ClassInfo::printStereotypes(){
     std::cout << "STEREOTYPES: \n";
-    for (int i = 0; i < stereotypes.size(); ++i){
-        std::cout << stereotypes[i] << "\n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cout << method[i].getStereotype() << "\n";
     }
     std::cout << std::endl;
 }
@@ -1860,7 +1855,7 @@ void ClassInfo::printReportToFile(std::ofstream& output_file, const std::string&
     int func_count = inline_function_count + outofline_function_count;
     if (output_file.is_open()){
         for (int i = 0; i < func_count; ++i){
-            output_file << input_file_path << "|" << method[i].getHeader() << "||" << stereotypes[i] << "\n";
+            output_file << input_file_path << "|" << method[i].getHeader() << "||" << method[i].getStereotype() << "\n";
         }
     }
 }
