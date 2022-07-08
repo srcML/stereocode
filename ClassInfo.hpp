@@ -37,32 +37,32 @@ class methodModel {
 public:
                 methodModel(const std::string& n) { name = n; };
 
-    std::string getName() const { return name; };
-    std::string getReturnType() const { return returnType; };
-    std::string getParameters() const { return parameters; };
-    std::string getHeader() const { return header; };
-    std::string getConst() const { if (constMethod) return "const"; else return ""; };
+    std::string getName               () const { return name; };
+    std::string getReturnType         () const { return returnType; };
+    std::string getParameters         () const { return parameters; };
+    std::string getHeader             () const { return header; };
+    std::string getConst              () const { if (constMethod) return "const"; else return ""; };
+    int         getAttributesModified () const { return attributesModified; };
+    std::string getStereotype         () const { return stereotype; };
+    bool        isConst               () const { return constMethod; };
+    bool        returnsAttribute      () const { return retAttribute; };
 
-    bool        isConst() const { return constMethod; };
-    bool        returnsDataMember() const { return retDataMember; };
-
-    void        setReturnType(const std::string& s) { returnType = s; };
-    void        setParameters(const std::string& s) { parameters = s; };
-    void        setHeader(const std::string& s) { header = s; };
-    void        setConst(bool flag) { constMethod = flag; };
-    void        setReturnsDataMember(bool flag) { retDataMember = flag; };
-    void        setModifiesDataMemberCount(int n) { modifiesDataMemberCount = n; };
-
+    void        setReturnType         (const std::string& s) { returnType = s; };
+    void        setParameters         (const std::string& s) { parameters = s; };
+    void        setHeader             (const std::string& s) { header = s; };
+    void        setConst              (bool flag)            { constMethod = flag; };
+    void        setReturnsAttribute   (bool flag)            { retAttribute = flag; };
+    void        setAttributesModified (int n)                { attributesModified = n; };
+    void        setStereotype         (const std::string& s) { stereotype = s; };
 
 private:
     std::string name;
     std::string parameters;
     std::string header;
     std::string returnType;
-    bool        constMethod;   //Is it a const method?
-    bool        retDataMember; //Does it return a data member?
-
-    int         modifiesDataMemberCount;  //# data members it modifies
+    bool        constMethod;         //Is it a const method?
+    bool        retAttribute;        //Does it return any attributes?
+    int         attributesModified;  //# of attributes modified
 
     std::string stereotype;
 };
@@ -125,7 +125,7 @@ private:
     bool isFactory                    (srcml_archive*, srcml_unit*, const int&);
     bool findConstructorCall          (srcml_archive*, srcml_unit*, const int&);
     bool isEmptyMethod                (srcml_archive*, srcml_unit*, const int&);
-    void returnsDataMembers           (srcml_archive*, srcml_unit*, const int&, bool);
+    void returnsAttributes            (srcml_archive*, srcml_unit*, const int&, bool);
 
     void addConstSpecifier            (std::string);
     bool isAttribute                  (std::string&) const;
@@ -153,8 +153,6 @@ private:
     int                      outofline_function_count;
 
     std::vector<methodModel> method;
-
-    std::vector<int>         changes_to_data_members;   //OLD
     std::vector<std::string> stereotypes;  //OLD
 };
 

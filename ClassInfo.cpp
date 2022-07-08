@@ -304,12 +304,12 @@ void ClassInfo::findMethodReturnTypes(srcml_archive* method_archive, srcml_unit*
 // return expression must be in the form 'return a;' or 'return *a;'
 void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
 
-    returnsDataMembers(method_archive, hpp_unit, inline_function_count, true);
-    returnsDataMembers(method_archive, cpp_unit, outofline_function_count, false);
+    returnsAttributes(method_archive, hpp_unit, inline_function_count, true);
+    returnsAttributes(method_archive, cpp_unit, outofline_function_count, false);
     
     int total = inline_function_count + outofline_function_count;
     for (int i = 0; i < total; ++i){
-        if (method[i].returnsDataMember()){
+        if (method[i].returnsAttribute()){
             if (method[i].isConst()){
                 stereotypes[i] = "get";
             }
@@ -336,7 +336,7 @@ void ClassInfo::stereotypeGetters(srcml_archive* method_archive, srcml_unit* hpp
 void ClassInfo::stereotypePredicates(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     for (int i = 0; i < inline_function_count; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType == "bool" && !method[i].returnsDataMember() && method[i].isConst()){
+        if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(method_archive, hpp_unit, i);
             std::vector<std::string> local_var_names = findLocalNames(method_archive, hpp_unit, i);
             std::vector<std::string> param_names = findParameterNames(method_archive, hpp_unit, i);
@@ -359,7 +359,7 @@ void ClassInfo::stereotypePredicates(srcml_archive* method_archive, srcml_unit* 
     int total = inline_function_count + outofline_function_count;
     for (int i = inline_function_count; i < total; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType == "bool" && !method[i].returnsDataMember() && method[i].isConst()){
+        if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(method_archive, cpp_unit, i);
 
             std::vector<std::string> local_var_names = findLocalNames(method_archive, cpp_unit, i);
@@ -399,7 +399,7 @@ void ClassInfo::stereotypeProperties(srcml_archive* method_archive, srcml_unit* 
     //std::cout << "STEREOTYPING PROPERTIES!\n";
     for (int i = 0; i < inline_function_count; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType != "bool" && returnType != "void" && !method[i].returnsDataMember() && method[i].isConst()){
+        if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(method_archive, hpp_unit, i);
             std::vector<std::string> local_var_names = findLocalNames(method_archive, hpp_unit, i);
             std::vector<std::string> param_names = findParameterNames(method_archive, hpp_unit, i);
@@ -424,7 +424,7 @@ void ClassInfo::stereotypeProperties(srcml_archive* method_archive, srcml_unit* 
     int total = outofline_function_count + inline_function_count;
     for (int i = inline_function_count; i < total; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType != "bool" && returnType != "void" && !method[i].returnsDataMember() && method[i].isConst()){
+        if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(method_archive, cpp_unit, i);
 
             std::vector<std::string> local_var_names = findLocalNames(method_archive, cpp_unit, i);
@@ -527,7 +527,7 @@ void ClassInfo::stereotypeSetters(srcml_archive* method_archive, srcml_unit* hpp
         //std::cout << "testing method number " << i << std::endl;
         std::string returnType = separateTypeName(method[i].getReturnType());
         bool void_or_bool = (returnType == "void" || returnType == "bool");
-        if (changes_to_data_members[i] == 1 && !method[i].isConst() && void_or_bool){
+        if (method[i].getAttributesModified() == 1 && !method[i].isConst() && void_or_bool){
             stereotypes[i] = "set";
         }
     }
@@ -573,11 +573,9 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
         std::vector<std::string> param_names = findParameterNames(method_archive, cpp_unit, i);
         bool has_call_on_data_member = callsAttributesMethod(real_calls, local_var_names, param_names);
 
-        bool case1 = (changes_to_data_members[i] == 1 && real_calls.size() > 1);
-        bool case2 = changes_to_data_members[i] == 0 && (pure_calls_count > 0 || has_call_on_data_member);
-        bool case3 = changes_to_data_members[i] > 1;
-        //std::cout << "case1:" << case1 << " case2:" << case2 << std::endl;
-        //std::cout << changes_to_data_members[i] << " " << real_calls.size() << " " << pure_calls_count << "\n"; 
+        bool case1 = (method[i].getAttributesModified() == 1 && real_calls.size() > 1);
+        bool case2 = method[i].getAttributesModified() == 0 && (pure_calls_count > 0 || has_call_on_data_member);
+        bool case3 = method[i].getAttributesModified() > 1;
         if ((case1 || case2 || case3) && !method[i].isConst()){
             if (returnType == "void" || returnType == "bool"){
                 stereotypes[i] = "command";
@@ -587,7 +585,7 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
             }
         }
         // handles case of mutable data members
-        else if (changes_to_data_members[i] > 0 && method[i].isConst()){
+        else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
             if (stereotypes[i] != "nothing-yet"){
                 stereotypes[i] += " command";
             }
@@ -608,9 +606,9 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
         std::vector<std::string> param_names = findParameterNames(method_archive, hpp_unit, i);
         bool has_call_on_data_member = callsAttributesMethod(real_calls, local_var_names, param_names);
 
-        bool case1 = (changes_to_data_members[i] == 1 && real_calls.size() > 1);
-        bool case2 = (changes_to_data_members[i] == 0 && (pure_calls_count > 0 || has_call_on_data_member));
-        bool case3 = changes_to_data_members[i] > 1;
+        bool case1 = (method[i].getAttributesModified() == 1 && real_calls.size() > 1);
+        bool case2 = (method[i].getAttributesModified() == 0 && (pure_calls_count > 0 || has_call_on_data_member));
+        bool case3 = method[i].getAttributesModified() > 1;
         if ((case1 || case2 || case3) && !method[i].isConst()){
             if (returnType == "void" || returnType == "bool"){
                 stereotypes[i] = "command";
@@ -620,7 +618,7 @@ void ClassInfo::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hpp
             }
         }
         // handles case of mutable data members
-        else if (changes_to_data_members[i] > 0 && method[i].isConst()){
+        else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
             if (stereotypes[i] != "nothing-yet"){
                 stereotypes[i] += " command";
             }
@@ -648,8 +646,7 @@ void ClassInfo::stereotypeCollaborationalCommand(srcml_archive* method_archive, 
         std::vector<std::string> all_calls = findCalls(method_archive, hpp_unit, i, "");
         bool has_call_on_data_member = callsAttributesMethod(all_calls, local_var_names, param_names);
         
-        if (!method[i].isConst() && changes_to_data_members[i] == 0){
-
+        if (!method[i].isConst() && method[i].getAttributesModified() == 0) {
             bool local_var_written = false;
             for (int j = 0; j < local_var_names.size(); ++j){
                 if(variableChanged(method_archive, hpp_unit, i, local_var_names[j])){
@@ -680,8 +677,7 @@ void ClassInfo::stereotypeCollaborationalCommand(srcml_archive* method_archive, 
 
         std::vector<std::string> all_calls = findCalls(method_archive, cpp_unit, i, "");
         bool has_call_on_data_member = callsAttributesMethod(all_calls, local_var_names, param_names);
-        if (!method[i].isConst() && changes_to_data_members[i] == 0){
-
+        if (!method[i].isConst() && method[i].getAttributesModified() == 0) {
             bool local_var_written = false;
             for (int j = 0; j < local_var_names.size(); ++j){
                 if (variableChanged(method_archive, cpp_unit, i, local_var_names[j])){
@@ -923,7 +919,7 @@ bool ClassInfo::isPrimitiveContainer(std::string return_type){
 
 //
 //
-void ClassInfo::returnsDataMembers(srcml_archive* method_archive, srcml_unit* unit, const int& number_of_functions, bool inline_list){
+void ClassInfo::returnsAttributes(srcml_archive* method_archive, srcml_unit* unit, const int& number_of_functions, bool inline_list){
     //std::cout << "finding returns data members\n";
     // for each function, find all return expressions and determine if they contain an attribute
     for(int i = 0; i < number_of_functions; ++i){   
@@ -952,7 +948,7 @@ void ClassInfo::returnsDataMembers(srcml_archive* method_archive, srcml_unit* un
                 break;
             }
         }
-        method[i].setReturnsDataMember(returns_attribute);
+        method[i].setReturnsAttribute(returns_attribute);
     }
 }
 
@@ -1182,19 +1178,13 @@ void ClassInfo::countChangedDataMembers(srcml_archive* method_archive, srcml_uni
     int number_of_functions = inline_list ? inline_function_count : outofline_function_count;
     for (int i = 0; i < number_of_functions; ++i){
         int index = inline_list ? i : i + inline_function_count;
-        
-        //std::cout << "COUNTING CHANGED DATA MEMBERS FOR METHOD index " << index << "\n";
-        //std::cout << "finding data members changed for function number: " << i << std::endl;
-
         int data_members_changed = 0;
         data_members_changed += findIncrementedDataMembers(method_archive, unit, index, false);
         data_members_changed += findIncrementedDataMembers(method_archive, unit, index, true);
         data_members_changed += findAssignOperatorDataMembers(method_archive, unit, index, false);
         data_members_changed += findAssignOperatorDataMembers(method_archive, unit, index, true);
-        //std::cout << "\tdata members changed is: " << data_members_changed << std::endl;
 
-        method[i].setModifiesDataMemberCount(data_members_changed);
-        changes_to_data_members.push_back(data_members_changed);  //OLD
+        method[i].setAttributesModified(data_members_changed);
     }
 }
 
@@ -1634,7 +1624,7 @@ bool ClassInfo::isFactory(srcml_archive* method_archive, srcml_unit* unit, const
     //std::cout << "returns obj " << returns_obj << " returns ptr " << returns_ptr << " returns local " 
     //<< returns_local << " returns new " << returns_new << " returns param "<< returns_param  << " new call " << new_call << std::endl;
     
-    bool return_ex = (returns_local || returns_new || returns_param || method[func_index].returnsDataMember());
+    bool return_ex = (returns_local || returns_new || returns_param || method[func_index].returnsAttribute());
     bool is_factory = returns_obj && returns_ptr && new_call && return_ex;
     return is_factory;
 }
