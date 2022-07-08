@@ -23,18 +23,14 @@ ClassInfo::ClassInfo(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_u
     
     findMethodReturnTypes(input_archive, hpp_unit);
     findMethodReturnTypes(input_archive, cpp_unit);
-    //readPrimitives();
 }
 
 //
 //
 void ClassInfo::findClassName(srcml_archive* input_archive, srcml_unit* unit){
-
     srcml_append_transform_xpath(input_archive, "//src:class/src:name");
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(input_archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
 
     for (int i = 0; i < number_of_result_units; ++i){
@@ -55,11 +51,10 @@ void ClassInfo::findClassName(srcml_archive* input_archive, srcml_unit* unit){
 //
 void ClassInfo::findParentClassName(srcml_archive* input_archive, srcml_unit* unit){
     srcml_append_transform_xpath(input_archive, "//src:class/src:super_list/src:super/src:name");
-    
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(input_archive, unit, &result);
-    
     int number_of_result_units = srcml_transform_get_unit_size(result);
+
     for (int i = 0; i < number_of_result_units; ++i){
         srcml_unit* result_unit = srcml_transform_get_unit(result, i);
         std::string name = srcml_unit_get_srcml(result_unit);
@@ -77,13 +72,9 @@ void ClassInfo::findParentClassName(srcml_archive* input_archive, srcml_unit* un
 //
 //
 void ClassInfo::findAttributeNames(srcml_archive* input_archive, srcml_unit* unit){
-    // append xpath to archive, gives variable names
     srcml_append_transform_xpath(input_archive, "//src:class//src:decl_stmt[not(ancestor::src:function)]/src:decl/src:name");
-
-    // apply xpath transformation to the archive
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(input_archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
 
     srcml_unit* result_unit = nullptr;
@@ -113,10 +104,10 @@ void ClassInfo::findAttributeTypes(srcml_archive* method_archive, srcml_unit* un
     srcml_append_transform_xpath(method_archive, "//src:class//src:decl_stmt[not(ancestor::src:function)]/src:decl/src:type");
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(method_archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
     std::string prev = "";
+
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
         std::string attr_type = srcml_unit_get_srcml(result_unit);
@@ -142,24 +133,19 @@ void ClassInfo::findAttributeTypes(srcml_archive* method_archive, srcml_unit* un
 }
 
 //
-//  MAY BE SOURCE OF BUG jm test 5 Range.xml
 //
 void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
-
     srcml_append_transform_xpath(method_archive, "//src:function");
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(method_archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
-
-    if (inline_list){
+    if (inline_list) {
         inline_function_count = number_of_result_units;
-    }
-    else{
+    } else {
         outofline_function_count = number_of_result_units;
     }
     srcml_unit* result_unit = nullptr;
+
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result,i);
 
@@ -179,9 +165,7 @@ void ClassInfo::findMethodHeaders(srcml_archive* method_archive, srcml_unit* uni
         function_header.erase(std::remove(function_header.begin(), function_header.end(), '\n'), function_header.end());
 
         method[i].setHeader(function_header);
-        method[i].setStereotype("nothing-yet");
     }
-
     srcml_clear_transforms(method_archive);
     srcml_transform_free(result);    
 }
@@ -232,10 +216,8 @@ void ClassInfo::findMethodNames(srcml_archive* src, srcml_unit* unit){
 //
 void ClassInfo::findParameterLists(srcml_archive* method_archive, srcml_unit* unit){
     srcml_append_transform_xpath(method_archive, "//src:function/src:parameter_list");
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(method_archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
     
@@ -263,9 +245,7 @@ void ClassInfo::findMethodReturnTypes(srcml_archive* method_archive, srcml_unit*
     srcml_append_transform_xpath(method_archive, "//src:function/src:type");
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(method_archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
-
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_result_units; ++i){
@@ -281,8 +261,6 @@ void ClassInfo::findMethodReturnTypes(srcml_archive* method_archive, srcml_unit*
         //std::cout << unparsed << std::endl;
         int error = srcml_unit_unparse_memory(result_unit, &unparsed, &size);
         std::string ret_type(unparsed);
-
-        
         delete[] unparsed;
 
         method[i].setReturnType(ret_type);
@@ -519,8 +497,8 @@ void ClassInfo::stereotypeVoidAccessor(srcml_archive* method_archive, srcml_unit
 //
 void ClassInfo::stereotypeSetters(srcml_archive* method_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     //std::cout << "STEREOTYPING SETTERS!!!!\n";
-    countChangedDataMembers(method_archive, hpp_unit, true);
-    countChangedDataMembers(method_archive, cpp_unit, false);
+    countChangedAttributes(method_archive, hpp_unit, true);
+    countChangedAttributes(method_archive, cpp_unit, false);
 
     int total = inline_function_count + outofline_function_count;
     for (int i = 0; i < total; ++i){
@@ -1169,7 +1147,7 @@ bool ClassInfo::variableChanged(srcml_archive* method_archive, srcml_unit* unit,
 // need to count different data members and not the same one twice.
 // check with multiple changes with same opperator(same var), different operators(same var), same operator(dif var)
 // test ++data_member += 10;
-void ClassInfo::countChangedDataMembers(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
+void ClassInfo::countChangedAttributes(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
     int number_of_functions = inline_list ? inline_function_count : outofline_function_count;
     for (int i = 0; i < number_of_functions; ++i){
         int index = inline_list ? i : i + inline_function_count;

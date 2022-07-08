@@ -35,8 +35,7 @@ private:
 //
 class methodModel {
 public:
-                methodModel(const std::string& n) { name = n; };
-
+                methodModel           (const std::string& n) { name = n; stereotype = "nothing-yet"; };
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
     std::string getParameters         () const { return parameters; };
@@ -102,7 +101,6 @@ public:
 
 
 private:
-
     void findClassName                (srcml_archive*, srcml_unit*);
     void findParentClassName          (srcml_archive*, srcml_unit*);
 
@@ -116,7 +114,7 @@ private:
 
     bool isVoidAccessor               (srcml_archive*, srcml_unit*, const int&);
     bool variableChanged              (srcml_archive*, srcml_unit*, const int&, const std::string&);
-    void countChangedDataMembers      (srcml_archive*, srcml_unit*, bool);
+    void countChangedAttributes       (srcml_archive*, srcml_unit*, bool);
     int  findAssignOperatorDataMembers(srcml_archive*, srcml_unit*, const int&, bool);
     int  findIncrementedDataMembers   (srcml_archive*, srcml_unit*, const int&, bool);
     bool containsNonPrimitive         (srcml_archive*, srcml_unit*, const int&, const std::string&);
@@ -127,7 +125,6 @@ private:
     bool isEmptyMethod                (srcml_archive*, srcml_unit*, const int&);
     void returnsAttributes            (srcml_archive*, srcml_unit*, const int&, bool);
 
-    void addConstSpecifier            (std::string);
     bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
     void methodsReturnPrimitive       (const std::vector<std::string>&, const int&, std::vector<bool>&);
