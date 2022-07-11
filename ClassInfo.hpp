@@ -17,6 +17,8 @@
 
 extern primitiveTypes primitives; //Not ideal
 
+const char NO_STEREOTYPE[] = "none";
+
 //
 class attributeModel {
 public:
@@ -35,7 +37,7 @@ private:
 //
 class methodModel {
 public:
-    methodModel           (const std::string& s, bool f) { header = s; constMethod = f; stereotype = "nothing-yet"; };
+    methodModel           (const std::string& s, bool f) { header = s; constMethod = f; stereotype = NO_STEREOTYPE; };
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
     std::string getParameters         () const { return parameters; };

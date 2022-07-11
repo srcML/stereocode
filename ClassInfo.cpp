@@ -585,7 +585,7 @@ void classModel::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hp
         }
         // handles case of mutable data members
         else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
-            if (method[i].getStereotype() != "nothing-yet"){
+            if (method[i].getStereotype() != NO_STEREOTYPE){
                 method[i].setStereotype(method[i].getStereotype() + " command");
             }
             else{
@@ -617,7 +617,7 @@ void classModel::stereotypeCommand(srcml_archive* method_archive, srcml_unit* hp
         }
         // handles case of mutable data members
         else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
-            if (method[i].getStereotype() != "nothing-yet") {
+            if (method[i].getStereotype() != NO_STEREOTYPE) {
                 method[i].setStereotype(method[i].getStereotype() + " command");
             } else {
                 method[i].setStereotype("command");
@@ -737,7 +737,7 @@ void classModel::stereotypeCollaborators(srcml_archive* method_archive, srcml_un
         //std::cout << "\tlocal obj " << local_obj << " param obj " << param_obj << " attr obj " << attr_obj << " ret obj " << ret_obj << std::endl;
 
         if (local_obj || param_obj || attr_obj || ret_obj){
-            if (method[i].getStereotype() == "nothing-yet" && !method[i].isConst()){
+            if (method[i].getStereotype() == NO_STEREOTYPE && !method[i].isConst()){
                 method[i].setStereotype("controller");
             }
             else{
@@ -757,7 +757,7 @@ void classModel::stereotypeCollaborators(srcml_archive* method_archive, srcml_un
         bool ret_obj = !isPrimitiveContainer(returnType) && returnType != "void" && !matches_class_name;
 
         if (local_obj || param_obj || attr_obj || ret_obj){
-            if (method[i].getStereotype() == "nothing-yet" && !method[i].isConst()){
+            if (method[i].getStereotype() == NO_STEREOTYPE && !method[i].isConst()){
                 method[i].setStereotype("controller");
             } else {
                 method[i].setStereotype(method[i].getStereotype() + " collaborator");
@@ -1037,13 +1037,13 @@ bool classModel::isVoidAccessor(srcml_archive* method_archive, srcml_unit* unit,
         // and the return type of the method is void.
         if (reference && !constant && primitive && returnType == "void" && method[func_index].isConst()){
             bool param_changed = variableChanged(method_archive, unit, func_index, parameter_names[j]);
-                if (param_changed || method[func_index].getStereotype() == "nothing-yet"){
+                if (param_changed || method[func_index].getStereotype() == NO_STEREOTYPE){
                 return true;
             }
         }
     }
     if (returnType == "void" && method[func_index].isConst() &&
-        method[func_index].getStereotype() == "nothing-yet"){
+        method[func_index].getStereotype() == NO_STEREOTYPE){
         return true;
     }
     return false;
@@ -1384,7 +1384,7 @@ std::vector<std::string> classModel::findCalls(srcml_archive* method_archive, sr
 // dont count calls if
 // there is a . or -> somewhere in the name
 // or call is static and class name is the same
-int classModel::countPureCalls(const std::vector<std::string>& all_calls) const{
+int classModel::countPureCalls(const std::vector<std::string>& all_calls) const {
     int pure_calls = all_calls.size();
     for (int i = 0; i < all_calls.size(); ++i){
         size_t colon = all_calls[i].find(":");
@@ -1396,9 +1396,7 @@ int classModel::countPureCalls(const std::vector<std::string>& all_calls) const{
         }
         else if(colon != std::string::npos){
             std::string name = all_calls[i].substr(0, colon);
-            //std::cout << "Static call found class name:" << name << std::endl;
             --pure_calls;
-            
         }
     }
     return pure_calls;
@@ -1406,7 +1404,9 @@ int classModel::countPureCalls(const std::vector<std::string>& all_calls) const{
 
 //
 //
-bool classModel::callsAttributesMethod(const std::vector<std::string>& real_calls, const std::vector<std::string>& local_var_names, const std::vector<std::string>& param_names){
+bool classModel::callsAttributesMethod(const std::vector<std::string>& real_calls,
+                                       const std::vector<std::string>& local_var_names,
+                                       const std::vector<std::string>& param_names){
     bool ret = false;
     for (int i = 0; i < real_calls.size(); ++i){
         size_t dot = real_calls[i].find(".");
@@ -1417,12 +1417,10 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
             bool attr = isAttribute(calling_object);
             bool inherit = isInheritedMember(param_names, local_var_names, calling_object);
             if(attr){
-                //std::cout << "found a call on an attribute with the name." << calling_object << "\n"; 
                 ret = true;     
             }
             else if (inherit){
                 ret = true;
-                //std::cout << "pushed back " << calling_object << "\n";
                 attribute.push_back(attributeModel(calling_object, "unknown"));
             }
         }
@@ -1431,12 +1429,10 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
             bool attr = isAttribute(calling_object);
             bool inherit = isInheritedMember(param_names, local_var_names, calling_object);
             if (attr){
-                //std::cout << "found a call on an attribute with the name-> " << calling_object << "\n";
                 ret = true;
             }
             else if (inherit){
                 ret = true;
-                // std::cout << "pushed back " << calling_object << "\n";
                 attribute.push_back(attributeModel(calling_object, "unknown"));
              }
         }
@@ -1490,7 +1486,6 @@ bool classModel::containsNonPrimitive(srcml_archive* method_archive, srcml_unit*
     srcml_transform_free(result);
     srcml_clear_transforms(method_archive);
     return false;
-
 }
 
 //
@@ -1589,11 +1584,10 @@ bool classModel::usesAttribute(srcml_archive* method_archive, srcml_unit* unit, 
 // returns true if method, specified by number and unit, is a factory
 bool classModel::isFactory(srcml_archive* method_archive, srcml_unit* unit, int func_index){
     std::vector<std::string> return_expressions = findReturnExpressions(method_archive, unit, func_index, false);
-    std::vector<std::string> local_var_names = findLocalNames(method_archive, unit, func_index);
-    std::vector<std::string> param_names = findParameterNames(method_archive, unit, func_index);
-    bool returns_ptr = method[func_index].getReturnType().find("*") != std::string::npos;
-    bool returns_obj = !isPrimitiveContainer(method[func_index].getReturnType());
-
+    std::vector<std::string> local_var_names    = findLocalNames(method_archive, unit, func_index);
+    std::vector<std::string> param_names        = findParameterNames(method_archive, unit, func_index);
+    bool                     returns_ptr        = method[func_index].getReturnType().find("*") != std::string::npos;
+    bool                     returns_obj        = !isPrimitiveContainer(method[func_index].getReturnType());
 
     bool returns_local = false;
     bool returns_new = false;
@@ -1760,44 +1754,40 @@ bool classModel::isEmptyMethod(srcml_archive* method_archive, srcml_unit* unit, 
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "'][not(src:block/src:block_content/*[not(self::src:comment)][1])]";
 
-    //std::cout << "\t xpath:\n" << "\t" << xpath << "\n";
     srcml_append_transform_xpath(method_archive, xpath.c_str());
-
     srcml_transform_result* result;
     srcml_unit_apply_transforms(method_archive, unit, &result);
 
     int number_of_results = srcml_transform_get_unit_size(result);
-    //std::cout << "number of results: " << number_of_results << "\n";
     srcml_clear_transforms(method_archive);
     srcml_transform_free(result);
     return number_of_results == 1;
 }
 
+
 //
+//  TODO: output the default stereotype if NO_STEREOTYPE - currently gives no attribute
+//  Copy and add in stereotype attribute on <function>
 //
-srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* method_archive, srcml_unit* unit, bool inline_list){
-    //std::cout << "inside function of death " << std::endl;
+//  Example <function stereotype="get">
+//
+srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* method_archive, srcml_unit* unit, bool hppUnit){
+    int n = hppMethodCount;
+    int offset = 0;
+    if (!hppUnit) {
+        n = cppMethodCount;
+        offset = hppMethodCount;
+    }
 
-    int func_count = inline_list ? hppMethodCount : cppMethodCount;
-    //std::cout << "TOTAL function count is: " << hppMethodCount + cppMethodCount << std::endl;
-    for (int i = 1; i <= func_count; ++i){
-
-        int index = inline_list ? i-1 : hppMethodCount + i - 1;
-
-        //std::cout << "function index is " << function_index <<std::endl;
-
-        std::string stereotype = method[index].getStereotype();
-        //std::cout << "stereotype is " << stereotype << std::endl;
-        if (stereotype == "nothing-yet" && hppMethodCount + cppMethodCount == 1){
-            return nullptr;
-        }
-        if (stereotype != "nothing-yet"){
+    for (int i = 0; i < n; ++i){
+        std::string stereotype = method[i+offset].getStereotype();
+        if (stereotype == NO_STEREOTYPE && hppMethodCount + cppMethodCount == 1) return nullptr;
+        if (stereotype != NO_STEREOTYPE){
             std::string xpath = "//src:function[string(src:name)='";
-            xpath += method[index].getName() + "' and string(src:type)='";
-            xpath += method[index].getReturnType() + "' and string(src:parameter_list)='";
-            xpath += method[index].getParameters() + "' and string(src:specifier)='";
-            xpath += method[index].getConst() + "']";
-            //std::cout << "adding " << xpath << " to list of transformations" << std::endl;
+            xpath += method[i+offset].getName() + "' and string(src:type)='";
+            xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
+            xpath += method[i+offset].getParameters() + "' and string(src:specifier)='";
+            xpath += method[i+offset].getConst() + "']";
             srcml_append_transform_xpath_attribute(method_archive, xpath.c_str(), "src", "/srcML/src", "stereotype", stereotype.c_str());
         }
     }
@@ -1806,7 +1796,6 @@ srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* method_archive, 
     unit = srcml_transform_get_unit(result, 0);
     srcml_clear_transforms(method_archive);
     return unit;
-
 }
 
 //
