@@ -1,7 +1,7 @@
 #ifndef CLASS_INFO_HPP
 #define CLASS_INFO_HPP
 
-//ClassInfo for stereocode
+//classModel for stereocode
 //
 
 #include <iostream>
@@ -67,12 +67,12 @@ private:
 };
 
 
-class ClassInfo {
+class classModel {
 public:
-    ClassInfo () {};
-    ClassInfo (srcml_archive*, srcml_unit*, srcml_unit*);
+    classModel () {};
+    classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
-    std::string getClassName              ()      const { return class_name;               }
+    std::string getClassName              ()      const { return className;                }
     int         getInlineFunctionCount    ()      const { return inline_function_count;    }
     int         getOutoflineFunctionCount ()      const { return outofline_function_count; }
     //std::string getReturnType             (int i) const { return return_types[i];          }
@@ -80,23 +80,23 @@ public:
     //int         getNumberOfMethods        ()      const { return headers.size();           }
 
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
-
-    void stereotypeGetters               (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypePredicates            (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeProperties            (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeVoidAccessor          (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeSetters               (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCommand               (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborationalCommand(srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborators         (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeFactories             (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeEmpty                 (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeStateless             (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeGetters                (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypePredicates             (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeProperties             (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeVoidAccessor           (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeSetters                (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeCommand                (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeCollaborationalCommand (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeCollaborators          (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeFactories              (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeEmpty                  (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeStateless              (srcml_archive*, srcml_unit*, srcml_unit*);
 
     void printMethodHeaders              ();
     void printReturnTypes                ();
     void printStereotypes                ();
     void printAttributes                 ();
+    void printMethodNames                ();
     void printReportToFile               (std::ofstream&, const std::string&);
 
 
@@ -111,7 +111,6 @@ private:
     void findParameterLists           (srcml_archive*, srcml_unit*);
     void findMethodHeaders            (srcml_archive*, srcml_unit*, bool);
     void findMethodReturnTypes        (srcml_archive*, srcml_unit*);
-
     bool isVoidAccessor               (srcml_archive*, srcml_unit*, const int&);
     bool variableChanged              (srcml_archive*, srcml_unit*, const int&, const std::string&);
     void countChangedAttributes       (srcml_archive*, srcml_unit*, bool);
@@ -138,17 +137,13 @@ private:
     std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, const int&, bool);
     std::vector<std::string> findLocalNames        (srcml_archive*, srcml_unit*, const int&);
 
-
 //Attributes:
-    std::string                 class_name;
-    std::vector<std::string>    parent_class_names;
+    std::string                 className;
+    std::vector<std::string>    parentClass;
     std::vector<attributeModel> attribute;
-
-    //Info on methods
-    int                      inline_function_count;
-    int                      outofline_function_count;
-
-    std::vector<methodModel> method;
+    std::vector<methodModel>    method;
+    int                         inline_function_count;
+    int                         outofline_function_count;
 };
 
 

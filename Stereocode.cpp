@@ -33,7 +33,7 @@ int main(int argc, char const *argv[])
     app.add_option("-l,--list-file",  file_list, "File name that contains a list of srcML archives");
     app.add_option("-a,--archive",    file_name, "File name of a single srcML archive containing hpp and cpp units");
     app.add_option("-p,--primitives", prim_file, "File name user supplied primitive types (one per line)");
-   CLI11_PARSE(app, argc, argv);
+    CLI11_PARSE(app, argc, argv);
 
     std::vector<std::string> file_names_list;
     if (file_name != "none") {
@@ -52,8 +52,7 @@ int main(int argc, char const *argv[])
         std::cerr << "   Output: srcML archive foo.annotated.xml - in same path as foo.xml\n";
       return -1;
     }
-
-    if (prim_file != "none") {  //Add user defined primitive types to initial set
+    if (prim_file != "none") {  //Add any user defined primitive types to initial set
         std::ifstream in(prim_file);
         if (in.is_open())
             in >> primitives;
@@ -68,64 +67,56 @@ int main(int argc, char const *argv[])
 
     for (int i = 0; i < file_names_list.size(); ++i){
         int error;
-        srcml_archive* input_archive = srcml_archive_create();
-
-        // read the srcml archive file
-        //assumes the hpp file is the first unit
-        error = srcml_archive_read_open_filename(input_archive, file_names_list[i].c_str());
+        srcml_archive* archive = srcml_archive_create();
+        error = srcml_archive_read_open_filename(archive, file_names_list[i].c_str());   // read the srcml archive file
         if (error) {
             std::cerr << "Error: file not found: " << file_names_list[i] << ", error == " << error << "\n";
             return -1;
         }
+        srcml_unit* hppUnit = srcml_archive_read_unit(archive);   //hpp unit is first
+        srcml_unit* cppUnit = srcml_archive_read_unit(archive);
+        classModel  aClass  = classModel(archive, hppUnit, cppUnit);
 
-        srcml_unit* hpp_unit = srcml_archive_read_unit(input_archive);
-        srcml_unit* cpp_unit = srcml_archive_read_unit(input_archive);
+        aClass.stereotypeGetters               (archive, hppUnit, cppUnit);
+        aClass.stereotypeSetters               (archive, hppUnit, cppUnit);
+        aClass.stereotypeCollaborationalCommand(archive, hppUnit, cppUnit);
+        aClass.stereotypePredicates            (archive, hppUnit, cppUnit);
+        aClass.stereotypeProperties            (archive, hppUnit, cppUnit);
+        aClass.stereotypeVoidAccessor          (archive, hppUnit, cppUnit);
+        aClass.stereotypeCommand               (archive, hppUnit, cppUnit);
+        aClass.stereotypeFactories             (archive, hppUnit, cppUnit);
+        aClass.stereotypeEmpty                 (archive, hppUnit, cppUnit);
+        aClass.stereotypeCollaborators         (archive, hppUnit, cppUnit);
+        aClass.stereotypeStateless             (archive, hppUnit, cppUnit);
 
-        ClassInfo class_representation = ClassInfo(input_archive, hpp_unit, cpp_unit);
-
-        class_representation.stereotypeGetters               (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeSetters               (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeCollaborationalCommand(input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypePredicates            (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeProperties            (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeVoidAccessor          (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeCommand               (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeFactories             (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeEmpty                 (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeCollaborators         (input_archive, hpp_unit, cpp_unit);
-        class_representation.stereotypeStateless             (input_archive, hpp_unit, cpp_unit);
-
-        //Output stereotype report file
         std::ofstream reportFile;
         reportFile.open(file_names_list[i] + ".report.txt");
-        class_representation.printReportToFile(reportFile, file_names_list[i]);
+        aClass.printReportToFile(reportFile, file_names_list[i]);
         reportFile.close();
 
-        std::cerr << "Class name: " << class_representation.getClassName() << std::endl;
-         
-        if (class_representation.getInlineFunctionCount() != 0) {
-            hpp_unit = class_representation.writeStereotypeAttribute(input_archive, hpp_unit, true);
+        std::cerr << "Class name: " << aClass.getClassName() << std::endl;
+        if (aClass.getInlineFunctionCount() != 0) {
+            hppUnit = aClass.writeStereotypeAttribute(archive, hppUnit, true);
         }
-        if (class_representation.getOutoflineFunctionCount() != 0) {
-            cpp_unit = class_representation.writeStereotypeAttribute(input_archive, cpp_unit, false);
+        if (aClass.getOutoflineFunctionCount() != 0) {
+            cppUnit = aClass.writeStereotypeAttribute(archive, cppUnit, false);
         }
 
         srcml_archive* output_archive = srcml_archive_create();
-
         error = srcml_archive_write_open_filename(output_archive, (file_names_list[i] + ".annotated.xml").c_str());
         if (error) {
             std::cerr << "Error opening " << file_names_list[i] << ".annotated.xml" << std::endl;
             return -1;
         }
-        srcml_archive_write_unit(output_archive, hpp_unit);
-        srcml_archive_write_unit(output_archive, cpp_unit);
+        srcml_archive_write_unit(output_archive, hppUnit);
+        srcml_archive_write_unit(output_archive, cppUnit);
 
-        srcml_unit_free(hpp_unit);
-        srcml_unit_free(cpp_unit);
-        srcml_archive_close(input_archive);
+        srcml_unit_free(hppUnit);
+        srcml_unit_free(cppUnit);
+        srcml_archive_close(archive);
         srcml_archive_close(output_archive);
         srcml_archive_free(output_archive);
-        srcml_archive_free(input_archive);
+        srcml_archive_free(archive);
     }
     
     std::cerr << "StereoCode completed." << std::endl;
