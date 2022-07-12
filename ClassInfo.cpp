@@ -5,26 +5,18 @@
 
 //
 //
-classModel::classModel(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+classModel::classModel(srcml_archive* input_archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit) : classModel() {
     findClassName(input_archive, hpp_unit);
     findParentClassName(input_archive, hpp_unit);
     findAttributeNames(input_archive, hpp_unit);
     findAttributeTypes(input_archive, hpp_unit);
 
     findMethodHeaders(input_archive, hpp_unit, true);
-    printMethodHeaders(); std::cout << "IN:  " << hppMethodCount << std::endl; std::cout << "OUT: " << cppMethodCount << std::endl;
     findMethodHeaders(input_archive, cpp_unit, false);
-    printMethodHeaders(); std::cout << "IN:  " << hppMethodCount << std::endl; std::cout << "OUT: " << cppMethodCount << std::endl;
-
-
     findMethodNames(input_archive, hpp_unit, true);
-    //printMethodNames(); std::cout << "IN:  " << hppMethodCount << std::endl; std::cout << "OUT: " << cppMethodCount << std::endl;
     findMethodNames(input_archive, cpp_unit, false);
-    //printMethodNames(); std::cout << "IN:  " << hppMethodCount << std::endl; std::cout << "OUT: " << cppMethodCount << std::endl;
-
     findParameterLists(input_archive, hpp_unit, true);
     findParameterLists(input_archive, cpp_unit, false);
-    
     findMethodReturnTypes(input_archive, hpp_unit, true);
     findMethodReturnTypes(input_archive, cpp_unit, false);
 }

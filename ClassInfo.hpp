@@ -22,6 +22,7 @@ const char NO_STEREOTYPE[] = "none";
 //
 class attributeModel {
 public:
+                attributeModel()                                           { name = ""; type = ""; };
                 attributeModel(const std::string& s)                       { name = s;           };
                 attributeModel(const std::string& n, const std::string& t) { name = n; type = t; };
     void        setType       (const std::string& s)                       { type = s;           };
@@ -37,7 +38,9 @@ private:
 //
 class methodModel {
 public:
-    methodModel           (const std::string& s, bool f) { header = s; constMethod = f; stereotype = NO_STEREOTYPE; };
+                methodModel           () { name=""; parameters=""; header=""; returnType=""; constMethod=false;
+                                           retAttribute=false; attributesModified=0; stereotype = NO_STEREOTYPE; };
+                methodModel           (const std::string& s, bool f) { header = s; constMethod = f; stereotype = NO_STEREOTYPE; };
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
     std::string getParameters         () const { return parameters; };
@@ -65,14 +68,13 @@ private:
     bool        constMethod;         //Is it a const method?
     bool        retAttribute;        //Does it return any attributes?
     int         attributesModified;  //# of attributes modified
-
     std::string stereotype;
 };
 
 
 class classModel {
 public:
-    classModel () {};
+    classModel () : className(), parentClass(), attribute(), method(), hppMethodCount(0), cppMethodCount(0)  {};
     classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
     std::string getClassName              ()      const { return className;                }

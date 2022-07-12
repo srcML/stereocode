@@ -117,6 +117,7 @@ int main(int argc, char const *argv[])
         srcml_archive_close(output_archive);
         srcml_archive_free(output_archive);
         srcml_archive_free(archive);
+        aClass  = classModel();
     }
     
     std::cerr << "StereoCode completed." << std::endl;
