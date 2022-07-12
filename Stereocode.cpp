@@ -95,10 +95,10 @@ int main(int argc, char const *argv[])
         reportFile.close();
 
         std::cerr << "Class name: " << aClass.getClassName() << std::endl;
-        if (aClass.getInlineFunctionCount() != 0) {
+        if (aClass.getHppMethodCount() != 0) {
             hppUnit = aClass.writeStereotypeAttribute(archive, hppUnit, true);
         }
-        if (aClass.getOutoflineFunctionCount() != 0) {
+        if (aClass.getCppMethodCount() != 0) {
             cppUnit = aClass.writeStereotypeAttribute(archive, cppUnit, false);
         }
 

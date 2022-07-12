@@ -50,6 +50,7 @@ public:
     std::string getStereotype         () const { return stereotype; };
     bool        isConst               () const { return constMethod; };
     bool        returnsAttribute      () const { return retAttribute; };
+    std::vector<std::string> getLocalVariables() const { return localVariables; };
 
     void        setName               (const std::string& s) { name = s; };
     void        setReturnType         (const std::string& s) { returnType = s; };
@@ -58,17 +59,19 @@ public:
     void        setConst              (bool flag)            { constMethod = flag; };
     void        setReturnsAttribute   (bool flag)            { retAttribute = flag; };
     void        setAttributesModified (int n)                { attributesModified = n; };
+    void        setLocalVariables     (const std::vector<std::string>& s) { localVariables = s; };
     void        setStereotype         (const std::string& s) { stereotype = s; };
 
 private:
-    std::string name;
-    std::string parameters;
-    std::string header;
-    std::string returnType;
-    bool        constMethod;         //Is it a const method?
-    bool        retAttribute;        //Does it return any attributes?
-    int         attributesModified;  //# of attributes modified
-    std::string stereotype;
+    std::string                 name;
+    std::string                 parameters;
+    std::string                 header;
+    std::string                 returnType;
+    bool                        constMethod;         //Is it a const method?
+    bool                        retAttribute;        //Does it return any attributes?
+    int                         attributesModified;  //# of attributes modified
+    std::vector<std::string>    localVariables;
+    std::string                 stereotype;
 };
 
 
@@ -77,9 +80,9 @@ public:
     classModel () : className(), parentClass(), attribute(), method(), hppMethodCount(0), cppMethodCount(0)  {};
     classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
-    std::string getClassName              ()      const { return className;                }
-    int         getInlineFunctionCount    ()      const { return hppMethodCount;    }
-    int         getOutoflineFunctionCount ()      const { return cppMethodCount; }
+    std::string getClassName      ()      const { return className;      }
+    int         getHppMethodCount ()      const { return hppMethodCount; }
+    int         getCppMethodCount ()      const { return cppMethodCount; }
 
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
@@ -139,6 +142,8 @@ private:
     std::vector<std::string> findParameterNames    (srcml_archive*, srcml_unit*, int);
     std::vector<std::string> findCalls             (srcml_archive*, srcml_unit*, int, const std::string&);
     std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, int, bool);
+
+    void                     findLocalVariableNames(srcml_archive*, srcml_unit*, bool);
     std::vector<std::string> findLocalNames        (srcml_archive*, srcml_unit*, int);
 
 //Attributes:
