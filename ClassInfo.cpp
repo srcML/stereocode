@@ -1780,7 +1780,7 @@ srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* method_archive, 
             xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
             xpath += method[i+offset].getParameters() + "' and string(src:specifier)='";
             xpath += method[i+offset].getConst() + "']";
-            srcml_append_transform_xpath_attribute(method_archive, xpath.c_str(), "src", "/srcML/src", "stereotype", stereotype.c_str());
+            srcml_append_transform_xpath_attribute(method_archive, xpath.c_str(), "st", "http://www.srcML.org/srcML/stereotype", "stereotype", stereotype.c_str());
         }
     }
     srcml_transform_result* result;

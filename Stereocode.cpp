@@ -103,6 +103,11 @@ int main(int argc, char const *argv[])
         }
 
         srcml_archive* output_archive = srcml_archive_create();
+        error = srcml_archive_register_namespace(output_archive, "st", "http://www.srcML.org/srcML/stereotype");
+        if (error) {
+            std::cerr << "Error registering namespace" << std::endl;
+            return -1;
+        }
         error = srcml_archive_write_open_filename(output_archive, (file_names_list[i] + ".annotated.xml").c_str());
         if (error) {
             std::cerr << "Error opening " << file_names_list[i] << ".annotated.xml" << std::endl;
