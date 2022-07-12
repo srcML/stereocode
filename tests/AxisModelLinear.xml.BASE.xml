@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
 
 <unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisModelLinear.hpp" hash="01f3684df832b33e6a0ce509e81e3a5baa18f4e8"><comment type="block">/* -*- mode: c++ -*- */</comment>
 
@@ -121,27 +121,27 @@ $Id: AxisModelLinear.cxx,v 1.108 2004/05/02 17:18:34 pfkeb Exp $
 </block_content>}</block></destructor>
 
 <comment type="block">/* virtual */</comment>
-<function src:stereotype="factory collaborator wrapper"><type><name>AxisModelBase</name> <modifier>*</modifier></type> <name><name>AxisModelLinear</name><operator>::</operator><name>clone</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="factory collaborator wrapper"><type><name>AxisModelBase</name> <modifier>*</modifier></type> <name><name>AxisModelLinear</name><operator>::</operator><name>clone</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><operator>new</operator> <call><name>AxisModelLinear</name><argument_list>( <argument><expr><operator>*</operator><name>this</name></expr></argument> )</argument_list></call></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>bool</name></type> <name>FLT_EQUAL</name><parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>y</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>bool</name></type> <name>FLT_EQUAL</name><parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>y</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <return>return <expr><operator>(</operator> <call><name>abs</name><argument_list>( <argument><expr><name>x</name> <operator>-</operator> <name>y</name></expr></argument> )</argument_list></call> <operator>&lt;=</operator> <literal type="number">100.0</literal> <operator>*</operator>  <name>DBL_EPSILON</name>  <operator>)</operator></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="collaborational-predicate stateless"><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
+<function st:stereotype="collaborational-predicate stateless"><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
 <block>{<block_content> 
   <return>return <expr><literal type="boolean">false</literal></expr>;</return> 
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>needPMag</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>needPMag</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_use_pmag</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="non-void-command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type>
+<function st:stereotype="non-void-command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type>
 <name><name>AxisModelLinear</name><operator>::</operator><name>adjustValues</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>limit</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <comment type="line">//Because the low value, the high value, and the length value of the</comment>
@@ -234,7 +234,7 @@ $Id: AxisModelLinear.cxx,v 1.108 2004/05/02 17:18:34 pfkeb Exp $
   <return>return <expr><name>m_range</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="non-void-command collaborator wrapper"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type>
+<function st:stereotype="non-void-command collaborator wrapper"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type>
 <name><name>AxisModelLinear</name><operator>::</operator><name>adjustLogValues</name></name><parameter_list>()</parameter_list>
 <block>{<block_content>
   <comment type="line">// This doesn't do jack.</comment>
@@ -243,7 +243,7 @@ $Id: AxisModelLinear.cxx,v 1.108 2004/05/02 17:18:34 pfkeb Exp $
 
 <comment type="block" format="doxygen">/** @todo We will have to put a check here to keep it from hitting a
     length of 0. */</comment>
-<function src:stereotype="non-void-command collaborator"><type><name>Range</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>calcLow</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<function st:stereotype="non-void-command collaborator"><type><name>Range</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>calcLow</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><call><name>startDragging</name> <argument_list>( <argument><expr><name>dragging</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 
@@ -261,7 +261,7 @@ $Id: AxisModelLinear.cxx,v 1.108 2004/05/02 17:18:34 pfkeb Exp $
 
 <comment type="block" format="doxygen">/** @todo We will have to put a check here to keep it from hitting a
     length of 0. */</comment>
-<function src:stereotype="non-void-command collaborator"><type><name>Range</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>calcHigh</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<function st:stereotype="non-void-command collaborator"><type><name>Range</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>calcHigh</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><call><name>startDragging</name> <argument_list>( <argument><expr><name>dragging</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 

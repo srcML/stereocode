@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
 
 <unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisModelBase.hpp" hash="5456ca997159f8068e501fc3708e63c57b7e39d4"><comment type="block">/* -*- mode: c++; -*- */</comment>
 
@@ -333,92 +333,92 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
 <block>{<block_content>
 </block_content>}</block></destructor>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setTickStep</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>t_step</name></decl></parameter> )</parameter_list> 
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setTickStep</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>t_step</name></decl></parameter> )</parameter_list> 
 <block>{<block_content>
   <expr_stmt><expr><name>m_tick_step</name> <operator>=</operator> <name>t_step</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getTickStep</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getTickStep</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_tick_step</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setFirstTick</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>first_tick</name></decl></parameter> )</parameter_list> 
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setFirstTick</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>first_tick</name></decl></parameter> )</parameter_list> 
 <block>{<block_content>
   <expr_stmt><expr><name>m_first_tick</name> <operator>=</operator> <name>first_tick</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getFirstTick</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getFirstTick</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_first_tick</name></expr>;</return> 
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getMaxTicks</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getMaxTicks</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_max_ticks</name></expr>;</return> 
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>rmag</name></decl></parameter> )</parameter_list> 
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>rmag</name></decl></parameter> )</parameter_list> 
 <block>{<block_content>
   <expr_stmt><expr><name>m_rmag</name> <operator>=</operator> <name>rmag</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_rmag</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setPMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>pmag</name></decl></parameter> )</parameter_list> 
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setPMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>double</name> <modifier>&amp;</modifier></type> <name>pmag</name></decl></parameter> )</parameter_list> 
 <block>{<block_content>
   <expr_stmt><expr><name>m_pmag</name> <operator>=</operator> <name>pmag</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getPMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getPMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_pmag</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>needPMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>needPMag</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_use_pmag</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUsePMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>bool</name> <modifier>&amp;</modifier></type> <name>use_p_mag</name></decl></parameter> )</parameter_list>
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUsePMag</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>bool</name> <modifier>&amp;</modifier></type> <name>use_p_mag</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_use_pmag</name> <operator>=</operator> <name>use_p_mag</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getLabelLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getLabelLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_label_location</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_scale_location</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set collaborator"><type><name>void</name></type>
+<function st:stereotype="set collaborator"><type><name>void</name></type>
 <name><name>AxisModelBase</name><operator>::</operator>
 <name>setTicks</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name> <argument_list type="generic">&lt; <argument><expr><name>AxisTick</name></expr></argument> &gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>ticks</name></decl></parameter>)</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_ticks</name> <operator>=</operator> <name>ticks</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get collaborator"><type><specifier>const</specifier> <name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type>
+<function st:stereotype="get collaborator"><type><specifier>const</specifier> <name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type>
 <name><name>AxisModelBase</name><operator>::</operator><name>getTicks</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_ticks</name></expr>;</return>
 </block_content>}</block></function>
 
 
-<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>low</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>high</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>low</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>high</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>low</name> <operator>&gt;</operator> <name>high</name></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><call><name><name>std</name><operator>::</operator><name>swap</name></name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument> )</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
   <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setRange</name></name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument>, <argument><expr><name>pos</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><call><name><name>range</name><operator>.</operator><name>length</name></name> <argument_list>()</argument_list></call> <operator>&lt;</operator> <name>DBL_EPSILON</name></expr> )</condition> <block>{<block_content>
     <return>return;</return>
@@ -447,13 +447,13 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
 
 </block_content>}</block></function>
 
-<function src:stereotype="set collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setIntersectRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r1</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r2</name></decl></parameter> )</parameter_list>
+<function st:stereotype="set collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setIntersectRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r1</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r2</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>r1</name></expr>;</expr_stmt>
   <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setIntersect</name></name> <argument_list>( <argument><expr><name>r2</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type>
+<function st:stereotype="command"><type><name>void</name></type>
 <name><name>AxisModelBase</name><operator>::</operator>
 <name>setRangePos</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
@@ -461,7 +461,7 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setPos</name></name><argument_list>( <argument><expr><name>pos</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUnionRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUnionRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if<condition>( <expr><name>m_empty</name></expr> )</condition> <block>{<block_content>
     <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>range</name></expr>;</expr_stmt>
@@ -473,12 +473,12 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   </block_content>}</block></else></if_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setEmpty</name></name><parameter_list>()</parameter_list>
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setEmpty</name></name><parameter_list>()</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <literal type="boolean">true</literal></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRange</name></name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter>)</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRange</name></name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter>)</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
 
   <if_stmt><if>if<condition>(<expr><operator>!</operator><name>scaled</name></expr>)</condition><block type="pseudo"><block_content>
@@ -493,41 +493,41 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   <return>return <expr><name>m_scaled_range</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setAutoRanging</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>flag</name></decl></parameter> )</parameter_list>
+<function st:stereotype="set"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setAutoRanging</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>flag</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_auto_range</name> <operator>=</operator> <name>flag</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>isAutoRanging</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>isAutoRanging</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_auto_range</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setScaleFactor</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>sf</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setScaleFactor</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>sf</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_scale_factor</name> <operator>=</operator> <name>sf</name></expr>;</expr_stmt>
   <expr_stmt><expr><name>m_scaling_on</name> <operator>=</operator> <literal type="boolean">true</literal></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleFactor</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>double</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleFactor</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>m_scaling_on</name> <operator>==</operator> <literal type="boolean">false</literal></expr> )</condition><block type="pseudo"><block_content> <return>return <expr><literal type="number">1.0</literal></expr>;</return></block_content></block></if></if_stmt>
   <comment type="line">// else</comment>
   <return>return <expr><name>m_scale_factor</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator> <name>isScaling</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get"><type><name>bool</name></type> <name><name>AxisModelBase</name><operator>::</operator> <name>isScaling</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_scaling_on</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator> <name>setScaling</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>on</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator> <name>setScaling</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>on</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_scaling_on</name> <operator>=</operator> <name>on</name></expr>;</expr_stmt>
   <if_stmt><if>if <condition>( <expr><name>on</name> <operator>==</operator> <literal type="boolean">false</literal></expr> )</condition><block type="pseudo"><block_content> <expr_stmt><expr><name>m_scale_factor</name> <operator>=</operator> <literal type="number">1.0</literal></expr>;</expr_stmt></block_content></block></if></if_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>startDragging</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>startDragging</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>m_is_dragging</name> <operator>==</operator> <literal type="boolean">false</literal></expr>  )</condition> <block>{<block_content>
     <expr_stmt><expr><name>m_start_range</name> <operator>=</operator> <name>m_range</name></expr>;</expr_stmt>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
 
 <unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="AxisTick.hpp" hash="058c354a538172d7b5dfa9832bfda079ad339d63"><comment type="block">/* HippoPlot AxisTick  class interface
  *
@@ -98,25 +98,25 @@
 </member_init_list><block>{<block_content>
 </block_content>}</block></constructor>
 
-<function src:stereotype="get"><type><name>double</name></type>
+<function st:stereotype="get"><type><name>double</name></type>
 <name><name>AxisTick</name><operator>::</operator><name>value</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_v</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type>
+<function st:stereotype="set"><type><name>void</name></type>
 <name><name>AxisTick</name><operator>::</operator><name>setValue</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>v</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_v</name> <operator>=</operator> <name>v</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><specifier>const</specifier> <name>string</name> <modifier>&amp;</modifier></type> 
+<function st:stereotype="get"><type><specifier>const</specifier> <name>string</name> <modifier>&amp;</modifier></type> 
 <name><name>AxisTick</name><operator>::</operator><name>content</name></name> <parameter_list>( )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_c</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type>
+<function st:stereotype="set"><type><name>void</name></type>
 <name><name>AxisTick</name><operator>::</operator><name>setContent</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name> <modifier>&amp;</modifier></type> <name>s</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_c</name> <operator>=</operator> <name>s</name></expr>;</expr_stmt>

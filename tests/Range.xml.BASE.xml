@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
 
 <unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Range.hpp" hash="511a2614cb946425c6ff33fd9b3e5070c4eb2045"><comment type="block">/* -*- mode: c++ -*- */</comment>
 
@@ -156,7 +156,7 @@ $Id: Range.h,v 1.47 2004/05/23 23:34:01 pfkeb Exp $
 
 </public>}</block>;</class>
 
-<function src:stereotype="property"><type><specifier>inline</specifier>
+<function st:stereotype="property"><type><specifier>inline</specifier>
 <name>double</name></type>
 <name><name>Range</name><operator>::</operator>
 <name>length</name></name> <parameter_list>()</parameter_list> <specifier>const</specifier>
@@ -165,7 +165,7 @@ $Id: Range.h,v 1.47 2004/05/23 23:34:01 pfkeb Exp $
 </block_content>}</block></function>
 
 
-<function src:stereotype="command collaborator"><template>template <parameter_list>&lt; <parameter><type><name>class</name></type> <name>Iterator</name></parameter> &gt;</parameter_list></template>
+<function st:stereotype="command collaborator"><template>template <parameter_list>&lt; <parameter><type><name>class</name></type> <name>Iterator</name></parameter> &gt;</parameter_list></template>
 <type><name>void</name></type>
 <name><name>Range</name><operator>::</operator>
 <name>setRange</name></name> <parameter_list>( <parameter><decl><type><name>Iterator</name></type> <name>first</name></decl></parameter>, <parameter><decl><type><name>Iterator</name></type> <name>end</name></decl></parameter> )</parameter_list>
@@ -271,46 +271,46 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
   <expr_stmt><expr><call><name>setRange</name> <argument_list>( <argument><expr><call><name><name>array</name><operator>.</operator><name>begin</name></name><argument_list>()</argument_list></call></expr></argument>, <argument><expr><call><name><name>array</name><operator>.</operator><name>end</name></name> <argument_list>()</argument_list></call></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></constructor>
 
-<function src:stereotype="get"><type><name>double</name></type>
+<function st:stereotype="get"><type><name>double</name></type>
 <name><name>Range</name><operator>::</operator><name>low</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_min</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type>
+<function st:stereotype="set"><type><name>void</name></type>
 <name><name>Range</name><operator>::</operator><name>setLow</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_min</name> <operator>=</operator> <name>x</name></expr>;</expr_stmt>
   <expr_stmt><expr><call><name>assert</name> <argument_list>( <argument><expr><name>m_min</name> <operator>&lt;=</operator> <name>m_max</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type>
+<function st:stereotype="get"><type><name>double</name></type>
 <name><name>Range</name><operator>::</operator><name>high</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_max</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type>
+<function st:stereotype="set"><type><name>void</name></type>
 <name><name>Range</name><operator>::</operator><name>setHigh</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_max</name> <operator>=</operator> <name>x</name></expr>;</expr_stmt>
   <expr_stmt><expr><call><name>assert</name> <argument_list>( <argument><expr><name>m_min</name> <operator>&lt;=</operator> <name>m_max</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="get"><type><name>double</name></type>
+<function st:stereotype="get"><type><name>double</name></type>
 <name><name>Range</name><operator>::</operator><name>pos</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_pos</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type>
+<function st:stereotype="set"><type><name>void</name></type>
 <name><name>Range</name><operator>::</operator><name>setPos</name></name> <parameter_list>(<parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter>)</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_pos</name> <operator>=</operator> <name>x</name></expr>;</expr_stmt>
   <expr_stmt><expr><call><name>assert</name> <argument_list>( <argument><expr><name>m_min</name> <operator>&lt;=</operator> <name>m_max</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type> 
+<function st:stereotype="command"><type><name>void</name></type> 
 <name><name>Range</name><operator>::</operator><name>setRange</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>low</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>high</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>pos</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_min</name> <operator>=</operator> <name>low</name></expr>;</expr_stmt>
@@ -325,7 +325,7 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
 <comment type="line">//   return (m_max - m_min);</comment>
 <comment type="line">// }</comment>
 
-<function src:stereotype="command"><type><name>void</name></type>
+<function st:stereotype="command"><type><name>void</name></type>
 <name><name>Range</name><operator>::</operator><name>setLength</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>val</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>high_hold</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if<condition>( <expr><name>high_hold</name></expr> )</condition><block>{<block_content>
@@ -336,32 +336,32 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
   <expr_stmt><expr><call><name>assert</name> <argument_list>( <argument><expr><name>m_min</name> <operator>&lt;=</operator> <name>m_max</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="predicate"><type><name>bool</name></type>
+<function st:stereotype="predicate"><type><name>bool</name></type>
 <name><name>Range</name><operator>::</operator><name>includes</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>val</name></decl></parameter> )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>val</name> <operator>&gt;=</operator> <name>m_min</name> <operator>&amp;&amp;</operator> <name>val</name> <operator>&lt;=</operator> <name>m_max</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="predicate"><type><name>bool</name></type>
+<function st:stereotype="predicate"><type><name>bool</name></type>
 <name><name>Range</name><operator>::</operator>
 <name>excludes</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>value</name></decl></parameter> )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name><name>value</name> <argument_list type="generic">&lt; <argument><expr><name>m_min</name> <operator>||</operator> <name>value</name></expr></argument> &gt;</argument_list></name> <name>m_max</name></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="property"><type><name>double</name></type>
+<function st:stereotype="property"><type><name>double</name></type>
 <name><name>Range</name><operator>::</operator>
 <name>fraction</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>value</name></decl></parameter> )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><operator>(</operator> <name>value</name> <operator>-</operator> <name>m_min</name> <operator>)</operator> <operator>/</operator> <operator>(</operator> <name>m_max</name> <operator>-</operator> <name>m_min</name> <operator>)</operator></expr>;</return>
 </block_content>}</block></function>
 
-<function src:stereotype="set"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setEmpty</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>yes</name></decl></parameter> )</parameter_list>
+<function st:stereotype="set"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setEmpty</name></name> <parameter_list>( <parameter><decl><type><name>bool</name></type> <name>yes</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <name>yes</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setUnion</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setUnion</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>m_empty</name></expr> )</condition> <block>{<block_content>
     <expr_stmt><expr><name>m_min</name> <operator>=</operator> <name><name>range</name><operator>.</operator><name>m_min</name></name></expr>;</expr_stmt>
@@ -379,7 +379,7 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
 
 </block_content>}</block></function>
 
-<function src:stereotype="command"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setIntersect</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setIntersect</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>m_min</name> <operator>&gt;</operator> <name><name>range</name><operator>.</operator><name>m_max</name></name> <operator>||</operator> <name>m_max</name> <operator>&lt;</operator> <name><name>range</name><operator>.</operator><name>m_min</name></name></expr> )</condition><block type="pseudo"><block_content> <return>return;</return></block_content></block></if></if_stmt>
   <expr_stmt><expr><name>m_min</name> <operator>=</operator> <call><name>max</name> <argument_list>( <argument><expr><name>m_min</name></expr></argument>, <argument><expr><name><name>range</name><operator>.</operator><name>m_min</name></name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
@@ -389,7 +389,7 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
   <expr_stmt><expr><call><name>assert</name> <argument_list>( <argument><expr><name>m_min</name> <operator>&lt;=</operator> <name>m_max</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function src:stereotype="property"><type><name>int</name></type>
+<function st:stereotype="property"><type><name>int</name></type>
 <name><name>Range</name><operator>::</operator><name>numberOfBins</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>width</name></decl></parameter> )</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <expr_stmt><expr><call><name>assert</name> <argument_list>( <argument><expr><name>m_max</name> <operator>&gt;</operator> <name>m_min</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
@@ -397,7 +397,7 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
   <return>return <expr><cast type="static">static_cast<argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> &gt;</argument_list> <argument_list>( <argument><expr><call><name>floor</name> <argument_list>( <argument><expr><operator>(</operator><name>m_max</name> <operator>-</operator> <name>m_min</name><operator>)</operator> <operator>/</operator> <name>width</name> <operator>+</operator> <literal type="number">0.5</literal></expr></argument> )</argument_list></call></expr></argument> )</argument_list></cast></expr>;</return>
 </block_content>}</block></function>
 
-<function type="operator" src:stereotype="controller stateless"><type><name>ostream</name> <modifier>&amp;</modifier></type> <name>operator <name>&lt;&lt;</name></name> <parameter_list>( <parameter><decl><type><name>ostream</name> <modifier>&amp;</modifier></type> <name>o</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function type="operator" st:stereotype="controller stateless"><type><name>ostream</name> <modifier>&amp;</modifier></type> <name>operator <name>&lt;&lt;</name></name> <parameter_list>( <parameter><decl><type><name>ostream</name> <modifier>&amp;</modifier></type> <name>o</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>o</name> <operator>&lt;&lt;</operator> <literal type="string">"range = {"</literal>
     <operator>&lt;&lt;</operator> <name><name>range</name><operator>.</operator><name>m_min</name></name> <operator>&lt;&lt;</operator> <literal type="string">", "</literal>
