@@ -346,7 +346,7 @@ void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bo
     }
 }
 
-// TODO: usesAttribute, findCalls, callsAttributesMethod, countPureCalls??
+// TODO: usesAttribute, findCalls, callsAttributesMethod, countPureCalls??, usesAttributeOBJ??
 
 
 
@@ -1537,6 +1537,10 @@ bool classModel::usesAttributeObj(srcml_archive* archive, srcml_unit* unit, int 
 }
 
 //
+// USES primitives
+//
+// Returns if a method uses any attribute (including inherited attributes)
+//  Also adds any inherited attributes to attribute
 //
 bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
     std::vector<std::string> param_names = method[i].getParameterNames();
