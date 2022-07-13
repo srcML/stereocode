@@ -2,7 +2,7 @@
 #define CLASS_INFO_HPP
 
 //classModel for stereocode
-//
+// 
 
 #include <iostream>
 #include <fstream>

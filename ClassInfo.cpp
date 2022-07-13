@@ -28,6 +28,9 @@ classModel::classModel(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit*
     findParameterNames(archive, hpp_unit, false);
     findParameterTypes(archive, hpp_unit, true);
     findParameterTypes(archive, hpp_unit, false);
+
+    //FOO(archive, hpp_unit, true);
+    //FOO(archive, hpp_unit, false);
 }
 
 
@@ -346,10 +349,27 @@ void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bo
     }
 }
 
-// TODO: usesAttribute, findCalls, callsAttributesMethod, countPureCalls??, usesAttributeOBJ??
+// TODO:  findCalls, callsAttributesMethod, countPureCalls??, usesAttributeOBJ??
+//
+// Can not compute upfront: usesAttribute
 
+/*
+// Finds methods that
+//
+void classModel::FOO(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+    int offset = 0;
+    int n = hppMethodCount;
+    if (!hppUnit) {
+        offset = hppMethodCount;
+        n = cppMethodCount;
+    }
 
+    for (int i = 0; i < n; ++i) {
+        method[i+offset].setUsesFOO(FOO(archive, unit, i));
+    }
+}
 
+*/
 
 
 // WORKING ON STEREOTYPES
@@ -393,7 +413,6 @@ void classModel::stereotypePredicates(srcml_archive* archive, srcml_unit* hpp_un
     for (int i = 0; i < hppMethodCount; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()) {
-
             bool data_members = usesAttribute(archive, hpp_unit, i);
 
             std::vector<std::string> real_calls = findCalls(archive, hpp_unit, i, "real");
@@ -420,7 +439,6 @@ void classModel::stereotypePredicates(srcml_archive* archive, srcml_unit* hpp_un
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(archive, cpp_unit, i);
             std::vector<std::string> real_calls = findCalls(archive, cpp_unit, i, "real");
-            
             bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
             data_members = data_members || has_call_on_data_member;
 
@@ -1359,12 +1377,9 @@ std::vector<std::string> classModel::findCalls(srcml_archive* archive, srcml_uni
     srcml_unit_apply_transforms(archive, unit, &result);
 
     int number_of_results = srcml_transform_get_unit_size(result);
-    //std::cout << "number of calls are:" << number_of_results << std::endl;
-
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_results; ++i){
-        //std::cout << "iteration number " << i << std::endl;
         result_unit = srcml_transform_get_unit(result, i);
 
         std::string call = srcml_unit_get_srcml(result_unit);
@@ -1375,11 +1390,9 @@ std::vector<std::string> classModel::findCalls(srcml_archive* archive, srcml_uni
 
         call = unparsed;
         delete[] unparsed;
-        //std::cout << "\t\t\tcall name:'" << call << "'\n"; 
 
         trimWhitespace(call);
-        if(call != "assert" && !isPrimitiveContainer(call)){
-            //std::cout << call << std::endl;
+        if (call != "assert" && !isPrimitiveContainer(call)) {
             calls.push_back(call);
         }
     }
@@ -1539,7 +1552,8 @@ bool classModel::usesAttributeObj(srcml_archive* archive, srcml_unit* unit, int 
 //
 // USES primitives
 //
-// Returns if a method uses any attribute (including inherited attributes)
+// Returns if a method has a USE of an attribute (including inherited attributes)
+//  Does not consider DEF of an attribute
 //  Also adds any inherited attributes to attribute
 //
 bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
@@ -1553,7 +1567,6 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
     xpath += method[i].getConst() + "']//src:expr[not(ancestor::src:throw) and";
     xpath += "not(ancestor::src:argument_list[@type='generic']) and not(ancestor::src:catch)]/src:name";
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
 
@@ -1571,17 +1584,13 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
         std::string possible_attr(unparsed);
         delete[] unparsed;
 
-        if (primitives.isPrimitive(possible_attr)){
-            continue;
-        }
+        if (primitives.isPrimitive(possible_attr)) continue;
+
         bool attr = isAttribute(possible_attr);
         bool inherit = isInheritedMember(param_names, local_var_names, possible_attr);
-        //std::cout << "testing if the name '" << possible_attr << "' is a data member\n";
         if (attr){
-            //std::cout << "is an attribute\n";
-            found_data_mem = true;
+             found_data_mem = true;
         }else if (inherit){
-            //std::cout << "'" << possible_attr << "' has been found inherited\n";
             attribute.push_back(attributeModel(possible_attr, "unknown"));
             found_data_mem = true;
         }
