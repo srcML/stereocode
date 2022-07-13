@@ -51,6 +51,8 @@ public:
     bool        isConst               () const { return constMethod; };
     bool        returnsAttribute      () const { return retAttribute; };
     std::vector<std::string> getLocalVariables() const { return localVariables; };
+    std::vector<std::string> getParameterNames() const { return parameterNames; };
+    std::vector<std::string> getParameterTypes() const { return parameterTypes; };
 
     void        setName               (const std::string& s) { name = s; };
     void        setReturnType         (const std::string& s) { returnType = s; };
@@ -60,11 +62,16 @@ public:
     void        setReturnsAttribute   (bool flag)            { retAttribute = flag; };
     void        setAttributesModified (int n)                { attributesModified = n; };
     void        setLocalVariables     (const std::vector<std::string>& s) { localVariables = s; };
+    void        setParameterNames     (const std::vector<std::string>& s) { parameterNames = s; };
+    void        setParameterTypes     (const std::vector<std::string>& s) { parameterTypes = s; };
+
     void        setStereotype         (const std::string& s) { stereotype = s; };
 
 private:
     std::string                 name;
     std::string                 parameters;
+    std::vector<std::string>    parameterNames;
+    std::vector<std::string>    parameterTypes;
     std::string                 header;
     std::string                 returnType;
     bool                        constMethod;         //Is it a const method?
@@ -138,13 +145,16 @@ private:
     int  countPureCalls               (const std::vector<std::string>&) const;
     bool callsAttributesMethod        (const std::vector<std::string>&, const std::vector<std::string>&, const std::vector<std::string>&);
 
-    std::vector<std::string> findParameterTypes    (srcml_archive*, srcml_unit*, int);
-    std::vector<std::string> findParameterNames    (srcml_archive*, srcml_unit*, int);
+    void                     findParameterTypes    (srcml_archive*, srcml_unit*, bool);
+    std::vector<std::string> methodParameterTypes  (srcml_archive*, srcml_unit*, int);
+    void                     findParameterNames    (srcml_archive*, srcml_unit*, bool);
+    std::vector<std::string> methodParameterNames  (srcml_archive*, srcml_unit*, int);
+
     std::vector<std::string> findCalls             (srcml_archive*, srcml_unit*, int, const std::string&);
     std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, int, bool);
 
     void                     findLocalVariableNames(srcml_archive*, srcml_unit*, bool);
-    std::vector<std::string> findLocalNames        (srcml_archive*, srcml_unit*, int);
+    std::vector<std::string> methodLocalVariables  (srcml_archive*, srcml_unit*, int);
 
 //Attributes:
     std::string                 className;
