@@ -86,12 +86,12 @@ private:
 
 class classModel {
 public:
-    classModel () : className(), parentClass(), attribute(), method(), hppMethodCount(0), cppMethodCount(0), language() {};
+    classModel () : className(), parentClass(), attribute(), method(), unitOneCount(0), unitTwoCount(0), language() {};
     classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
-    std::string getClassName      ()      const { return className;      }
-    int         getHppMethodCount ()      const { return hppMethodCount; }
-    int         getCppMethodCount ()      const { return cppMethodCount; }
+    std::string getClassName    ()      const { return className;    }
+    int         getUnitOneCount ()      const { return unitOneCount; }
+    int         getUnitTwoCount ()      const { return unitTwoCount; }
 
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
@@ -160,9 +160,11 @@ private:
     std::vector<std::string>    parentClass;
     std::vector<attributeModel> attribute;
     std::vector<methodModel>    method;
-    int                         hppMethodCount;
-    int                         cppMethodCount;
-    std::string                 language;    //Programming language
+//    int                         hppMethodCount;
+//    int                         cppMethodCount;
+    int                         unitOneCount;   //Methods in .hpp, .java, .cs, etc.
+    int                         unitTwoCount;   //Methods in .cpp - only C++ has two units
+    std::string                 language;       //Language: "C++", "C#", "Java", "C"
 
 };
 

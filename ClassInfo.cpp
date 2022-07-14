@@ -172,17 +172,17 @@ bool checkConst(std::string function_srcml) {
 //
 //  Finds header and const-ness
 //
-void classModel::findMethodHeaders(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findMethodHeaders(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     srcml_append_transform_xpath(archive, "//src:function");
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
     int number_of_result_units = srcml_transform_get_unit_size(result);
     int start = 0;
-    if (hppUnit) {
-        hppMethodCount = number_of_result_units;           //COMPUTED HERE
+    if (oneUnit) {
+        unitOneCount = number_of_result_units;           //COMPUTED HERE
     } else {
-        cppMethodCount = number_of_result_units;        //COMPUTED HERE
+        unitTwoCount = number_of_result_units;        //COMPUTED HERE
     }
     srcml_unit* result_unit = nullptr;
 
@@ -214,7 +214,7 @@ void classModel::findMethodHeaders(srcml_archive* archive, srcml_unit* unit, boo
 //
 // Find the name of all functions/methods in the archive
 //
-void classModel::findMethodNames(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findMethodNames(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     srcml_append_transform_xpath(archive, "//src:function/src:name");
     srcml_transform_result* result      = nullptr;
     srcml_unit*             result_unit = nullptr;
@@ -222,7 +222,7 @@ void classModel::findMethodNames(srcml_archive* archive, srcml_unit* unit, bool 
 
     int n = srcml_transform_get_unit_size(result);
     int offset = 0;
-    if (!hppUnit) offset = hppMethodCount;
+    if (!oneUnit) offset = unitOneCount;
 
     for (int i = 0; i < n; ++i){
         result_unit = srcml_transform_get_unit(result, i);
@@ -241,14 +241,14 @@ void classModel::findMethodNames(srcml_archive* archive, srcml_unit* unit, bool 
 
 //
 //
-void classModel::findParameterLists(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findParameterLists(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     srcml_append_transform_xpath(archive, "//src:function/src:parameter_list");
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
     int offset = 0;
-    if (!hppUnit) offset = hppMethodCount;
+    if (!oneUnit) offset = unitOneCount;
 
     for (int i = 0; i < n; ++i){
         result_unit = srcml_transform_get_unit(result,i);
@@ -270,14 +270,14 @@ void classModel::findParameterLists(srcml_archive* archive, srcml_unit* unit, bo
 //
 //
 // collects return types for each function
-void classModel::findMethodReturnTypes(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findMethodReturnTypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     srcml_append_transform_xpath(archive, "//src:function/src:type");
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
     int offset = 0;
-    if (!hppUnit) offset = hppMethodCount;
+    if (!oneUnit) offset = unitOneCount;
 
     for (int i = 0; i < n; ++i){
         result_unit = srcml_transform_get_unit(result,i);
@@ -304,12 +304,12 @@ void classModel::findMethodReturnTypes(srcml_archive* archive, srcml_unit* unit,
 //
 // Finds all the local variables in each method
 //
-void classModel::findLocalVariableNames(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findLocalVariableNames(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
-    int n = hppMethodCount;
-    if (!hppUnit) {
-        offset = hppMethodCount;
-        n = cppMethodCount;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
 
     for (int i = 0; i < n; ++i) {
@@ -320,12 +320,12 @@ void classModel::findLocalVariableNames(srcml_archive* archive, srcml_unit* unit
 
 // Finds the parameter names in each method
 //
-void classModel::findParameterNames(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findParameterNames(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
-    int n = hppMethodCount;
-    if (!hppUnit) {
-        offset = hppMethodCount;
-        n = cppMethodCount;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
 
     for (int i = 0; i < n; ++i) {
@@ -335,12 +335,12 @@ void classModel::findParameterNames(srcml_archive* archive, srcml_unit* unit, bo
 
 // Finds the parameter types in each method
 //
-void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
-    int n = hppMethodCount;
-    if (!hppUnit) {
-        offset = hppMethodCount;
-        n = cppMethodCount;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
 
     for (int i = 0; i < n; ++i) {
@@ -393,19 +393,14 @@ void classModel::stereotypeGetter(srcml_archive* archive, srcml_unit* hpp_unit, 
 // does not use any data member in the method
 // has no pure calls 
 void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()) {
             bool data_members = usesAttribute(archive, hpp_unit, i);
-
             std::vector<std::string> real_calls = findCalls(archive, hpp_unit, i, "real");
-
             bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-
             data_members = data_members || has_call_on_data_member;
-
             std::vector<std::string> pure_calls = findCalls(archive, hpp_unit, i, "pure");
-
             int pure_calls_count = countPureCalls(pure_calls);
 
             if (!data_members && pure_calls_count == 0){
@@ -417,14 +412,13 @@ void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* hpp_uni
         }
     }
 
-    for (int i = hppMethodCount; i < method.size(); ++i){
+    for (int i = unitOneCount; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(archive, cpp_unit, i);
             std::vector<std::string> real_calls = findCalls(archive, cpp_unit, i, "real");
             bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
             data_members = data_members || has_call_on_data_member;
-
             std::vector<std::string> pure_calls = findCalls(archive, cpp_unit, i, "pure");
             int pure_calls_count = countPureCalls(pure_calls);
 
@@ -453,7 +447,7 @@ void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* hpp_uni
 // does not contain any calls on data members
 void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     //std::cout << "STEREOTYPING PROPERTIES!\n";
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(archive, hpp_unit, i);
@@ -475,7 +469,7 @@ void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* hpp_unit
         }
     }
 
-    for (int i = hppMethodCount; i < method.size(); ++i){
+    for (int i = unitOneCount; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
             bool data_members = usesAttribute(archive, cpp_unit, i);
@@ -505,7 +499,7 @@ void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* hpp_unit
 //     is a primitive type
 //     and is assigned a value(one = in the expression).
 void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
-    for (int i = hppMethodCount; i < method.size(); ++i){
+    for (int i = unitOneCount; i < method.size(); ++i){
         if(isVoidAccessor(archive, cpp_unit, i)){
             bool data_members = usesAttribute(archive, cpp_unit, i);
             std::vector<std::string> real_calls = findCalls(archive, cpp_unit, i, "real");
@@ -523,7 +517,7 @@ void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* hpp_
             }
         }
     }
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         if(isVoidAccessor(archive, hpp_unit, i)){
             bool data_members = usesAttribute(archive, hpp_unit, i);
             std::vector<std::string> real_calls = findCalls(archive, hpp_unit, i, "real");
@@ -592,8 +586,8 @@ void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* hpp_unit, 
 // need to handle the case where 0 data members are written and there is a call on a data member.
 //
 void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
-    int total = hppMethodCount + cppMethodCount;
-    for (int i = hppMethodCount; i < total; ++i){
+    int total = unitOneCount + unitTwoCount;
+    for (int i = unitOneCount; i < total; ++i){
         std::vector<std::string> real_calls = findCalls(archive, cpp_unit, i, "real");
         std::vector<std::string> pure_calls = findCalls(archive, cpp_unit, i, "pure");
 
@@ -622,7 +616,7 @@ void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* hpp_unit,
         }
     }
 
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         std::vector<std::string> real_calls = findCalls(archive, hpp_unit, i, "real");
         std::vector<std::string> pure_calls = findCalls(archive, hpp_unit, i, "pure");
 
@@ -660,7 +654,7 @@ void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* hpp_unit,
 //Calls allowed:  f->g() where f is not a data member, new f() (which isn't a real call)
 //
 void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         std::vector<std::string> all_calls = findCalls(archive, hpp_unit, i, "");
         bool has_call_on_data_member = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
         
@@ -688,8 +682,8 @@ void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_
             }       
         }
     }
-    int total = hppMethodCount + cppMethodCount;
-    for (int i = hppMethodCount; i < total; ++i){
+    int total = unitOneCount + unitTwoCount;
+    for (int i = unitOneCount; i < total; ++i){
         std::vector<std::string> all_calls = findCalls(archive, cpp_unit, i, "");
         bool has_call_on_data_member = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
         if (!method[i].isConst() && method[i].getAttributesModified() == 0) {
@@ -743,7 +737,7 @@ void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* hpp_
         }
     }
 
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         bool param_obj = containsNonPrimitive(archive, hpp_unit, i, param);
         bool local_obj = containsNonPrimitive(archive, hpp_unit, i, local_var);
         bool attr_obj = usesAttributeObj(archive, hpp_unit, i, non_primitive_attributes);
@@ -764,8 +758,8 @@ void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* hpp_
         }
 
     }
-    int total = hppMethodCount + cppMethodCount;
-    for (int i = hppMethodCount; i < total; ++i){
+    int total = unitOneCount + unitTwoCount;
+    for (int i = unitOneCount; i < total; ++i){
         bool param_obj = containsNonPrimitive(archive, cpp_unit, i, param);
         bool local_obj = containsNonPrimitive(archive, cpp_unit, i, local_var);
         bool attr_obj = usesAttributeObj(archive, cpp_unit, i, non_primitive_attributes);
@@ -796,14 +790,14 @@ void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* hpp_unit,
     // for each function i need:
     // all non-primitive local variable names that match the return type of that function.
     // the variable in the return expression.
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         bool method_is_factory = isFactory(archive, hpp_unit, i);
         if (method_is_factory){
             method[i].setStereotype("factory");
         }
     }   
-    int total = hppMethodCount + cppMethodCount;
-    for (int i = hppMethodCount; i < total; ++i){
+    int total = unitOneCount + unitTwoCount;
+    for (int i = unitOneCount; i < total; ++i){
         bool method_is_factory = isFactory(archive, cpp_unit, i);
         if (method_is_factory){
             method[i].setStereotype("factory");
@@ -812,15 +806,15 @@ void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* hpp_unit,
 }
 void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     //std::cout << "STEREOTYPING EMPTY METHODS! _______\n";
-    for (int i = 1; i <= hppMethodCount; ++i){
+    for (int i = 1; i <= unitOneCount; ++i){
         int index = i-1;
         //std::cout << "method index " << index << "\n";
         if (isEmptyMethod(archive, hpp_unit, index)){
             method[index].setStereotype("empty");
         }
     }
-    for (int i = 1; i <= cppMethodCount; ++i){
-        int index = hppMethodCount + i - 1;
+    for (int i = 1; i <= unitTwoCount; ++i){
+        int index = unitOneCount + i - 1;
         //std::cout << "method index " << index << "\n";
         if (isEmptyMethod(archive, cpp_unit, index)){
             method[index].setStereotype("empty");
@@ -840,7 +834,7 @@ void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* hpp_unit, s
 // does not use any data memebers
 //
 void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
-    for (int i = 0; i < hppMethodCount; ++i){
+    for (int i = 0; i < unitOneCount; ++i){
         bool empty = isEmptyMethod(archive, hpp_unit, i);
         std::vector<std::string> calls = findCalls(archive, hpp_unit, i, "");
         std::vector<std::string> real_calls = findCalls(archive, hpp_unit, i, "real");
@@ -860,8 +854,8 @@ void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* hpp_uni
             }
         }
     }
-    int total = hppMethodCount + cppMethodCount;
-    for (int i = hppMethodCount; i < total; ++i){
+    int total = unitOneCount + unitTwoCount;
+    for (int i = unitOneCount; i < total; ++i){
         bool empty = isEmptyMethod(archive, cpp_unit, i);
         std::vector<std::string> calls = findCalls(archive, cpp_unit, i, "");
         std::vector<std::string> real_calls = findCalls(archive, cpp_unit, i, "real");
@@ -927,14 +921,14 @@ bool classModel::isPrimitiveContainer(std::string return_type){
 //
 //for each function, find all return expressions and determine if they contain an attribute
 //
-void classModel::returnsAttributes(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
+void classModel::returnsAttributes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
     int n;
-    if (hppUnit) {
-        n = hppMethodCount;
+    if (oneUnit) {
+        n = unitOneCount;
     } else {
-        n = cppMethodCount;
-        offset = hppMethodCount;
+        n = unitTwoCount;
+        offset = unitOneCount;
     }
 
     for(int i = 0; i < n; ++i) {
@@ -975,7 +969,9 @@ bool classModel::isAttribute(std::string& name) const{
 
 //
 //
-bool classModel::isInheritedMember(const std::vector<std::string>& parameter_names, const std::vector<std::string>& local_var_names, const std::string& expr){
+bool classModel::isInheritedMember(const std::vector<std::string>& parameter_names,
+                                   const std::vector<std::string>& local_var_names,
+                                   const std::string& expr){
 
     bool is_inherited = true;
     //std::cout << "testing the expression is inherited member '" << expr << "'\n";
@@ -1032,10 +1028,10 @@ bool classModel::isInheritedMember(const std::vector<std::string>& parameter_nam
 
 //
 //
-bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int func_index){
-    std::vector<std::string> parameter_types = method[func_index].getParameterTypes();
-    std::vector<std::string> parameter_names = method[func_index].getParameterNames();
-    std::string returnType = separateTypeName(method[func_index].getReturnType());
+bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int funcIndex){
+    std::vector<std::string> parameter_types = method[funcIndex].getParameterTypes();
+    std::vector<std::string> parameter_names = method[funcIndex].getParameterNames();
+    std::string returnType = separateTypeName(method[funcIndex].getReturnType());
 
     for (int j = 0; j < parameter_types.size(); ++j){
         bool reference = parameter_types[j].find("&") != std::string::npos;
@@ -1045,15 +1041,15 @@ bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int fu
 
         // if the parameter type contains an &, is not const and is primitive 
         // and the return type of the method is void.
-        if (reference && !constant && primitive && returnType == "void" && method[func_index].isConst()){
-            bool param_changed = variableChanged(archive, unit, func_index, parameter_names[j]);
-                if (param_changed || method[func_index].getStereotype() == NO_STEREOTYPE){
+        if (reference && !constant && primitive && returnType == "void" && method[funcIndex].isConst()){
+            bool param_changed = variableChanged(archive, unit, funcIndex, parameter_names[j]);
+                if (param_changed || method[funcIndex].getStereotype() == NO_STEREOTYPE){
                 return true;
             }
         }
     }
-    if (returnType == "void" && method[func_index].isConst() &&
-        method[func_index].getStereotype() == NO_STEREOTYPE){
+    if (returnType == "void" && method[funcIndex].isConst() &&
+        method[funcIndex].getStereotype() == NO_STEREOTYPE){
         return true;
     }
     return false;
@@ -1174,23 +1170,23 @@ bool classModel::variableChanged(srcml_archive* archive, srcml_unit* unit, int i
     return var_changed;
 }
 
-
+//
 // need to count different data members and not the same one twice.
 // check with multiple changes with same opperator(same var), different operators(same var), same operator(dif var)
 // test ++data_member += 10;
-void classModel::countChangedAttributes(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
-    int n = hppMethodCount ;
+void classModel::countChangedAttributes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int n = unitOneCount ;
     int offset = 0;
-    if (!hppUnit) {
-        n = cppMethodCount;
-        offset = hppMethodCount;
+    if (!oneUnit) {
+        n = unitTwoCount;
+        offset = unitOneCount;
     }
     for (int i = 0; i < n; ++i){
         int data_members_changed = 0;
-        data_members_changed += findIncrementedDataMembers(archive, unit, i+offset, false);
-        data_members_changed += findIncrementedDataMembers(archive, unit, i+offset, true);
-        data_members_changed += findAssignOperatorDataMembers(archive, unit, i+offset, false);
-        data_members_changed += findAssignOperatorDataMembers(archive, unit, i+offset, true);
+        data_members_changed += findIncrementedDataMembers(archive, unit, i+offset, false);     //No loop
+        data_members_changed += findIncrementedDataMembers(archive, unit, i+offset, true);      // loop
+        data_members_changed += findAssignOperatorDataMembers(archive, unit, i+offset, false);  // No loop
+        data_members_changed += findAssignOperatorDataMembers(archive, unit, i+offset, true);   // loop
         method[i+offset].setAttributesModified(data_members_changed);
     }
 }
@@ -1219,17 +1215,12 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
         }
 
         assign_operator_xpath += "]/preceding-sibling::src:name";
-
-        //std::cout << "\t XPATH IS:" << assign_operator_xpath << "\n";
         srcml_append_transform_xpath(archive, assign_operator_xpath.c_str());
-
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
-
         int number_of_result_units = srcml_transform_get_unit_size(result);
         srcml_unit* result_unit = nullptr;
 
-        //std::cout << "\t_________ NUMBER OF RESULTS!! _______" << number_of_result_units << "_______\n";
         for (int k = 0; k < number_of_result_units; ++k){
             result_unit = srcml_transform_get_unit(result, k);
 
@@ -1239,8 +1230,7 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
             srcml_unit_unparse_memory(result_unit, &unparsed, &size);
 
             std::string var_name(unparsed);
-            //std::cout <<"the variable name to the left of an assignment operator is: "<< var_name << std::endl;
-            delete[] unparsed;
+             delete[] unparsed;
 
             // removes whitespace
             trimWhitespace(var_name);
@@ -1248,12 +1238,9 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
             bool attr = isAttribute(var_name);
             bool inherit = isInheritedMember(param_names, method[i].getLocalVariables(), var_name);
 
-            if (attr){
-                //std::cout << "variable " << var_name << " changed!" << std::endl; 
-                ++data_members_changed;
-            }else if (inherit){
-                //std::cout << "\tvariable " << var_name << " is probably inherited\n";
-
+            if (attr) {
+                 ++data_members_changed;
+            } else if (inherit){
                 attribute.push_back(attributeModel(var_name, "unknown"));
                  ++data_members_changed;
             }
@@ -1313,16 +1300,12 @@ int classModel::findIncrementedDataMembers(srcml_archive* archive, srcml_unit* u
 
                 // removes whitespace
                 trimWhitespace(var_name);
-            
-                //std::cout <<"the variable name to the " << k << " of an " << j << " operator is: "<< var_name << " func_num " << i << std::endl;
-
                 bool attr = isAttribute(var_name);
                 bool inherit = isInheritedMember(param_names, method[i].getLocalVariables(), var_name);
 
-                if (attr){
-                    //std::cout << "variable " << var_name << " changed!" << std::endl;
+                if (attr) {
                     ++data_members_changed;
-                }else if (inherit){
+                } else if (inherit) {
                     attribute.push_back(attributeModel(var_name, "unknown"));
                     ++data_members_changed;
                 }
@@ -1587,19 +1570,19 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
 //
 //
 // returns true if method, specified by number and unit, is a factory
-bool classModel::isFactory(srcml_archive* archive, srcml_unit* unit, int func_index){
-    std::vector<std::string> return_expressions = findReturnExpressions(archive, unit, func_index, false);
-    std::vector<std::string> param_names        = method[func_index].getParameterNames();
-    bool                     returns_ptr        = method[func_index].getReturnType().find("*") != std::string::npos;
-    bool                     returns_obj        = !isPrimitiveContainer(method[func_index].getReturnType());
+bool classModel::isFactory(srcml_archive* archive, srcml_unit* unit, int funcIndex){
+    std::vector<std::string> return_expressions = findReturnExpressions(archive, unit, funcIndex, false);
+    std::vector<std::string> param_names        = method[funcIndex].getParameterNames();
+    bool                     returns_ptr        = method[funcIndex].getReturnType().find("*") != std::string::npos;
+    bool                     returns_obj        = !isPrimitiveContainer(method[funcIndex].getReturnType());
 
     bool returns_local = false;
     bool returns_new = false;
     bool returns_param = false; 
     for (int i = 0; i < return_expressions.size(); ++i){
-        for (int j = 0; j < method[func_index].getLocalVariables().size(); ++j){
+        for (int j = 0; j < method[funcIndex].getLocalVariables().size(); ++j){
             //std::cout << "\tret: " << return_expressions[i] << " loc: " << local_var_names[j] << std::endl;
-            if(return_expressions[i] == method[func_index].getLocalVariables()[j]){
+            if(return_expressions[i] == method[funcIndex].getLocalVariables()[j]){
                 //std::cout << "local var is returned\n";
                 returns_local = true;
             }
@@ -1614,11 +1597,11 @@ bool classModel::isFactory(srcml_archive* archive, srcml_unit* unit, int func_in
             returns_new = true;
         }
     }
-    bool new_call = findConstructorCall(archive, unit, func_index);
+    bool new_call = findConstructorCall(archive, unit, funcIndex);
     //std::cout << "returns obj " << returns_obj << " returns ptr " << returns_ptr << " returns local " 
     //<< returns_local << " returns new " << returns_new << " returns param "<< returns_param  << " new call " << new_call << std::endl;
     
-    bool return_ex = (returns_local || returns_new || returns_param || method[func_index].returnsAttribute());
+    bool return_ex = (returns_local || returns_new || returns_param || method[funcIndex].returnsAttribute());
     bool is_factory = returns_obj && returns_ptr && new_call && return_ex;
     return is_factory;
 }
@@ -1776,17 +1759,17 @@ bool classModel::isEmptyMethod(srcml_archive* archive, srcml_unit* unit, int i){
 //
 //  Example <function stereotype="get">
 //
-srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
-    int n = hppMethodCount;
+srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int n = unitOneCount;
     int offset = 0;
-    if (!hppUnit) {
-        n = cppMethodCount;
-        offset = hppMethodCount;
+    if (!oneUnit) {
+        n = unitTwoCount;
+        offset = unitOneCount;
     }
 
     for (int i = 0; i < n; ++i){
         std::string stereotype = method[i+offset].getStereotype();
-        if (stereotype == NO_STEREOTYPE && hppMethodCount + cppMethodCount == 1) return nullptr;
+        if (stereotype == NO_STEREOTYPE && unitOneCount + unitTwoCount == 1) return nullptr;
         if (stereotype != NO_STEREOTYPE){
             std::string xpath = "//src:function[string(src:name)='";
             xpath += method[i+offset].getName() + "' and string(src:type)='";
@@ -1857,7 +1840,7 @@ void classModel::printAttributes(){
 //
 //
 void classModel::printReportToFile(std::ofstream& output_file, const std::string& input_file_path){
-    int func_count = hppMethodCount + cppMethodCount;
+    int func_count = unitOneCount + unitTwoCount;
     if (output_file.is_open()){
         for (int i = 0; i < func_count; ++i){
             output_file << input_file_path << "|" << method[i].getHeader() << "||" << method[i].getStereotype() << "\n";
