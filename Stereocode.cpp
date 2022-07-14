@@ -21,7 +21,7 @@
 
 std::vector<std::string> readFileNames(const std::string&);
 
-primitiveTypes primitives;  //Global set of primitives.  Need to fix.
+primitiveTypes primitives;  //Global set of primitives.
 
 
 int main(int argc, char const *argv[])
@@ -77,16 +77,16 @@ int main(int argc, char const *argv[])
         srcml_unit* cppUnit = srcml_archive_read_unit(archive);
         classModel  aClass  = classModel(archive, hppUnit, cppUnit);
 
-        aClass.stereotypeGetters               (archive, hppUnit, cppUnit);
-        aClass.stereotypeSetters               (archive, hppUnit, cppUnit);
+        aClass.stereotypeGetter                (archive, hppUnit, cppUnit);
+        aClass.stereotypeSetter                (archive, hppUnit, cppUnit);
         aClass.stereotypeCollaborationalCommand(archive, hppUnit, cppUnit);
-        aClass.stereotypePredicates            (archive, hppUnit, cppUnit);
-        aClass.stereotypeProperties            (archive, hppUnit, cppUnit);
+        aClass.stereotypePredicate             (archive, hppUnit, cppUnit);
+        aClass.stereotypeProperty              (archive, hppUnit, cppUnit);
         aClass.stereotypeVoidAccessor          (archive, hppUnit, cppUnit);
         aClass.stereotypeCommand               (archive, hppUnit, cppUnit);
-        aClass.stereotypeFactories             (archive, hppUnit, cppUnit);
+        aClass.stereotypeFactory               (archive, hppUnit, cppUnit);
         aClass.stereotypeEmpty                 (archive, hppUnit, cppUnit);
-        aClass.stereotypeCollaborators         (archive, hppUnit, cppUnit);
+        aClass.stereotypeCollaborator          (archive, hppUnit, cppUnit);
         aClass.stereotypeStateless             (archive, hppUnit, cppUnit);
 
         std::ofstream reportFile;

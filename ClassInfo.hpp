@@ -15,9 +15,9 @@
 #include "PrimitiveTypes.hpp"
 
 
-extern primitiveTypes primitives; //Not ideal
-
 const char NO_STEREOTYPE[] = "none";
+
+extern primitiveTypes primitives;
 
 //
 class attributeModel {
@@ -86,7 +86,7 @@ private:
 
 class classModel {
 public:
-    classModel () : className(), parentClass(), attribute(), method(), hppMethodCount(0), cppMethodCount(0)  {};
+    classModel () : className(), parentClass(), attribute(), method(), hppMethodCount(0), cppMethodCount(0), language() {};
     classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
     std::string getClassName      ()      const { return className;      }
@@ -95,15 +95,15 @@ public:
 
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
-    void stereotypeGetters                (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypePredicates             (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeProperties             (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeGetter                 (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypePredicate              (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeProperty               (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypeVoidAccessor           (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeSetters                (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeSetter                 (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypeCommand                (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypeCollaborationalCommand (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborators          (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeFactories              (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeCollaborator           (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeFactory                (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypeEmpty                  (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypeStateless              (srcml_archive*, srcml_unit*, srcml_unit*);
 
@@ -114,8 +114,6 @@ public:
     void printMethodNames                ();
     void printReportToFile               (std::ofstream&, const std::string&);
 
-
-private:
     void findClassName                (srcml_archive*, srcml_unit*);
     void findParentClassName          (srcml_archive*, srcml_unit*);
 
@@ -157,13 +155,15 @@ private:
     int  countPureCalls               (const std::vector<std::string>&) const;
     bool callsAttributesMethod        (const std::vector<std::string>&, const std::vector<std::string>&, const std::vector<std::string>&);
 
-//Attributes:
+private:
     std::string                 className;
     std::vector<std::string>    parentClass;
     std::vector<attributeModel> attribute;
     std::vector<methodModel>    method;
     int                         hppMethodCount;
     int                         cppMethodCount;
+    std::string                 language;    //Programming language
+
 };
 
 

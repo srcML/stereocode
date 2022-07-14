@@ -6,6 +6,8 @@
 //
 //
 classModel::classModel(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit) : classModel() {
+    language = srcml_unit_get_language(hpp_unit);
+
     findClassName(archive, hpp_unit);
     findParentClassName(archive, hpp_unit);
     findAttributeNames(archive, hpp_unit);
@@ -28,9 +30,6 @@ classModel::classModel(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit*
     findParameterNames(archive, hpp_unit, false);
     findParameterTypes(archive, hpp_unit, true);
     findParameterTypes(archive, hpp_unit, false);
-
-    //FOO(archive, hpp_unit, true);
-    //FOO(archive, hpp_unit, false);
 }
 
 
@@ -349,27 +348,11 @@ void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bo
     }
 }
 
-// TODO:  findCalls, callsAttributesMethod, countPureCalls??, usesAttributeOBJ??
+// TODO:  Check if these can be computed upfront:  callsAttributesMethod??, countPureCalls??, usesAttributeOBJ??
 //
-// Can not compute upfront: usesAttribute
-
-/*
-// Finds methods that
+// Does not seem that these can be computed upfront: usesAttribute or findCalls (not sure why?)
 //
-void classModel::FOO(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
-    int offset = 0;
-    int n = hppMethodCount;
-    if (!hppUnit) {
-        offset = hppMethodCount;
-        n = cppMethodCount;
-    }
 
-    for (int i = 0; i < n; ++i) {
-        method[i+offset].setUsesFOO(FOO(archive, unit, i));
-    }
-}
-
-*/
 
 
 // WORKING ON STEREOTYPES
@@ -386,7 +369,7 @@ void classModel::FOO(srcml_archive* archive, srcml_unit* unit, bool hppUnit){
 // method is not const
 // contains at least 1 return statement that returns a data memeber
 // return expression must be in the form 'return a;' or 'return *a;'
-void classModel::stereotypeGetters(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+void classModel::stereotypeGetter(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     for (int i = 0; i < method.size(); ++i){
         if (method[i].returnsAttribute()) {
             if (method[i].isConst())
@@ -409,7 +392,7 @@ void classModel::stereotypeGetters(srcml_archive* archive, srcml_unit* hpp_unit,
 // return expression is not a data member
 // does not use any data member in the method
 // has no pure calls 
-void classModel::stereotypePredicates(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     for (int i = 0; i < hppMethodCount; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()) {
@@ -468,7 +451,7 @@ void classModel::stereotypePredicates(srcml_archive* archive, srcml_unit* hpp_un
 // does not contain a data member anywhere in the function
 // does not contain any pure calls
 // does not contain any calls on data members
-void classModel::stereotypeProperties(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     //std::cout << "STEREOTYPING PROPERTIES!\n";
     for (int i = 0; i < hppMethodCount; ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
@@ -568,7 +551,7 @@ void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* hpp_
 //  method not const
 //  only 1 data member has been changed
 //
-void classModel::stereotypeSetters(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     countChangedAttributes(archive, hpp_unit, true);
     countChangedAttributes(archive, cpp_unit, false);
 
@@ -744,7 +727,7 @@ void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_
 //
 // what about returning an object attribtue !yes!
 //
-void classModel::stereotypeCollaborators(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     std::string param = "/src:parameter_list//src:parameter";
     std::string local_var = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
 
@@ -809,7 +792,7 @@ void classModel::stereotypeCollaborators(srcml_archive* archive, srcml_unit* hpp
 //  return type includes pointer to object
 //  a return statement includes a new operator or a local variable
 //
-void classModel::stereotypeFactories(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
+void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* hpp_unit, srcml_unit* cpp_unit){
     // for each function i need:
     // all non-primitive local variable names that match the return type of that function.
     // the variable in the return expression.
@@ -901,6 +884,7 @@ void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* hpp_uni
 }
 
 //
+// Checks if a primitive type
 //
 bool classModel::isPrimitiveContainer(std::string return_type){
     // trim whitespace, specifiers and modifiers
@@ -1584,7 +1568,7 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
         std::string possible_attr(unparsed);
         delete[] unparsed;
 
-        if (primitives.isPrimitive(possible_attr)) continue;
+        //if (primitives.isPrimitive(possible_attr)) continue;  //Should never be a primitive type
 
         bool attr = isAttribute(possible_attr);
         bool inherit = isInheritedMember(param_names, local_var_names, possible_attr);
