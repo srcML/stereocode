@@ -166,7 +166,7 @@ private:
     int                         unitTwoCount;   //Methods in .cpp - only C++ has two units
     std::string                 language;       //Language: "C++", "C#", "Java", "C"
 
-};
+}; 
 
 
 bool         checkConst       (std::string);
