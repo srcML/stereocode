@@ -348,9 +348,9 @@ void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bo
     }
 }
 
-// TODO:  Check if these can be computed upfront:  callsAttributesMethod??, countPureCalls??, usesAttributeOBJ??
+// TODO:  Check if these can be computed upfront:  usesAttribute, findCalls, callsAttributesMethod??, countPureCalls??, usesAttributeOBJ??
 //
-// Does not seem that these can be computed upfront: usesAttribute or findCalls (not sure why?)
+// Need to recheck usesAttribute, findCalls do to error in ctor on calls to parameter name/types??  Could be the problem?
 //
 
 
@@ -391,46 +391,35 @@ void classModel::stereotypeGetter(srcml_archive* archive, srcml_unit* firstUnit,
 // returns boolean
 // return expression is not a data member
 // does not use any data member in the method
-// has no pure calls 
-void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    for (int i = 0; i < unitOneCount; ++i){
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()) {
-            bool data_members = usesAttribute(archive, firstUnit, i);
-            std::vector<std::string> real_calls = findCalls(archive, firstUnit, i, "real");
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
+// has no pure calls
+
+//void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
+void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
+    }
+
+    for (int i = 0; i < n; ++i){
+        std::string returnType = separateTypeName(method[i+offset].getReturnType());
+        if (returnType == "bool" && !method[i+offset].returnsAttribute() && method[i+offset].isConst()) {
+            bool data_members = usesAttribute(archive, unit, i+offset);
+            std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
+            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
             data_members = data_members || has_call_on_data_member;
-            std::vector<std::string> pure_calls = findCalls(archive, firstUnit, i, "pure");
+            std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
             int pure_calls_count = countPureCalls(pure_calls);
 
             if (!data_members && pure_calls_count == 0){
-                method[i].setStereotype("collaborational-predicate");
+                method[i+offset].setStereotype("collaborational-predicate");
             }
             else{
-                method[i].setStereotype("predicate");
+                method[i+offset].setStereotype("predicate");
             }
         }
     }
-
-    for (int i = unitOneCount; i < method.size(); ++i){
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()){
-            bool data_members = usesAttribute(archive, secondUnit, i);
-            std::vector<std::string> real_calls = findCalls(archive, secondUnit, i, "real");
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-            data_members = data_members || has_call_on_data_member;
-            std::vector<std::string> pure_calls = findCalls(archive, secondUnit, i, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
-
-            if (!data_members && pure_calls_count == 0){
-                method[i].setStereotype("collaborational-predicate");
-            }
-            else{
-                method[i].setStereotype("predicate");
-            }
-        }
-    }
-
 }
 
 
@@ -445,47 +434,32 @@ void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* firstUn
 // does not contain a data member anywhere in the function
 // does not contain any pure calls
 // does not contain any calls on data members
-void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    //std::cout << "STEREOTYPING PROPERTIES!\n";
-    for (int i = 0; i < unitOneCount; ++i){
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
-            bool data_members = usesAttribute(archive, firstUnit, i);
-            std::vector<std::string> real_calls = findCalls(archive, firstUnit, i, "real");
-
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-            data_members = data_members || has_call_on_data_member;
-
-            std::vector<std::string> pure_calls = findCalls(archive, firstUnit, i, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
-
-
-            if (!data_members && pure_calls_count == 0){
-                method[i].setStereotype("collaborational-property");
-            }
-            else{
-                method[i].setStereotype("property");
-            }
-        }
+void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
 
-    for (int i = unitOneCount; i < method.size(); ++i){
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
-            bool data_members = usesAttribute(archive, secondUnit, i);
-            std::vector<std::string> real_calls = findCalls(archive, secondUnit, i, "real");
+    for (int i = 0; i < n; ++i){
+        std::string returnType = separateTypeName(method[i+offset].getReturnType());
+        if (returnType != "bool" && returnType != "void" && !method[i+offset].returnsAttribute() && method[i+offset].isConst()){
+            bool data_members = usesAttribute(archive, unit, i+offset);
+            std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
 
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
+            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
             data_members = data_members || has_call_on_data_member;
 
-            std::vector<std::string> pure_calls = findCalls(archive, secondUnit, i, "pure");
+            std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
             int pure_calls_count = countPureCalls(pure_calls);
 
+
             if (!data_members && pure_calls_count == 0){
-                method[i].setStereotype("collaborational-property");
+                method[i+offset].setStereotype("collaborational-property");
             }
             else{
-                method[i].setStereotype("property");
+                method[i+offset].setStereotype("property");
             }
         }
     }
@@ -498,43 +472,30 @@ void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* firstUni
 //     passed by non-const reference
 //     is a primitive type
 //     and is assigned a value(one = in the expression).
-void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    for (int i = unitOneCount; i < method.size(); ++i){
-        if(isVoidAccessor(archive, secondUnit, i)){
-            bool data_members = usesAttribute(archive, secondUnit, i);
-            std::vector<std::string> real_calls = findCalls(archive, secondUnit, i, "real");
-
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-            data_members = data_members || has_call_on_data_member;
-
-            std::vector<std::string> pure_calls = findCalls(archive, secondUnit, i, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
-            if (!data_members && pure_calls_count == 0){
-                method[i].setStereotype("collaborational-voidaccessor");
-            }
-            else{
-                method[i].setStereotype("voidaccessor");
-            }
-        }
+void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
-    for (int i = 0; i < unitOneCount; ++i){
-        if(isVoidAccessor(archive, firstUnit, i)){
-            bool data_members = usesAttribute(archive, firstUnit, i);
-            std::vector<std::string> real_calls = findCalls(archive, firstUnit, i, "real");
 
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
+    for (int i = 0; i < n; ++i){
+        if(isVoidAccessor(archive, unit, i+offset)){
+            bool data_members = usesAttribute(archive, unit, i+offset);
+            std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
+
+            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
             data_members = data_members || has_call_on_data_member;
 
-            std::vector<std::string> pure_calls = findCalls(archive, firstUnit, i, "pure");
+            std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
             int pure_calls_count = countPureCalls(pure_calls);
-
             if (!data_members && pure_calls_count == 0){
-                method[i].setStereotype("collaborational-voidaccessor");
+                method[i+offset].setStereotype("collaborational-voidaccessor");
             }
             else{
-                method[i].setStereotype("voidaccessor");
+                method[i+offset].setStereotype("voidaccessor");
             }
-            
         }
     }
 }
@@ -585,60 +546,39 @@ void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* firstUnit,
 //
 // need to handle the case where 0 data members are written and there is a call on a data member.
 //
-void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    int total = unitOneCount + unitTwoCount;
-    for (int i = unitOneCount; i < total; ++i){
-        std::vector<std::string> real_calls = findCalls(archive, secondUnit, i, "real");
-        std::vector<std::string> pure_calls = findCalls(archive, secondUnit, i, "pure");
-
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        int pure_calls_count = countPureCalls(pure_calls);
-        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-        bool case1 = (method[i].getAttributesModified() == 1 && real_calls.size() > 1);
-        bool case2 = method[i].getAttributesModified() == 0 && (pure_calls_count > 0 || has_call_on_data_member);
-        bool case3 = method[i].getAttributesModified() > 1;
-        if ((case1 || case2 || case3) && !method[i].isConst()){
-            if (returnType == "void" || returnType == "bool"){
-                method[i].setStereotype("command");
-            }   
-            else{
-                method[i].setStereotype("non-void-command");
-            }
-        }
-        // handles case of mutable data members
-        else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
-            if (method[i].getStereotype() != NO_STEREOTYPE){
-                method[i].setStereotype(method[i].getStereotype() + " command");
-            }
-            else{
-                method[i].setStereotype("command");
-            }
-        }
+void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
 
-    for (int i = 0; i < unitOneCount; ++i){
-        std::vector<std::string> real_calls = findCalls(archive, firstUnit, i, "real");
-        std::vector<std::string> pure_calls = findCalls(archive, firstUnit, i, "pure");
+    for (int i = 0; i < n; ++i){
+        std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
+        std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
 
-        std::string returnType = separateTypeName(method[i].getReturnType());
+        std::string returnType = separateTypeName(method[i+offset].getReturnType());
         int pure_calls_count = countPureCalls(pure_calls);
-        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-        bool case1 = (method[i].getAttributesModified() == 1 && real_calls.size() > 1);
-        bool case2 = (method[i].getAttributesModified() == 0 && (pure_calls_count > 0 || has_call_on_data_member));
-        bool case3 = method[i].getAttributesModified() > 1;
-        if ((case1 || case2 || case3) && !method[i].isConst()){
+        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+        bool case1 = (method[i+offset].getAttributesModified() == 1 && real_calls.size() > 1);
+        bool case2 = method[i+offset].getAttributesModified() == 0 && (pure_calls_count > 0 || has_call_on_data_member);
+        bool case3 = method[i+offset].getAttributesModified() > 1;
+        if ((case1 || case2 || case3) && !method[i+offset].isConst()){
             if (returnType == "void" || returnType == "bool"){
-                method[i].setStereotype("command");
-            } else {
-                method[i].setStereotype("non-void-command");
+                method[i+offset].setStereotype("command");
+            }   
+            else{
+                method[i+offset].setStereotype("non-void-command");
             }
         }
         // handles case of mutable data members
-        else if (method[i].getAttributesModified() > 0 && method[i].isConst()){
-            if (method[i].getStereotype() != NO_STEREOTYPE) {
-                method[i].setStereotype(method[i].getStereotype() + " command");
-            } else {
-                method[i].setStereotype("command");
+        else if (method[i+offset].getAttributesModified() > 0 && method[i+offset].isConst()){
+            if (method[i+offset].getStereotype() != NO_STEREOTYPE){
+                method[i+offset].setStereotype(method[i+offset].getStereotype() + " command");
+            }
+            else{
+                method[i+offset].setStereotype("command");
             }
         }
     }
@@ -653,61 +593,40 @@ void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* firstUnit
 //at least 1 call or parameter or local variable is written
 //Calls allowed:  f->g() where f is not a data member, new f() (which isn't a real call)
 //
-void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    for (int i = 0; i < unitOneCount; ++i){
-        std::vector<std::string> all_calls = findCalls(archive, firstUnit, i, "");
-        bool has_call_on_data_member = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
+void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
+    }
+
+    for (int i = 0; i < n; ++i){
+        std::vector<std::string> all_calls = findCalls(archive, unit, i+offset, "");
+        bool has_call_on_data_member = callsAttributesMethod(all_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
         
-        if (!method[i].isConst() && method[i].getAttributesModified() == 0) {
+        if (!method[i+offset].isConst() && method[i+offset].getAttributesModified() == 0) {
             bool local_var_written = false;
-            for (int j = 0; j < method[i].getLocalVariables().size(); ++j){
-                if(variableChanged(archive, firstUnit, i, method[i].getLocalVariables()[j])){
+            for (int j = 0; j < method[i+offset].getLocalVariables().size(); ++j){
+                if(variableChanged(archive, unit, i+offset, method[i+offset].getLocalVariables()[j])){
                     local_var_written = true;
                     break;
                 }
             }
             bool param_written = false;
-            for (int j = 0; j < method[i].getParameterNames().size(); ++j){
-                if(variableChanged(archive, firstUnit, i, method[i].getParameterNames()[j])){
+            for (int j = 0; j < method[i+offset].getParameterNames().size(); ++j){
+                if(variableChanged(archive, unit, i+offset, method[i+offset].getParameterNames()[j])){
                     param_written = true;
                     break;
                 }
             }
-            std::vector<std::string> pure_calls = findCalls(archive, firstUnit, i, "pure");
+            std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
             int pure_calls_count = countPureCalls(pure_calls);
 
             bool not_command =  pure_calls_count == 0 && !has_call_on_data_member;
             if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
-                method[i].setStereotype("collaborational-command");
+                method[i+offset].setStereotype("collaborational-command");
             }       
-        }
-    }
-    int total = unitOneCount + unitTwoCount;
-    for (int i = unitOneCount; i < total; ++i){
-        std::vector<std::string> all_calls = findCalls(archive, secondUnit, i, "");
-        bool has_call_on_data_member = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-        if (!method[i].isConst() && method[i].getAttributesModified() == 0) {
-            bool local_var_written = false;
-            for (int j = 0; j < method[i].getLocalVariables().size(); ++j){
-                if (variableChanged(archive, secondUnit, i, method[i].getLocalVariables()[j])){
-                    local_var_written = true;
-                    break;
-                }
-            }
-            bool param_written = false;
-            for (int j = 0; j < method[i].getParameterNames().size(); ++j){
-                if (variableChanged(archive, secondUnit, i, method[i].getParameterNames()[j])){
-                    param_written = true;
-                    break;
-                }
-            }
-            std::vector<std::string> pure_calls = findCalls(archive, secondUnit, i, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
-            
-            bool not_command = pure_calls_count == 0 && !has_call_on_data_member;
-            if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
-                method[i].setStereotype("collaborational-command");
-            }
         }
     }
 }
@@ -721,13 +640,9 @@ void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_
 //
 // what about returning an object attribtue !yes!
 //
-void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
+void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     std::string param = "/src:parameter_list//src:parameter";
     std::string local_var = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
-
-    //std::cout << "STEREOTYPING COLLABORATORS " << std::endl;
-
-    // create a list of attribute names that are non-primitive types.
     std::vector<std::string> non_primitive_attributes;
     for (int i = 0; i < attribute.size(); ++i){
         bool attr_primitive = isPrimitiveContainer(attribute[i].getType());
@@ -737,44 +652,29 @@ void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* firs
         }
     }
 
-    for (int i = 0; i < unitOneCount; ++i){
-        bool param_obj = containsNonPrimitive(archive, firstUnit, i, param);
-        bool local_obj = containsNonPrimitive(archive, firstUnit, i, local_var);
-        bool attr_obj = usesAttributeObj(archive, firstUnit, i, non_primitive_attributes);
-        std::string returnType = separateTypeName(method[i].getReturnType());
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
+    }
+
+    for (int i = 0; i < n; ++i){
+        bool param_obj = containsNonPrimitive(archive, unit, i+offset, param);
+        bool local_obj = containsNonPrimitive(archive, unit, i+offset, local_var);
+        bool attr_obj = usesAttributeObj(archive, unit, i+offset, non_primitive_attributes);
+        std::string returnType = separateTypeName(method[i+offset].getReturnType());
         bool matches_class_name = returnType == className;
         bool ret_obj = !isPrimitiveContainer(returnType) && returnType != "void" && !matches_class_name;
-
-        //std::cout << "inline function number " << i << "\n";
-        //std::cout << "\tlocal obj " << local_obj << " param obj " << param_obj << " attr obj " << attr_obj << " ret obj " << ret_obj << std::endl;
-
         if (local_obj || param_obj || attr_obj || ret_obj){
-            if (method[i].getStereotype() == NO_STEREOTYPE && !method[i].isConst()){
-                method[i].setStereotype("controller");
+            if (method[i+offset].getStereotype() == NO_STEREOTYPE && !method[i+offset].isConst()){
+                method[i+offset].setStereotype("controller");
             }
             else{
-                method[i].setStereotype(method[i].getStereotype() + " collaborator");
+                method[i+offset].setStereotype(method[i+offset].getStereotype() + " collaborator");
             }
         }
 
-    }
-    int total = unitOneCount + unitTwoCount;
-    for (int i = unitOneCount; i < total; ++i){
-        bool param_obj = containsNonPrimitive(archive, secondUnit, i, param);
-        bool local_obj = containsNonPrimitive(archive, secondUnit, i, local_var);
-        bool attr_obj = usesAttributeObj(archive, secondUnit, i, non_primitive_attributes);
-
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        bool matches_class_name = returnType == className;
-        bool ret_obj = !isPrimitiveContainer(returnType) && returnType != "void" && !matches_class_name;
-
-        if (local_obj || param_obj || attr_obj || ret_obj){
-            if (method[i].getStereotype() == NO_STEREOTYPE && !method[i].isConst()){
-                method[i].setStereotype("controller");
-            } else {
-                method[i].setStereotype(method[i].getStereotype() + " collaborator");
-            }
-        }
     }
 }
 
@@ -786,38 +686,40 @@ void classModel::stereotypeCollaborator(srcml_archive* archive, srcml_unit* firs
 //  return type includes pointer to object
 //  a return statement includes a new operator or a local variable
 //
-void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    // for each function i need:
-    // all non-primitive local variable names that match the return type of that function.
-    // the variable in the return expression.
-    for (int i = 0; i < unitOneCount; ++i){
-        bool method_is_factory = isFactory(archive, firstUnit, i);
+// for each function i need:
+// all non-primitive local variable names that match the return type of that function.
+// the variable in the return expression.
+
+void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
+    }
+
+    for (int i = 0; i < n; ++i){
+        bool method_is_factory = isFactory(archive, unit, i+offset);
         if (method_is_factory){
-            method[i].setStereotype("factory");
-        }
-    }   
-    int total = unitOneCount + unitTwoCount;
-    for (int i = unitOneCount; i < total; ++i){
-        bool method_is_factory = isFactory(archive, secondUnit, i);
-        if (method_is_factory){
-            method[i].setStereotype("factory");
-        }
-    }   
-}
-void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    //std::cout << "STEREOTYPING EMPTY METHODS! _______\n";
-    for (int i = 1; i <= unitOneCount; ++i){
-        int index = i-1;
-        //std::cout << "method index " << index << "\n";
-        if (isEmptyMethod(archive, firstUnit, index)){
-            method[index].setStereotype("empty");
+            method[i+offset].setStereotype("factory");
         }
     }
-    for (int i = 1; i <= unitTwoCount; ++i){
-        int index = unitOneCount + i - 1;
-        //std::cout << "method index " << index << "\n";
-        if (isEmptyMethod(archive, secondUnit, index)){
-            method[index].setStereotype("empty");
+}
+
+
+// stereotype empty
+//
+void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
+    }
+
+    for (int i = 0; i < n; ++i){
+        if (isEmptyMethod(archive, unit, i+offset)){
+            method[i+offset].setStereotype("empty");
         }
     }
 }
@@ -833,45 +735,31 @@ void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* firstUnit, 
 // has exactly 1 real call including new calls
 // does not use any data memebers
 //
-void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    for (int i = 0; i < unitOneCount; ++i){
-        bool empty = isEmptyMethod(archive, firstUnit, i);
-        std::vector<std::string> calls = findCalls(archive, firstUnit, i, "");
-        std::vector<std::string> real_calls = findCalls(archive, firstUnit, i, "real");
-        bool usedAttr = usesAttribute(archive, firstUnit, i);
-        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
-        usedAttr = usedAttr || has_call_on_data_member;
-        if (!empty && calls.size() < 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " stateless");
-            if (method[i].getStereotype() == "nothing-yet stateless"){
-                method[i].setStereotype("stateless");
-            }
-        }
-        if (!empty && calls.size() == 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " wrapper");
-            if (method[i].getStereotype() == "nothing-yet wrapper"){
-                method[i].setStereotype("wrapper");
-            }
-        }
+void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+    int offset = 0;
+    int n = unitOneCount;
+    if (!oneUnit) {
+        offset = unitOneCount;
+        n = unitTwoCount;
     }
-    int total = unitOneCount + unitTwoCount;
-    for (int i = unitOneCount; i < total; ++i){
-        bool empty = isEmptyMethod(archive, secondUnit, i);
-        std::vector<std::string> calls = findCalls(archive, secondUnit, i, "");
-        std::vector<std::string> real_calls = findCalls(archive, secondUnit, i, "real");
-        bool usedAttr = usesAttribute(archive, secondUnit, i);
-        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
+
+    for (int i = 0; i < n; ++i){
+        bool empty = isEmptyMethod(archive, unit, i+offset);
+        std::vector<std::string> calls = findCalls(archive, unit, i+offset, "");
+        std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
+        bool usedAttr = usesAttribute(archive, unit, i+offset);
+        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
         usedAttr = usedAttr || has_call_on_data_member;
         if (!empty && calls.size() < 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " stateless");
-            if (method[i].getStereotype() == "nothing-yet stateless"){
-                method[i].setStereotype("stateless");
+            method[i+offset].setStereotype(method[i+offset].getStereotype() + " stateless");
+            if (method[i+offset].getStereotype() == "nothing-yet stateless"){
+                method[i+offset].setStereotype("stateless");
             }
         }
         if (!empty && calls.size() == 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " wrapper");
-            if (method[i].getStereotype() == "nothing-yet wrapper"){
-                method[i].setStereotype("wrapper");
+            method[i+offset].setStereotype(method[i+offset].getStereotype() + " wrapper");
+            if (method[i+offset].getStereotype() == "nothing-yet wrapper"){
+                method[i+offset].setStereotype("wrapper");
             }
         }
     }

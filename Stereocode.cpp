@@ -79,15 +79,24 @@ int main(int argc, char const *argv[])
 
         aClass.stereotypeGetter                (archive, firstUnit, secondUnit);
         aClass.stereotypeSetter                (archive, firstUnit, secondUnit);
-        aClass.stereotypeCollaborationalCommand(archive, firstUnit, secondUnit);
-        aClass.stereotypePredicate             (archive, firstUnit, secondUnit);
-        aClass.stereotypeProperty              (archive, firstUnit, secondUnit);
-        aClass.stereotypeVoidAccessor          (archive, firstUnit, secondUnit);
-        aClass.stereotypeCommand               (archive, firstUnit, secondUnit);
-        aClass.stereotypeFactory               (archive, firstUnit, secondUnit);
-        aClass.stereotypeEmpty                 (archive, firstUnit, secondUnit);
-        aClass.stereotypeCollaborator          (archive, firstUnit, secondUnit);
-        aClass.stereotypeStateless             (archive, firstUnit, secondUnit);
+        aClass.stereotypeCollaborationalCommand(archive, firstUnit, true);
+        aClass.stereotypeCollaborationalCommand(archive, secondUnit, false);
+        aClass.stereotypePredicate             (archive, firstUnit, true);
+        aClass.stereotypePredicate             (archive, secondUnit, false);
+        aClass.stereotypeProperty              (archive, firstUnit, true);
+        aClass.stereotypeProperty              (archive, secondUnit, false);
+        aClass.stereotypeVoidAccessor          (archive, firstUnit, true);
+        aClass.stereotypeVoidAccessor          (archive, secondUnit, false);
+        aClass.stereotypeCommand               (archive, firstUnit, true);
+        aClass.stereotypeCommand               (archive, secondUnit, false);
+        aClass.stereotypeFactory               (archive, firstUnit, true);
+        aClass.stereotypeFactory               (archive, secondUnit, false);
+        aClass.stereotypeEmpty                 (archive, firstUnit, true);
+        aClass.stereotypeEmpty                 (archive, secondUnit, false);
+        aClass.stereotypeCollaborator          (archive, firstUnit, true);
+        aClass.stereotypeCollaborator          (archive, secondUnit, false);
+        aClass.stereotypeStateless             (archive, firstUnit, true);
+        aClass.stereotypeStateless             (archive, secondUnit, false);
 
         std::ofstream reportFile;
         reportFile.open(file_names_list[i] + ".report.txt");

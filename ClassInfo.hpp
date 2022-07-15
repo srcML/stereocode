@@ -96,16 +96,16 @@ public:
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
     void stereotypeGetter                 (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypePredicate              (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeProperty               (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeVoidAccessor           (srcml_archive*, srcml_unit*, srcml_unit*);
     void stereotypeSetter                 (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCommand                (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborationalCommand (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborator           (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeFactory                (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeEmpty                  (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeStateless              (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypePredicate              (srcml_archive*, srcml_unit*, bool);
+    void stereotypeProperty               (srcml_archive*, srcml_unit*, bool);
+    void stereotypeVoidAccessor           (srcml_archive*, srcml_unit*, bool);
+    void stereotypeCommand                (srcml_archive*, srcml_unit*, bool);
+    void stereotypeCollaborationalCommand (srcml_archive*, srcml_unit*, bool);
+    void stereotypeCollaborator           (srcml_archive*, srcml_unit*, bool);
+    void stereotypeFactory                (srcml_archive*, srcml_unit*, bool);
+    void stereotypeEmpty                  (srcml_archive*, srcml_unit*, bool);
+    void stereotypeStateless              (srcml_archive*, srcml_unit*, bool);
 
     void printMethodHeaders              ();
     void printReturnTypes                ();
