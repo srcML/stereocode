@@ -21,7 +21,7 @@
 
 std::vector<std::string> readFileNames(const std::string&);
 
-primitiveTypes primitives;  //Global set of primitives.  Need to fix.
+primitiveTypes primitives;  //Global set of primitives.
 
 
 int main(int argc, char const *argv[])
@@ -73,21 +73,30 @@ int main(int argc, char const *argv[])
             std::cerr << "Error: file not found: " << file_names_list[i] << ", error == " << error << "\n";
             return -1;
         }
-        srcml_unit* hppUnit = srcml_archive_read_unit(archive);   //hpp unit is first
-        srcml_unit* cppUnit = srcml_archive_read_unit(archive);
-        classModel  aClass  = classModel(archive, hppUnit, cppUnit);
+        srcml_unit* firstUnit = srcml_archive_read_unit(archive);   //.hpp, .java, .cs, etc
+        srcml_unit* secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
+        classModel  aClass  = classModel(archive, firstUnit, secondUnit);
 
-        aClass.stereotypeGetters               (archive, hppUnit, cppUnit);
-        aClass.stereotypeSetters               (archive, hppUnit, cppUnit);
-        aClass.stereotypeCollaborationalCommand(archive, hppUnit, cppUnit);
-        aClass.stereotypePredicates            (archive, hppUnit, cppUnit);
-        aClass.stereotypeProperties            (archive, hppUnit, cppUnit);
-        aClass.stereotypeVoidAccessor          (archive, hppUnit, cppUnit);
-        aClass.stereotypeCommand               (archive, hppUnit, cppUnit);
-        aClass.stereotypeFactories             (archive, hppUnit, cppUnit);
-        aClass.stereotypeEmpty                 (archive, hppUnit, cppUnit);
-        aClass.stereotypeCollaborators         (archive, hppUnit, cppUnit);
-        aClass.stereotypeStateless             (archive, hppUnit, cppUnit);
+        aClass.stereotypeGetter                (archive, firstUnit, secondUnit);
+        aClass.stereotypeSetter                (archive, firstUnit, secondUnit);
+        aClass.stereotypeCollaborationalCommand(archive, firstUnit, true);
+        aClass.stereotypeCollaborationalCommand(archive, secondUnit, false);
+        aClass.stereotypePredicate             (archive, firstUnit, true);
+        aClass.stereotypePredicate             (archive, secondUnit, false);
+        aClass.stereotypeProperty              (archive, firstUnit, true);
+        aClass.stereotypeProperty              (archive, secondUnit, false);
+        aClass.stereotypeVoidAccessor          (archive, firstUnit, true);
+        aClass.stereotypeVoidAccessor          (archive, secondUnit, false);
+        aClass.stereotypeCommand               (archive, firstUnit, true);
+        aClass.stereotypeCommand               (archive, secondUnit, false);
+        aClass.stereotypeFactory               (archive, firstUnit, true);
+        aClass.stereotypeFactory               (archive, secondUnit, false);
+        aClass.stereotypeEmpty                 (archive, firstUnit, true);
+        aClass.stereotypeEmpty                 (archive, secondUnit, false);
+        aClass.stereotypeCollaborator          (archive, firstUnit, true);
+        aClass.stereotypeCollaborator          (archive, secondUnit, false);
+        aClass.stereotypeStateless             (archive, firstUnit, true);
+        aClass.stereotypeStateless             (archive, secondUnit, false);
 
         std::ofstream reportFile;
         reportFile.open(file_names_list[i] + ".report.txt");
@@ -95,11 +104,11 @@ int main(int argc, char const *argv[])
         reportFile.close();
 
         std::cerr << "Class name: " << aClass.getClassName() << std::endl;
-        if (aClass.getInlineFunctionCount() != 0) {
-            hppUnit = aClass.writeStereotypeAttribute(archive, hppUnit, true);
+        if (aClass.getUnitOneCount() != 0) {
+            firstUnit = aClass.writeStereotypeAttribute(archive, firstUnit, true);
         }
-        if (aClass.getOutoflineFunctionCount() != 0) {
-            cppUnit = aClass.writeStereotypeAttribute(archive, cppUnit, false);
+        if (aClass.getUnitTwoCount() != 0) {
+            secondUnit = aClass.writeStereotypeAttribute(archive, secondUnit, false);
         }
 
         srcml_archive* output_archive = srcml_archive_create();
@@ -113,11 +122,11 @@ int main(int argc, char const *argv[])
             std::cerr << "Error opening " << file_names_list[i] << ".annotated.xml" << std::endl;
             return -1;
         }
-        srcml_archive_write_unit(output_archive, hppUnit);
-        srcml_archive_write_unit(output_archive, cppUnit);
+        srcml_archive_write_unit(output_archive, firstUnit);
+        srcml_archive_write_unit(output_archive, secondUnit);
 
-        srcml_unit_free(hppUnit);
-        srcml_unit_free(cppUnit);
+        srcml_unit_free(firstUnit);
+        srcml_unit_free(secondUnit);
         srcml_archive_close(archive);
         srcml_archive_close(output_archive);
         srcml_archive_free(output_archive);

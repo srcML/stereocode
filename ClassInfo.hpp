@@ -2,7 +2,7 @@
 #define CLASS_INFO_HPP
 
 //classModel for stereocode
-//
+// 
 
 #include <iostream>
 #include <fstream>
@@ -15,9 +15,9 @@
 #include "PrimitiveTypes.hpp"
 
 
-extern primitiveTypes primitives; //Not ideal
-
 const char NO_STEREOTYPE[] = "none";
+
+extern primitiveTypes primitives;
 
 //
 class attributeModel {
@@ -38,18 +38,23 @@ private:
 //
 class methodModel {
 public:
-                methodModel           () { name=""; parameters=""; header=""; returnType=""; constMethod=false;
-                                           retAttribute=false; attributesModified=0; stereotype = NO_STEREOTYPE; };
-                methodModel           (const std::string& s, bool f) { header = s; constMethod = f; stereotype = NO_STEREOTYPE; };
+                methodModel           () : name(), parameters(), parameterNames(), parameterTypes(), header(),
+                                           returnType(), constMethod(false), retAttribute(false), attributesModified(0),
+                                           localVariables(), stereotype(NO_STEREOTYPE) {};
+                methodModel           (const std::string& s, bool f) : methodModel() { header = s; constMethod = f; };
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
     std::string getParameters         () const { return parameters; };
     std::string getHeader             () const { return header; };
     std::string getConst              () const { if (constMethod) return "const"; else return ""; };
     int         getAttributesModified () const { return attributesModified; };
-    std::string getStereotype         () const { return stereotype; };
     bool        isConst               () const { return constMethod; };
     bool        returnsAttribute      () const { return retAttribute; };
+    std::string getStereotype         () const { return stereotype; };
+
+    std::vector<std::string> getLocalVariables() const { return localVariables; };
+    std::vector<std::string> getParameterNames() const { return parameterNames; };
+    std::vector<std::string> getParameterTypes() const { return parameterTypes; };
 
     void        setName               (const std::string& s) { name = s; };
     void        setReturnType         (const std::string& s) { returnType = s; };
@@ -58,42 +63,49 @@ public:
     void        setConst              (bool flag)            { constMethod = flag; };
     void        setReturnsAttribute   (bool flag)            { retAttribute = flag; };
     void        setAttributesModified (int n)                { attributesModified = n; };
+    void        setLocalVariables     (const std::vector<std::string>& s) { localVariables = s; };
+    void        setParameterNames     (const std::vector<std::string>& s) { parameterNames = s; };
+    void        setParameterTypes     (const std::vector<std::string>& s) { parameterTypes = s; };
+
     void        setStereotype         (const std::string& s) { stereotype = s; };
 
 private:
-    std::string name;
-    std::string parameters;
-    std::string header;
-    std::string returnType;
-    bool        constMethod;         //Is it a const method?
-    bool        retAttribute;        //Does it return any attributes?
-    int         attributesModified;  //# of attributes modified
-    std::string stereotype;
+    std::string                 name;
+    std::string                 parameters;
+    std::vector<std::string>    parameterNames;
+    std::vector<std::string>    parameterTypes;
+    std::string                 header;
+    std::string                 returnType;
+    bool                        constMethod;         //Is it a const method?
+    bool                        retAttribute;        //Does it return any attributes?
+    int                         attributesModified;  //# of attributes modified
+    std::vector<std::string>    localVariables;
+    std::string                 stereotype;
 };
 
 
 class classModel {
 public:
-    classModel () : className(), parentClass(), attribute(), method(), hppMethodCount(0), cppMethodCount(0)  {};
+    classModel () : className(), parentClass(), attribute(), method(), unitOneCount(0), unitTwoCount(0), language() {};
     classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
-    std::string getClassName              ()      const { return className;                }
-    int         getInlineFunctionCount    ()      const { return hppMethodCount;    }
-    int         getOutoflineFunctionCount ()      const { return cppMethodCount; }
+    std::string getClassName    ()      const { return className;    }
+    int         getUnitOneCount ()      const { return unitOneCount; }
+    int         getUnitTwoCount ()      const { return unitTwoCount; }
 
     srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
 
-    void stereotypeGetters                (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypePredicates             (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeProperties             (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeVoidAccessor           (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeSetters                (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCommand                (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborationalCommand (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeCollaborators          (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeFactories              (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeEmpty                  (srcml_archive*, srcml_unit*, srcml_unit*);
-    void stereotypeStateless              (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeGetter                 (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypeSetter                 (srcml_archive*, srcml_unit*, srcml_unit*);
+    void stereotypePredicate              (srcml_archive*, srcml_unit*, bool);
+    void stereotypeProperty               (srcml_archive*, srcml_unit*, bool);
+    void stereotypeVoidAccessor           (srcml_archive*, srcml_unit*, bool);
+    void stereotypeCommand                (srcml_archive*, srcml_unit*, bool);
+    void stereotypeCollaborationalCommand (srcml_archive*, srcml_unit*, bool);
+    void stereotypeCollaborator           (srcml_archive*, srcml_unit*, bool);
+    void stereotypeFactory                (srcml_archive*, srcml_unit*, bool);
+    void stereotypeEmpty                  (srcml_archive*, srcml_unit*, bool);
+    void stereotypeStateless              (srcml_archive*, srcml_unit*, bool);
 
     void printMethodHeaders              ();
     void printReturnTypes                ();
@@ -102,8 +114,6 @@ public:
     void printMethodNames                ();
     void printReportToFile               (std::ofstream&, const std::string&);
 
-
-private:
     void findClassName                (srcml_archive*, srcml_unit*);
     void findParentClassName          (srcml_archive*, srcml_unit*);
 
@@ -114,10 +124,15 @@ private:
     void findMethodNames              (srcml_archive*, srcml_unit*, bool);
     void findParameterLists           (srcml_archive*, srcml_unit*, bool);
     void findMethodReturnTypes        (srcml_archive*, srcml_unit*, bool);
+    void findParameterTypes           (srcml_archive*, srcml_unit*, bool);
+    void findParameterNames           (srcml_archive*, srcml_unit*, bool);
+    void findLocalVariableNames       (srcml_archive*, srcml_unit*, bool);
+
+    void countChangedAttributes       (srcml_archive*, srcml_unit*, bool);
+    void returnsAttributes            (srcml_archive*, srcml_unit*, bool);
 
     bool isVoidAccessor               (srcml_archive*, srcml_unit*, int);
     bool variableChanged              (srcml_archive*, srcml_unit*, int, const std::string&);
-    void countChangedAttributes       (srcml_archive*, srcml_unit*, bool);
     int  findAssignOperatorDataMembers(srcml_archive*, srcml_unit*, int, bool);
     int  findIncrementedDataMembers   (srcml_archive*, srcml_unit*, int, bool);
     bool containsNonPrimitive         (srcml_archive*, srcml_unit*, int, const std::string&);
@@ -126,7 +141,12 @@ private:
     bool isFactory                    (srcml_archive*, srcml_unit*, int);
     bool findConstructorCall          (srcml_archive*, srcml_unit*, int);
     bool isEmptyMethod                (srcml_archive*, srcml_unit*, int);
-    void returnsAttributes            (srcml_archive*, srcml_unit*, bool);
+
+    std::vector<std::string> methodParameterTypes  (srcml_archive*, srcml_unit*, int);
+    std::vector<std::string> methodParameterNames  (srcml_archive*, srcml_unit*, int);
+    std::vector<std::string> findCalls             (srcml_archive*, srcml_unit*, int, const std::string&);
+    std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, int, bool);
+    std::vector<std::string> methodLocalVariables  (srcml_archive*, srcml_unit*, int);
 
     bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
@@ -135,20 +155,15 @@ private:
     int  countPureCalls               (const std::vector<std::string>&) const;
     bool callsAttributesMethod        (const std::vector<std::string>&, const std::vector<std::string>&, const std::vector<std::string>&);
 
-    std::vector<std::string> findParameterTypes    (srcml_archive*, srcml_unit*, int);
-    std::vector<std::string> findParameterNames    (srcml_archive*, srcml_unit*, int);
-    std::vector<std::string> findCalls             (srcml_archive*, srcml_unit*, int, const std::string&);
-    std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, int, bool);
-    std::vector<std::string> findLocalNames        (srcml_archive*, srcml_unit*, int);
-
-//Attributes:
+private:
     std::string                 className;
     std::vector<std::string>    parentClass;
     std::vector<attributeModel> attribute;
     std::vector<methodModel>    method;
-    int                         hppMethodCount;
-    int                         cppMethodCount;
-};
+    int                         unitOneCount;   //Methods in .hpp, .java, .cs, etc.
+    int                         unitTwoCount;   //Methods in .cpp - only C++ has two units
+    std::string                 language;       //Language: "C++", "C#", "Java", "C"
+}; 
 
 
 bool         checkConst       (std::string);
