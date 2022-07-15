@@ -160,12 +160,9 @@ private:
     std::vector<std::string>    parentClass;
     std::vector<attributeModel> attribute;
     std::vector<methodModel>    method;
-//    int                         hppMethodCount;
-//    int                         cppMethodCount;
     int                         unitOneCount;   //Methods in .hpp, .java, .cs, etc.
     int                         unitTwoCount;   //Methods in .cpp - only C++ has two units
     std::string                 language;       //Language: "C++", "C#", "Java", "C"
-
 }; 
 
 

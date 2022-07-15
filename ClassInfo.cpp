@@ -30,6 +30,8 @@ classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit
     if (secondUnit) findParameterNames(archive, secondUnit, false);
     findParameterTypes(archive, firstUnit, true);
     if (secondUnit) findParameterTypes(archive, secondUnit, false);
+    countChangedAttributes(archive, firstUnit, true);
+    if (secondUnit) countChangedAttributes(archive, secondUnit, false);
 }
 
 
@@ -348,15 +350,10 @@ void classModel::findParameterTypes(srcml_archive* archive, srcml_unit* unit, bo
     }
 }
 
-// TODO:  Check if these can be computed upfront:  usesAttribute, findCalls, callsAttributesMethod??, countPureCalls??, usesAttributeOBJ??
-//
-// Need to recheck usesAttribute, findCalls do to error in ctor on calls to parameter name/types??  Could be the problem?
-//
 
 
 
-// WORKING ON STEREOTYPES
-
+// Determining STEREOTYPES
 
 
 
@@ -381,6 +378,24 @@ void classModel::stereotypeGetter(srcml_archive* archive, srcml_unit* firstUnit,
 }
 
 
+
+// stereotype set:
+//  return type void or boolean
+//  method not const
+//  only 1 data member has been changed
+//
+void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
+    for (int i = 0; i < method.size(); ++i){
+        std::string returnType = separateTypeName(method[i].getReturnType());
+        bool void_or_bool = (returnType == "void" || returnType == "bool");
+        if (method[i].getAttributesModified() == 1 && !method[i].isConst() && void_or_bool){
+            method[i].setStereotype("set");
+        }
+    }
+}
+
+
+
 // Stereotype predicate:
 // method is const
 // returns boolean
@@ -392,8 +407,6 @@ void classModel::stereotypeGetter(srcml_archive* archive, srcml_unit* firstUnit,
 // return expression is not a data member
 // does not use any data member in the method
 // has no pure calls
-
-//void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
 void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
     int n = unitOneCount;
@@ -500,24 +513,6 @@ void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* unit
     }
 }
 
-
-// stereotype set:
-//  return type void or boolean
-//  method not const
-//  only 1 data member has been changed
-//
-void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
-    countChangedAttributes(archive, firstUnit, true);
-    countChangedAttributes(archive, secondUnit, false);
-
-    for (int i = 0; i < method.size(); ++i){
-        std::string returnType = separateTypeName(method[i].getReturnType());
-        bool void_or_bool = (returnType == "void" || returnType == "bool");
-        if (method[i].getAttributesModified() == 1 && !method[i].isConst() && void_or_bool){
-            method[i].setStereotype("set");
-        }
-    }
-}
 
 
 // stereotype Command:
@@ -709,6 +704,7 @@ void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* unit, boo
 
 // stereotype empty
 //
+//
 void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
     int n = unitOneCount;
@@ -765,21 +761,18 @@ void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* unit, b
     }
 }
 
+
 //
 // Checks if a primitive type
 //
 bool classModel::isPrimitiveContainer(std::string return_type){
-    // trim whitespace, specifiers and modifiers
-    return_type = separateTypeName(return_type);
+    return_type = separateTypeName(return_type); // trim whitespace, specifiers and modifiers
 
     // if the type is a vector or list, check if the element type is primitive
-
     if(return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
         size_t start = return_type.find("<") + 1;
         size_t end = return_type.find(">");
-
         return_type = return_type.substr(start, end - start);
-
         // in the case of vector<vector<x>>
         if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
             size_t start = return_type.find("<") + 1;
@@ -793,13 +786,11 @@ bool classModel::isPrimitiveContainer(std::string return_type){
         size_t start = return_type.find("<") + 1;
         size_t split = return_type.find(",");
         size_t end = return_type.find(">");
-
         std::string key = return_type.substr(start, split-start);
         std::string value = return_type.substr(split + 1, end - split - 1);
         return(primitives.isPrimitive(key) && primitives.isPrimitive(value));
     }
     // else check if primitive(NOT container).
-    //std::cout << "testing the type against the file: " << return_type << "\n";    
     return primitives.isPrimitive(return_type);
     
 }
@@ -844,8 +835,7 @@ void classModel::returnsAttributes(srcml_archive* archive, srcml_unit* unit, boo
 //
 bool classModel::isAttribute(std::string& name) const{
     trimWhitespace(name);
-    // remove [] if the name is an array
-    size_t left_sq_bracket = name.find("[");
+    size_t left_sq_bracket = name.find("[");    // remove [] if the name is an array
     if (left_sq_bracket != std::string::npos){
         name = name.substr(0, left_sq_bracket);
     }
@@ -862,30 +852,23 @@ bool classModel::isInheritedMember(const std::vector<std::string>& parameter_nam
                                    const std::string& expr){
 
     bool is_inherited = true;
-    //std::cout << "testing the expression is inherited member '" << expr << "'\n";
-    
     // checks for literal return expression
     if (expr == "#"){
-        //std::cout << "\t expression is a number not inherited data member\n";
         is_inherited = false;
     }
     if (expr == "true" || expr == "false" || expr == "TRUE" || expr == "FALSE"){
-        //std::cout << "\t expression is a boolean not inherited data member\n";
         is_inherited = false;
     }
 
     // expr is not inherited if it is a parameter name
     for (int k = 0; k < parameter_names.size(); ++k){
         if(expr == parameter_names[k]){
-            //std::cout << "\t expression is a parameter not inherited data member\n";
             is_inherited = false;
         }
     }
     // expr is not inherited if it is a local variable
     for (int k = 0; k < local_var_names.size(); ++k){
-        //std::cout << "checking local name " << local_var_names[k] << "\n";
         if (expr == local_var_names[k]){
-            //std::cout << "\t expression is a local variable not inherited data member\n";
             is_inherited = false;
         }
     }
@@ -895,7 +878,6 @@ bool classModel::isInheritedMember(const std::vector<std::string>& parameter_nam
             || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
             || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
             || expr[k] == '.' || expr[k] == '?' || expr[k] == ':' || expr[k] == '"'){
-            //std::cout << "\t expression contains an operator not inherited data member\n";
             is_inherited = false;
         }
     }
@@ -923,8 +905,7 @@ bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int fu
 
     for (int j = 0; j < parameter_types.size(); ++j){
         bool reference = parameter_types[j].find("&") != std::string::npos;
-        bool constant = parameter_types[j].find("const") != std::string::npos; 
-
+        bool constant = parameter_types[j].find("const") != std::string::npos;
         bool primitive = isPrimitiveContainer(parameter_types[j]);
 
         // if the parameter type contains an &, is not const and is primitive 
@@ -946,6 +927,7 @@ bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int fu
 //
 //
 // returns a vector of strings containing the parameters type and specifiers of function #i
+//
 std::vector<std::string> classModel::methodParameterTypes(srcml_archive* archive, srcml_unit* unit, int i){
     std::vector<std::string> parameter_types;
     std::string xpath = "//src:function[string(src:name)='";
@@ -955,25 +937,18 @@ std::vector<std::string> classModel::methodParameterTypes(srcml_archive* archive
     xpath += method[i].getConst() + "']/src:parameter_list//src:parameter/src:decl/src:type";
 
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result = nullptr;
-
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
-
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-
         std::string type = srcml_unit_get_srcml(result_unit);
         char * unparsed = new char [type.size() + 1];
         size_t size = type.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
         std::string param_type(unparsed);
-        //std::cout << param_type << std::endl;
         delete[] unparsed;
         parameter_types.push_back(param_type);
     }
@@ -994,24 +969,19 @@ std::vector<std::string> classModel::methodParameterNames(srcml_archive* archive
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']/src:parameter_list//src:parameter/src:decl/src:name";
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-
         std::string type = srcml_unit_get_srcml(result_unit);
         char * unparsed = new char [type.size() + 1];
         size_t size = type.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
         std::string param_name(unparsed);
-        //std::cout << param_name << std::endl;
-        delete[] unparsed;
+         delete[] unparsed;
         parameter_names.push_back(param_name);
     }
     srcml_clear_transforms(archive);
@@ -1031,24 +1001,20 @@ bool classModel::variableChanged(srcml_archive* archive, srcml_unit* unit, int i
     xpath += method[i].getConst() + "']//src:name[.='" + var_name + "' and not(ancestor::src:throw) ";
     xpath += "and not(ancestor::src:catch)]/following-sibling::*[1]";
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_result_units = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
         std::string next_element = srcml_unit_get_srcml(result_unit);
-
         int equal_sign_count = 0;
         for (int j = 0; j < next_element.size(); ++j){
             if (next_element[j] == '='){
                 equal_sign_count++;
             }
         }
-
         if (equal_sign_count == 1){
             var_changed = true;
         }
@@ -1058,10 +1024,12 @@ bool classModel::variableChanged(srcml_archive* archive, srcml_unit* unit, int i
     return var_changed;
 }
 
+
 //
 // need to count different data members and not the same one twice.
 // check with multiple changes with same opperator(same var), different operators(same var), same operator(dif var)
 // test ++data_member += 10;
+//
 void classModel::countChangedAttributes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int n = unitOneCount ;
     int offset = 0;
@@ -1085,11 +1053,10 @@ void classModel::countChangedAttributes(srcml_archive* archive, srcml_unit* unit
 int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit* unit, int i, bool check_for_loop){
     const int number_of_operators = 12;
     std::string assignment_operators[number_of_operators] = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
-
     std::vector<std::string> local_var_names = method[i].getLocalVariables();
     std::vector<std::string> param_names = method[i].getParameterNames();
-
     int data_members_changed = 0;
+
     for (int j = 0; j < number_of_operators; ++j){
         std::string assign_operator_xpath = "//src:function[string(src:name)='";
         assign_operator_xpath += method[i].getName() + "' and string(src:type)='";
@@ -1097,11 +1064,9 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
         assign_operator_xpath += method[i].getParameters() +"']//src:operator[.='";
         assign_operator_xpath += assignment_operators[j] + "' and not(ancestor::src:control)";
         assign_operator_xpath += " and not(ancestor::src:throw) and not(ancestor::src:catch)";
-
         if (check_for_loop){
             assign_operator_xpath += " and ancestor::src:for";
         }
-
         assign_operator_xpath += "]/preceding-sibling::src:name";
         srcml_append_transform_xpath(archive, assign_operator_xpath.c_str());
         srcml_transform_result* result = nullptr;
@@ -1111,21 +1076,15 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
 
         for (int k = 0; k < number_of_result_units; ++k){
             result_unit = srcml_transform_get_unit(result, k);
-
             std::string name = srcml_unit_get_srcml(result_unit);
             char * unparsed = new char [name.size() + 1];
             size_t size = name.size() + 1;
             srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
             std::string var_name(unparsed);
-             delete[] unparsed;
-
-            // removes whitespace
-            trimWhitespace(var_name);
-
+            delete[] unparsed;
+            trimWhitespace(var_name); // removes whitespace
             bool attr = isAttribute(var_name);
             bool inherit = isInheritedMember(param_names, method[i].getLocalVariables(), var_name);
-
             if (attr) {
                  ++data_members_changed;
             } else if (inherit){
@@ -1144,13 +1103,11 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
 int classModel::findIncrementedDataMembers(srcml_archive* archive, srcml_unit* unit, int i, bool check_for_loop){
     const int number_of_operators = 2;
     std::string increment_operators[number_of_operators] = {"++", "--"};
-
     std::string name_location[2] = {"following-sibling", "preceding-sibling"};
     std::vector<std::string> param_names = method[i].getParameterNames();
-
     int data_members_changed = 0;
-    //for each operator (++ and --)
-    for (int j = 0; j < number_of_operators; ++j){
+
+    for (int j = 0; j < number_of_operators; ++j){   //for each operator (++ and --)
         // check following and preceeding
         for (int k = 0; k < 2; ++k){
             std::string xpath = "//src:function[string(src:name)='";
@@ -1160,37 +1117,26 @@ int classModel::findIncrementedDataMembers(srcml_archive* archive, srcml_unit* u
             xpath += method[i].getConst() + "']//src:operator[.='";
             xpath += increment_operators[j] + "' and not(ancestor::src:control)";
             xpath += " and not(ancestor::src:throw) and not(ancestor::src:catch)";
-
             if (check_for_loop){
                 xpath += " and ancestor::src:for";
             }
-
             xpath += "]/" + name_location[k] + "::src:name[1]";
-
             srcml_append_transform_xpath(archive, xpath.c_str());
-
             srcml_transform_result* result = nullptr;
             int success = srcml_unit_apply_transforms(archive, unit, &result);
-
             int number_of_result_units = srcml_transform_get_unit_size(result);
             srcml_unit* result_unit = nullptr;
-
             if (number_of_result_units != 0){
                 result_unit = srcml_transform_get_unit(result, 0);
-
                 std::string name = srcml_unit_get_srcml(result_unit);
                 char * unparsed = new char [name.size() + 1];
                 size_t size = name.size() + 1;
                 srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
                 std::string var_name(unparsed);
                 delete[] unparsed;
-
-                // removes whitespace
-                trimWhitespace(var_name);
+                trimWhitespace(var_name);// removes whitespace
                 bool attr = isAttribute(var_name);
                 bool inherit = isInheritedMember(param_names, method[i].getLocalVariables(), var_name);
-
                 if (attr) {
                     ++data_members_changed;
                 } else if (inherit) {
@@ -1216,6 +1162,7 @@ std::vector<std::string> classModel::findCalls(srcml_archive* archive, srcml_uni
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:call[not(ancestor::src:throw) and not(ancestor::src:catch)";
+
     if (call_type == "pure"){
         xpath += " and not(preceding-sibling::*[1][self::src:operator='new'])";
         xpath += " and not(preceding-sibling::*[1][self::src:operator='.'])";
@@ -1224,28 +1171,21 @@ std::vector<std::string> classModel::findCalls(srcml_archive* archive, srcml_uni
     else if(call_type == "real"){
         xpath += "and not(preceding-sibling::*[1][self::src:operator='new'])";
     }
-
     xpath += "]/src:name";
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_results; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-
         std::string call = srcml_unit_get_srcml(result_unit);
-        
         char * unparsed = new char [call.size() + 1];
         size_t size = call.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
         call = unparsed;
         delete[] unparsed;
-
         trimWhitespace(call);
         if (call != "assert" && !isPrimitiveContainer(call)) {
             calls.push_back(call);
@@ -1260,13 +1200,13 @@ std::vector<std::string> classModel::findCalls(srcml_archive* archive, srcml_uni
 // dont count calls if
 // there is a . or -> somewhere in the name
 // or call is static and class name is the same
+//
 int classModel::countPureCalls(const std::vector<std::string>& all_calls) const {
     int pure_calls = all_calls.size();
     for (int i = 0; i < all_calls.size(); ++i){
         size_t colon = all_calls[i].find(":");
         size_t dot = all_calls[i].find(".");
         size_t arrow = all_calls[i].find("->");
-
         if (dot != std::string::npos || arrow != std::string::npos){
             --pure_calls;
         }
@@ -1277,6 +1217,7 @@ int classModel::countPureCalls(const std::vector<std::string>& all_calls) const 
     }
     return pure_calls;
 }
+
 
 //
 //
@@ -1289,7 +1230,6 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
         size_t arrow = real_calls[i].find("->");
         if (dot != std::string::npos){
             std::string calling_object = real_calls[i].substr(0, dot);
-            //std::cout << "checking " << calling_object << "\n";
             bool attr = isAttribute(calling_object);
             bool inherit = isInheritedMember(param_names, local_var_names, calling_object);
             if(attr){
@@ -1316,9 +1256,11 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
     return ret;
 }
 
+
 //
 //
 // checks for non primitive parameters and local variables
+//
 bool classModel::containsNonPrimitive(srcml_archive* archive, srcml_unit* unit, int i, const std::string& x){
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
@@ -1326,34 +1268,25 @@ bool classModel::containsNonPrimitive(srcml_archive* archive, srcml_unit* unit, 
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']" + x + "/src:decl/src:type/src:name";
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
-
     srcml_unit* result_unit = nullptr;
-    //std::cout << "\txpath: '" << xpath << "'\n";
-    //std::cout << "\tnumber of results: '" << number_of_results << "'\n";
+
     for (int i = 0; i < number_of_results; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-
         std::string type = srcml_unit_get_srcml(result_unit);
         char * unparsed = new char [type.size() + 1];
         size_t size = type.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
-        //std::cout << "unparsed:'" << unparsed << "'" << std::endl;
         std::string param_type(unparsed);
         delete[] unparsed;
-
         // handles case of (void) for param list
         if (number_of_results == 1 && x == "/src:parameter_list//src:parameter" && param_type == "void"){
             return false;
         }
         if (!isPrimitiveContainer(param_type) && param_type != className){
-            //std::cout << "\tnon primitive found in " << x <<" type is '" << param_type << "' class name is: " << className << std::endl;
-            srcml_transform_free(result);
+             srcml_transform_free(result);
             srcml_clear_transforms(archive);
             return true;
         }
@@ -1364,6 +1297,8 @@ bool classModel::containsNonPrimitive(srcml_archive* archive, srcml_unit* unit, 
     return false;
 }
 
+
+
 //
 //
 bool classModel::usesAttributeObj(srcml_archive* archive, srcml_unit* unit, int i, const std::vector<std::string>& obj_names){
@@ -1373,17 +1308,13 @@ bool classModel::usesAttributeObj(srcml_archive* archive, srcml_unit* unit, int 
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:name[not(ancestor::src:throw) and not(ancestor::src:catch)]";
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
-
     srcml_unit* result_unit = nullptr;
 
     for (int i = 0; i < number_of_results; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-
         std::string attribute_name = srcml_unit_get_srcml(result_unit);
         char * unparsed = new char [attribute_name.size() + 1];
         size_t size = attribute_name.size() + 1;
@@ -1391,8 +1322,7 @@ bool classModel::usesAttributeObj(srcml_archive* archive, srcml_unit* unit, int 
         std::string attr_name(unparsed);
         delete[] unparsed;
         for (int j = 0; j < obj_names.size(); ++j){
-            //std::cout << "\tchecking " << attr_name << " against " << obj_names[j] << "\n";
-            if (attr_name == obj_names[j]){
+             if (attr_name == obj_names[j]){
                 srcml_clear_transforms(archive);
                 srcml_transform_free(result);
                 return true;
@@ -1414,7 +1344,6 @@ bool classModel::usesAttributeObj(srcml_archive* archive, srcml_unit* unit, int 
 bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
     std::vector<std::string> param_names = method[i].getParameterNames();
     std::vector<std::string> local_var_names = method[i].getLocalVariables();
-
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
@@ -1424,14 +1353,12 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
 
     bool found_data_mem = false;
     for (int i = 0; i < number_of_results; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-
         std::string name = srcml_unit_get_srcml(result_unit);
         char * unparsed = new char [name.size() + 1];
         size_t size = name.size() + 1;
@@ -1439,13 +1366,14 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
         std::string possible_attr(unparsed);
         delete[] unparsed;
 
-        //if (primitives.isPrimitive(possible_attr)) continue;  //Should never be a primitive type
+        //Removing this passes the 5 orginal tests.  Remove?
+        if (primitives.isPrimitive(possible_attr)) continue;  //Should never be a primitive type???
 
         bool attr = isAttribute(possible_attr);
         bool inherit = isInheritedMember(param_names, local_var_names, possible_attr);
-        if (attr){
+        if (attr) {
              found_data_mem = true;
-        }else if (inherit){
+        } else if (inherit){
             attribute.push_back(attributeModel(possible_attr, "unknown"));
             found_data_mem = true;
         }
@@ -1455,29 +1383,27 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
     return found_data_mem;
 }
 
+
 //
 //
 // returns true if method, specified by number and unit, is a factory
+//
 bool classModel::isFactory(srcml_archive* archive, srcml_unit* unit, int funcIndex){
     std::vector<std::string> return_expressions = findReturnExpressions(archive, unit, funcIndex, false);
     std::vector<std::string> param_names        = method[funcIndex].getParameterNames();
     bool                     returns_ptr        = method[funcIndex].getReturnType().find("*") != std::string::npos;
     bool                     returns_obj        = !isPrimitiveContainer(method[funcIndex].getReturnType());
-
     bool returns_local = false;
     bool returns_new = false;
     bool returns_param = false; 
     for (int i = 0; i < return_expressions.size(); ++i){
         for (int j = 0; j < method[funcIndex].getLocalVariables().size(); ++j){
-            //std::cout << "\tret: " << return_expressions[i] << " loc: " << local_var_names[j] << std::endl;
             if(return_expressions[i] == method[funcIndex].getLocalVariables()[j]){
-                //std::cout << "local var is returned\n";
-                returns_local = true;
+                 returns_local = true;
             }
         }
         for (int k = 0; k < param_names.size(); ++k){
             if (return_expressions[i] == param_names[k]){
-                //std::cout << "param is returned\n";
                 returns_param = true;
             }
         }
@@ -1486,9 +1412,6 @@ bool classModel::isFactory(srcml_archive* archive, srcml_unit* unit, int funcInd
         }
     }
     bool new_call = findConstructorCall(archive, unit, funcIndex);
-    //std::cout << "returns obj " << returns_obj << " returns ptr " << returns_ptr << " returns local " 
-    //<< returns_local << " returns new " << returns_new << " returns param "<< returns_param  << " new call " << new_call << std::endl;
-    
     bool return_ex = (returns_local || returns_new || returns_param || method[funcIndex].returnsAttribute());
     bool is_factory = returns_obj && returns_ptr && new_call && return_ex;
     return is_factory;
@@ -1508,37 +1431,31 @@ std::vector<std::string> classModel::findReturnExpressions(srcml_archive* archiv
     }
 
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result;
     int error = srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
-
     std::vector<std::string> return_expressions;
+
     for (int j = 0; j < number_of_results; ++j){
         result_unit = srcml_transform_get_unit(result, j);
-
         std::string return_ex = srcml_unit_get_srcml(result_unit);
         if (return_ex.find("<expr><literal type=\"number\"") == 0){
-            //std::cout << "found literal expression return" << return_ex << std::endl;
             return_ex = "#";
         }else{
             char * unparsed = new char [return_ex.size() + 1];
             size_t size = return_ex.size() + 1;
             srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
-            //std::cout << "\t\treturn expression: " << unparsed << std::endl;
             return_ex = unparsed;
             delete[] unparsed;
         }
-        //std::cout << "pushing back the return ex: " << return_ex << std::endl;
         return_expressions.push_back(return_ex);
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);   
     return return_expressions;
 }
+
 
 //
 // Finds all the local variables within a given method[i]
@@ -1551,42 +1468,31 @@ std::vector<std::string> classModel::methodLocalVariables(srcml_archive* archive
     xpath_function += method[i].getReturnType() + "' and string(src:parameter_list)='";
     xpath_function += method[i].getParameters() + "' and string(src:specifier)='";
     xpath_function += method[i].getConst() + "']";
-
     std::string decl_stmt = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
     std::string control = "//src:control/src:init";
     std::string decl_name = "/src:decl/src:name";
-    
     std::string xpath = xpath_function + decl_stmt + decl_name + " | ";
     xpath += xpath_function + control + decl_name;
-
     srcml_append_transform_xpath(archive, xpath.c_str());
-    
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
     srcml_unit* result_unit = nullptr;
-    //std::cout << "number of results from xpath to find local names " << number_of_results << "\n";
+
     for (int j = 0; j < number_of_results; ++j){
         result_unit = srcml_transform_get_unit(result, j);
-        
         std::string var_name = srcml_unit_get_srcml(result_unit);
-
         char * unparsed = new char [var_name.size() + 1];
         size_t size = var_name.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
-        //std::cout << "\t" <<  unparsed << std::endl;
         var_name = unparsed;
         delete[] unparsed;
-
         trimWhitespace(var_name);
         size_t arr = var_name.find("[");
         if (arr != std::string::npos){
             var_name.erase(arr, arr-var_name.size());
         }
         local_var_names.push_back(var_name);
-
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -1596,6 +1502,7 @@ std::vector<std::string> classModel::methodLocalVariables(srcml_archive* archive
 //
 //
 // this function finds a constuctor call that is after a new operator that matches the class name
+//
 bool classModel::findConstructorCall(srcml_archive* archive, srcml_unit* unit, int i){
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
@@ -1603,17 +1510,13 @@ bool classModel::findConstructorCall(srcml_archive* archive, srcml_unit* unit, i
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:call[not(ancestor::src:throw) and not(ancestor::src:catch) and";
     xpath += " preceding-sibling::*[1][self::src:operator='new']]/src:name";
-
     srcml_append_transform_xpath(archive, xpath.c_str());
-
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
     bool found_constructor_call = false;
     if (number_of_results > 0){
         found_constructor_call = true;
-        //std::cout << "found a call that has 'new' operator before it\n";
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -1629,11 +1532,9 @@ bool classModel::isEmptyMethod(srcml_archive* archive, srcml_unit* unit, int i){
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "'][not(src:block/src:block_content/*[not(self::src:comment)][1])]";
-
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-
     int number_of_results = srcml_transform_get_unit_size(result);
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -1681,7 +1582,7 @@ void classModel::printReturnTypes(){
     for (int i = 0; i < method.size(); ++i){
         std::cout << method[i].getReturnType() << "\n";
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
 }
 
 //
@@ -1691,7 +1592,7 @@ void classModel::printStereotypes(){
     for (int i = 0; i < method.size(); ++i){
         std::cout << method[i].getStereotype() << "\n";
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
 }
 
 //
@@ -1699,7 +1600,7 @@ void classModel::printStereotypes(){
 void classModel::printMethodNames(){
     std::cout << "METHOD Names: \n";
     for (int i = 0; i < method.size(); ++i){
-        std::cout << i << "  " << method[i].getName() << std::endl;
+        std::cerr << i << "  " << method[i].getName() << std::endl;
     }
 }
 
@@ -1709,7 +1610,7 @@ void classModel::printMethodNames(){
 void classModel::printMethodHeaders(){
     std::cout << "METHOD HEADERS: \n";
     for (int i = 0; i < method.size(); ++i){
-        std::cout << i << "  " << method[i].getHeader() << std::endl;
+        std::cerr << i << "  " << method[i].getHeader() << std::endl;
     }
 }
 
@@ -1720,7 +1621,7 @@ void classModel::printAttributes(){
     std::cout << attribute.size() << " names\n";
 
     for (int i = 0; i < attribute.size(); ++i){
-        std::cout << "TYPE: " << attribute[i].getType() << " NAME: " << attribute[i].getName() << std::endl;
+        std::cerr << "TYPE: " << attribute[i].getType() << " NAME: " << attribute[i].getName() << std::endl;
     }
 
 }
