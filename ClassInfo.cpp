@@ -97,17 +97,17 @@ void classModel::findAttributeNames(srcml_archive* archive, srcml_unit* unit){
     // proessing results to collect variable names.
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result,i);
-        std::string attribute_name = srcml_unit_get_srcml(result_unit);
+        std::string name = srcml_unit_get_srcml(result_unit);
 
         // chop off everything beyond variable name
-        size_t end_position = attribute_name.find("</name>");
-        attribute_name = attribute_name.substr(0,end_position);
+        size_t end_position = name.find("</name>");
+        name = name.substr(0,end_position);
 
         // chop off begining <name>(regular variables) or <name><name>(arrays)
-        while (attribute_name.substr(0,6) == "<name>")
-            attribute_name.erase(0,6);
+        while (name.substr(0,6) == "<name>")
+            name.erase(0,6);
 
-        attribute.push_back(attributeModel(attribute_name));
+        attribute.push_back(attributeModel(name));
      }
 
     srcml_clear_transforms(archive);
@@ -126,23 +126,23 @@ void classModel::findAttributeTypes(srcml_archive* archive, srcml_unit* unit){
 
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
-        std::string attr_type = srcml_unit_get_srcml(result_unit);
+        std::string type = srcml_unit_get_srcml(result_unit);
         
-        char* unparsed = new char[attr_type.size() + 1];
-        std::strcpy(unparsed, attr_type.c_str());
-        size_t size = attr_type.size();
+        char* unparsed = new char[type.size() + 1];
+        std::strcpy(unparsed, type.c_str());
+        size_t size = type.size();
 
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
 
-        if (attr_type == "<type ref=\"prev\"/>"){
-            attr_type = prev;
+        if (type == "<type ref=\"prev\"/>"){
+            type = prev;
         }else{  
-            attr_type = unparsed;
-            prev = attr_type;
+            type = unparsed;
+            prev = type;
         }
         delete[] unparsed;
 
-        attribute[i].setType(attr_type);
+        attribute[i].setType(type);
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -293,10 +293,10 @@ void classModel::findMethodReturnTypes(srcml_archive* archive, srcml_unit* unit,
 
         //std::cout << unparsed << std::endl;
         int error = srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-        std::string ret_type(unparsed);
+        std::string type(unparsed);
         delete[] unparsed;
 
-        method[i+offset].setReturnType(ret_type);
+        method[i+offset].setReturnType(type);
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);    
@@ -382,7 +382,7 @@ void classModel::stereotypeGetter(srcml_archive* archive, srcml_unit* firstUnit,
 // stereotype set:
 //  return type void or boolean
 //  method not const
-//  only 1 data member has been changed
+//  only 1 attribute has been changed
 //
 void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit){
     for (int i = 0; i < method.size(); ++i){
@@ -399,13 +399,13 @@ void classModel::stereotypeSetter(srcml_archive* archive, srcml_unit* firstUnit,
 // Stereotype predicate:
 // method is const
 // returns boolean
-// return expression is not a data member
+// return expression is not a attribute
 //
 // Stereotype collaborational-predicate:
 // method is const
 // returns boolean
-// return expression is not a data member
-// does not use any data member in the method
+// return expression is not a attribute
+// does not use any attribute in the method
 // has no pure calls
 void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
@@ -418,14 +418,14 @@ void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* unit, b
     for (int i = 0; i < n; ++i){
         std::string returnType = separateTypeName(method[i+offset].getReturnType());
         if (returnType == "bool" && !method[i+offset].returnsAttribute() && method[i+offset].isConst()) {
-            bool data_members = usesAttribute(archive, unit, i+offset);
+            bool usesAttr = usesAttribute(archive, unit, i+offset);
             std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
-            data_members = data_members || has_call_on_data_member;
+            bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+            usesAttr = usesAttr || hasCallOnAttribute;
             std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
+            int pureCallsCount = countPureCalls(pure_calls);
 
-            if (!data_members && pure_calls_count == 0){
+            if (!usesAttr && pureCallsCount == 0){
                 method[i+offset].setStereotype("collaborational-predicate");
             }
             else{
@@ -439,14 +439,14 @@ void classModel::stereotypePredicate(srcml_archive* archive, srcml_unit* unit, b
 // Stereotype property:
 // method is const
 // return type is not boolean or void
-// does not return a data member
+// does not return a attribute
 
 // Stereotype collaborational-property
 // method is const
 // return type is not void or boolean
-// does not contain a data member anywhere in the function
+// does not contain a attribute anywhere in the function
 // does not contain any pure calls
-// does not contain any calls on data members
+// does not contain any calls on attributes
 void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
     int n = unitOneCount;
@@ -458,17 +458,17 @@ void classModel::stereotypeProperty(srcml_archive* archive, srcml_unit* unit, bo
     for (int i = 0; i < n; ++i){
         std::string returnType = separateTypeName(method[i+offset].getReturnType());
         if (returnType != "bool" && returnType != "void" && !method[i+offset].returnsAttribute() && method[i+offset].isConst()){
-            bool data_members = usesAttribute(archive, unit, i+offset);
+            bool usesAttr = usesAttribute(archive, unit, i+offset);
             std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
 
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
-            data_members = data_members || has_call_on_data_member;
+            bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+            usesAttr = usesAttr || hasCallOnAttribute;
 
             std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
+            int pureCallsCount = countPureCalls(pure_calls);
 
 
-            if (!data_members && pure_calls_count == 0){
+            if (!usesAttr && pureCallsCount == 0){
                 method[i+offset].setStereotype("collaborational-property");
             }
             else{
@@ -495,15 +495,15 @@ void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* unit
 
     for (int i = 0; i < n; ++i){
         if(isVoidAccessor(archive, unit, i+offset)){
-            bool data_members = usesAttribute(archive, unit, i+offset);
+            bool usesAttr = usesAttribute(archive, unit, i+offset);
             std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
 
-            bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
-            data_members = data_members || has_call_on_data_member;
+            bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+            usesAttr = usesAttr || hasCallOnAttribute;
 
             std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
-            if (!data_members && pure_calls_count == 0){
+            int pureCallsCount = countPureCalls(pure_calls);
+            if (!usesAttr && pureCallsCount == 0){
                 method[i+offset].setStereotype("collaborational-voidaccessor");
             }
             else{
@@ -521,12 +521,12 @@ void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* unit
 //
 //    return type contains void or bool
 //
-//    exactly one data member is written to and the number of calls
+//    exactly one attribute is written to and the number of calls
 //    in expression statements or returns is at least 2
 //
-//    no data members are written to and there is a call not
+//    no attributes are written to and there is a call not
 //    in a throw statement that is a simple real call (not a constructor call)
-//    or a complex call for a data member
+//    or a complex call for a attribute
 //
 //REAL CALL
 //~ does not following a new operator
@@ -539,7 +539,7 @@ void classModel::stereotypeVoidAccessor(srcml_archive* archive, srcml_unit* unit
 //PURE CALL
 // ~ does not contain . or ->
 //
-// need to handle the case where 0 data members are written and there is a call on a data member.
+// need to handle the case where 0 attributes are written and there is a call on a attribute.
 //
 void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
@@ -554,10 +554,10 @@ void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* unit, boo
         std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
 
         std::string returnType = separateTypeName(method[i+offset].getReturnType());
-        int pure_calls_count = countPureCalls(pure_calls);
-        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+        int pureCallsCount = countPureCalls(pure_calls);
+        bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
         bool case1 = (method[i+offset].getAttributesModified() == 1 && real_calls.size() > 1);
-        bool case2 = method[i+offset].getAttributesModified() == 0 && (pure_calls_count > 0 || has_call_on_data_member);
+        bool case2 = method[i+offset].getAttributesModified() == 0 && (pureCallsCount > 0 || hasCallOnAttribute);
         bool case3 = method[i+offset].getAttributesModified() > 1;
         if ((case1 || case2 || case3) && !method[i+offset].isConst()){
             if (returnType == "void" || returnType == "bool"){
@@ -567,7 +567,7 @@ void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* unit, boo
                 method[i+offset].setStereotype("non-void-command");
             }
         }
-        // handles case of mutable data members
+        // handles case of mutable attributes
         else if (method[i+offset].getAttributesModified() > 0 && method[i+offset].isConst()){
             if (method[i+offset].getStereotype() != NO_STEREOTYPE){
                 method[i+offset].setStereotype(method[i+offset].getStereotype() + " command");
@@ -582,11 +582,11 @@ void classModel::stereotypeCommand(srcml_archive* archive, srcml_unit* unit, boo
 
 //stereotype collaborational-command
 //method is not const and
-//no data members are written and
+//no attributes are written and
 //no pure calls, a() a::b() and
-//no calls on data members and
+//no calls on attributes and
 //at least 1 call or parameter or local variable is written
-//Calls allowed:  f->g() where f is not a data member, new f() (which isn't a real call)
+//Calls allowed:  f->g() where f is not a attribute, new f() (which isn't a real call)
 //
 void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int offset = 0;
@@ -598,7 +598,7 @@ void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_
 
     for (int i = 0; i < n; ++i){
         std::vector<std::string> all_calls = findCalls(archive, unit, i+offset, "");
-        bool has_call_on_data_member = callsAttributesMethod(all_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+        bool hasCallOnAttribute = callsAttributesMethod(all_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
         
         if (!method[i+offset].isConst() && method[i+offset].getAttributesModified() == 0) {
             bool local_var_written = false;
@@ -616,9 +616,9 @@ void classModel::stereotypeCollaborationalCommand(srcml_archive* archive, srcml_
                 }
             }
             std::vector<std::string> pure_calls = findCalls(archive, unit, i+offset, "pure");
-            int pure_calls_count = countPureCalls(pure_calls);
+            int pureCallsCount = countPureCalls(pure_calls);
 
-            bool not_command =  pure_calls_count == 0 && !has_call_on_data_member;
+            bool not_command =  pureCallsCount == 0 && !hasCallOnAttribute;
             if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
                 method[i+offset].setStereotype("collaborational-command");
             }       
@@ -694,8 +694,7 @@ void classModel::stereotypeFactory(srcml_archive* archive, srcml_unit* unit, boo
     }
 
     for (int i = 0; i < n; ++i){
-        bool method_is_factory = isFactory(archive, unit, i+offset);
-        if (method_is_factory){
+        if (isFactory(archive, unit, i+offset)){
             method[i+offset].setStereotype("factory");
         }
     }
@@ -724,7 +723,7 @@ void classModel::stereotypeEmpty(srcml_archive* archive, srcml_unit* unit, bool 
 // stereotype stateless
 // is not an empty method
 // has no real calls including new calls
-// does not use any data members
+// does not use any attributes
 //
 // stereotype wrapper
 // is not empty
@@ -744,8 +743,8 @@ void classModel::stereotypeStateless(srcml_archive* archive, srcml_unit* unit, b
         std::vector<std::string> calls = findCalls(archive, unit, i+offset, "");
         std::vector<std::string> real_calls = findCalls(archive, unit, i+offset, "real");
         bool usedAttr = usesAttribute(archive, unit, i+offset);
-        bool has_call_on_data_member = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
-        usedAttr = usedAttr || has_call_on_data_member;
+        bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i+offset].getLocalVariables(), method[i+offset].getParameterNames());
+        usedAttr = usedAttr || hasCallOnAttribute;
         if (!empty && calls.size() < 1 && !usedAttr){
             method[i+offset].setStereotype(method[i+offset].getStereotype() + " stateless");
             if (method[i+offset].getStereotype() == "nothing-yet stateless"){
@@ -819,7 +818,7 @@ void classModel::returnsAttributes(srcml_archive* archive, srcml_unit* unit, boo
             if (isAttribute(return_expr)){
                 returns_attribute = true;
                 break;
-            } else if (isInheritedMember(method[i+offset].getParameterNames(), method[i+offset].getLocalVariables(), return_expr)){
+            } else if (isInheritedAttribute(method[i+offset].getParameterNames(), method[i+offset].getLocalVariables(), return_expr)){
                 returns_attribute = true;
                 attribute.push_back(attributeModel(return_expr, method[i+offset].getReturnType()));
                 break;
@@ -847,10 +846,9 @@ bool classModel::isAttribute(std::string& name) const{
 
 //
 //
-bool classModel::isInheritedMember(const std::vector<std::string>& parameter_names,
+bool classModel::isInheritedAttribute(const std::vector<std::string>& parameter_names,
                                    const std::vector<std::string>& local_var_names,
                                    const std::string& expr){
-
     bool is_inherited = true;
     // checks for literal return expression
     if (expr == "#"){
@@ -881,7 +879,7 @@ bool classModel::isInheritedMember(const std::vector<std::string>& parameter_nam
             is_inherited = false;
         }
     }
-    // expr is a keyword that is not a data member
+    // expr is a keyword that is not a attribute
     if (expr == "this" || expr == "cout" || expr == "endl"){
         is_inherited = false;
     }
@@ -899,19 +897,19 @@ bool classModel::isInheritedMember(const std::vector<std::string>& parameter_nam
 //
 //
 bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int funcIndex){
-    std::vector<std::string> parameter_types = method[funcIndex].getParameterTypes();
-    std::vector<std::string> parameter_names = method[funcIndex].getParameterNames();
+    std::vector<std::string> types = method[funcIndex].getParameterTypes();
+    std::vector<std::string> names = method[funcIndex].getParameterNames();
     std::string returnType = separateTypeName(method[funcIndex].getReturnType());
 
-    for (int j = 0; j < parameter_types.size(); ++j){
-        bool reference = parameter_types[j].find("&") != std::string::npos;
-        bool constant = parameter_types[j].find("const") != std::string::npos;
-        bool primitive = isPrimitiveContainer(parameter_types[j]);
+    for (int j = 0; j < types.size(); ++j){
+        bool reference = types[j].find("&") != std::string::npos;
+        bool constant = types[j].find("const") != std::string::npos;
+        bool primitive = isPrimitiveContainer(types[j]);
 
         // if the parameter type contains an &, is not const and is primitive 
         // and the return type of the method is void.
         if (reference && !constant && primitive && returnType == "void" && method[funcIndex].isConst()){
-            bool param_changed = variableChanged(archive, unit, funcIndex, parameter_names[j]);
+            bool param_changed = variableChanged(archive, unit, funcIndex, names[j]);
                 if (param_changed || method[funcIndex].getStereotype() == NO_STEREOTYPE){
                 return true;
             }
@@ -929,7 +927,7 @@ bool classModel::isVoidAccessor(srcml_archive* archive, srcml_unit* unit, int fu
 // returns a vector of strings containing the parameters type and specifiers of function #i
 //
 std::vector<std::string> classModel::methodParameterTypes(srcml_archive* archive, srcml_unit* unit, int i){
-    std::vector<std::string> parameter_types;
+    std::vector<std::string> types;
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
@@ -950,11 +948,11 @@ std::vector<std::string> classModel::methodParameterTypes(srcml_archive* archive
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
         std::string param_type(unparsed);
         delete[] unparsed;
-        parameter_types.push_back(param_type);
+        types.push_back(param_type);
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result); 
-    return parameter_types;
+    return types;
 }
 
 //
@@ -1026,9 +1024,9 @@ bool classModel::variableChanged(srcml_archive* archive, srcml_unit* unit, int i
 
 
 //
-// need to count different data members and not the same one twice.
+// need to count different attributes and not the same one twice.
 // check with multiple changes with same opperator(same var), different operators(same var), same operator(dif var)
-// test ++data_member += 10;
+// test ++attribute += 10;
 //
 void classModel::countChangedAttributes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int n = unitOneCount ;
@@ -1038,24 +1036,24 @@ void classModel::countChangedAttributes(srcml_archive* archive, srcml_unit* unit
         offset = unitOneCount;
     }
     for (int i = 0; i < n; ++i){
-        int data_members_changed = 0;
-        data_members_changed += findIncrementedDataMembers(archive, unit, i+offset, false);     //No loop
-        data_members_changed += findIncrementedDataMembers(archive, unit, i+offset, true);      // loop
-        data_members_changed += findAssignOperatorDataMembers(archive, unit, i+offset, false);  // No loop
-        data_members_changed += findAssignOperatorDataMembers(archive, unit, i+offset, true);   // loop
-        method[i+offset].setAttributesModified(data_members_changed);
+        int changes = 0;
+        changes += findIncrementedAttribute(archive, unit, i+offset, false);     //No loop
+        changes += findIncrementedAttribute(archive, unit, i+offset, true);      // loop
+        changes += findAssignOperatorAttribute(archive, unit, i+offset, false);  // No loop
+        changes += findAssignOperatorAttribute(archive, unit, i+offset, true);   // loop
+        method[i+offset].setAttributesModified(changes);
     }
 }
 
 
 //
 //
-int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit* unit, int i, bool check_for_loop){
+int classModel::findAssignOperatorAttribute(srcml_archive* archive, srcml_unit* unit, int i, bool check_for_loop){
     const int number_of_operators = 12;
     std::string assignment_operators[number_of_operators] = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
     std::vector<std::string> local_var_names = method[i].getLocalVariables();
     std::vector<std::string> param_names = method[i].getParameterNames();
-    int data_members_changed = 0;
+    int attributes_changed = 0;
 
     for (int j = 0; j < number_of_operators; ++j){
         std::string assign_operator_xpath = "//src:function[string(src:name)='";
@@ -1084,28 +1082,28 @@ int classModel::findAssignOperatorDataMembers(srcml_archive* archive, srcml_unit
             delete[] unparsed;
             trimWhitespace(var_name); // removes whitespace
             bool attr = isAttribute(var_name);
-            bool inherit = isInheritedMember(param_names, method[i].getLocalVariables(), var_name);
+            bool inherit = isInheritedAttribute(param_names, method[i].getLocalVariables(), var_name);
             if (attr) {
-                 ++data_members_changed;
+                 ++attributes_changed;
             } else if (inherit){
                 attribute.push_back(attributeModel(var_name, "unknown"));
-                 ++data_members_changed;
+                 ++attributes_changed;
             }
         }
         srcml_transform_free(result);
         srcml_clear_transforms(archive);
     }
-    return data_members_changed;
+    return attributes_changed;
 }
 
 //
 //
-int classModel::findIncrementedDataMembers(srcml_archive* archive, srcml_unit* unit, int i, bool check_for_loop){
+int classModel::findIncrementedAttribute(srcml_archive* archive, srcml_unit* unit, int i, bool check_for_loop){
     const int number_of_operators = 2;
     std::string increment_operators[number_of_operators] = {"++", "--"};
     std::string name_location[2] = {"following-sibling", "preceding-sibling"};
     std::vector<std::string> param_names = method[i].getParameterNames();
-    int data_members_changed = 0;
+    int attributes_changed = 0;
 
     for (int j = 0; j < number_of_operators; ++j){   //for each operator (++ and --)
         // check following and preceeding
@@ -1136,19 +1134,19 @@ int classModel::findIncrementedDataMembers(srcml_archive* archive, srcml_unit* u
                 delete[] unparsed;
                 trimWhitespace(var_name);// removes whitespace
                 bool attr = isAttribute(var_name);
-                bool inherit = isInheritedMember(param_names, method[i].getLocalVariables(), var_name);
+                bool inherit = isInheritedAttribute(param_names, method[i].getLocalVariables(), var_name);
                 if (attr) {
-                    ++data_members_changed;
+                    ++attributes_changed;
                 } else if (inherit) {
                     attribute.push_back(attributeModel(var_name, "unknown"));
-                    ++data_members_changed;
+                    ++attributes_changed;
                 }
             }
             srcml_transform_free(result);
             srcml_clear_transforms(archive);
         }
     }
-    return data_members_changed;
+    return attributes_changed;
 }
 
 
@@ -1202,20 +1200,20 @@ std::vector<std::string> classModel::findCalls(srcml_archive* archive, srcml_uni
 // or call is static and class name is the same
 //
 int classModel::countPureCalls(const std::vector<std::string>& all_calls) const {
-    int pure_calls = all_calls.size();
+    int result = all_calls.size();
     for (int i = 0; i < all_calls.size(); ++i){
         size_t colon = all_calls[i].find(":");
         size_t dot = all_calls[i].find(".");
         size_t arrow = all_calls[i].find("->");
         if (dot != std::string::npos || arrow != std::string::npos){
-            --pure_calls;
+            --result;
         }
         else if(colon != std::string::npos){
             std::string name = all_calls[i].substr(0, colon);
-            --pure_calls;
+            --result;
         }
     }
-    return pure_calls;
+    return result;
 }
 
 
@@ -1224,36 +1222,36 @@ int classModel::countPureCalls(const std::vector<std::string>& all_calls) const 
 bool classModel::callsAttributesMethod(const std::vector<std::string>& real_calls,
                                        const std::vector<std::string>& local_var_names,
                                        const std::vector<std::string>& param_names){
-    bool ret = false;
+    bool result = false;
     for (int i = 0; i < real_calls.size(); ++i){
         size_t dot = real_calls[i].find(".");
         size_t arrow = real_calls[i].find("->");
         if (dot != std::string::npos){
             std::string calling_object = real_calls[i].substr(0, dot);
             bool attr = isAttribute(calling_object);
-            bool inherit = isInheritedMember(param_names, local_var_names, calling_object);
+            bool inherit = isInheritedAttribute(param_names, local_var_names, calling_object);
             if(attr){
-                ret = true;     
+                result = true;
             }
             else if (inherit){
-                ret = true;
+                result = true;
                 attribute.push_back(attributeModel(calling_object, "unknown"));
             }
         }
         if (arrow != std::string::npos){
             std::string calling_object = real_calls[i].substr(0, arrow);
             bool attr = isAttribute(calling_object);
-            bool inherit = isInheritedMember(param_names, local_var_names, calling_object);
+            bool inherit = isInheritedAttribute(param_names, local_var_names, calling_object);
             if (attr){
-                ret = true;
+                result = true;
             }
             else if (inherit){
-                ret = true;
+                result = true;
                 attribute.push_back(attributeModel(calling_object, "unknown"));
              }
         }
     }
-    return ret;
+    return result;
 }
 
 
@@ -1370,7 +1368,7 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
         if (primitives.isPrimitive(possible_attr)) continue;  //Should never be a primitive type???
 
         bool attr = isAttribute(possible_attr);
-        bool inherit = isInheritedMember(param_names, local_var_names, possible_attr);
+        bool inherit = isInheritedAttribute(param_names, local_var_names, possible_attr);
         if (attr) {
              found_data_mem = true;
         } else if (inherit){
@@ -1462,7 +1460,6 @@ std::vector<std::string> classModel::findReturnExpressions(srcml_archive* archiv
 //
 std::vector<std::string> classModel::methodLocalVariables(srcml_archive* archive, srcml_unit* unit, int i){
     std::vector<std::string> local_var_names;
-    
     std::string xpath_function = "//src:function[string(src:name)='";
     xpath_function += method[i].getName() + "' and string(src:type)='";
     xpath_function += method[i].getReturnType() + "' and string(src:parameter_list)='";
@@ -1514,13 +1511,13 @@ bool classModel::findConstructorCall(srcml_archive* archive, srcml_unit* unit, i
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
     int number_of_results = srcml_transform_get_unit_size(result);
-    bool found_constructor_call = false;
+    bool found = false;
     if (number_of_results > 0){
-        found_constructor_call = true;
+        found = true;
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
-    return found_constructor_call;
+    return found;
 }
 
 
@@ -1535,10 +1532,10 @@ bool classModel::isEmptyMethod(srcml_archive* archive, srcml_unit* unit, int i){
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-    int number_of_results = srcml_transform_get_unit_size(result);
+    int count = srcml_transform_get_unit_size(result);
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
-    return number_of_results == 1;
+    return count == 1;
 }
 
 

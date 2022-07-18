@@ -133,8 +133,8 @@ public:
 
     bool isVoidAccessor               (srcml_archive*, srcml_unit*, int);
     bool variableChanged              (srcml_archive*, srcml_unit*, int, const std::string&);
-    int  findAssignOperatorDataMembers(srcml_archive*, srcml_unit*, int, bool);
-    int  findIncrementedDataMembers   (srcml_archive*, srcml_unit*, int, bool);
+    int  findAssignOperatorAttribute  (srcml_archive*, srcml_unit*, int, bool);
+    int  findIncrementedAttribute     (srcml_archive*, srcml_unit*, int, bool);
     bool containsNonPrimitive         (srcml_archive*, srcml_unit*, int, const std::string&);
     bool usesAttributeObj             (srcml_archive*, srcml_unit*, int, const std::vector<std::string>&);
     bool usesAttribute                (srcml_archive*, srcml_unit*, int);
@@ -151,7 +151,7 @@ public:
     bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
     void methodsReturnPrimitive       (const std::vector<std::string>&, int, std::vector<bool>&);
-    bool isInheritedMember            (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
+    bool isInheritedAttribute         (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
     int  countPureCalls               (const std::vector<std::string>&) const;
     bool callsAttributesMethod        (const std::vector<std::string>&, const std::vector<std::string>&, const std::vector<std::string>&);
 
