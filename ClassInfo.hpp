@@ -38,10 +38,11 @@ private:
 //
 class methodModel {
 public:
-                methodModel           () : name(), parameters(), parameterNames(), parameterTypes(), header(),
+                methodModel           () : name(), parameters(), parameterNames(), parameterTypes(), srcML(), header(),
                                            returnType(), constMethod(false), retAttribute(false), attributesModified(0),
                                            localVariables(), stereotype(NO_STEREOTYPE) {};
-                methodModel           (const std::string& s, bool f) : methodModel() { header = s; constMethod = f; };
+                methodModel           (const std::string& xml, const std::string& s, bool f) : methodModel()
+                                           { srcML = xml; header = s; constMethod = f; };
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
     std::string getParameters         () const { return parameters; };
@@ -51,6 +52,8 @@ public:
     bool        isConst               () const { return constMethod; };
     bool        returnsAttribute      () const { return retAttribute; };
     std::string getStereotype         () const { return stereotype; };
+
+    std::string getsrcML () const {return srcML; };
 
     std::vector<std::string> getLocalVariables() const { return localVariables; };
     std::vector<std::string> getParameterNames() const { return parameterNames; };
@@ -74,6 +77,7 @@ private:
     std::string                 parameters;
     std::vector<std::string>    parameterNames;
     std::vector<std::string>    parameterTypes;
+    std::string                 srcML;               //srcML archive of the method
     std::string                 header;
     std::string                 returnType;
     bool                        constMethod;         //Is it a const method?
@@ -107,23 +111,16 @@ public:
     void stereotypeEmpty                  (srcml_archive*, srcml_unit*, bool);
     void stereotypeStateless              (srcml_archive*, srcml_unit*, bool);
 
-    void printMethodHeaders              ();
-    void printReturnTypes                ();
-    void printStereotypes                ();
-    void printAttributes                 ();
-    void printMethodNames                ();
-    void printReportToFile               (std::ofstream&, const std::string&);
-
     void findClassName                (srcml_archive*, srcml_unit*);
     void findParentClassName          (srcml_archive*, srcml_unit*);
 
     void findAttributeNames           (srcml_archive*, srcml_unit*);
     void findAttributeTypes           (srcml_archive*, srcml_unit*);
 
-    void findMethodHeaders            (srcml_archive*, srcml_unit*, bool);
-    void findMethodNames              (srcml_archive*, srcml_unit*, bool);
-    void findParameterLists           (srcml_archive*, srcml_unit*, bool);
-    void findMethodReturnTypes        (srcml_archive*, srcml_unit*, bool);
+    void findMethods                  (srcml_archive*, srcml_unit*, bool);
+    void findMethodNames              ();
+    void findParameterLists           ();
+    void findMethodReturnTypes        ();
     void findParameterTypes           (srcml_archive*, srcml_unit*, bool);
     void findParameterNames           (srcml_archive*, srcml_unit*, bool);
     void findLocalVariableNames       (srcml_archive*, srcml_unit*, bool);
@@ -154,6 +151,13 @@ public:
     bool isInheritedAttribute         (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
     int  countPureCalls               (const std::vector<std::string>&) const;
     bool callsAttributesMethod        (const std::vector<std::string>&, const std::vector<std::string>&, const std::vector<std::string>&);
+
+    void printMethodHeaders              ();
+    void printReturnTypes                ();
+    void printStereotypes                ();
+    void printAttributes                 ();
+    void printMethodNames                ();
+    void printReportToFile               (std::ofstream&, const std::string&);
 
 private:
     std::string                 className;

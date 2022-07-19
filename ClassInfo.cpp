@@ -14,14 +14,12 @@ classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit
     findAttributeNames    (archive, firstUnit);
     findAttributeTypes    (archive, firstUnit);
 
-    findMethodHeaders(archive, firstUnit, true);
-    if (secondUnit) findMethodHeaders(archive, secondUnit, false);
-    findMethodNames(archive, firstUnit, true);
-    if (secondUnit) findMethodNames(archive, secondUnit, false);
-    findParameterLists(archive, firstUnit, true);
-    if (secondUnit) findParameterLists(archive, secondUnit, false);
-    findMethodReturnTypes(archive, firstUnit, true);
-    if (secondUnit) findMethodReturnTypes(archive, secondUnit, false);
+    findMethods(archive, firstUnit, true);
+    if (secondUnit) findMethods(archive, secondUnit, false);
+    findMethodNames();
+    findParameterLists();
+    findMethodReturnTypes();
+
     returnsAttributes(archive, firstUnit, true);
     if (secondUnit) returnsAttributes(archive, secondUnit, false);
     findLocalVariableNames(archive, firstUnit, true);
@@ -171,29 +169,45 @@ bool checkConst(std::string function_srcml) {
 }
 
 
+
 //
-//  Finds header and const-ness
+//  Calls ctor for methodModel and finds:
+//      srcML for the method
+//      header
+//      const-ness
 //
-void classModel::findMethodHeaders(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+void classModel::findMethods(srcml_archive* archive, srcml_unit* unit, bool oneUnit) {
     srcml_append_transform_xpath(archive, "//src:function");
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
     int number_of_result_units = srcml_transform_get_unit_size(result);
-    int start = 0;
+
     if (oneUnit) {
         unitOneCount = number_of_result_units;       //COMPUTED HERE
     } else {
         unitTwoCount = number_of_result_units;       //COMPUTED HERE
     }
+
+
     srcml_unit* result_unit = nullptr;
+    srcml_archive* temp = nullptr;
 
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
+
+        temp = srcml_archive_create();
+        char* str = nullptr;
+        size_t s = 0;
+        srcml_archive_write_open_memory(temp, &str, &s);
+        srcml_archive_write_unit(temp, result_unit);
+        srcml_archive_close(temp);
+        std::string xml(str);
+        free(str);
+
         std::string function = srcml_unit_get_srcml(result_unit);
 
         bool isConstMethod = checkConst(function);
-
         char * unparsed = new char [function.size() + 1];
         size_t size = function.size() + 1;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
@@ -201,106 +215,118 @@ void classModel::findMethodHeaders(srcml_archive* archive, srcml_unit* unit, boo
         delete[] unparsed;
         
         header = header.substr(0, header.find("{"));
-        //remove newline characters
-        header.erase(std::remove(header.begin(), header.end(), '\n'), header.end());
+        header.erase(std::remove(header.begin(), header.end(), '\n'), header.end());  //remove newline characters
 
-        method.push_back(methodModel(header, isConstMethod));
+        method.push_back(methodModel(xml, header, isConstMethod));
     }
     srcml_clear_transforms(archive);
-    srcml_transform_free(result);    
+    srcml_transform_free(result);
 }
 
-
-
-
 //
-// Find the name of all functions/methods in the archive
+// Gets the name of all methods
 //
-void classModel::findMethodNames(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
-    srcml_append_transform_xpath(archive, "//src:function/src:name");
-    srcml_transform_result* result      = nullptr;
-    srcml_unit*             result_unit = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
+void classModel::findMethodNames() {
+    for (int i = 0; i < method.size(); ++i) {
+        srcml_archive*          archive = nullptr;
+        srcml_unit*             unit = nullptr;
+        srcml_unit*             resultUnit = nullptr;
+        srcml_transform_result* result = nullptr;
 
-    int n = srcml_transform_get_unit_size(result);
-    int offset = 0;
-    if (!oneUnit) offset = unitOneCount;
+        archive = srcml_archive_create();
+        srcml_archive_read_open_memory(archive, method[i].getsrcML().c_str(), method[i].getsrcML().size());
+        srcml_append_transform_xpath(archive, "//src:function/src:name");
+        unit = srcml_archive_read_unit(archive);
+        srcml_unit_apply_transforms(archive, unit, &result);
+        resultUnit = srcml_transform_get_unit(result, 0);
 
-    for (int i = 0; i < n; ++i){
-        result_unit = srcml_transform_get_unit(result, i);
-        std::string name_srcml = srcml_unit_get_srcml(result_unit);
+        std::string name_srcml = srcml_unit_get_srcml(resultUnit);
         char * unparsed = new char [name_srcml.size() + 1];
         size_t size = name_srcml.size() + 1;
-        srcml_unit_unparse_memory(result_unit, &unparsed, &size);
+        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string name(unparsed);
         delete[] unparsed;
 
-        method[i+offset].setName(name);
+        method[i].setName(name);
+
+        srcml_unit_free(unit);
+        srcml_clear_transforms(archive);
+        srcml_archive_close(archive);
+        srcml_transform_free(result);
     }
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);  
 }
 
-//
-//
-void classModel::findParameterLists(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
-    srcml_append_transform_xpath(archive, "//src:function/src:parameter_list");
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
-    srcml_unit* result_unit = nullptr;
-    int offset = 0;
-    if (!oneUnit) offset = unitOneCount;
 
-    for (int i = 0; i < n; ++i){
-        result_unit = srcml_transform_get_unit(result,i);
+//
+// Gets the parameter list of all methods
+//
+void classModel::findParameterLists() {
+    for (int i = 0; i < method.size(); ++i) {
+        srcml_archive*          archive = nullptr;
+        srcml_unit*             unit = nullptr;
+        srcml_unit*             resultUnit = nullptr;
+        srcml_transform_result* result = nullptr;
 
-        std::string name_srcml = srcml_unit_get_srcml(result_unit);
+        archive = srcml_archive_create();
+        srcml_archive_read_open_memory(archive, method[i].getsrcML().c_str(), method[i].getsrcML().size());
+        srcml_append_transform_xpath(archive, "//src:function/src:parameter_list");
+        unit = srcml_archive_read_unit(archive);
+        srcml_unit_apply_transforms(archive, unit, &result);
+        resultUnit = srcml_transform_get_unit(result, 0);
+
+        std::string name_srcml = srcml_unit_get_srcml(resultUnit);
         char * unparsed = new char [name_srcml.size() + 1];
         size_t size = name_srcml.size() + 1;
-        srcml_unit_unparse_memory(result_unit, &unparsed, &size);
+        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
 
         std::string parameter_list(unparsed);
         delete[] unparsed;
-        method[i+offset].setParameters(parameter_list);
-    }
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);  
-}
 
+        method[i].setParameters(parameter_list);
+
+        srcml_unit_free(unit);
+        srcml_clear_transforms(archive);
+        srcml_archive_close(archive);
+        srcml_transform_free(result);
+    }
+}
 
 //
 //
 // collects return types for each function
-void classModel::findMethodReturnTypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
-    srcml_append_transform_xpath(archive, "//src:function/src:type");
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
-    srcml_unit* result_unit = nullptr;
-    int offset = 0;
-    if (!oneUnit) offset = unitOneCount;
+//
+void classModel::findMethodReturnTypes(){
+    for (int i = 0; i < method.size(); ++i) {
+        srcml_archive*          archive = nullptr;
+        srcml_unit*             unit = nullptr;
+        srcml_unit*             resultUnit = nullptr;
+        srcml_transform_result* result = nullptr;
 
-    for (int i = 0; i < n; ++i){
-        result_unit = srcml_transform_get_unit(result,i);
+        archive = srcml_archive_create();
+        srcml_archive_read_open_memory(archive, method[i].getsrcML().c_str(), method[i].getsrcML().size());
+        srcml_append_transform_xpath(archive, "//src:function/src:type");
+        unit = srcml_archive_read_unit(archive);
+        srcml_unit_apply_transforms(archive, unit, &result);
+        resultUnit = srcml_transform_get_unit(result, 0);
 
-        std::string return_type = srcml_unit_get_srcml(result_unit);
-        //std::cout << "return type srcml = " << return_type << std::endl;
-
+        std::string return_type = srcml_unit_get_srcml(resultUnit);
         char * unparsed = new char[return_type.size() + 1];
         std::strcpy (unparsed, return_type.c_str());
         size_t size = return_type.size() +1;
 
-        //std::cout << unparsed << std::endl;
-        int error = srcml_unit_unparse_memory(result_unit, &unparsed, &size);
+        int error = srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string type(unparsed);
         delete[] unparsed;
 
-        method[i+offset].setReturnType(type);
+        method[i].setReturnType(type);
+
+        srcml_unit_free(unit);
+        srcml_clear_transforms(archive);
+        srcml_archive_close(archive);
+        srcml_transform_free(result);
     }
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);    
 }
+
 
 
 //
@@ -961,11 +987,13 @@ std::vector<std::string> classModel::methodParameterTypes(srcml_archive* archive
 //
 std::vector<std::string> classModel::methodParameterNames(srcml_archive* archive, srcml_unit* unit, int i){
     std::vector<std::string> parameter_names;
+
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
     xpath += method[i].getParameters() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']/src:parameter_list//src:parameter/src:decl/src:name";
+
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -984,6 +1012,7 @@ std::vector<std::string> classModel::methodParameterNames(srcml_archive* archive
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
+    
     return parameter_names;
 }
 
