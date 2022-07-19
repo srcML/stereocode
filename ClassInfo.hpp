@@ -121,9 +121,9 @@ public:
     void findMethodNames              ();
     void findParameterLists           ();
     void findMethodReturnTypes        ();
-    void findParameterTypes           (srcml_archive*, srcml_unit*, bool);
-    void findParameterNames           (srcml_archive*, srcml_unit*, bool);
-    void findLocalVariableNames       (srcml_archive*, srcml_unit*, bool);
+    void findParameterTypes           ();
+    void findParameterNames           ();
+    void findLocalVariableNames       ();
 
     void countChangedAttributes       (srcml_archive*, srcml_unit*, bool);
     void returnsAttributes            (srcml_archive*, srcml_unit*, bool);
@@ -139,11 +139,11 @@ public:
     bool findConstructorCall          (srcml_archive*, srcml_unit*, int);
     bool isEmptyMethod                (srcml_archive*, srcml_unit*, int);
 
-    std::vector<std::string> methodParameterTypes  (srcml_archive*, srcml_unit*, int);
-    std::vector<std::string> methodParameterNames  (srcml_archive*, srcml_unit*, int);
+    std::vector<std::string> methodParameterTypes  (int);
+    std::vector<std::string> methodParameterNames  (int);
     std::vector<std::string> findCalls             (srcml_archive*, srcml_unit*, int, const std::string&);
     std::vector<std::string> findReturnExpressions (srcml_archive*, srcml_unit*, int, bool);
-    std::vector<std::string> methodLocalVariables  (srcml_archive*, srcml_unit*, int);
+    std::vector<std::string> methodLocalVariables  (int);
 
     bool isAttribute                  (std::string&) const;
     bool isPrimitiveContainer         (std::string);
