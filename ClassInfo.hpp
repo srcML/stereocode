@@ -94,7 +94,7 @@ public:
 private:
     std::string                 className;
     std::vector<std::string>    parentClass;
-    std::vector<attributeModel> attribute;
+    std::vector<variable>       attribute;
     std::vector<methodModel>    method;
     int                         unitOneCount;   //Methods in .hpp, .java, .cs, etc.
     int                         unitTwoCount;   //Methods in .cpp - only C++ has two units

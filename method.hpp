@@ -20,14 +20,14 @@
 #include "utils.hpp"
 
 //
-class attributeModel {
+class variable {
 public:
-                attributeModel()                                           { name = ""; type = ""; };
-                attributeModel(const std::string& s)                       { name = s;           };
-                attributeModel(const std::string& n, const std::string& t) { name = n; type = t; };
-    void        setType       (const std::string& s)                       { type = s;           };
-    std::string getName       () const                                     { return name;        };
-    std::string getType       () const                                     { return type;        };
+                variable ()                                           { name = ""; type = ""; };
+                variable (const std::string& s)                       { name = s;           };
+                variable (const std::string& n, const std::string& t) { name = n; type = t; };
+    void        setType  (const std::string& s)                       { type = s;           };
+    std::string getName  () const                                     { return name;        };
+    std::string getType  () const                                     { return type;        };
 
 private:
     std::string name;

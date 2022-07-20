@@ -105,7 +105,7 @@ void classModel::findAttributeNames(srcml_archive* archive, srcml_unit* unit){
         while (name.substr(0,6) == "<name>")
             name.erase(0,6);
 
-        attribute.push_back(attributeModel(name));
+        attribute.push_back(variable(name));
      }
 
     srcml_clear_transforms(archive);
@@ -951,7 +951,7 @@ void classModel::returnsAttributes(srcml_archive* archive, srcml_unit* unit, boo
                 break;
             } else if (isInheritedAttribute(method[i+offset].getParameterNames(), method[i+offset].getLocalVariables(), return_expr)){
                 returns_attribute = true;
-                attribute.push_back(attributeModel(return_expr, method[i+offset].getReturnType()));
+                attribute.push_back(variable(return_expr, method[i+offset].getReturnType()));
                 break;
             }
         }
@@ -1202,7 +1202,7 @@ int classModel::findAssignOperatorAttribute(srcml_archive* archive, srcml_unit* 
             if (attr) {
                  ++attributes_changed;
             } else if (inherit){
-                attribute.push_back(attributeModel(var_name, "unknown"));
+                attribute.push_back(variable(var_name, "unknown"));
                  ++attributes_changed;
             }
         }
@@ -1256,7 +1256,7 @@ int classModel::findIncrementedAttribute(srcml_archive* archive, srcml_unit* uni
                 if (attr) {
                     ++attributes_changed;
                 } else if (inherit) {
-                    attribute.push_back(attributeModel(var_name, "unknown"));
+                    attribute.push_back(variable(var_name, "unknown"));
                     ++attributes_changed;
                 }
             }
@@ -1357,7 +1357,7 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
             }
             else if (inherit){
                 result = true;
-                attribute.push_back(attributeModel(calling_object, "unknown"));
+                attribute.push_back(variable(calling_object, "unknown"));
             }
         }
         if (arrow != std::string::npos){
@@ -1369,7 +1369,7 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
             }
             else if (inherit){
                 result = true;
-                attribute.push_back(attributeModel(calling_object, "unknown"));
+                attribute.push_back(variable(calling_object, "unknown"));
              }
         }
     }
@@ -1500,7 +1500,7 @@ bool classModel::usesAttribute(srcml_archive* archive, srcml_unit* unit, int i){
         if (attr) {
              found_data_mem = true;
         } else if (inherit){
-            attribute.push_back(attributeModel(possible_attr, "unknown"));
+            attribute.push_back(variable(possible_attr, "unknown"));
             found_data_mem = true;
         }
     }
