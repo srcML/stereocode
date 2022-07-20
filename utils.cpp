@@ -23,6 +23,70 @@ bool checkConst(std::string function_srcml) {
 }
 
 //
+// Checks if a name could be an inheritied attribute
+//
+// REQUIRES: parentClass.size() > 0 - the class inherits from another class
+//
+bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
+                                      const std::vector<std::string>& local_var_names,
+                                      const std::string& expr){
+    bool is_inherited = true;
+    // checks for literal return expression
+    if (expr == "#") is_inherited = false;
+    if (expr == "true" || expr == "false" || expr == "TRUE" || expr == "FALSE") is_inherited = false;
+    // expr is a keyword that is not a attribute
+    if (expr == "this" || expr == "cout" || expr == "endl") is_inherited = false;
+
+    for (int k = 0; k < parameter_names.size(); ++k) { // expr is not inherited if it is a parameter name
+        if(expr == parameter_names[k]) is_inherited = false;
+    }
+
+    for (int k = 0; k < local_var_names.size(); ++k) { // expr is not inherited if it is a local variable
+        if (expr == local_var_names[k]) is_inherited = false;
+    }
+
+    for(int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
+        if (expr[k] == '+' || expr[k] == '-' || expr[k] == '*' || expr[k] == '/'
+            || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
+            || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
+            || expr[k] == '.' || expr[k] == '?' || expr[k] == ':' || expr[k] == '"'){
+            is_inherited = false;
+        }
+    }
+
+    // expr is all uppercase letters
+    // assumed to be global variable
+    //if (upper_case(expr)) is_inherited = false;
+
+    return is_inherited;
+}
+
+
+// dont count calls if
+// there is a . or -> somewhere in the name
+// or call is static and class name is the same
+//
+int countPureCalls(const std::vector<std::string>& all_calls)  {
+    int result = all_calls.size();
+    for (int i = 0; i < all_calls.size(); ++i){
+        size_t colon = all_calls[i].find(":");
+        size_t dot   = all_calls[i].find(".");
+        size_t arrow = all_calls[i].find("->");
+        if (dot != std::string::npos || arrow != std::string::npos) {
+            --result;
+        }
+        else if (colon != std::string::npos) {
+            std::string name = all_calls[i].substr(0, colon);
+            --result;
+        }
+    }
+    return result;
+}
+
+
+
+
+//
 // TODO: Should return a string with no side effect. But this is efficent
 //
 void trimWhitespace(std::string& str) {

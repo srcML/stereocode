@@ -21,7 +21,7 @@
 
 std::vector<std::string> readFileNames(const std::string&);
 
-primitiveTypes primitives;  //Global set of primitives.
+primitiveTypes PRIMITIVES;  //Global set of primitives.
 
 
 int main(int argc, char const *argv[])
@@ -55,7 +55,7 @@ int main(int argc, char const *argv[])
     if (prim_file != "none") {  //Add any user defined primitive types to initial set
         std::ifstream in(prim_file);
         if (in.is_open())
-            in >> primitives;
+            in >> PRIMITIVES;
         else {
             std::cerr << "Error: Primitive types file not found: " << prim_file << std::endl;
             return -1;
@@ -77,26 +77,17 @@ int main(int argc, char const *argv[])
         srcml_unit* secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
         classModel  aClass  = classModel(archive, firstUnit, secondUnit);
 
-        aClass.stereotypeGetter                (archive, firstUnit, secondUnit);
-        aClass.stereotypeSetter                (archive, firstUnit, secondUnit);
-        aClass.stereotypeCollaborationalCommand(archive, firstUnit, true);
-        aClass.stereotypeCollaborationalCommand(archive, secondUnit, false);
-        aClass.stereotypePredicate             (archive, firstUnit, true);
-        aClass.stereotypePredicate             (archive, secondUnit, false);
-        aClass.stereotypeProperty              (archive, firstUnit, true);
-        aClass.stereotypeProperty              (archive, secondUnit, false);
-        aClass.stereotypeVoidAccessor          (archive, firstUnit, true);
-        aClass.stereotypeVoidAccessor          (archive, secondUnit, false);
-        aClass.stereotypeCommand               (archive, firstUnit, true);
-        aClass.stereotypeCommand               (archive, secondUnit, false);
-        aClass.stereotypeFactory               (archive, firstUnit, true);
-        aClass.stereotypeFactory               (archive, secondUnit, false);
-        aClass.stereotypeEmpty                 (archive, firstUnit, true);
-        aClass.stereotypeEmpty                 (archive, secondUnit, false);
-        aClass.stereotypeCollaborator          (archive, firstUnit, true);
-        aClass.stereotypeCollaborator          (archive, secondUnit, false);
-        aClass.stereotypeStateless             (archive, firstUnit, true);
-        aClass.stereotypeStateless             (archive, secondUnit, false);
+        aClass.stereotypeGetter();
+        aClass.stereotypeSetter();
+        aClass.stereotypeCollaborationalCommand();
+        aClass.stereotypePredicate();
+        aClass.stereotypeProperty();
+        aClass.stereotypeVoidAccessor();
+        aClass.stereotypeCommand();
+        aClass.stereotypeFactory();
+        aClass.stereotypeEmpty();
+        aClass.stereotypeCollaborator();
+        aClass.stereotypeStateless();
 
         std::ofstream reportFile;
         reportFile.open(file_names_list[i] + ".report.txt");
