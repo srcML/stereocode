@@ -32,6 +32,7 @@ public:
     bool        isAttribute     (std::string&) const;
 
     srcml_unit* writeStereotypeAttribute (srcml_archive*, srcml_unit*, bool);
+
     void        findClassName            (srcml_archive*, srcml_unit*);
     void        findParentClassName      (srcml_archive*, srcml_unit*);
     void        findAttributeNames       (srcml_archive*, srcml_unit*);
@@ -46,39 +47,25 @@ public:
     void findLocalVariableNames       ();
     void countChangedAttributes       ();
     void returnsAttributes            ();
-
-    bool isVoidAccessor               (int);
-    bool variableChanged              (int, const std::string&);
-    int  findAssignOperatorAttribute  (int, bool);
-    int  findIncrementedAttribute     (int, bool);
-    bool containsNonPrimitive         (int, const std::string&);
+    int  findAssignOperatorAttribute  (int, bool) const;
+    int  findIncrementedAttribute     (int, bool) const;
     bool usesAttributeObj             (int, const std::vector<std::string>&);
     bool usesAttribute                (int);
-    bool isFactory                    (int);
-    bool findConstructorCall          (int);
-    bool isEmptyMethod                (int);
-    
-    std::vector<std::string> findCalls             (int, const std::string&);
-    std::vector<std::string> methodParameterTypes  (int);
-    std::vector<std::string> methodParameterNames  (int);
-    std::vector<std::string> findReturnExpressions (int, bool);
-    std::vector<std::string> methodLocalVariables  (int);
-
     bool callsAttributesMethod        (const std::vector<std::string>&,
                                        const std::vector<std::string>&,
                                        const std::vector<std::string>&);
 
-    void stereotypeGetter                 ();
-    void stereotypeSetter                 ();
-    void stereotypePredicate              ();
-    void stereotypeProperty               ();
-    void stereotypeVoidAccessor           ();
-    void stereotypeCommand                ();
-    void stereotypeCollaborationalCommand ();
-    void stereotypeCollaborator           ();
-    void stereotypeFactory                ();
-    void stereotypeEmpty                  ();
-    void stereotypeStateless              ();
+    void stereotypeGetter                ();
+    void stereotypeSetter                ();
+    void stereotypePredicate             ();
+    void stereotypeProperty              ();
+    void stereotypeVoidAccessor          ();
+    void stereotypeCommand               ();
+    void stereotypeCollaborationalCommand();
+    void stereotypeCollaborator          ();
+    void stereotypeFactory               ();
+    void stereotypeEmpty                 ();
+    void stereotypeStateless             ();
 
     void printMethodHeaders              ();
     void printReturnTypes                ();

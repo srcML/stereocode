@@ -57,6 +57,14 @@ public:
     std::vector<std::string> getParameterNames() const { return parameterNames; };
     std::vector<std::string> getParameterTypes() const { return parameterTypes; };
 
+    std::vector<std::string> findReturnExpressions (bool) const;
+    std::vector<std::string> findLocalVariables    () const;
+    std::vector<std::string> findParameterNames    () const;
+    std::vector<std::string> findParameterTypes    () const;
+
+    std::vector<std::string> findCalls             (const std::string&) const;
+
+
     void        setName               (const std::string& s) { name = s; };
     void        setReturnType         (const std::string& s) { returnType = s; };
     void        setParameters         (const std::string& s) { parameters = s; };
@@ -67,8 +75,15 @@ public:
     void        setLocalVariables     (const std::vector<std::string>& s) { localVariables = s; };
     void        setParameterNames     (const std::vector<std::string>& s) { parameterNames = s; };
     void        setParameterTypes     (const std::vector<std::string>& s) { parameterTypes = s; };
-
     void        setStereotype         (const std::string& s) { stereotype = s; };
+
+    bool        findConstructorCall   () const;
+    bool        isFactory             () const;
+    bool        isEmptyMethod         () const;
+    bool        containsNonPrimitive  (const std::string&, const std::string&) const;
+    bool        isVoidAccessor        () const;
+    bool        variableChanged       (const std::string&) const;
+
 
 private:
     std::string                 name;
