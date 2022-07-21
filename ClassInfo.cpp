@@ -821,39 +821,6 @@ void classModel::stereotypeStateless() {
 }
 
 
-//
-// Checks if a primitive type
-//
-bool classModel::isPrimitiveContainer(std::string return_type){
-    return_type = separateTypeName(return_type); // trim whitespace, specifiers and modifiers
-
-    // if the type is a vector or list, check if the element type is primitive
-    if(return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
-        size_t start = return_type.find("<") + 1;
-        size_t end = return_type.find(">");
-        return_type = return_type.substr(start, end - start);
-        // in the case of vector<vector<x>>
-        if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
-            size_t start = return_type.find("<") + 1;
-            return_type = return_type.substr(start);
-        }
-    }
-
-    // if the type is a map check if the key and value are both primivite 
-    // assumes never get map<map<x,y>,z>
-    if (return_type.find("map") != std::string::npos){
-        size_t start = return_type.find("<") + 1;
-        size_t split = return_type.find(",");
-        size_t end = return_type.find(">");
-        std::string key = return_type.substr(start, split-start);
-        std::string value = return_type.substr(split + 1, end - split - 1);
-        return(PRIMITIVES.isPrimitive(key) && PRIMITIVES.isPrimitive(value));
-    }
-    // else check if primitive(NOT container).
-    return PRIMITIVES.isPrimitive(return_type);
-    
-}
-
 
 
 //
@@ -930,15 +897,9 @@ std::vector<std::string> classModel::findReturnExpressions(int i, bool getter){
 }
 
 
-
-
-
-
-
-
 //
 //
-bool classModel::isAttribute(std::string& name) const{
+bool classModel::isAttribute(std::string& name) const {
     trimWhitespace(name);
     size_t left_sq_bracket = name.find("[");    // remove [] if the name is an array
     if (left_sq_bracket != std::string::npos){
@@ -1224,15 +1185,14 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
                                        const std::vector<std::string>& local_var_names,
                                        const std::vector<std::string>& param_names){
     bool result = false;
-    for (int i = 0; i < real_calls.size(); ++i){
+    for (int i = 0; i < real_calls.size(); ++i) {
         size_t dot = real_calls[i].find(".");
         size_t arrow = real_calls[i].find("->");
-        if (dot != std::string::npos){
+        if (dot != std::string::npos) {
             std::string calling_object = real_calls[i].substr(0, dot);
-            if(isAttribute(calling_object)){
+            if (isAttribute(calling_object)) {
                 result = true;
-            }
-            else if (inherits())
+            } else if (inherits())
                 if (isInheritedAttribute(param_names, local_var_names, calling_object)) {
                     result = true;
                     attribute.push_back(variable(calling_object, "unknown"));
@@ -1242,8 +1202,7 @@ bool classModel::callsAttributesMethod(const std::vector<std::string>& real_call
             std::string calling_object = real_calls[i].substr(0, arrow);
             if (isAttribute(calling_object)) {
                 result = true;
-            }
-            else if (inherits())
+            } else if (inherits())
                 if (isInheritedAttribute(param_names, local_var_names, calling_object)) {
                     result = true;
                     attribute.push_back(variable(calling_object, "unknown"));

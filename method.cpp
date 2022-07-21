@@ -22,3 +22,7 @@ methodModel::methodModel(const std::string& xml, const std::string& s, bool f) :
     header = s;
     constMethod = f;
 };
+
+
+
+

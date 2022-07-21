@@ -83,6 +83,39 @@ int countPureCalls(const std::vector<std::string>& all_calls)  {
     return result;
 }
 
+//
+// Checks if a primitive type
+//
+bool isPrimitiveContainer(std::string return_type){
+    return_type = separateTypeName(return_type); // trim whitespace, specifiers and modifiers
+
+    // if the type is a vector or list, check if the element type is primitive
+    if(return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
+        size_t start = return_type.find("<") + 1;
+        size_t end = return_type.find(">");
+        return_type = return_type.substr(start, end - start);
+        // in the case of vector<vector<x>>
+        if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
+            size_t start = return_type.find("<") + 1;
+            return_type = return_type.substr(start);
+        }
+    }
+
+    // if the type is a map check if the key and value are both primivite
+    // assumes never get map<map<x,y>,z>
+    if (return_type.find("map") != std::string::npos){
+        size_t start = return_type.find("<") + 1;
+        size_t split = return_type.find(",");
+        size_t end = return_type.find(">");
+        std::string key = return_type.substr(start, split-start);
+        std::string value = return_type.substr(split + 1, end - split - 1);
+        return(PRIMITIVES.isPrimitive(key) && PRIMITIVES.isPrimitive(value));
+    }
+    // else check if primitive(NOT container).
+    return PRIMITIVES.isPrimitive(return_type);
+
+}
+
 
 
 

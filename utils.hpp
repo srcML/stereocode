@@ -14,8 +14,10 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include "PrimitiveTypes.hpp"
 
 
+extern primitiveTypes PRIMITIVES;
 
 
 const char NO_STEREOTYPE[] = "none";
@@ -28,6 +30,7 @@ void         trimWhitespace       (std::string&);
 std::string  separateTypeName     (const std::string&);
 bool         isInheritedAttribute (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
 int          countPureCalls       (const std::vector<std::string>&) ;
+bool         isPrimitiveContainer (std::string);
 
 
 #endif

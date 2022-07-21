@@ -12,9 +12,9 @@
 #include <set>
 #include <algorithm>
 #include <srcml.h>
+#include "PrimitiveTypes.hpp"
 #include "utils.hpp"
 #include "method.hpp"
-#include "PrimitiveTypes.hpp"
 
 
 extern primitiveTypes PRIMITIVES;
@@ -29,35 +29,21 @@ public:
     int         getUnitOneCount ()      const { return unitOneCount; };
     int         getUnitTwoCount ()      const { return unitTwoCount; };
     bool        inherits        ()      const { return parentClass.size() > 0; };
+    bool        isAttribute     (std::string&) const;
 
-    srcml_unit* writeStereotypeAttribute  (srcml_archive*, srcml_unit*, bool);
+    srcml_unit* writeStereotypeAttribute (srcml_archive*, srcml_unit*, bool);
+    void        findClassName            (srcml_archive*, srcml_unit*);
+    void        findParentClassName      (srcml_archive*, srcml_unit*);
+    void        findAttributeNames       (srcml_archive*, srcml_unit*);
+    void        findAttributeTypes       (srcml_archive*, srcml_unit*);
+    void        findMethods              (srcml_archive*, srcml_unit*, bool);
 
-    void stereotypeGetter                 ();
-    void stereotypeSetter                 ();
-    void stereotypePredicate              ();
-    void stereotypeProperty               ();
-    void stereotypeVoidAccessor           ();
-    void stereotypeCommand                ();
-    void stereotypeCollaborationalCommand ();
-    void stereotypeCollaborator           ();
-    void stereotypeFactory                ();
-    void stereotypeEmpty                  ();
-    void stereotypeStateless              ();
-
-    void findClassName                (srcml_archive*, srcml_unit*);
-    void findParentClassName          (srcml_archive*, srcml_unit*);
-
-    void findAttributeNames           (srcml_archive*, srcml_unit*);
-    void findAttributeTypes           (srcml_archive*, srcml_unit*);
-
-    void findMethods                  (srcml_archive*, srcml_unit*, bool);
     void findMethodNames              ();
     void findParameterLists           ();
     void findMethodReturnTypes        ();
     void findParameterTypes           ();
     void findParameterNames           ();
     void findLocalVariableNames       ();
-
     void countChangedAttributes       ();
     void returnsAttributes            ();
 
@@ -71,17 +57,28 @@ public:
     bool isFactory                    (int);
     bool findConstructorCall          (int);
     bool isEmptyMethod                (int);
-    std::vector<std::string> findCalls(int, const std::string&);
-
+    
+    std::vector<std::string> findCalls             (int, const std::string&);
     std::vector<std::string> methodParameterTypes  (int);
     std::vector<std::string> methodParameterNames  (int);
     std::vector<std::string> findReturnExpressions (int, bool);
     std::vector<std::string> methodLocalVariables  (int);
 
-    bool isAttribute                  (std::string&) const;
-    bool isPrimitiveContainer         (std::string);
-    void methodsReturnPrimitive       (const std::vector<std::string>&, int, std::vector<bool>&);
-    bool callsAttributesMethod        (const std::vector<std::string>&, const std::vector<std::string>&, const std::vector<std::string>&);
+    bool callsAttributesMethod        (const std::vector<std::string>&,
+                                       const std::vector<std::string>&,
+                                       const std::vector<std::string>&);
+
+    void stereotypeGetter                 ();
+    void stereotypeSetter                 ();
+    void stereotypePredicate              ();
+    void stereotypeProperty               ();
+    void stereotypeVoidAccessor           ();
+    void stereotypeCommand                ();
+    void stereotypeCollaborationalCommand ();
+    void stereotypeCollaborator           ();
+    void stereotypeFactory                ();
+    void stereotypeEmpty                  ();
+    void stereotypeStateless              ();
 
     void printMethodHeaders              ();
     void printReturnTypes                ();
@@ -99,7 +96,6 @@ private:
     int                         unitTwoCount;   //Methods in .cpp - only C++ has two units
     std::string                 language;       //Language: "C++", "C#", "Java", "C"
 }; 
-
 
 
 #endif
