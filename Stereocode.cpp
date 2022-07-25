@@ -27,37 +27,37 @@ primitiveTypes PRIMITIVES;  //Global set of primitives.
 int main(int argc, char const *argv[])
 {
     CLI::App app{"StereoCode: Determines method stereotypes"};
-    std::string file_list = "none";
-    std::string file_name = "none";
-    std::string prim_file = "none";
-    app.add_option("-l,--list-file",  file_list, "File name that contains a list of srcML archives");
-    app.add_option("-a,--archive",    file_name, "File name of a single srcML archive containing hpp and cpp units");
-    app.add_option("-p,--primitives", prim_file, "File name user supplied primitive types (one per line)");
+
+    std::string fileList = "";
+    std::string inputFile = "";
+    std::string primitivesFile = "";
+    std::string outputFile = "";
+    bool        outputReport = false;
+    std::vector<std::string> inputFileList;
+
+    app.add_option("-a,--archive",     inputFile,      "File name of a single srcML archive (for C++ it is the hpp and cpp units");
+    app.add_option("-o,--output-file", outputFile,     "File name of output srcML archive with stereotypes");
+    app.add_option("-l,--list-file",   fileList,       "File name that contains a list of srcML archives");
+    app.add_option("-p,--primitives",  primitivesFile, "File name of user supplied primitive types (one per line)");
+    app.add_flag  ("-r,--report",      outputReport,   "Output optional report file (off by default)");
+
     CLI11_PARSE(app, argc, argv);
 
-    std::vector<std::string> file_names_list;
-    if (file_name != "none") {
-        file_names_list.push_back(file_name);
+    if (inputFile != "") {
+        inputFileList.push_back(inputFile);
     }
-    else if(file_list != "none") {
-        file_names_list = readFileNames(file_list);
+    else if(fileList != "") {
+        inputFileList = readFileNames(fileList);
     } else {
-        std::cerr << "Error, incorrect usage\n";
-        std::cerr << "   Options: -a input-filename\n";
-        std::cerr << "            -l input-list-filename\n";
-        std::cerr << "            -p primitive-types-filename\n";
-        //std::cerr << "            -o output-filename\n";
-        std::cerr << "   Example: stereocode -a foo.xml \n";
-        std::cerr << "   Input:  srcML archive of foo.hpp and foo.cpp\n";
-        std::cerr << "   Output: srcML archive foo.annotated.xml - in same path as foo.xml\n";
-      return -1;
+        std::cerr << "Error: No input given " << std::endl;
+        return -1;
     }
-    if (prim_file != "none") {  //Add any user defined primitive types to initial set
-        std::ifstream in(prim_file);
+    if (primitivesFile != "") {  //Add any user defined primitive types to initial set
+        std::ifstream in(primitivesFile);
         if (in.is_open())
             in >> PRIMITIVES;
         else {
-            std::cerr << "Error: Primitive types file not found: " << prim_file << std::endl;
+            std::cerr << "Error: Primitive types file not found: " << primitivesFile << std::endl;
             return -1;
         }
         in.close();
@@ -65,12 +65,12 @@ int main(int argc, char const *argv[])
 
     std::cerr << "Computing stereotypes for the following classes: " << std::endl;
 
-    for (int i = 0; i < file_names_list.size(); ++i){
+    for (int i = 0; i < inputFileList.size(); ++i){
         int error;
         srcml_archive* archive = srcml_archive_create();
-        error = srcml_archive_read_open_filename(archive, file_names_list[i].c_str());   // read the srcml archive file
+        error = srcml_archive_read_open_filename(archive, inputFileList[i].c_str());   // read the srcml archive file
         if (error) {
-            std::cerr << "Error: file not found: " << file_names_list[i] << ", error == " << error << "\n";
+            std::cerr << "Error: File not found: " << inputFileList[i] << ", error == " << error << "\n";
             return -1;
         }
         srcml_unit* firstUnit = srcml_archive_read_unit(archive);   //.hpp, .java, .cs, etc
@@ -89,10 +89,12 @@ int main(int argc, char const *argv[])
         aClass.stereotypeCollaborator();
         aClass.stereotypeStateless();
 
-        std::ofstream reportFile;
-        reportFile.open(file_names_list[i] + ".report.txt");
-        aClass.printReportToFile(reportFile, file_names_list[i]);
-        reportFile.close();
+        if (outputReport) {
+            std::ofstream reportFile;
+            reportFile.open(inputFileList[i] + ".report.txt");
+            aClass.printReportToFile(reportFile, inputFileList[i]);
+            reportFile.close();
+        }
 
         std::cerr << "Class name: " << aClass.getClassName() << std::endl;
         if (aClass.getUnitOneCount() != 0) {
@@ -108,10 +110,19 @@ int main(int argc, char const *argv[])
             std::cerr << "Error registering namespace" << std::endl;
             return -1;
         }
-        error = srcml_archive_write_open_filename(output_archive, (file_names_list[i] + ".annotated.xml").c_str());
-        if (error) {
-            std::cerr << "Error opening " << file_names_list[i] << ".annotated.xml" << std::endl;
-            return -1;
+
+        if (fileList == "" && outputFile != "") {
+            error = srcml_archive_write_open_filename(output_archive, outputFile.c_str());
+            if (error) {
+                std::cerr << "Error opening: " << outputFile << std::endl;
+                return -1;
+            }
+        } else {
+            error = srcml_archive_write_open_filename(output_archive, (inputFileList[i] + ".annotated.xml").c_str());
+            if (error) {
+                std::cerr << "Error opening: " << inputFileList[i] << ".annotated.xml" << std::endl;
+                return -1;
+            }
         }
         srcml_archive_write_unit(output_archive, firstUnit);
         srcml_archive_write_unit(output_archive, secondUnit);
@@ -133,10 +144,10 @@ int main(int argc, char const *argv[])
 //
 // Read a file of file names for input.
 // Each file name is a srcML archive.
-std::vector<std::string> readFileNames(const std::string & file_name){
+std::vector<std::string> readFileNames(const std::string & fileName){
     std::vector<std::string> list_of_archives;
     std::ifstream archives_file;
-    archives_file.open(file_name);
+    archives_file.open(fileName);
 
     if (archives_file.is_open()){
         std::string name;
@@ -144,7 +155,7 @@ std::vector<std::string> readFileNames(const std::string & file_name){
             list_of_archives.push_back(name);
         }
     } else{
-        std::cerr << "Error: file not found: " << file_name << "\n";
+        std::cerr << "Error: File not found: " << fileName << "\n";
     }
     return list_of_archives;
 }
