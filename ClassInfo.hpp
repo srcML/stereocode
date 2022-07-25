@@ -55,17 +55,18 @@ public:
                                        const std::vector<std::string>&,
                                        const std::vector<std::string>&);
 
-    void stereotypeGetter                ();
-    void stereotypeSetter                ();
-    void stereotypePredicate             ();
-    void stereotypeProperty              ();
-    void stereotypeVoidAccessor          ();
-    void stereotypeCommand               ();
-    void stereotypeCollaborationalCommand();
-    void stereotypeCollaborator          ();
-    void stereotypeFactory               ();
-    void stereotypeEmpty                 ();
-    void stereotypeStateless             ();
+    void stereotype            ();
+    void getter                ();
+    void setter                ();
+    void predicate             ();
+    void property              ();
+    void voidAccessor          ();
+    void command               ();
+    void collaborationalCommand();
+    void collaborator          ();
+    void factory               ();
+    void empty                 ();
+    void stateless             ();
 
     void printMethodHeaders              ();
     void printReturnTypes                ();

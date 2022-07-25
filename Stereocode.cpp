@@ -75,19 +75,9 @@ int main(int argc, char const *argv[])
         }
         srcml_unit* firstUnit = srcml_archive_read_unit(archive);   //.hpp, .java, .cs, etc
         srcml_unit* secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
-        classModel  aClass  = classModel(archive, firstUnit, secondUnit);
 
-        aClass.stereotypeGetter();
-        aClass.stereotypeSetter();
-        aClass.stereotypeCollaborationalCommand();
-        aClass.stereotypePredicate();
-        aClass.stereotypeProperty();
-        aClass.stereotypeVoidAccessor();
-        aClass.stereotypeCommand();
-        aClass.stereotypeFactory();
-        aClass.stereotypeEmpty();
-        aClass.stereotypeCollaborator();
-        aClass.stereotypeStateless();
+        classModel  aClass  = classModel(archive, firstUnit, secondUnit);
+        aClass.stereotype();
 
         if (outputReport) {
             std::ofstream reportFile;

@@ -344,6 +344,22 @@ void classModel::findParameterTypes(){
 // Determining STEREOTYPES
 
 
+void classModel::stereotype() {
+    getter();
+    setter();
+    collaborationalCommand();
+    predicate();
+    property();
+    voidAccessor();
+    command();
+    factory();
+    empty();
+    collaborator();
+    stateless();
+}
+
+
+
 
 // Stereotype get:
 // method is const,
@@ -354,7 +370,7 @@ void classModel::findParameterTypes(){
 // method is not const
 // contains at least 1 return statement that returns a data memeber
 // return expression must be in the form 'return a;' or 'return *a;'
-void classModel::stereotypeGetter() {
+void classModel::getter() {
     for (int i = 0; i < method.size(); ++i){
         if (method[i].returnsAttribute()) {
             if (method[i].isConst())
@@ -372,7 +388,7 @@ void classModel::stereotypeGetter() {
 //  method not const
 //  only 1 attribute has been changed
 //
-void classModel::stereotypeSetter() {
+void classModel::setter() {
     for (int i = 0; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         bool void_or_bool = (returnType == "void" || returnType == "bool");
@@ -395,7 +411,7 @@ void classModel::stereotypeSetter() {
 // return expression is not a attribute
 // does not use any attribute in the method
 // has no pure calls
-void classModel::stereotypePredicate() {
+void classModel::predicate() {
     for (int i = 0; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()) {
@@ -428,7 +444,7 @@ void classModel::stereotypePredicate() {
 // does not contain a attribute anywhere in the function
 // does not contain any pure calls
 // does not contain any calls on attributes
-void classModel::stereotypeProperty() {
+void classModel::property() {
     for (int i = 0; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
@@ -459,7 +475,7 @@ void classModel::stereotypeProperty() {
 //     passed by non-const reference
 //     is a primitive type
 //     and is assigned a value(one = in the expression).
-void classModel::stereotypeVoidAccessor() {
+void classModel::voidAccessor() {
     for (int i = 0; i < method.size(); ++i){
         if(method[i].isVoidAccessor()){
             bool usesAttr = usesAttribute(i);
@@ -508,7 +524,7 @@ void classModel::stereotypeVoidAccessor() {
 //
 // need to handle the case where 0 attributes are written and there is a call on a attribute.
 //
-void classModel::stereotypeCommand() {
+void classModel::command() {
     for (int i = 0; i < method.size(); ++i){
         std::vector<std::string> real_calls = method[i].findCalls("real");
         std::vector<std::string> pure_calls = method[i].findCalls("pure");
@@ -545,7 +561,7 @@ void classModel::stereotypeCommand() {
 //at least 1 call or parameter or local variable is written
 //Calls allowed:  f->g() where f is not a attribute, new f() (which isn't a real call)
 //
-void classModel::stereotypeCollaborationalCommand() {
+void classModel::collaborationalCommand() {
     for (int i = 0; i < method.size(); ++i){
         std::vector<std::string> all_calls = method[i].findCalls("");
         bool hasCallOnAttribute = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
@@ -585,7 +601,7 @@ void classModel::stereotypeCollaborationalCommand() {
 //
 // what about returning an object attribtue !yes!
 //
-void classModel::stereotypeCollaborator() {
+void classModel::collaborator() {
     std::string param = "/src:parameter_list//src:parameter";
     std::string local_var = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
     std::vector<std::string> non_primitive_attributes;
@@ -628,7 +644,7 @@ void classModel::stereotypeCollaborator() {
 // all non-primitive local variable names that match the return type of that function.
 // the variable in the return expression.
 
-void classModel::stereotypeFactory() {
+void classModel::factory() {
     for (int i = 0; i < method.size(); ++i){
         if (method[i].isFactory()){
             method[i].setStereotype("factory");
@@ -640,7 +656,7 @@ void classModel::stereotypeFactory() {
 // stereotype empty
 //
 //
-void classModel::stereotypeEmpty() {
+void classModel::empty() {
     for (int i = 0; i < method.size(); ++i){
         if (method[i].isEmptyMethod()){
             method[i].setStereotype("empty");
@@ -659,7 +675,7 @@ void classModel::stereotypeEmpty() {
 // has exactly 1 real call including new calls
 // does not use any data memebers
 //
-void classModel::stereotypeStateless() {
+void classModel::stateless() {
     for (int i = 0; i < method.size(); ++i) {
         bool empty = method[i].isEmptyMethod();
         std::vector<std::string> calls = method[i].findCalls("");
