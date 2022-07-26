@@ -19,18 +19,17 @@
 
 extern primitiveTypes PRIMITIVES;
 
-
 const char NO_STEREOTYPE[] = "none";
-
 const std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
 
-
-bool         checkConst           (std::string);
-void         trimWhitespace       (std::string&);
-std::string  separateTypeName     (const std::string&);
+bool         checkConst           (const std::string&);
 bool         isInheritedAttribute (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
 int          countPureCalls       (const std::vector<std::string>&) ;
 bool         isPrimitiveContainer (std::string);
+
+std::string  trimWhitespace       (const std::string&);
+std::string  LRtoSpace            (const std::string&);
+std::string  separateTypeName     (const std::string&);
 
 
 #endif

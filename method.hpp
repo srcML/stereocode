@@ -23,9 +23,10 @@
 class variable {
 public:
                 variable ()                                           { name = ""; type = ""; };
-                variable (const std::string& s)                       { name = s;           };
+                variable (const std::string& n)                       { name = n;           };
                 variable (const std::string& n, const std::string& t) { name = n; type = t; };
-    void        setType  (const std::string& s)                       { type = s;           };
+    void        setName  (const std::string& n)                       { name = n;           };
+    void        setType  (const std::string& t)                       { type = t;           };
     std::string getName  () const                                     { return name;        };
     std::string getType  () const                                     { return type;        };
 
@@ -84,6 +85,7 @@ public:
     bool        isVoidAccessor        () const;
     bool        variableChanged       (const std::string&) const;
 
+    friend std::ostream& operator<<(std::ostream&, const methodModel&);
 
 private:
     std::string                 name;

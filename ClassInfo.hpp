@@ -29,51 +29,53 @@ public:
     int         getUnitOneCount ()      const { return unitOneCount; };
     int         getUnitTwoCount ()      const { return unitTwoCount; };
     bool        inherits        ()      const { return parentClass.size() > 0; };
-    bool        isAttribute     (std::string&) const;
+    bool        isAttribute     (const std::string&) const;
 
-    srcml_unit* writeStereotypeAttribute (srcml_archive*, srcml_unit*, bool);
+    srcml_unit* outputUnitWithStereotypes(srcml_archive*, srcml_unit*, bool);
+    void        outputReport(std::ofstream&, const std::string&);
 
-    void        findClassName            (srcml_archive*, srcml_unit*);
-    void        findParentClassName      (srcml_archive*, srcml_unit*);
-    void        findAttributeNames       (srcml_archive*, srcml_unit*);
-    void        findAttributeTypes       (srcml_archive*, srcml_unit*);
-    void        findMethods              (srcml_archive*, srcml_unit*, bool);
+    void findClassName(srcml_archive*, srcml_unit*);
+    void findParentClassName(srcml_archive*, srcml_unit*);
+    void findAttributeNames(srcml_archive*, srcml_unit*);
+    void findAttributeTypes(srcml_archive*, srcml_unit*);
+    void findMethods(srcml_archive*, srcml_unit*, bool);
 
-    void findMethodNames              ();
-    void findParameterLists           ();
-    void findMethodReturnTypes        ();
-    void findParameterTypes           ();
-    void findParameterNames           ();
-    void findLocalVariableNames       ();
-    void countChangedAttributes       ();
-    void returnsAttributes            ();
-    int  findAssignOperatorAttribute  (int, bool) const;
-    int  findIncrementedAttribute     (int, bool) const;
-    bool usesAttributeObj             (int, const std::vector<std::string>&);
-    bool usesAttribute                (int);
-    bool callsAttributesMethod        (const std::vector<std::string>&,
-                                       const std::vector<std::string>&,
-                                       const std::vector<std::string>&);
+    void findMethodNames();
+    void findParameterLists();
+    void findMethodReturnTypes();
+    void findParameterTypes();
+    void findParameterNames();
+    void findLocalVariableNames();
+    void countChangedAttributes();
+    void returnsAttributes();
+    int  findAssignOperatorAttribute(int, bool) const;
+    int  findIncrementedAttribute(int, bool) const;
+    bool usesAttributeObj(int, const std::vector<std::string>&);
+    bool usesAttribute(int);
+    bool callsAttributesMethod(const std::vector<std::string>&,
+                               const std::vector<std::string>&,
+                               const std::vector<std::string>&);
 
-    void stereotype            ();
-    void getter                ();
-    void setter                ();
-    void predicate             ();
-    void property              ();
-    void voidAccessor          ();
-    void command               ();
+    void stereotype();
+    void getter();
+    void setter();
+    void predicate();
+    void property();
+    void voidAccessor();
+    void command();
     void collaborationalCommand();
-    void collaborator          ();
-    void factory               ();
-    void empty                 ();
-    void stateless             ();
+    void collaborator();
+    void factory();
+    void empty();
+    void stateless();
 
-    void printMethodHeaders              ();
-    void printReturnTypes                ();
-    void printStereotypes                ();
-    void printAttributes                 ();
-    void printMethodNames                ();
-    void printReportToFile               (std::ofstream&, const std::string&);
+    void printMethodHeaders();
+    void printReturnTypes();
+    void printStereotypes();
+    void printAttributes();
+    void printMethodNames();
+
+    friend std::ostream& operator<<(std::ostream&, const classModel&);
 
 private:
     std::string                 className;

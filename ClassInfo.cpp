@@ -69,7 +69,6 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit){
         name = name.substr(6,end_position-6);
 
         parentClass.push_back(name);
-        //std::cout << "pushed back the super class name " << parentClass[i] << "\n";
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -730,8 +729,8 @@ void classModel::returnsAttributes() {
 
 //
 //
-bool classModel::isAttribute(std::string& name) const {
-    trimWhitespace(name);
+bool classModel::isAttribute(const std::string& n) const {
+    std::string name = trimWhitespace(n);
     size_t left_sq_bracket = name.find("[");    // remove [] if the name is an array
     if (left_sq_bracket != std::string::npos){
         name = name.substr(0, left_sq_bracket);
@@ -797,7 +796,7 @@ int classModel::findAssignOperatorAttribute(int i, bool check_for_loop) const {
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
             std::string var_name(unparsed);
             delete[] unparsed;
-            trimWhitespace(var_name); // removes whitespace
+            var_name = trimWhitespace(var_name); // removes whitespace
             if (isAttribute(var_name)) {
                  ++changed;
             } else if (inherits())
@@ -854,7 +853,7 @@ int classModel::findIncrementedAttribute(int i, bool check_for_loop) const {
                 srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
                 std::string var_name(unparsed);
                 delete[] unparsed;
-                trimWhitespace(var_name);// removes whitespace
+                var_name = trimWhitespace(var_name);// removes whitespace
                 if (isAttribute(var_name)) {
                     ++changed;
                 } else if (inherits())
@@ -1016,36 +1015,29 @@ bool classModel::usesAttribute(int i)  {
 
 
 
-
-
-
 //
-//  TODO: output the default stereotype if NO_STEREOTYPE - currently gives no attribute
-//  Copy and add in stereotype attribute on <function>
+//  Copy unit and add in stereotype attribute on <function>
+//  Example: <function stereotype="get"> ... </function>
 //
-//  Example <function stereotype="get">
-//
-srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int n = unitOneCount;
     int offset = 0;
     if (!oneUnit) {
         n = unitTwoCount;
         offset = unitOneCount;
     }
-
     for (int i = 0; i < n; ++i){
         std::string stereotype = method[i+offset].getStereotype();
         if (stereotype == NO_STEREOTYPE && unitOneCount + unitTwoCount == 1) return nullptr;
-        if (stereotype != NO_STEREOTYPE){
-            std::string xpath = "//src:function[string(src:name)='";
-            xpath += method[i+offset].getName() + "' and string(src:type)='";
-            xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
-            xpath += method[i+offset].getParameters() + "' and string(src:specifier)='";
-            xpath += method[i+offset].getConst() + "']";
-            srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
-                                                   "http://www.srcML.org/srcML/stereotype",
-                                                   "stereotype", stereotype.c_str());
-        }
+
+        std::string xpath = "//src:function[string(src:name)='";
+        xpath += method[i+offset].getName() + "' and string(src:type)='";
+        xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
+        xpath += method[i+offset].getParameters() + "' and string(src:specifier)='";
+        xpath += method[i+offset].getConst() + "']";
+        srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
+                                               "http://www.srcML.org/srcML/stereotype",
+                                               "stereotype", stereotype.c_str());
     }
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -1056,73 +1048,73 @@ srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* archive, srcml_u
 
 
 
+// Outputs a report file for a class (tab separated)
+//  filepath || class name || method || stereotypes
+//
+void classModel::outputReport(std::ofstream& out, const std::string& input_file_path){
+    if (out.is_open()) {
 
-
-//Basic output methods
-//
-//
-void classModel::printReturnTypes(){
-    std::cout << "RETURN TYPES: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cout << method[i].getReturnType() << "\n";
-    }
-    std::cerr << std::endl;
-}
-
-//
-//
-void classModel::printStereotypes(){
-    std::cout << "STEREOTYPES: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cout << method[i].getStereotype() << "\n";
-    }
-    std::cerr << std::endl;
-}
-
-//
-//
-void classModel::printMethodNames(){
-    std::cout << "METHOD Names: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cerr << i << "  " << method[i].getName() << std::endl;
-    }
-}
-
-
-//
-//
-void classModel::printMethodHeaders(){
-    std::cout << "METHOD HEADERS: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cerr << i << "  " << method[i].getHeader() << std::endl;
-    }
-}
-
-//
-//
-void classModel::printAttributes(){
-    std::cout << "ATTRIBUTES: \n";
-    std::cout << attribute.size() << " names\n";
-
-    for (int i = 0; i < attribute.size(); ++i){
-        std::cerr << "TYPE: " << attribute[i].getType() << " NAME: " << attribute[i].getName() << std::endl;
-    }
-
-}
-
-//
-//
-void classModel::printReportToFile(std::ofstream& output_file, const std::string& input_file_path){
-    int func_count = unitOneCount + unitTwoCount;
-    if (output_file.is_open()){
-        for (int i = 0; i < func_count; ++i){
-            output_file << input_file_path << "|" << method[i].getHeader() << "||" << method[i].getStereotype() << "\n";
+        for (int i = 0; i < method.size(); ++i){
+            out << input_file_path << "\t" << className << "\t" << method[i].getHeader() << "\t" << method[i].getStereotype() << "\n";
         }
     }
 }
 
 
+// Output class information
+std::ostream& operator<<(std::ostream& out, const classModel& c) {
+    out << std::endl << "--------------------------------------" << std::endl;
+    out << "Class: " << c.className << std::endl;
+    out << "# Methods: " << c.method.size() << std::endl;
+    for (int i = 0; i < c.method.size(); ++i) {
+        out <<  c.method[i] << std::endl;
+    }
+    out << "# Attributes: " << c.attribute.size() << std::endl;
+    for (int i = 0; i < c.attribute.size(); ++i) {
+        out << c.attribute[i].getType() << " : " << c.attribute[i].getName() << std::endl;
+    }
+    out << "--------------------------------------" << std::endl;
+    return out;
+}
 
 
+//Output for testing
+void classModel::printReturnTypes(){
+    std::cerr << "RETURN TYPES: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << method[i].getReturnType() << "\n";
+    }
+    std::cerr << std::endl;
+}
 
+void classModel::printStereotypes(){
+    std::cerr << "STEREOTYPES: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << method[i].getStereotype() << "\n";
+    }
+    std::cerr << std::endl;
+}
+
+void classModel::printMethodNames(){
+    std::cerr << "METHOD Names: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << i << "  " << method[i].getName() << std::endl;
+    }
+}
+
+void classModel::printMethodHeaders(){
+    std::cerr << "METHOD HEADERS: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << i << "  " << method[i].getHeader() << std::endl;
+    }
+}
+
+void classModel::printAttributes(){
+    std::cerr << "ATTRIBUTES: \n";
+    std::cerr << attribute.size() << " names\n";
+    for (int i = 0; i < attribute.size(); ++i){
+        std::cerr << "TYPE: " << attribute[i].getType() << " NAME: " << attribute[i].getName() << std::endl;
+    }
+
+}
 

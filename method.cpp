@@ -330,7 +330,7 @@ std::vector<std::string> methodModel::findLocalVariables() const {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         var_name = unparsed;
         delete[] unparsed;
-        trimWhitespace(var_name);
+        var_name = trimWhitespace(var_name);
         size_t arr = var_name.find("[");
         if (arr != std::string::npos){
             var_name.erase(arr, arr-var_name.size());
@@ -348,7 +348,7 @@ std::vector<std::string> methodModel::findLocalVariables() const {
 
 //
 //
-// returns a vector of string containing the parameters name of function(i)
+// returns a vector of string containing the parameters name of the function
 //
 std::vector<std::string> methodModel::findParameterNames() const {
     std::vector<std::string> names;
@@ -478,7 +478,7 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         call = unparsed;
         delete[] unparsed;
-        trimWhitespace(call);
+        call = trimWhitespace(call);
         if (call != "assert" && !isPrimitiveContainer(call)) {
             calls.push_back(call);
         }
@@ -491,4 +491,22 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
     return calls;
 }
 
+
+// Output a method for checking and testing
+std::ostream& operator<<(std::ostream& out, const methodModel& m) {
+    out << "Method: " << trimWhitespace(m.name) << " " << m.getConst();
+    out << " returns: " << LRtoSpace(m.getReturnType()) << std::endl;
+    out << "   Stereotype: " << m.stereotype << std::endl;
+    out << "   Parameters: ";
+    for (int i=0; i< m.parameterNames.size(); ++i) {
+        out << "(" << m.parameterTypes[i] << " : " << m.parameterNames[i] << ") ";
+    }
+    out << std::endl;
+    out << "   Local Variables: ";
+    for (int i=0; i< m.localVariables.size(); ++i) {
+        out << m.localVariables[i] << "  ";
+    }
+    out << std::endl;
+    return out;
+}
 

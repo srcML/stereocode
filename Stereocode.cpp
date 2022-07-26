@@ -39,7 +39,8 @@ int main(int argc, char const *argv[])
     std::string outputFile = "";
     bool outputReport = false;
     bool overWriteInput = false;
-    std::vector<std::string> inputFileList;
+    bool DEBUG = false;
+   std::vector<std::string> inputFileList;
 
     app.add_option("-a,--archive",     inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp units)");
     app.add_option("-o,--output-file", outputFile,     "File name of output - srcML archive with stereotypes");
@@ -47,6 +48,8 @@ int main(int argc, char const *argv[])
     app.add_option("-p,--primitives",  primitivesFile, "File name of user supplied primitive types (one per line)");
     app.add_flag  ("-r,--report",      outputReport,   "Output optional report file - *.report.txt (off by default)");
     app.add_flag  ("-v,--overwrite",   overWriteInput, "Over write input file with stereotype output (off by default)");
+    app.add_flag  ("-d,--debug",       DEBUG,          "Turn on debug mode");
+
 
     CLI11_PARSE(app, argc, argv);
 
@@ -87,19 +90,19 @@ int main(int argc, char const *argv[])
         classModel  aClass  = classModel(archive, firstUnit, secondUnit);  //Construct class and do initial anaylsis
         aClass.stereotype();                                               //Analysis for stereotypes
 
-        if (outputReport) {             //Optionally output a report of method names || stereotypes for the class
+        if (outputReport) {             //Optionally output a report (tab separated) path, method, stereotype for the class
             std::ofstream reportFile;
             reportFile.open(inputFileList[i] + ".report.txt");
-            aClass.printReportToFile(reportFile, inputFileList[i]);
+            aClass.outputReport(reportFile, inputFileList[i]);
             reportFile.close();
         }
 
         std::cerr << "Class name: " << aClass.getClassName() << std::endl;
         if (aClass.getUnitOneCount() != 0) {
-            firstUnit = aClass.writeStereotypeAttribute(archive, firstUnit, true);
+            firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
         }
         if (aClass.getUnitTwoCount() != 0) {
-            secondUnit = aClass.writeStereotypeAttribute(archive, secondUnit, false);
+            secondUnit = aClass.outputUnitWithStereotypes(archive, secondUnit, false);
         }
 
         //Namespace for output of stereotypes
@@ -121,6 +124,8 @@ int main(int argc, char const *argv[])
         }
         srcml_archive_write_unit(output_archive, firstUnit);
         srcml_archive_write_unit(output_archive, secondUnit);
+
+        if (DEBUG) std::cerr << aClass << std::endl;
 
         //Clean up
         srcml_unit_free(firstUnit);

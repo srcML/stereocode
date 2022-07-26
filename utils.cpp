@@ -9,8 +9,8 @@
 
 
 // Checks if method is const
-bool checkConst(std::string function_srcml) {
-    trimWhitespace(function_srcml);
+bool checkConst(const std::string& srcml) {
+    std::string function_srcml = trimWhitespace(srcml);
     size_t end = function_srcml.find("{");
     std::string function_srcml_header = function_srcml.substr(0, end);
     if (function_srcml_header.find("<specifier>const</specifier><block>") != std::string::npos){
@@ -119,51 +119,64 @@ bool isPrimitiveContainer(std::string return_type){
 
 
 
-//
-// TODO: Should return a string with no side effect. But this is efficent
-//
-void trimWhitespace(std::string& str) {
-    str.erase(std::remove_if(str.begin(),
-                             str.end(),
-                             [](char c) { return (c == ' ' || c == '\t' || c == '\n'); }),
-              str.end());
+
+//Removes all whitespace from string (' ', /t, /n)
+std::string trimWhitespace(const std::string& s) {
+    std::string result(s);
+    result.erase(std::remove_if(result.begin(),
+                                result.end(),
+                                [](char c) { return (c == ' ' || c == '\t' || c == '\n' || c == '\r'); }),
+                 result.end());
+    return result;
+}
+
+
+
+// Replaces tabs and LR to a space
+std::string LRtoSpace(const std::string& s) {
+    std::string result(s);
+    std::replace_if(result.begin(),
+                    result.end(),
+                    [](char c) { return c == '\t' || c == '\n'; },
+                    ' ');
+    return result;
 }
 
 //
+// Removes specifiers, *, & from type name
 //
 std::string separateTypeName(const std::string& type){
-    std::string name = type;
-    trimWhitespace(name);
-    size_t stat = name.find("static");
+    std::string result = trimWhitespace(type);
+    size_t stat = result.find("static");
     if (stat != std::string::npos){
-        name.erase(stat, 6);
+        result.erase(stat, 6);
     }
-    size_t mut = name.find("mutable");
+    size_t mut = result.find("mutable");
     if (mut != std::string::npos){
-        name.erase(mut, 7);
+        result.erase(mut, 7);
     }
-    size_t in = name.find("inline");
+    size_t in = result.find("inline");
     if(in != std::string::npos){
-        name.erase(in, 6);
+        result.erase(in, 6);
     }
-    size_t virt = name.find("virtual");
+    size_t virt = result.find("virtual");
     if (virt != std::string::npos){
-        name.erase(virt, 7);
+        result.erase(virt, 7);
     }
 
-    size_t star = name.find("*");
+    size_t star = result.find("*");
     if (star != std::string::npos){
-        name.erase(star, 1);
+        result.erase(star, 1);
     }
-    size_t amp = name.find("&");
+    size_t amp = result.find("&");
     if (amp != std::string::npos){
-        name.erase(amp, 1);
+        result.erase(amp, 1);
     }
 
-    size_t con = name.find("const");
+    size_t con = result.find("const");
     if (con != std::string::npos){
-        name.erase(con, 5);
+        result.erase(con, 5);
     }
-    return name;
+    return result;
 }
 
