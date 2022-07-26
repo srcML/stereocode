@@ -1,10 +1,15 @@
-// Stereocode main
 //
-// compile with cmake, then make
+// Stereocode Main
+//
+// Creation: 2021
+//
+// Given a srcML archive, each method/function is annotated with a stereotype as an
+//   attribute on <function stereotype="get"> ... </function>
 //
 // Input assumptions:
-//  given cpp and hpp in 1 archive.
-//  only 1 class per file   
+//  One class per file (i.e., <unit/> )
+//  For C++ assumes archive with two units: foo.hpp foo.cpp
+//
 
 #include <iostream>
 #include <fstream>
@@ -32,27 +37,28 @@ int main(int argc, char const *argv[])
     std::string inputFile = "";
     std::string primitivesFile = "";
     std::string outputFile = "";
-    bool        outputReport = false;
+    bool outputReport = false;
+    bool overWriteInput = false;
     std::vector<std::string> inputFileList;
 
-    app.add_option("-a,--archive",     inputFile,      "File name of a single srcML archive (for C++ it is the hpp and cpp units");
-    app.add_option("-o,--output-file", outputFile,     "File name of output srcML archive with stereotypes");
-    app.add_option("-l,--list-file",   fileList,       "File name that contains a list of srcML archives");
+    app.add_option("-a,--archive",     inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp units)");
+    app.add_option("-o,--output-file", outputFile,     "File name of output - srcML archive with stereotypes");
+    app.add_option("-l,--list-file",   fileList,       "File name that contains a list (one per line) of srcML archives");
     app.add_option("-p,--primitives",  primitivesFile, "File name of user supplied primitive types (one per line)");
-    app.add_flag  ("-r,--report",      outputReport,   "Output optional report file (off by default)");
+    app.add_flag  ("-r,--report",      outputReport,   "Output optional report file - *.report.txt (off by default)");
+    app.add_flag  ("-v,--overwrite",   overWriteInput, "Over write input file with stereotype output (off by default)");
 
     CLI11_PARSE(app, argc, argv);
 
-    if (inputFile != "") {
+    if (inputFile != "")                      //One class input archive
         inputFileList.push_back(inputFile);
-    }
-    else if(fileList != "") {
+    else if (fileList != "")                   //A list of archives
         inputFileList = readFileNames(fileList);
-    } else {
+    else {
         std::cerr << "Error: No input given " << std::endl;
         return -1;
     }
-    if (primitivesFile != "") {  //Add any user defined primitive types to initial set
+    if (primitivesFile != "") {       //Add user defined primitive types to initial set
         std::ifstream in(primitivesFile);
         if (in.is_open())
             in >> PRIMITIVES;
@@ -63,23 +69,25 @@ int main(int argc, char const *argv[])
         in.close();
     }
 
-    std::cerr << "Computing stereotypes for the following classes: " << std::endl;
+    std::cerr << "Computing stereotypes for the following class(es): " << std::endl;
 
     for (int i = 0; i < inputFileList.size(); ++i){
         int error;
         srcml_archive* archive = srcml_archive_create();
-        error = srcml_archive_read_open_filename(archive, inputFileList[i].c_str());   // read the srcml archive file
+        error = srcml_archive_read_open_filename(archive, inputFileList[i].c_str());   //Read a srcML archive file
         if (error) {
             std::cerr << "Error: File not found: " << inputFileList[i] << ", error == " << error << "\n";
             return -1;
         }
+        //In the case of C++ there will normally be two units, a hpp, cpp pair. But may only have a hpp
+        //In case of other languages just one unit
         srcml_unit* firstUnit = srcml_archive_read_unit(archive);   //.hpp, .java, .cs, etc
         srcml_unit* secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
 
-        classModel  aClass  = classModel(archive, firstUnit, secondUnit);
-        aClass.stereotype();
+        classModel  aClass  = classModel(archive, firstUnit, secondUnit);  //Construct class and do initial anaylsis
+        aClass.stereotype();                                               //Analysis for stereotypes
 
-        if (outputReport) {
+        if (outputReport) {             //Optionally output a report of method names || stereotypes for the class
             std::ofstream reportFile;
             reportFile.open(inputFileList[i] + ".report.txt");
             aClass.printReportToFile(reportFile, inputFileList[i]);
@@ -94,29 +102,27 @@ int main(int argc, char const *argv[])
             secondUnit = aClass.writeStereotypeAttribute(archive, secondUnit, false);
         }
 
+        //Namespace for output of stereotypes
         srcml_archive* output_archive = srcml_archive_create();
         error = srcml_archive_register_namespace(output_archive, "st", "http://www.srcML.org/srcML/stereotype");
         if (error) {
             std::cerr << "Error registering namespace" << std::endl;
             return -1;
         }
-
-        if (fileList == "" && outputFile != "") {
-            error = srcml_archive_write_open_filename(output_archive, outputFile.c_str());
-            if (error) {
-                std::cerr << "Error opening: " << outputFile << std::endl;
-                return -1;
-            }
-        } else {
-            error = srcml_archive_write_open_filename(output_archive, (inputFileList[i] + ".annotated.xml").c_str());
-            if (error) {
-                std::cerr << "Error opening: " << inputFileList[i] << ".annotated.xml" << std::endl;
-                return -1;
-            }
+        //Output srcML with stereotype attributes to some file
+        if (overWriteInput)
+            outputFile = inputFileList[i];                    //Overwrite input file
+        else if (fileList != "" || outputFile == "")          //Not specified, no overwrite
+            outputFile = inputFileList[i] + ".annotated.xml"; //Default output file name
+        error = srcml_archive_write_open_filename(output_archive, outputFile.c_str());
+        if (error) {
+            std::cerr << "Error opening: " << outputFile << std::endl;
+            return -1;
         }
         srcml_archive_write_unit(output_archive, firstUnit);
         srcml_archive_write_unit(output_archive, secondUnit);
 
+        //Clean up
         srcml_unit_free(firstUnit);
         srcml_unit_free(secondUnit);
         srcml_archive_close(archive);
@@ -124,6 +130,7 @@ int main(int argc, char const *argv[])
         srcml_archive_free(output_archive);
         srcml_archive_free(archive);
         aClass  = classModel();
+        outputFile = "";
     }
     
     std::cerr << "StereoCode completed." << std::endl;
