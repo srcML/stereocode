@@ -14,6 +14,8 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <cctype>
+
 #include "PrimitiveTypes.hpp"
 
 
@@ -22,6 +24,7 @@ extern primitiveTypes PRIMITIVES;
 const char NO_STEREOTYPE[] = "none";
 const std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
 
+bool         isGlobalConstFormat  (const std::string&);
 bool         checkConst           (const std::string&);
 bool         isInheritedAttribute (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);
 int          countPureCalls       (const std::vector<std::string>&) ;

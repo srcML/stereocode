@@ -7,6 +7,17 @@
 
 #include "utils.hpp"
 
+// Checks if name is global const format
+// Example: GLOBAL_FROMAT - upper case with "_"
+//
+bool isGlobalConstFormat(const std::string& name) {
+    bool result = true;
+    for (int k = 0; k < name.size(); ++k) {
+        if (!isupper(name[k]) && name[k] != '_') result = false;
+    }
+    return result;
+}
+
 
 // Checks if method is const
 bool checkConst(const std::string& srcml) {
@@ -22,10 +33,11 @@ bool checkConst(const std::string& srcml) {
     }
 }
 
-//
 // Checks if a name could be an inheritied attribute
 //
 // REQUIRES: parentClass.size() > 0 - the class inherits from another class
+//
+// TODO: Should we check for global const?  - AxisModelLinear.cxx bool FLT_EQUAL( double x, double y ) has a global.
 //
 bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
                                       const std::vector<std::string>& local_var_names,
@@ -45,7 +57,7 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
         if (expr == local_var_names[k]) is_inherited = false;
     }
 
-    for(int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
+    for (int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
         if (expr[k] == '+' || expr[k] == '-' || expr[k] == '*' || expr[k] == '/'
             || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
             || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
@@ -53,10 +65,6 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
             is_inherited = false;
         }
     }
-
-    // expr is all uppercase letters
-    // assumed to be global variable
-    //if (upper_case(expr)) is_inherited = false;
 
     return is_inherited;
 }
@@ -113,7 +121,6 @@ bool isPrimitiveContainer(std::string return_type){
     }
     // else check if primitive(NOT container).
     return PRIMITIVES.isPrimitive(return_type);
-
 }
 
 
@@ -125,19 +132,19 @@ std::string trimWhitespace(const std::string& s) {
     std::string result(s);
     result.erase(std::remove_if(result.begin(),
                                 result.end(),
-                                [](char c) { return (c == ' ' || c == '\t' || c == '\n' || c == '\r'); }),
+                                [](char c) { return isspace(c); } ),
                  result.end());
     return result;
 }
 
 
 
-// Replaces tabs and LR to a space
+// Replaces tab, CR, LR to a space
 std::string LRtoSpace(const std::string& s) {
     std::string result(s);
     std::replace_if(result.begin(),
                     result.end(),
-                    [](char c) { return c == '\t' || c == '\n'; },
+                    [](char c) { return c == '\t' || c == '\n' || c == '\r'; },
                     ' ');
     return result;
 }
@@ -147,36 +154,28 @@ std::string LRtoSpace(const std::string& s) {
 //
 std::string separateTypeName(const std::string& type){
     std::string result = trimWhitespace(type);
-    size_t stat = result.find("static");
-    if (stat != std::string::npos){
-        result.erase(stat, 6);
-    }
-    size_t mut = result.find("mutable");
-    if (mut != std::string::npos){
-        result.erase(mut, 7);
-    }
-    size_t in = result.find("inline");
-    if(in != std::string::npos){
-        result.erase(in, 6);
-    }
-    size_t virt = result.find("virtual");
-    if (virt != std::string::npos){
-        result.erase(virt, 7);
-    }
+    size_t pos = 0;
+    pos = result.find("static");
+    if (pos != std::string::npos) result.erase(pos, 6);
+    pos = result.find("mutable");
+    if (pos != std::string::npos) result.erase(pos, 7);
+    pos = result.find("inline");
+    if (pos != std::string::npos) result.erase(pos, 6);
+    pos = result.find("virtual");
+    if (pos != std::string::npos) result.erase(pos, 7);
+    pos = result.find("const");
+    if (pos != std::string::npos) result.erase(pos, 5);
+    pos = result.find("friend");
+    if (pos != std::string::npos) result.erase(pos, 6);
+    pos = result.find("*");
+    if (pos != std::string::npos) result.erase(pos, 1);
+    pos = result.find("&&");
+    if (pos != std::string::npos) result.erase(pos, 2);
+    pos = result.find("&");
+    if (pos != std::string::npos) result.erase(pos, 1);
+    pos = result.find("[]");
+    if (pos != std::string::npos) result.erase(pos, 2);
 
-    size_t star = result.find("*");
-    if (star != std::string::npos){
-        result.erase(star, 1);
-    }
-    size_t amp = result.find("&");
-    if (amp != std::string::npos){
-        result.erase(amp, 1);
-    }
-
-    size_t con = result.find("const");
-    if (con != std::string::npos){
-        result.erase(con, 5);
-    }
     return result;
 }
 
