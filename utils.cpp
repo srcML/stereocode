@@ -93,17 +93,74 @@ int countPureCalls(const std::vector<std::string>& all_calls)  {
 
 //
 // Checks if a primitive type
-//
-bool isPrimitiveContainer(std::string return_type){
+//  Examples: int, bool, char, double, cont int, inline int
+//            vector<int>, map<int,int>, int[], int*, int&
+bool isPrimitiveContainer(std::string s) {
+    s = removeSpecifiers(s);
+    s = LRtoSpace(s);
+
+    //Remove std::, vector, list, map
+    // std::vector<list<x>>  std::map<int, int>
+    size_t pos = 0;
+    while ((pos = s.find("std::")) != std::string::npos)
+        s.erase(pos, 5);
+    while ((pos = s.find("vector")) != std::string::npos)
+        s.erase(pos, 6);
+    while ((pos = s.find("list")) != std::string::npos)
+        s.erase(pos, 4);
+    while ((pos = s.find("set")) != std::string::npos)
+        s.erase(pos, 3);
+    while ((pos = s.find("map")) != std::string::npos)
+        s.erase(pos, 3);
+    //Replace < > , with space
+    std::replace_if(s.begin(), s.end(), [](char c) { return c == ',' || c == '<' || c == '>'; }, ' ');
+    //Multiple spaces to only one
+    while ((pos = s.find("  ")) != std::string::npos)
+        s.erase(pos, 1);
+    //Ltrim and Rtrim
+    pos = 0;
+    while (s[pos] == ' ') {
+        s.erase(pos, 1);
+        ++pos;
+    }
+    pos = s.size() - 1;
+    while (s[pos] == ' ') {
+        s.erase(pos, 1);
+        --pos;
+    }
+    if (s.find(" ") != std::string::npos) {  //Multiple type names
+        size_t start = 0;
+        size_t end = s.find(" ");
+        while (end != std::string::npos) {
+            if (!PRIMITIVES.isPrimitive(s.substr(start, end - start))) return false;
+            start = end + 1;
+            end = s.find(" ", start);
+        }
+        return PRIMITIVES.isPrimitive(s.substr(start, end - start));
+    }
+    return PRIMITIVES.isPrimitive(s);  //One type name
+}
+
+
+
+/*bool isPrimitiveContainer(std::string return_type) {
+
+    std::cout << "---------------------------------------" << std::endl;
+    std::cout << return_type << std::endl;
+    std::cout << "xx---------------------------------------" << std::endl;
+
     return_type = separateTypeName(return_type); // trim whitespace, specifiers and modifiers
 
+    std::cout << return_type << std::endl;
+    std::cout << "---------------------------------------" << std::endl;
+
     // if the type is a vector or list, check if the element type is primitive
-    if(return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
+    if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos) {
         size_t start = return_type.find("<") + 1;
         size_t end = return_type.find(">");
         return_type = return_type.substr(start, end - start);
         // in the case of vector<vector<x>>
-        if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
+        if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos) {
             size_t start = return_type.find("<") + 1;
             return_type = return_type.substr(start);
         }
@@ -111,17 +168,18 @@ bool isPrimitiveContainer(std::string return_type){
 
     // if the type is a map check if the key and value are both primivite
     // assumes never get map<map<x,y>,z>
-    if (return_type.find("map") != std::string::npos){
+    if (return_type.find("map") != std::string::npos) {
         size_t start = return_type.find("<") + 1;
         size_t split = return_type.find(",");
         size_t end = return_type.find(">");
         std::string key = return_type.substr(start, split-start);
         std::string value = return_type.substr(split + 1, end - split - 1);
+
         return(PRIMITIVES.isPrimitive(key) && PRIMITIVES.isPrimitive(value));
     }
     // else check if primitive(NOT container).
     return PRIMITIVES.isPrimitive(return_type);
-}
+}*/
 
 
 
@@ -150,10 +208,20 @@ std::string LRtoSpace(const std::string& s) {
 }
 
 //
-// Removes specifiers, *, & from type name
+// Removes WS, specifiers, *, & from type name
 //
 std::string separateTypeName(const std::string& type){
     std::string result = trimWhitespace(type);
+    result = removeSpecifiers(result);
+
+    return result;
+}
+
+//
+// Removes specifiers, *, & from type name
+//
+std::string removeSpecifiers(const std::string& type){
+    std::string result = type;
     size_t pos = 0;
     pos = result.find("static");
     if (pos != std::string::npos) result.erase(pos, 6);
@@ -178,4 +246,5 @@ std::string separateTypeName(const std::string& type){
 
     return result;
 }
+
 

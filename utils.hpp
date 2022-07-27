@@ -32,6 +32,7 @@ bool         isPrimitiveContainer (std::string);
 
 std::string  trimWhitespace       (const std::string&);
 std::string  LRtoSpace            (const std::string&);
+std::string  removeSpecifiers     (const std::string&);
 std::string  separateTypeName     (const std::string&);
 
 

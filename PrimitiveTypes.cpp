@@ -55,7 +55,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
     if (language != "") ptypes.clear();  //Change of language
     language = lang;
 
-    if (language == "C++") {
+    if (language == "C++OLD") {
         ptypes = {
             "short",
             "shortint",
@@ -158,7 +158,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "bool"
         };
     }
-    if (language == "C++2") {  //C++ with spaces
+    if (language == "C++") {  //C++ with spaces
         ptypes = {
             "int",
             "short",
