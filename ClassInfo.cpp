@@ -263,7 +263,7 @@ void classModel::findParameterLists() {
         std::string parameter_list(unparsed);
         delete[] unparsed;
 
-        method[i].setParameters(parameter_list);
+        method[i].setParametersXML(parameter_list);
 
         srcml_unit_free(unit);
         srcml_clear_transforms(archive);
@@ -775,7 +775,7 @@ int classModel::findAssignOperatorAttribute(int i, bool check_for_loop) const {
         std::string xpath = "//src:function[string(src:name)='";
         xpath += method[i].getName() + "' and string(src:type)='";
         xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-        xpath += method[i].getParameters() +"']//src:operator[.='";
+        xpath += method[i].getParametersXML() +"']//src:operator[.='";
         xpath += ASSIGNMENT_OPERATOR[j] + "' and not(ancestor::src:control)";
         xpath += " and not(ancestor::src:throw) and not(ancestor::src:catch)";
         if (check_for_loop) xpath += " and ancestor::src:for";
@@ -831,7 +831,7 @@ int classModel::findIncrementedAttribute(int i, bool check_for_loop) const {
             std::string xpath = "//src:function[string(src:name)='";
             xpath += method[i].getName() + "' and string(src:type)='";
             xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-            xpath += method[i].getParameters() + "' and string(src:specifier)='";
+            xpath += method[i].getParametersXML() + "' and string(src:specifier)='";
             xpath += method[i].getConst() + "']//src:operator[.='";
             xpath += INC_OPS[j] + "' and not(ancestor::src:control)";
             xpath += " and not(ancestor::src:throw) and not(ancestor::src:catch)";
@@ -924,7 +924,7 @@ bool classModel::usesAttributeObj(int i, const std::vector<std::string>& obj_nam
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-    xpath += method[i].getParameters() + "' and string(src:specifier)='";
+    xpath += method[i].getParametersXML() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:name[not(ancestor::src:throw) and not(ancestor::src:catch)]";
 
     archive = srcml_archive_create();
@@ -975,7 +975,7 @@ bool classModel::usesAttribute(int i)  {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-    xpath += method[i].getParameters() + "' and string(src:specifier)='";
+    xpath += method[i].getParametersXML() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:expr[not(ancestor::src:throw) and";
     xpath += "not(ancestor::src:argument_list[@type='generic']) and not(ancestor::src:catch)]/src:name";
 
@@ -1033,7 +1033,7 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
         std::string xpath = "//src:function[string(src:name)='";
         xpath += method[i+offset].getName() + "' and string(src:type)='";
         xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
-        xpath += method[i+offset].getParameters() + "' and string(src:specifier)='";
+        xpath += method[i+offset].getParametersXML() + "' and string(src:specifier)='";
         xpath += method[i+offset].getConst() + "']";
         srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
                                                "http://www.srcML.org/srcML/stereotype",

@@ -7,9 +7,9 @@
 
 #include "method.hpp"
 
-methodModel::methodModel() : name(), parameters(),
+methodModel::methodModel() : name(), parametersXML(),
                              parameterNames(), parameterTypes(),
-                             srcML(), header(),
+                             srcML(), headerXML(),
                              returnType(), constMethod(false),
                              retAttribute(false), attributesModified(0),
                              localVariables(), stereotype(NO_STEREOTYPE) {
@@ -19,7 +19,7 @@ methodModel::methodModel() : name(), parameters(),
 
 methodModel::methodModel(const std::string& xml, const std::string& s, bool f) : methodModel() {
     srcML = xml;
-    header = s;
+    headerXML = s;
     constMethod = f;
 };
 
@@ -37,7 +37,7 @@ bool methodModel::findConstructorCall() const{
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']//src:call[not(ancestor::src:throw) and not(ancestor::src:catch) and";
     xpath += " preceding-sibling::*[1][self::src:operator='new']]/src:name";
 
@@ -68,7 +68,7 @@ std::vector<std::string> methodModel::findReturnExpressions(bool getter) const {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']//src:return/src:expr";
     if (getter){
         xpath += "[(count(*)=1 and src:name) or (count(*)=2 and *[1][self::src:operator='*'] and *[2][self::src:name])]";
@@ -150,7 +150,7 @@ bool methodModel::isEmptyMethod() const {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "'][not(src:block/src:block_content/*[not(self::src:comment)][1])]";
 
     archive = srcml_archive_create();
@@ -183,7 +183,7 @@ bool methodModel::containsNonPrimitive(const std::string& x, const std::string& 
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']" + x + "/src:decl/src:type/src:name";
 
     archive = srcml_archive_create();
@@ -232,7 +232,7 @@ bool methodModel::variableChanged(const std::string& var_name) const {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']//src:name[.='" + var_name + "' and not(ancestor::src:throw) ";
     xpath += "and not(ancestor::src:catch)]/following-sibling::*[1]";
 
@@ -307,7 +307,7 @@ std::vector<std::string> methodModel::findLocalVariables() const {
     std::string xpath_function = "//src:function[string(src:name)='";
     xpath_function += getName() + "' and string(src:type)='";
     xpath_function += getReturnType() + "' and string(src:parameter_list)='";
-    xpath_function += getParameters() + "' and string(src:specifier)='";
+    xpath_function += getParametersXML() + "' and string(src:specifier)='";
     xpath_function += getConst() + "']";
     std::string decl_stmt = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
     std::string control = "//src:control/src:init";
@@ -360,7 +360,7 @@ std::vector<std::string> methodModel::findParameterNames() const {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']/src:parameter_list//src:parameter/src:decl/src:name";
 
 
@@ -407,7 +407,7 @@ std::vector<std::string> methodModel::findParameterTypes() const {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']/src:parameter_list//src:parameter/src:decl/src:type";
 
     archive = srcml_archive_create();
@@ -452,7 +452,7 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
     std::string xpath = "//src:function[string(src:name)='";
     xpath += getName() + "' and string(src:type)='";
     xpath += getReturnType() + "' and string(src:parameter_list)='";
-    xpath += getParameters() + "' and string(src:specifier)='";
+    xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']//src:call[not(ancestor::src:throw) and not(ancestor::src:catch)";
     if (call_type == "pure") {
         xpath += " and not(preceding-sibling::*[1][self::src:operator='new'])";

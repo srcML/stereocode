@@ -29,8 +29,8 @@ public:
 
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
-    std::string getParameters         () const { return parameters; };
-    std::string getHeader             () const { return header; };
+    std::string getParametersXML      () const { return parametersXML; };
+    std::string getHeader             () const { return headerXML; };
     std::string getConst              () const { if (constMethod) return "const"; else return ""; };
     int         getAttributesModified () const { return attributesModified; };
     bool        isConst               () const { return constMethod; };
@@ -53,8 +53,8 @@ public:
 
     void        setName               (const std::string& s) { name = s; };
     void        setReturnType         (const std::string& s) { returnType = s; };
-    void        setParameters         (const std::string& s) { parameters = s; };
-    void        setHeader             (const std::string& s) { header = s; };
+    void        setParametersXML      (const std::string& s) { parametersXML = s; };
+    void        setHeader             (const std::string& s) { headerXML = s; };
     void        setConst              (bool flag)            { constMethod = flag; };
     void        setReturnsAttribute   (bool flag)            { retAttribute = flag; };
     void        setAttributesModified (int n)                { attributesModified = n; };
@@ -74,11 +74,11 @@ public:
 
 private:
     std::string                 name;
-    std::string                 parameters;
+    std::string                 parametersXML;      //srcML of <parameter-list>
     std::vector<std::string>    parameterNames;
     std::vector<std::string>    parameterTypes;
     std::string                 srcML;               //srcML archive of the method
-    std::string                 header;
+    std::string                 headerXML;           //srcML of function header
     std::string                 returnType;
     bool                        constMethod;         //Is it a const method?
     bool                        retAttribute;        //Does it return any attributes?
