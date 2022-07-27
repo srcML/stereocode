@@ -78,7 +78,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const classModel&);
 
-private:
+protected:
     std::string                 className;
     std::vector<std::string>    parentClass;
     std::vector<variable>       attribute;

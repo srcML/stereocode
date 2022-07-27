@@ -6,7 +6,6 @@
 //   there will be no collaboration assumed
 //
 //  Created by jmaletic on 7/6/22.
-//  TODO: This needs to be improved to add new types and an option.
 //
 
 #ifndef PrimitiveTypes_HPP
@@ -20,20 +19,20 @@
 
 class primitiveTypes {
 public:
-    primitiveTypes();
+    primitiveTypes() : language(""), ptypes() {};
 
     bool isPrimitive(const std::string&) const;
+    void addPrimitive(const std::string&);
+    void setLanguage(const std::string&);
 
     friend std::ostream& operator<<(std::ostream&, const primitiveTypes&);
     friend std::istream& operator>>(std::istream&, primitiveTypes&);
 
 private:
-    std::set<std::string> ptypes;
+    std::string                 language;  //Language: "C++", "C#", "Java", "C"
+    std::set<std::string>       ptypes;    //List of language primitives
+    std::set<std::string>       usertypes;    //List of user defined primitives 
 };
 
 
-
-
-
-
-#endif /* PrimitiveTypes_hpp */
+#endif

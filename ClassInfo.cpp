@@ -8,15 +8,19 @@
 //
 classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit) : classModel() {
     language = srcml_unit_get_language(firstUnit);
+    PRIMITIVES.setLanguage(language);
 
+    //Get class information
     findClassName(archive, firstUnit);
     findParentClassName(archive, firstUnit);
     findAttributeNames(archive, firstUnit);
     findAttributeTypes(archive, firstUnit);
 
+    //Get the methods
     findMethods(archive, firstUnit, true);
     if (secondUnit) findMethods(archive, secondUnit, false);
 
+    //Get basic information on methods
     findMethodNames();
     findParameterLists();
     findMethodReturnTypes();

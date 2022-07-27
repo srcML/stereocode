@@ -40,7 +40,7 @@ int main(int argc, char const *argv[])
     bool outputReport = false;
     bool overWriteInput = false;
     bool DEBUG = false;
-   std::vector<std::string> inputFileList;
+    std::vector<std::string> inputFileList;
 
     app.add_option("-a,--archive",     inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp units)");
     app.add_option("-o,--output-file", outputFile,     "File name of output - srcML archive with stereotypes");
@@ -72,7 +72,7 @@ int main(int argc, char const *argv[])
         in.close();
     }
 
-    std::cerr << "Computing stereotypes for the following class(es): " << std::endl;
+    if (DEBUG) std::cerr << "Computing stereotypes for the following class(es): " << std::endl;
 
     for (int i = 0; i < inputFileList.size(); ++i){
         int error;
@@ -90,14 +90,13 @@ int main(int argc, char const *argv[])
         classModel  aClass  = classModel(archive, firstUnit, secondUnit);  //Construct class and do initial anaylsis
         aClass.stereotype();                                               //Analysis for stereotypes
 
-        if (outputReport) {             //Optionally output a report (tab separated) path, method, stereotype for the class
+        if (outputReport) {        //Optionally output a report (tab separated) path, class name, method, stereotype
             std::ofstream reportFile;
             reportFile.open(inputFileList[i] + ".report.txt");
             aClass.outputReport(reportFile, inputFileList[i]);
             reportFile.close();
         }
 
-        std::cerr << "Class name: " << aClass.getClassName() << std::endl;
         if (aClass.getUnitOneCount() != 0) {
             firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
         }
@@ -138,7 +137,7 @@ int main(int argc, char const *argv[])
         outputFile = "";
     }
     
-    std::cerr << "StereoCode completed." << std::endl;
+    if (DEBUG) std::cerr << "StereoCode completed." << std::endl;
     return 0;
 }
 

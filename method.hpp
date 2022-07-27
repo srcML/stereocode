@@ -72,7 +72,7 @@ public:
 
     friend std::ostream& operator<<(std::ostream&, const methodModel&);
 
-private:
+protected:
     std::string                 name;
     std::string                 parametersXML;      //srcML of <parameter-list>
     std::vector<std::string>    parameterNames;
