@@ -1,7 +1,7 @@
 //
 //  method.hpp
 //
-//  methodModel and attributeModel class for stereocode
+//  methodModel class for stereocode
 //
 //  Created by jmaletic on July 20 2022.
 //
@@ -18,22 +18,7 @@
 #include <algorithm>
 #include <srcml.h>
 #include "utils.hpp"
-
-//
-class variable {
-public:
-                variable ()                                           { name = ""; type = ""; };
-                variable (const std::string& n)                       { name = n;           };
-                variable (const std::string& n, const std::string& t) { name = n; type = t; };
-    void        setName  (const std::string& n)                       { name = n;           };
-    void        setType  (const std::string& t)                       { type = t;           };
-    std::string getName  () const                                     { return name;        };
-    std::string getType  () const                                     { return type;        };
-
-private:
-    std::string name;
-    std::string type;
-};
+#include "variable.hpp"
 
 
 //

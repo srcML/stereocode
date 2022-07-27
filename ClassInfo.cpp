@@ -1071,7 +1071,7 @@ std::ostream& operator<<(std::ostream& out, const classModel& c) {
     }
     out << "# Attributes: " << c.attribute.size() << std::endl;
     for (int i = 0; i < c.attribute.size(); ++i) {
-        out << c.attribute[i].getType() << " : " << c.attribute[i].getName() << std::endl;
+        out << c.attribute[i] << std::endl;
     }
     out << "--------------------------------------" << std::endl;
     return out;

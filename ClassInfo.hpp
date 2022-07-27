@@ -14,6 +14,7 @@
 #include <srcml.h>
 #include "PrimitiveTypes.hpp"
 #include "utils.hpp"
+#include "variable.hpp"
 #include "method.hpp"
 
 
