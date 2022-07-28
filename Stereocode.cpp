@@ -88,7 +88,8 @@ int main(int argc, char const *argv[])
         srcml_unit* secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
 
         classModel  aClass  = classModel(archive, firstUnit, secondUnit);  //Construct class and do initial anaylsis
-        aClass.stereotype();                                               //Analysis for stereotypes
+        aClass.ComputeMethodStereotype();                                  //Analysis for method stereotypes
+        aClass.ComputeClassStereotype();                                   //Analysis for class stereotype
 
         if (outputReport) {        //Optionally output a report (tab separated) path, class name, method, stereotype
             std::ofstream reportFile;

@@ -16,6 +16,7 @@
 #include "utils.hpp"
 #include "variable.hpp"
 #include "method.hpp"
+#include "set.hpp"
 
 
 extern primitiveTypes PRIMITIVES;
@@ -57,7 +58,8 @@ public:
                                const std::vector<std::string>&,
                                const std::vector<std::string>&);
 
-    void stereotype();
+    void ComputeClassStereotype();
+    void ComputeMethodStereotype();
     void getter();
     void setter();
     void predicate();
@@ -83,9 +85,10 @@ protected:
     std::vector<std::string>    parentClass;
     std::vector<variable>       attribute;
     std::vector<methodModel>    method;
-    int                         unitOneCount;   //Methods in .hpp, .java, .cs, etc. 
-    int                         unitTwoCount;   //Methods in .cpp - only C++ has two units
-    std::string                 language;       //Language: "C++", "C#", "Java", "C"
+    int                         unitOneCount;    //Methods in .hpp, .java, .cs, etc.
+    int                         unitTwoCount;    //Methods in .cpp - only C++ has two units
+    std::string                 language;        //Language: "C++", "C#", "Java", "C"
+    std::string                 classStereotype; //Class stereotype
 }; 
 
 

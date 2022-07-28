@@ -346,8 +346,125 @@ void classModel::findParameterTypes(){
 
 // Determining STEREOTYPES
 
+//Compute class stereotype
+void classModel::ComputeClassStereotype() {
+    classStereotype = NO_STEREOTYPE;
+    set allMethods;
+    set accessors, mutators, getters, setters;
+    set collaborators, nonCollaborators, controllers, factory;
+    set commands; //command U non-void-command
+    set degenerates;
 
-void classModel::stereotype() {
+    //Determine sets
+    for (int i=0; i < method.size(); ++i) {
+        std::string s;
+        s = method[i].getStereotype();
+        allMethods += i;
+        if (s.find("get") != std::string::npos) {
+            accessors += i;
+            getters += i;
+        }
+        if ((s.find("predicate") != std::string::npos) ||
+            (s.find("property") != std::string::npos) ||
+            (s.find("voidaccessor") != std::string::npos) ) {
+            accessors += i;
+        }
+        if ((s.find("set") != std::string::npos) || (s.find("command") != std::string::npos) ) {
+            mutators += i;
+            setters += i;
+        }
+        if (s.find("command") != std::string::npos) {
+            mutators += i;
+        }
+        if ((s.find("collaborational") != std::string::npos) || (s.find("controller") != std::string::npos)) {
+            collaborators += i;
+        } else {
+            nonCollaborators += i;
+        }
+        if (s.find("controller") != std::string::npos) {
+            controllers += i;
+        }
+        if (s.find("factory") != std::string::npos) {
+            factory += i;
+        }
+        if (s.find("command") != std::string::npos) {
+            commands += i;
+        }
+        if ((s.find("empty") != std::string::npos) || (s.find("incidental") != std::string::npos) ) {
+            degenerates += i;
+        }
+    }
+
+    //Entity
+    if (((accessors - getters) != set()) &&
+        ((mutators - setters) != set()) && (controllers.card() == 0)) {
+        double ratio = double(collaborators.card()) / double(nonCollaborators.card());
+        if (ratio > 1.9) {
+            classStereotype = "entity";
+            return;
+        }
+    }
+    //Minimal Entity
+    if ((allMethods - (getters + setters + commands)) == set()) {
+        double ratio = double(collaborators.card()) / double(nonCollaborators.card());
+        if (ratio > 1.9) {
+            classStereotype = "minimal-entity";
+            return;
+        }
+    }
+    //Data Provider
+    if ((mutators.card() > 2 * accessors.card()) &&
+        (mutators.card() > 2 * (controllers.card() + factory.card()))) {
+        classStereotype = "data-provider";
+        return;
+    }
+    //Commander
+    if ((accessors.card() > 2 * mutators.card()) &&
+        (accessors.card() > 2 * (controllers.card() + factory.card()))) {
+        classStereotype = "command";
+        return;
+    }
+    //Boundary
+    if ((collaborators.card() > nonCollaborators.card()) &&
+        (factory.card() < 0.5 * allMethods.card()) &&
+        (controllers.card() < 0.33 * allMethods.card())) {
+        classStereotype = "boundary";
+        return;
+    }
+    //Factory
+    if (factory.card() > 0.66 * allMethods.card()) {
+        classStereotype = "factory";
+        return;
+    }
+    //Controller
+    if ((controllers.card() + factory.card() > 0.66 * allMethods.card()) &&
+        ((accessors.card() != 0) || (mutators.card() != 0))) {
+        classStereotype = "control";
+        return;
+    }
+    //Pure Controller
+    if ((controllers.card() + factory.card() != 0) &&
+        (accessors.card() + mutators.card() + collaborators.card() == 0) &&
+        (controllers.card() != 0)) {
+        classStereotype = "pure-control";
+        return;
+    }
+    //Large Class
+
+    //Lazy Class
+
+    //Degenerate Class
+
+    //Data Class
+
+    //Small Class
+
+}
+
+
+
+//Compute method stereotypes
+void classModel::ComputeMethodStereotype() {
     getter();
     setter();
     collaborationalCommand();
@@ -686,17 +803,17 @@ void classModel::stateless() {
         bool usedAttr = usesAttribute(i);
         bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
         usedAttr = usedAttr || hasCallOnAttribute;
-        if (!empty && calls.size() < 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " stateless");
-            if (method[i].getStereotype() == "nothing-yet stateless"){
+        if (!empty && calls.size() < 1 && !usedAttr) {
+            if (method[i].getStereotype() == NO_STEREOTYPE)
                 method[i].setStereotype("stateless");
-            }
+            else
+                method[i].setStereotype(method[i].getStereotype() + " stateless");
         }
-        if (!empty && calls.size() == 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " wrapper");
-            if (method[i].getStereotype() == "nothing-yet wrapper"){
+        if (!empty && calls.size() == 1 && !usedAttr) {
+            if (method[i].getStereotype() == NO_STEREOTYPE)
                 method[i].setStereotype("wrapper");
-            }
+            else
+                method[i].setStereotype(method[i].getStereotype() + " wrapper");
         }
     }
 }
