@@ -495,7 +495,7 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
 // Output a method for checking and testing
 std::ostream& operator<<(std::ostream& out, const methodModel& m) {
     out << "Method: " << trimWhitespace(m.name) << " " << m.getConst();
-    out << " returns: " << LRtoSpace(m.getReturnType()) << std::endl;
+    out << " returns: " << WStoBlank(m.getReturnType()) << std::endl;
     out << "   Stereotype: " << m.stereotype << std::endl;
     out << "   Parameters: ";
     for (int i=0; i< m.parameterNames.size(); ++i) {
