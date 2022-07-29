@@ -20,7 +20,7 @@
 
 extern primitiveTypes PRIMITIVES;
 
-const std::string NO_STEREOTYPE = "none";
+const std::string NO_STEREOTYPE = "unclassified";
 
 const std::vector<std::string> METHOD_STEREOTYPE = {"get", "non-const-get", "set", "predicate", "collaborational-predicate",
     "property", "collaborational-property", "voidaccessor", "collaborational-voidaccessor",

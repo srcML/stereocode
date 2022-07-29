@@ -346,9 +346,11 @@ void classModel::findParameterTypes(){
 
 // Determining STEREOTYPES
 
+
 //Compute class stereotype
+// Based on definition from Dragan, Collard, Maletic ICSM 2010
+//
 void classModel::ComputeClassStereotype() {
-    classStereotype = NO_STEREOTYPE;
     set allMethods;
     set accessors, mutators, getters, setters;
     set collaborators, nonCollaborators, controllers, factory;
@@ -369,7 +371,7 @@ void classModel::ComputeClassStereotype() {
             (s.find("voidaccessor") != std::string::npos) ) {
             accessors += i;
         }
-        if ((s.find("set") != std::string::npos) || (s.find("command") != std::string::npos) ) {
+        if ((s.find("set") != std::string::npos)) {
             mutators += i;
             setters += i;
         }
@@ -395,70 +397,104 @@ void classModel::ComputeClassStereotype() {
         }
     }
 
+    classStereotype = "";
     //Entity
-    if (((accessors - getters) != set()) &&
-        ((mutators - setters) != set()) && (controllers.card() == 0)) {
+    if ( ((accessors - getters) != set()) &&
+         ((mutators - setters)  != set()) &&
+         (controllers.card() == 0) ) {
         double ratio = double(collaborators.card()) / double(nonCollaborators.card());
         if (ratio > 1.9) {
-            classStereotype = "entity";
-            return;
+            if (classStereotype != "") classStereotype += " ";
+            classStereotype += "entity";
         }
     }
     //Minimal Entity
     if ((allMethods - (getters + setters + commands)) == set()) {
         double ratio = double(collaborators.card()) / double(nonCollaborators.card());
         if (ratio > 1.9) {
-            classStereotype = "minimal-entity";
-            return;
+            if (classStereotype != "") classStereotype += " ";
+            classStereotype += "minimal-entity";
         }
     }
     //Data Provider
-    if ((mutators.card() > 2 * accessors.card()) &&
-        (mutators.card() > 2 * (controllers.card() + factory.card()))) {
-        classStereotype = "data-provider";
-        return;
+    if ( (mutators.card() > 2 * accessors.card()) &&
+         (mutators.card() > 2 * (controllers.card() + factory.card())) ) {
+        classStereotype += "data-provider";
     }
     //Commander
-    if ((accessors.card() > 2 * mutators.card()) &&
-        (accessors.card() > 2 * (controllers.card() + factory.card()))) {
-        classStereotype = "command";
-        return;
+    if ( (accessors.card() > 2 * mutators.card()) &&
+         (accessors.card() > 2 * (controllers.card() + factory.card())) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "command";
     }
     //Boundary
-    if ((collaborators.card() > nonCollaborators.card()) &&
-        (factory.card() < 0.5 * allMethods.card()) &&
-        (controllers.card() < 0.33 * allMethods.card())) {
-        classStereotype = "boundary";
-        return;
+    if ( (collaborators.card() > nonCollaborators.card()) &&
+         (factory.card() < 0.5 * allMethods.card()) &&
+         (controllers.card() < 0.33 * allMethods.card()) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "boundary";
     }
     //Factory
     if (factory.card() > 0.66 * allMethods.card()) {
-        classStereotype = "factory";
-        return;
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "factory";
     }
     //Controller
-    if ((controllers.card() + factory.card() > 0.66 * allMethods.card()) &&
-        ((accessors.card() != 0) || (mutators.card() != 0))) {
-        classStereotype = "control";
-        return;
+    if ( (controllers.card() + factory.card() > 0.66 * allMethods.card()) &&
+         ((accessors.card() != 0) || (mutators.card() != 0)) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "control";
     }
     //Pure Controller
-    if ((controllers.card() + factory.card() != 0) &&
-        (accessors.card() + mutators.card() + collaborators.card() == 0) &&
-        (controllers.card() != 0)) {
-        classStereotype = "pure-control";
-        return;
+    if ( (controllers.card() + factory.card() != 0) &&
+         (accessors.card() + mutators.card() + collaborators.card() == 0) &&
+         (controllers.card() != 0) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "pure-control";
     }
     //Large Class
+    {
+        const double AVG_METHODS_PER_CLASS = 16.0;  //General numbers from ICSM10
+        const double STD_METHODS_PER_CLASS = 5.0;
 
+        int accPlusMut = accessors.card() + mutators.card();
+        int facPlusCon = controllers.card() + factory.card();
+        int m = allMethods.card();
+        if ( ((0.2 * m < accPlusMut) && (accPlusMut < 0.67 * m )) &&
+             ((0.2 * m < facPlusCon) && (facPlusCon < 0.67 * m )) &&
+             (factory.card() != 0) && (controllers.card() != 0) &&
+             (accessors.card() != 0) && (mutators.card() != 0) ) {
+            if (m > AVG_METHODS_PER_CLASS + STD_METHODS_PER_CLASS) {
+                if (classStereotype != "") classStereotype += " ";
+                classStereotype += "large-class";
+            }
+        }
+    }
     //Lazy Class
-
+    if ( (getters.card() + setters.card() != 0) &&
+         (degenerates.card() / double(allMethods.card()) > 0.33) &&
+         ((allMethods.card() - (degenerates.card() + getters.card() + setters.card())) / double(allMethods.card())  <= 0.2) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "lazy-class";
+    }
     //Degenerate Class
-
+    if (degenerates.card() / double(allMethods.card()) > 0.33)  {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "degenerate";
+    }
     //Data Class
-
+    if (allMethods.card() - getters.card() - setters.card() == 0)  {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "data-class";
+    }
     //Small Class
+    if (allMethods.card() < 3)  {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "small-class";
+    }
 
+    //Final check if no stereotype was assigned
+    if (classStereotype == "") classStereotype = NO_STEREOTYPE;
 }
 
 
@@ -1174,7 +1210,6 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
 //
 void classModel::outputReport(std::ofstream& out, const std::string& input_file_path){
     if (out.is_open()) {
-
         for (int i = 0; i < method.size(); ++i){
             out << input_file_path << "\t" << className << "\t" << method[i].getHeader() << "\t" << method[i].getStereotype() << "\n";
         }
@@ -1186,6 +1221,7 @@ void classModel::outputReport(std::ofstream& out, const std::string& input_file_
 std::ostream& operator<<(std::ostream& out, const classModel& c) {
     out << std::endl << "--------------------------------------" << std::endl;
     out << "Class: " << c.className << std::endl;
+    out << "Class Stereotype: " << c.classStereotype << std::endl;
     out << "# Methods: " << c.method.size() << std::endl;
     for (int i = 0; i < c.method.size(); ++i) {
         out <<  c.method[i] << std::endl;

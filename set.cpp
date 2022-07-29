@@ -8,7 +8,7 @@
 //
 #include "set.hpp"
 
-bool isValid(int x) {
+inline bool isValid(int x) {
     return (0 <= x) && (x < SET_DOMAIN);
 }
 
@@ -21,12 +21,6 @@ set::set() {         //Empty set
 //set a(2);
 set::set(int a) : set() {
     if (isValid(a)) s[a] = true;
-}
-
-//set a(3, 4);
-set::set(int a, int b) : set() {
-    if (isValid(a)) s[a] = true;
-    if (isValid(b)) s[b] = true;
 }
 
 // set a = {1, 3, 4};
@@ -68,13 +62,9 @@ set& set::operator+=(const set& rhs)  {
     return *this;
 }
 
-
+set operator+(int lhs, const set& rhs) { return set(lhs) + rhs; }
 
 //Intersection
-set operator+(int lhs, const set& rhs) {
-    return set(lhs) + rhs;
-}
-
 set set::operator*(const set& rhs) const {
     set result;
     for (int i = 0; i<SET_DOMAIN; ++i) {
@@ -93,6 +83,13 @@ set set::operator-(const set& rhs) const {
         result.s[i] = s[i] && !rhs.s[i];
     }
     return result;
+}
+
+set& set::operator-=(const set& rhs) {
+    for (int i = 0; i<SET_DOMAIN; ++i) {
+        s[i] = s[i] && !rhs.s[i];
+    }
+    return *this;
 }
 
 set operator-(int lhs, const set& rhs) { return set(lhs) - rhs; }
