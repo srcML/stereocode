@@ -751,9 +751,9 @@ void classModel::collaborationalCommand() {
 
 // Stereotype Collaborators
 // at least one of the following is true:
-// makes a call to an attribute that is an object (only count pointers (* ->) [fix])
-// has a parameter that is an object.
-// has a local variable that is an object.
+// makes a call to an attribute that is an external object (only count pointers (* ->) [fix])
+// has a parameter that is an external object.
+// has a local variable that is an external object.
 //
 // what about returning an object attribtue !yes!
 //
@@ -1151,8 +1151,6 @@ bool classModel::usesAttribute(int i)  {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string possible_attr(unparsed);
         delete[] unparsed;
-
-        if (PRIMITIVES.isPrimitive(possible_attr)) continue;  //Should never be a primitive type??? Remove??
 
         if (isAttribute(possible_attr)) {
             found = true;

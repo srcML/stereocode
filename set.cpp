@@ -43,7 +43,8 @@ int set::card() const {
 
 // if (a[4])
 bool set::operator[](int i) const {
-    return s[i];
+    if (isValid(i)) return s[i];
+    return false;
 }
 
 //Union
@@ -113,10 +114,10 @@ bool set::operator<=(const set& rhs) const {
     return true;
 }
 
-bool operator<=(int lhs, const set& rhs)        { return set(lhs) <= rhs;         }
-bool operator>=(const set& lhs, const set& rhs) { return rhs <= lhs;              }
-bool operator< (const set& lhs, const set& rhs) { return lhs != rhs && lhs < rhs; }
-bool operator> (const set& lhs, const set& rhs) { return rhs < lhs;               }
+bool operator<=(int lhs, const set& rhs)        { return set(lhs) <= rhs;          }
+bool operator>=(const set& lhs, const set& rhs) { return rhs <= lhs;               }
+bool operator< (const set& lhs, const set& rhs) { return lhs != rhs && lhs <= rhs; }
+bool operator> (const set& lhs, const set& rhs) { return rhs < lhs;                }
 
 std::ostream& operator<<(std::ostream& out, const set& rhs) {
     bool printComma = false;
