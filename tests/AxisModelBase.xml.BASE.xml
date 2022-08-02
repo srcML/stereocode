@@ -35,7 +35,7 @@ $Id: AxisModelBase.h,v 1.120 2004/08/19 10:16:02 kaustuv Exp $
     @author Oded Wurman &lt;owurman@stanford.edu&gt;
 */</comment>
 
-<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelBase</name>
+<class st:stereotype="unclassified">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelBase</name>
 <block>{<private type="default">
 </private><protected>protected:
 

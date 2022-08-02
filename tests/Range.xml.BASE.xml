@@ -32,7 +32,7 @@ $Id: Range.h,v 1.47 2004/05/23 23:34:01 pfkeb Exp $
     @author Oded Wurman &lt;owurman@stanford.edu&gt;
 */</comment>
 
-<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>Range</name> <block>{<private type="default">
+<class st:stereotype="unclassified">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>Range</name> <block>{<private type="default">
 
 </private><private>private:
 

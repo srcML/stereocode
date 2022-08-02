@@ -25,7 +25,7 @@ $Id: AxisModelLog.h,v 1.53 2004/05/02 17:18:34 pfkeb Exp $
     @author Paul F. Kunz &lt;Paul_Kunz@slac.stanford.edu&gt; 
     @author Oded Wurman &lt;owurman@stanford.edu&gt;
 */</comment>
-<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLog</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
+<class st:stereotype="entity command boundary">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLog</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
 <block>{<private type="default">
 
   <comment type="block" format="doxygen">/** Sets the tick step, and the magnitude power magnitude (the
@@ -135,7 +135,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
   <return>return <expr><operator>(</operator> <operator>(</operator><name>double</name><operator>)</operator><call><name>fabs</name><argument_list>( <argument><expr><name>x</name> <operator>-</operator> <name>y</name></expr></argument> )</argument_list></call> <operator>&lt;=</operator> <literal type="number">2.0</literal> <operator>*</operator> <operator>(</operator> <name>y</name> <operator>*</operator> <name>FLT_EPSILON</name> <operator>+</operator> <name>FLT_MIN</name> <operator>)</operator> <operator>)</operator></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="collaborational-predicate stateless"><type><name>bool</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
+<function st:stereotype="predicate collaborator stateless"><type><name>bool</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
 <block>{<block_content> 
   <return>return <expr><literal type="boolean">true</literal></expr>;</return> 
 </block_content>}</block></function>

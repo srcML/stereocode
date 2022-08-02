@@ -27,7 +27,7 @@ $Id: AxisModelLinear.h,v 1.54 2004/06/28 23:39:11 pfkeb Exp $
  *  @author Oded Wurman &lt;oded@slac.stanford.edu&gt;
  */</comment>
 
-<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLinear</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
+<class st:stereotype="entity command boundary degenerate">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLinear</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
 <block>{<private type="default">
 </private><public>public:
 
@@ -131,7 +131,7 @@ $Id: AxisModelLinear.cxx,v 1.108 2004/05/02 17:18:34 pfkeb Exp $
   <return>return <expr><operator>(</operator> <call><name>abs</name><argument_list>( <argument><expr><name>x</name> <operator>-</operator> <name>y</name></expr></argument> )</argument_list></call> <operator>&lt;=</operator> <literal type="number">100.0</literal> <operator>*</operator>  <name>DBL_EPSILON</name>  <operator>)</operator></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="collaborational-predicate stateless"><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
+<function st:stereotype="predicate collaborator stateless"><type><name>bool</name></type> <name><name>AxisModelLinear</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
 <block>{<block_content> 
   <return>return <expr><literal type="boolean">false</literal></expr>;</return> 
 </block_content>}</block></function>
