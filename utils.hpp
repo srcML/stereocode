@@ -22,9 +22,8 @@ extern primitiveTypes PRIMITIVES;
 
 const std::string NO_STEREOTYPE = "unclassified";
 
-const std::vector<std::string> METHOD_STEREOTYPE = {"get", "non-const-get", "set", "predicate", "collaborational-predicate",
-    "property", "collaborational-property", "voidaccessor", "collaborational-voidaccessor",
-    "command", "non-void-command", "collaborational-command",
+const std::vector<std::string> METHOD_STEREOTYPE = {"get", "non-const-get", "set", "predicate",
+    "property", "void-accessor", "collaborator", "command", "non-void-command",
     "controller", "factory", "empty", "stateless", "wrapper", "incidental" };
 
 const std::vector<std::string> CLASS_STEREOTYPE = {"entity", "minimal-entity", "data-provider", "command", "boundary",

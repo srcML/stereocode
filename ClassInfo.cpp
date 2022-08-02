@@ -362,13 +362,14 @@ void classModel::ComputeClassStereotype() {
         std::string s;
         s = method[i].getStereotype();
         allMethods += i;
-        if (s.find("get") != std::string::npos) {
+        if (s.find("get") != std::string::npos) {   //get or get colaborator
             accessors += i;
-            getters += i;
+            if (s.find("command") == std::string::npos)  //get command is not a get
+                getters += i;
         }
         if ((s.find("predicate") != std::string::npos) ||
             (s.find("property") != std::string::npos) ||
-            (s.find("voidaccessor") != std::string::npos) ) {
+            (s.find("void-accessor") != std::string::npos) ) {
             accessors += i;
         }
         if ((s.find("set") != std::string::npos)) {
@@ -378,7 +379,8 @@ void classModel::ComputeClassStereotype() {
         if (s.find("command") != std::string::npos) {
             mutators += i;
         }
-        if ((s.find("collaborational") != std::string::npos) || (s.find("controller") != std::string::npos)) {
+        if ( (s.find("collaborator") != std::string::npos) ||
+             (s.find("controller") != std::string::npos)) {
             collaborators += i;
         } else {
             nonCollaborators += i;
@@ -392,9 +394,25 @@ void classModel::ComputeClassStereotype() {
         if (s.find("command") != std::string::npos) {
             commands += i;
         }
-        if ((s.find("empty") != std::string::npos) || (s.find("incidental") != std::string::npos) ) {
+        if ( (s.find("empty") != std::string::npos) ||
+             (s.find("stateless") != std::string::npos) ||
+             (s.find("wrapper") != std::string::npos) ||
+             (s.find("incidental") != std::string::npos) ) {
             degenerates += i;
         }
+    }
+    if (true) { //For debugging
+        std::cerr << "Methods: " << allMethods.card() << " " << allMethods << std::endl;
+        std::cerr << "Accessors: " << accessors.card() << " " << accessors << std::endl;
+        std::cerr << "Getters: " << getters.card() << " " << getters << std::endl;
+        std::cerr << "Mutators: " << mutators.card() << " " << mutators << std::endl;
+        std::cerr << "Setters: " << setters.card() << " " << setters << std::endl;
+        std::cerr << "Collaborators: " << collaborators.card() << " " << collaborators << std::endl;
+        std::cerr << "Non Collaborators: " << nonCollaborators.card() << " " << nonCollaborators << std::endl;
+        std::cerr << "Controllers: " << controllers.card() << " " << controllers << std::endl;
+        std::cerr << "Factory: " << factory.card() << " " << factory << std::endl;
+        std::cerr << "Commands: " << commands.card() << " " << commands << std::endl;
+        std::cerr << "Degenerates: " << degenerates.card() << " " << degenerates << std::endl;
     }
 
     classStereotype = "";
@@ -417,13 +435,14 @@ void classModel::ComputeClassStereotype() {
         }
     }
     //Data Provider
-    if ( (mutators.card() > 2 * accessors.card()) &&
-         (mutators.card() > 2 * (controllers.card() + factory.card())) ) {
+    if ( (accessors.card() > 2 * mutators.card()) &&
+         (accessors.card() > 2 * (controllers.card() + factory.card())) ) {
+        if (classStereotype != "") classStereotype += " ";
         classStereotype += "data-provider";
     }
     //Commander
-    if ( (accessors.card() > 2 * mutators.card()) &&
-         (accessors.card() > 2 * (controllers.card() + factory.card())) ) {
+    if ( (mutators.card() > 2 * accessors.card()) &&
+         (mutators.card() > 2 * (controllers.card() + factory.card())) ) {
         if (classStereotype != "") classStereotype += " ";
         classStereotype += "command";
     }
@@ -561,7 +580,7 @@ void classModel::setter() {
 // returns boolean
 // return expression is not a attribute
 //
-// Stereotype collaborational-predicate:
+// Stereotype predicate collaborator:
 // method is const
 // returns boolean
 // return expression is not a attribute
@@ -579,7 +598,7 @@ void classModel::predicate() {
             int pureCallsCount = countPureCalls(pure_calls);
 
             if (!usesAttr && pureCallsCount == 0){
-                method[i].setStereotype("collaborational-predicate");
+                method[i].setStereotype("predicate collaborator");
             }
             else{
                 method[i].setStereotype("predicate");
@@ -594,7 +613,7 @@ void classModel::predicate() {
 // return type is not boolean or void
 // does not return a attribute
 
-// Stereotype collaborational-property
+// Stereotype property collaborator
 // method is const
 // return type is not void or boolean
 // does not contain a attribute anywhere in the function
@@ -615,7 +634,7 @@ void classModel::property() {
 
 
             if (!usesAttr && pureCallsCount == 0){
-                method[i].setStereotype("collaborational-property");
+                method[i].setStereotype("property collaborator");
             }
             else{
                 method[i].setStereotype("property");
@@ -643,10 +662,10 @@ void classModel::voidAccessor() {
             std::vector<std::string> pure_calls = method[i].findCalls("pure");
             int pureCallsCount = countPureCalls(pure_calls);
             if (!usesAttr && pureCallsCount == 0){
-                method[i].setStereotype("collaborational-voidaccessor");
+                method[i].setStereotype("void-accessor collaborator");
             }
             else{
-                method[i].setStereotype("voidaccessor");
+                method[i].setStereotype("void-accessor");
             }
         }
     }
@@ -709,7 +728,7 @@ void classModel::command() {
 }
 
 
-//stereotype collaborational-command
+//stereotype command collaborator
 //method is not const and
 //no attributes are written and
 //no pure calls, a() a::b() and
@@ -742,7 +761,7 @@ void classModel::collaborationalCommand() {
 
             bool not_command =  pureCallsCount == 0 && !hasCallOnAttribute;
             if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
-                method[i].setStereotype("collaborational-command");
+                method[i].setStereotype("command collaborator");
             }       
         }
     }
@@ -830,6 +849,8 @@ void classModel::empty() {
 // is not empty
 // has exactly 1 real call including new calls
 // does not use any data memebers
+//
+// Both are degenerate
 //
 void classModel::stateless() {
     for (int i = 0; i < method.size(); ++i) {
@@ -1171,8 +1192,9 @@ bool classModel::usesAttribute(int i)  {
 
 
 //
-//  Copy unit and add in stereotype attribute on <function>
-//  Example: <function stereotype="get"> ... </function>
+//  Copy unit and add in stereotype attribute on <class> and <function>
+//  Example: <function st:stereotype="get"> ... </function>
+//           <class st:stereotype="boundary"> ... ></class>
 //
 srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int n = unitOneCount;
@@ -1181,9 +1203,16 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
         n = unitTwoCount;
         offset = unitOneCount;
     }
-    for (int i = 0; i < n; ++i){
+    if (oneUnit) { //Add stereotype attribute to <class>
+        std::string xpath = "//src:class";
+        srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
+                                               "http://www.srcML.org/srcML/stereotype",
+                                               "stereotype", classStereotype.c_str());
+    }
+
+    for (int i = 0; i < n; ++i) { //Add stereotype attribute to each method/function
         std::string stereotype = method[i+offset].getStereotype();
-        if (stereotype == NO_STEREOTYPE && unitOneCount + unitTwoCount == 1) return nullptr;
+        //if (stereotype == NO_STEREOTYPE && unitOneCount + unitTwoCount == 1) return nullptr;  //Not sure why this is included?
 
         std::string xpath = "//src:function[string(src:name)='";
         xpath += method[i+offset].getName() + "' and string(src:type)='";
@@ -1194,6 +1223,7 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
                                                "http://www.srcML.org/srcML/stereotype",
                                                "stereotype", stereotype.c_str());
     }
+
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
     unit = srcml_transform_get_unit(result, 0);

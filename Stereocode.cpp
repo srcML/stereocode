@@ -98,12 +98,9 @@ int main(int argc, char const *argv[])
             reportFile.close();
         }
 
-        if (aClass.getUnitOneCount() != 0) {
-            firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
-        }
-        if (aClass.getUnitTwoCount() != 0) {
+        firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
+        if (aClass.getUnitTwoCount() != 0)
             secondUnit = aClass.outputUnitWithStereotypes(archive, secondUnit, false);
-        }
 
         //Namespace for output of stereotypes
         srcml_archive* output_archive = srcml_archive_create();
