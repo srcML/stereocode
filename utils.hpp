@@ -19,19 +19,21 @@
 
 
 extern primitiveTypes PRIMITIVES;
+extern bool           DEBUG;
 
-const std::string NO_STEREOTYPE = "unclassified";
+const std::string     NO_STEREOTYPE = "unclassified";
 
-const std::vector<std::string> METHOD_STEREOTYPE = {"get", "non-const-get", "set", "predicate",
+const std::vector<std::string> METHOD_STEREOTYPE =
+   {"get", "non-const-get", "set", "predicate",
     "property", "void-accessor", "collaborator", "command", "non-void-command",
-    "controller", "factory", "empty", "stateless", "wrapper", "incidental" };
+    "controller", "factory", "empty", "stateless", "wrapper" };
 
-const std::vector<std::string> CLASS_STEREOTYPE = {"entity", "minimal-entity", "data-provider", "command", "boundary",
-    "control", "pure-control", "factory",  "large-class", "lazy-class", "degenerate", "data-class", "small-class" };
-
+const std::vector<std::string> CLASS_STEREOTYPE =
+   {"entity", "minimal-entity", "data-provider", "command", "boundary",
+    "control", "pure-control", "factory",  "large-class", "lazy-class",
+    "degenerate", "data-class", "small-class" };
 
 const std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
-
 
 bool         isGlobalConstFormat  (const std::string&);
 bool         checkConst           (const std::string&);

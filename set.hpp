@@ -1,9 +1,9 @@
 //File:   set.hpp
 //
 //Programmer:   Dr. J. Maletic
-//Date:
+//Date:         7/2022
 //Description:  Definition for Set ADT.
-//              Set of integers 
+//              Set of integers
 //
 
 #ifndef CS2_SET_HPP_
@@ -20,12 +20,12 @@ const int SET_DOMAIN = 500; //Or whatever
 
 class set {
 public:
-          set();
-          set(int);
-          set(std::initializer_list<int>);
-
-    int   card() const;
-    bool  operator[] (int) const;
+          set        ();
+          set        (int);
+          set        (std::initializer_list<int>);
+    
+    int   card       ()           const;
+    bool  operator[] (int)        const;
     set   operator+  (const set&) const;
     set&  operator+= (const set&);
     set   operator*  (const set&) const;
@@ -38,12 +38,12 @@ private:
     bool s[SET_DOMAIN];
 };
 
-set  operator+ (int, const set&);
-set  operator* (int, const set&);
-set  operator- (int, const set&);
-bool operator==(int, const set&);
+set  operator+ (int,        const set&);
+set  operator* (int,        const set&);
+set  operator- (int,        const set&);
+bool operator==(int,        const set&);
 bool operator!=(const set&, const set&);
-bool operator<=(int, const set&);
+bool operator<=(int,        const set&);
 bool operator< (const set&, const set&);
 bool operator>=(const set&, const set&);
 bool operator> (const set&, const set&);

@@ -24,6 +24,11 @@ methodModel::methodModel(const std::string& xml, const std::string& s, bool f) :
 };
 
 
+void methodModel::setStereotype (const std::string& s) {
+        stereotype = s;
+}
+
+
 //
 //
 // Finds a constuctor call that is after a new operator that matches the class name

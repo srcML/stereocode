@@ -20,6 +20,7 @@
 #include "utils.hpp"
 #include "variable.hpp"
 
+extern bool           DEBUG;
 
 //
 class methodModel {
@@ -61,7 +62,7 @@ public:
     void        setLocalVariables     (const std::vector<std::string>& s) { localVariables = s; };
     void        setParameterNames     (const std::vector<std::string>& s) { parameterNames = s; };
     void        setParameterTypes     (const std::vector<std::string>& s) { parameterTypes = s; };
-    void        setStereotype         (const std::string& s) { stereotype = s; };
+    void        setStereotype         (const std::string&);
 
     bool        findConstructorCall   () const;
     bool        isFactory             () const;

@@ -401,7 +401,7 @@ void classModel::ComputeClassStereotype() {
             degenerates += i;
         }
     }
-    if (true) { //For debugging
+    if (DEBUG) {  //Print out sets to check
         std::cerr << "Methods: " << allMethods.card() << " " << allMethods << std::endl;
         std::cerr << "Accessors: " << accessors.card() << " " << accessors << std::endl;
         std::cerr << "Getters: " << getters.card() << " " << getters << std::endl;
@@ -473,9 +473,6 @@ void classModel::ComputeClassStereotype() {
     }
     //Large Class
     {
-        const double AVG_METHODS_PER_CLASS = 16.0;  //General numbers from ICSM10
-        const double STD_METHODS_PER_CLASS = 5.0;
-
         int accPlusMut = accessors.card() + mutators.card();
         int facPlusCon = controllers.card() + factory.card();
         int m = allMethods.card();
@@ -483,7 +480,7 @@ void classModel::ComputeClassStereotype() {
              ((0.2 * m < facPlusCon) && (facPlusCon < 0.67 * m )) &&
              (factory.card() != 0) && (controllers.card() != 0) &&
              (accessors.card() != 0) && (mutators.card() != 0) ) {
-            if (m > AVG_METHODS_PER_CLASS + STD_METHODS_PER_CLASS) {
+            if (m > METHODS_PER_CLASS_THRESHOLD) { //Average methods/class + 1 std (system wide)
                 if (classStereotype != "") classStereotype += " ";
                 classStereotype += "large-class";
             }
@@ -511,7 +508,6 @@ void classModel::ComputeClassStereotype() {
         if (classStereotype != "") classStereotype += " ";
         classStereotype += "small-class";
     }
-
     //Final check if no stereotype was assigned
     if (classStereotype == "") classStereotype = NO_STEREOTYPE;
 }
@@ -522,7 +518,7 @@ void classModel::ComputeClassStereotype() {
 void classModel::ComputeMethodStereotype() {
     getter();
     setter();
-    collaborationalCommand();
+    commandCollaborator();
     predicate();
     property();
     voidAccessor();
@@ -736,7 +732,7 @@ void classModel::command() {
 //at least 1 call or parameter or local variable is written
 //Calls allowed:  f->g() where f is not a attribute, new f() (which isn't a real call)
 //
-void classModel::collaborationalCommand() {
+void classModel::commandCollaborator() {
     for (int i = 0; i < method.size(); ++i){
         std::vector<std::string> all_calls = method[i].findCalls("");
         bool hasCallOnAttribute = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
@@ -768,7 +764,7 @@ void classModel::collaborationalCommand() {
 }
 
 
-// Stereotype Collaborators
+// Stereotype Collaborator
 // at least one of the following is true:
 // makes a call to an attribute that is an external object (only count pointers (* ->) [fix])
 // has a parameter that is an external object.

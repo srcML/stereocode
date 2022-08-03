@@ -20,7 +20,8 @@
 
 
 extern primitiveTypes PRIMITIVES;
-
+extern bool           DEBUG;
+extern int            METHODS_PER_CLASS_THRESHOLD;
 
 class classModel {
 public:
@@ -66,7 +67,7 @@ public:
     void property();
     void voidAccessor();
     void command();
-    void collaborationalCommand();
+    void commandCollaborator();
     void collaborator();
     void factory();
     void empty();

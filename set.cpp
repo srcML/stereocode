@@ -1,7 +1,7 @@
 //File:   set.cpp
 //
 //Programmer:   Dr. J. Maletic   
-//Date:
+//Date:         7/2022
 //Description:  Definition for Set ADT.
 //              Set of integers
 //
@@ -12,8 +12,9 @@ inline bool isValid(int x) {
     return (0 <= x) && (x < SET_DOMAIN);
 }
 
-// set a;
-set::set() {         //Empty set
+//Empty set
+//  set a();
+set::set() {
     for (int i=0; i<SET_DOMAIN; ++i)
         s[i] = false;
 }
@@ -30,14 +31,11 @@ set::set(std::initializer_list<int> lst) : set() {
     }
 }
 
-// a.card()
+// Cardinality of a set |s|
 int set::card() const {
     int result = 0;
-    for (int i=0; i < SET_DOMAIN; ++i) {
-        if (s[i]) {
-            ++result;
-        }
-    }
+    for (int i=0; i < SET_DOMAIN; ++i)
+        if (s[i]) ++result;
     return result;
 }
 
@@ -50,16 +48,14 @@ bool set::operator[](int i) const {
 //Union
 set set::operator+(const set& rhs) const {
     set result;
-    for (int i = 0; i<SET_DOMAIN; ++i) {
+    for (int i = 0; i<SET_DOMAIN; ++i)
         result.s[i] = s[i] || rhs.s[i];
-    }
     return result;
 }
 
 set& set::operator+=(const set& rhs)  {
-    for (int i = 0; i<SET_DOMAIN; ++i) {
+    for (int i = 0; i<SET_DOMAIN; ++i)
         s[i] = s[i] || rhs.s[i];
-    }
     return *this;
 }
 
@@ -68,33 +64,28 @@ set operator+(int lhs, const set& rhs) { return set(lhs) + rhs; }
 //Intersection
 set set::operator*(const set& rhs) const {
     set result;
-    for (int i = 0; i<SET_DOMAIN; ++i) {
+    for (int i = 0; i<SET_DOMAIN; ++i)
         result.s[i] = s[i] && rhs.s[i];
-    }
     return result;
 }
 
 set operator*(int lhs, const set& rhs) { return set(lhs) * rhs; }
 
-
 //Difference
 set set::operator-(const set& rhs) const {
     set result;
-    for (int i = 0; i<SET_DOMAIN; ++i) {
+    for (int i = 0; i<SET_DOMAIN; ++i)
         result.s[i] = s[i] && !rhs.s[i];
-    }
     return result;
 }
 
 set& set::operator-=(const set& rhs) {
-    for (int i = 0; i<SET_DOMAIN; ++i) {
+    for (int i = 0; i<SET_DOMAIN; ++i)
         s[i] = s[i] && !rhs.s[i];
-    }
     return *this;
 }
 
 set operator-(int lhs, const set& rhs) { return set(lhs) - rhs; }
-
 
 //Relational operators
 bool set::operator==(const set& rhs) const {
@@ -103,18 +94,17 @@ bool set::operator==(const set& rhs) const {
     return true;
 }
 
-bool operator==(int lhs, const set& rhs)        { return set(lhs) == rhs; }
+bool operator==(int lhs,        const set& rhs) { return set(lhs) == rhs; }
 bool operator!=(const set& lhs, const set& rhs) { return !(lhs == rhs);   }
 
 //Subset
 bool set::operator<=(const set& rhs) const {
-    for (int i=0; i<SET_DOMAIN; ++i) {
+    for (int i=0; i<SET_DOMAIN; ++i)
         if (s[i] && !rhs.s[i]) return false;
-    }
     return true;
 }
 
-bool operator<=(int lhs, const set& rhs)        { return set(lhs) <= rhs;          }
+bool operator<=(int lhs,        const set& rhs) { return set(lhs) <= rhs;          }
 bool operator>=(const set& lhs, const set& rhs) { return rhs <= lhs;               }
 bool operator< (const set& lhs, const set& rhs) { return lhs != rhs && lhs <= rhs; }
 bool operator> (const set& lhs, const set& rhs) { return rhs < lhs;                }

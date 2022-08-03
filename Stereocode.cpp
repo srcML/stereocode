@@ -26,8 +26,10 @@
 
 std::vector<std::string> readFileNames(const std::string&);
 
-primitiveTypes PRIMITIVES;  //Global set of primitives.
-
+//Globals
+primitiveTypes PRIMITIVES;                        //Primitives type per language + any user supplied
+bool           DEBUG = false;                     //Debug flag from CLI option
+int            METHODS_PER_CLASS_THRESHOLD = 21; //Threshhold for large class stereotype (from ICSM10)
 
 int main(int argc, char const *argv[])
 {
@@ -39,7 +41,6 @@ int main(int argc, char const *argv[])
     std::string outputFile = "";
     bool outputReport = false;
     bool overWriteInput = false;
-    bool DEBUG = false;
     std::vector<std::string> inputFileList;
 
     app.add_option("-a,--archive",     inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp units)");
@@ -49,7 +50,7 @@ int main(int argc, char const *argv[])
     app.add_flag  ("-r,--report",      outputReport,   "Output optional report file - *.report.txt (off by default)");
     app.add_flag  ("-v,--overwrite",   overWriteInput, "Over write input file with stereotype output (off by default)");
     app.add_flag  ("-d,--debug",       DEBUG,          "Turn on debug mode");
-
+    app.add_option("-c,--large-class", METHODS_PER_CLASS_THRESHOLD, "The # of methods threshold for a large class stereotype (default=21)");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -72,7 +73,7 @@ int main(int argc, char const *argv[])
         in.close();
     }
 
-    if (DEBUG) std::cerr << "Computing stereotypes for the following class(es): " << std::endl;
+    if (DEBUG) std::cerr << std::endl << "Computing stereotypes for the following class: " << std::endl << std::endl;
 
     for (int i = 0; i < inputFileList.size(); ++i){
         int error;
@@ -98,11 +99,12 @@ int main(int argc, char const *argv[])
             reportFile.close();
         }
 
+        //Add class & method stereotypes as attributes to both units
         firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
         if (aClass.getUnitTwoCount() != 0)
             secondUnit = aClass.outputUnitWithStereotypes(archive, secondUnit, false);
 
-        //Namespace for output of stereotypes
+        //Register namespace for output of stereotypes
         srcml_archive* output_archive = srcml_archive_create();
         error = srcml_archive_register_namespace(output_archive, "st", "http://www.srcML.org/srcML/stereotype");
         if (error) {
@@ -135,7 +137,7 @@ int main(int argc, char const *argv[])
         outputFile = "";
     }
     
-    if (DEBUG) std::cerr << "StereoCode completed." << std::endl;
+    if (DEBUG) std::cerr << std::endl << "StereoCode completed." << std::endl;
     return 0;
 }
 
