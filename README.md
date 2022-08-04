@@ -2,19 +2,20 @@
 
 ## Prerequitsites
 - [srcml 1.0](https://www.srcml.org/)
-- [cmake](https://cmake.org/)
+- [cmake 3.18+](https://cmake.org/)
 
 
 ## What does it do?
 Stereocode computes stereotypes for methods and classes.
 
-It takes a class (in srcML) as input, conducts static analysis on the code, and annotates the srcML with the stereotype of the class and each method in the class.
-
 Class and method stereotypes are defined in two papers appearing in ICSM 2006 and 2010 by Dragan, Collard, and Maletic.
 
+It takes a class (in srcML) as input, conducts static analysis on the code, and annotates the srcML with the stereotype of the class and each method in the class.  The output is in srcML with stereotype attributes on the class and function tags.  
 
-## Installation
-intall srcml version 1.0 and cmake version 3.18 or later
+Users of stereocode use this output as input to additional processing or analysis.  For example, the stereotype information can be added as documentation (comments, doxgen, javadoc) to the source code.
+
+## Installation and Build
+intall srcml version 1.0 and cmake version 3.18 or later on Linux/Unix/MacOS
 
 clone or download this repo
 
@@ -29,7 +30,7 @@ make
 
 ## Usage
 
-Stereocode is run on the command line, navigate to the executable location and use the executable name
+Stereocode is run on the command line
 
 Example: Range.xml is a srcML archive
 ```
@@ -79,14 +80,14 @@ There are a predefined set of primitive (base) types for each language.  Additio
 
 ## Output
 
-Stereocode outputs an annotated archive for each input archive and optionally a report file.
+Stereocode outputs an annotated archive for each input archive and optionaly a report file.
 
-By default annotated archives have the same name/path as the input archive with `annotated.xml` at the end of the name.
+By default annotated archives have the same name/path as the input archive with `annotated.xml` at the end of the name.  There are options to overwrite the input file or specify a output file name.
 
 The <class> and <function> tags are given a stereotype attribute:
 ```
 <class st:stereotype="entity"> ... </class>
-<function st:stereotype="entity"> ... </function>
+<function st:stereotype="get"> ... </function>
 ```
 
 Class stereotypes:
@@ -100,16 +101,17 @@ Class stereotypes:
 - pure-control
 - factory
 - large-class
-- lazy-class",
+- lazy-class
 - degenerate
 - data-class
-- small-class"
+- small-class
 
 Method stereotypes:
 - unclassified
 - get
 - non-const-get
-- set-predicate
+- set
+- predicate
 - property
 - void-accessor
 - collaborator
