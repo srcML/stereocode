@@ -6,9 +6,9 @@
 
 
 ## What does it do?
-Stereocode computes stereotypes for methods and classes.
+Stereocode classifies methods and classes with one or more stereotypes.
 
-Class and method stereotypes are defined in two papers appearing in ICSM 2006 and 2010 by Dragan, Collard, and Maletic.
+Class and method stereotypes are defined in two papers appearing in IEEE International Conference on Software Maintenance (ICSM) 2006 and 2010 by Dragan, Collard, and Maletic.
 
 It takes a class (in srcML) as input, conducts static analysis on the code, and annotates the srcML with the stereotype of the class and each method in the class.  The output is in srcML with stereotype attributes on the class and function tags.  
 
@@ -84,7 +84,7 @@ Stereocode outputs an annotated archive for each input archive and optionaly a r
 
 By default annotated archives have the same name/path as the input archive with `annotated.xml` at the end of the name.  There are options to overwrite the input file or specify a output file name.
 
-The <class> and <function> tags are given a stereotype attribute:
+The class and function tags are given a stereotype attribute:
 ```
 <class st:stereotype="entity"> ... </class>
 <function st:stereotype="get"> ... </function>
@@ -123,3 +123,13 @@ Method stereotypes:
 - stateless
 - wrapper
 
+
+## Developer Notes:
+
+The initial version of this code base was developed by Doleh and documented in his MS Thesis December 2021 at Kent State University.   Previously, a prototype of stereocode was developed by Collard and Dragan for Dragan's dissertation in December 2010 at KSU.  This prototype was further extended for DySDoc 2018 by Decker and Collard.
+
+Developers of stereocode 1.0:
+- Michael L. Collard - University of Akron
+- Michael Decker - Bowling Green State University
+- Zane Doleh - Kent State University
+- Jonathan I. Maletic - Kent State University
