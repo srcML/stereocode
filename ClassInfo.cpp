@@ -8,15 +8,19 @@
 //
 classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit) : classModel() {
     language = srcml_unit_get_language(firstUnit);
+    PRIMITIVES.setLanguage(language);
 
+    //Get class information
     findClassName(archive, firstUnit);
     findParentClassName(archive, firstUnit);
     findAttributeNames(archive, firstUnit);
     findAttributeTypes(archive, firstUnit);
 
+    //Get the methods
     findMethods(archive, firstUnit, true);
     if (secondUnit) findMethods(archive, secondUnit, false);
 
+    //Get basic information on methods
     findMethodNames();
     findParameterLists();
     findMethodReturnTypes();
@@ -69,7 +73,6 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit){
         name = name.substr(6,end_position-6);
 
         parentClass.push_back(name);
-        //std::cout << "pushed back the super class name " << parentClass[i] << "\n";
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -264,7 +267,7 @@ void classModel::findParameterLists() {
         std::string parameter_list(unparsed);
         delete[] unparsed;
 
-        method[i].setParameters(parameter_list);
+        method[i].setParametersXML(parameter_list);
 
         srcml_unit_free(unit);
         srcml_clear_transforms(archive);
@@ -344,6 +347,190 @@ void classModel::findParameterTypes(){
 // Determining STEREOTYPES
 
 
+//Compute class stereotype
+// Based on definition from Dragan, Collard, Maletic ICSM 2010
+//
+void classModel::ComputeClassStereotype() {
+    set allMethods;
+    set accessors, mutators, getters, setters;
+    set collaborators, nonCollaborators, controllers, factory;
+    set commands; //command U non-void-command
+    set degenerates;
+
+    //Determine sets
+    for (int i=0; i < method.size(); ++i) {
+        std::string s;
+        s = method[i].getStereotype();
+        allMethods += i;
+        if (s.find("get") != std::string::npos) {   //get or get colaborator
+            accessors += i;
+            if (s.find("command") == std::string::npos)  //get command is not a get
+                getters += i;
+        }
+        if ((s.find("predicate") != std::string::npos) ||
+            (s.find("property") != std::string::npos) ||
+            (s.find("void-accessor") != std::string::npos) ) {
+            accessors += i;
+        }
+        if ((s.find("set") != std::string::npos)) {
+            mutators += i;
+            setters += i;
+        }
+        if (s.find("command") != std::string::npos) {
+            mutators += i;
+        }
+        if ( (s.find("collaborator") != std::string::npos) ||
+             (s.find("controller") != std::string::npos)) {
+            collaborators += i;
+        } else {
+            nonCollaborators += i;
+        }
+        if (s.find("controller") != std::string::npos) {
+            controllers += i;
+        }
+        if (s.find("factory") != std::string::npos) {
+            factory += i;
+        }
+        if (s.find("command") != std::string::npos) {
+            commands += i;
+        }
+        if ( (s.find("empty") != std::string::npos) ||
+             (s.find("stateless") != std::string::npos) ||
+             (s.find("wrapper") != std::string::npos) ||
+             (s.find("incidental") != std::string::npos) ) {
+            degenerates += i;
+        }
+    }
+    if (DEBUG) {  //Print out sets to check
+        std::cerr << "Methods: " << allMethods.card() << " " << allMethods << std::endl;
+        std::cerr << "Accessors: " << accessors.card() << " " << accessors << std::endl;
+        std::cerr << "Getters: " << getters.card() << " " << getters << std::endl;
+        std::cerr << "Mutators: " << mutators.card() << " " << mutators << std::endl;
+        std::cerr << "Setters: " << setters.card() << " " << setters << std::endl;
+        std::cerr << "Collaborators: " << collaborators.card() << " " << collaborators << std::endl;
+        std::cerr << "Non Collaborators: " << nonCollaborators.card() << " " << nonCollaborators << std::endl;
+        std::cerr << "Controllers: " << controllers.card() << " " << controllers << std::endl;
+        std::cerr << "Factory: " << factory.card() << " " << factory << std::endl;
+        std::cerr << "Commands: " << commands.card() << " " << commands << std::endl;
+        std::cerr << "Degenerates: " << degenerates.card() << " " << degenerates << std::endl;
+    }
+
+    classStereotype = "";
+    //Entity
+    if ( ((accessors - getters) != set()) &&
+         ((mutators - setters)  != set()) &&
+         (controllers.card() == 0) ) {
+        double ratio = double(collaborators.card()) / double(nonCollaborators.card());
+        if (ratio > 1.9) {
+            if (classStereotype != "") classStereotype += " ";
+            classStereotype += "entity";
+        }
+    }
+    //Minimal Entity
+    if ((allMethods - (getters + setters + commands)) == set()) {
+        double ratio = double(collaborators.card()) / double(nonCollaborators.card());
+        if (ratio > 1.9) {
+            if (classStereotype != "") classStereotype += " ";
+            classStereotype += "minimal-entity";
+        }
+    }
+    //Data Provider
+    if ( (accessors.card() > 2 * mutators.card()) &&
+         (accessors.card() > 2 * (controllers.card() + factory.card())) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "data-provider";
+    }
+    //Commander
+    if ( (mutators.card() > 2 * accessors.card()) &&
+         (mutators.card() > 2 * (controllers.card() + factory.card())) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "command";
+    }
+    //Boundary
+    if ( (collaborators.card() > nonCollaborators.card()) &&
+         (factory.card() < 0.5 * allMethods.card()) &&
+         (controllers.card() < 0.33 * allMethods.card()) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "boundary";
+    }
+    //Factory
+    if (factory.card() > 0.66 * allMethods.card()) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "factory";
+    }
+    //Controller
+    if ( (controllers.card() + factory.card() > 0.66 * allMethods.card()) &&
+         ((accessors.card() != 0) || (mutators.card() != 0)) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "control";
+    }
+    //Pure Controller
+    if ( (controllers.card() + factory.card() != 0) &&
+         (accessors.card() + mutators.card() + collaborators.card() == 0) &&
+         (controllers.card() != 0) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "pure-control";
+    }
+    //Large Class
+    {
+        int accPlusMut = accessors.card() + mutators.card();
+        int facPlusCon = controllers.card() + factory.card();
+        int m = allMethods.card();
+        if ( ((0.2 * m < accPlusMut) && (accPlusMut < 0.67 * m )) &&
+             ((0.2 * m < facPlusCon) && (facPlusCon < 0.67 * m )) &&
+             (factory.card() != 0) && (controllers.card() != 0) &&
+             (accessors.card() != 0) && (mutators.card() != 0) ) {
+            if (m > METHODS_PER_CLASS_THRESHOLD) { //Average methods/class + 1 std (system wide)
+                if (classStereotype != "") classStereotype += " ";
+                classStereotype += "large-class";
+            }
+        }
+    }
+    //Lazy Class
+    if ( (getters.card() + setters.card() != 0) &&
+         (degenerates.card() / double(allMethods.card()) > 0.33) &&
+         ((allMethods.card() - (degenerates.card() + getters.card() + setters.card())) / double(allMethods.card())  <= 0.2) ) {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "lazy-class";
+    }
+    //Degenerate Class
+    if (degenerates.card() / double(allMethods.card()) > 0.33)  {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "degenerate";
+    }
+    //Data Class
+    if (allMethods.card() - getters.card() - setters.card() == 0)  {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "data-class";
+    }
+    //Small Class
+    if (allMethods.card() < 3)  {
+        if (classStereotype != "") classStereotype += " ";
+        classStereotype += "small-class";
+    }
+    //Final check if no stereotype was assigned
+    if (classStereotype == "") classStereotype = NO_STEREOTYPE;
+}
+
+
+
+//Compute method stereotypes
+void classModel::ComputeMethodStereotype() {
+    getter();
+    setter();
+    commandCollaborator();
+    predicate();
+    property();
+    voidAccessor();
+    command();
+    factory();
+    empty();
+    collaborator();
+    stateless();
+}
+
+
+
 
 // Stereotype get:
 // method is const,
@@ -354,7 +541,7 @@ void classModel::findParameterTypes(){
 // method is not const
 // contains at least 1 return statement that returns a data memeber
 // return expression must be in the form 'return a;' or 'return *a;'
-void classModel::stereotypeGetter() {
+void classModel::getter() {
     for (int i = 0; i < method.size(); ++i){
         if (method[i].returnsAttribute()) {
             if (method[i].isConst())
@@ -372,7 +559,7 @@ void classModel::stereotypeGetter() {
 //  method not const
 //  only 1 attribute has been changed
 //
-void classModel::stereotypeSetter() {
+void classModel::setter() {
     for (int i = 0; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         bool void_or_bool = (returnType == "void" || returnType == "bool");
@@ -389,13 +576,13 @@ void classModel::stereotypeSetter() {
 // returns boolean
 // return expression is not a attribute
 //
-// Stereotype collaborational-predicate:
+// Stereotype predicate collaborator:
 // method is const
 // returns boolean
 // return expression is not a attribute
 // does not use any attribute in the method
 // has no pure calls
-void classModel::stereotypePredicate() {
+void classModel::predicate() {
     for (int i = 0; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType == "bool" && !method[i].returnsAttribute() && method[i].isConst()) {
@@ -407,7 +594,7 @@ void classModel::stereotypePredicate() {
             int pureCallsCount = countPureCalls(pure_calls);
 
             if (!usesAttr && pureCallsCount == 0){
-                method[i].setStereotype("collaborational-predicate");
+                method[i].setStereotype("predicate collaborator");
             }
             else{
                 method[i].setStereotype("predicate");
@@ -422,13 +609,13 @@ void classModel::stereotypePredicate() {
 // return type is not boolean or void
 // does not return a attribute
 
-// Stereotype collaborational-property
+// Stereotype property collaborator
 // method is const
 // return type is not void or boolean
 // does not contain a attribute anywhere in the function
 // does not contain any pure calls
 // does not contain any calls on attributes
-void classModel::stereotypeProperty() {
+void classModel::property() {
     for (int i = 0; i < method.size(); ++i){
         std::string returnType = separateTypeName(method[i].getReturnType());
         if (returnType != "bool" && returnType != "void" && !method[i].returnsAttribute() && method[i].isConst()){
@@ -443,7 +630,7 @@ void classModel::stereotypeProperty() {
 
 
             if (!usesAttr && pureCallsCount == 0){
-                method[i].setStereotype("collaborational-property");
+                method[i].setStereotype("property collaborator");
             }
             else{
                 method[i].setStereotype("property");
@@ -459,7 +646,7 @@ void classModel::stereotypeProperty() {
 //     passed by non-const reference
 //     is a primitive type
 //     and is assigned a value(one = in the expression).
-void classModel::stereotypeVoidAccessor() {
+void classModel::voidAccessor() {
     for (int i = 0; i < method.size(); ++i){
         if(method[i].isVoidAccessor()){
             bool usesAttr = usesAttribute(i);
@@ -471,10 +658,10 @@ void classModel::stereotypeVoidAccessor() {
             std::vector<std::string> pure_calls = method[i].findCalls("pure");
             int pureCallsCount = countPureCalls(pure_calls);
             if (!usesAttr && pureCallsCount == 0){
-                method[i].setStereotype("collaborational-voidaccessor");
+                method[i].setStereotype("void-accessor collaborator");
             }
             else{
-                method[i].setStereotype("voidaccessor");
+                method[i].setStereotype("void-accessor");
             }
         }
     }
@@ -508,7 +695,7 @@ void classModel::stereotypeVoidAccessor() {
 //
 // need to handle the case where 0 attributes are written and there is a call on a attribute.
 //
-void classModel::stereotypeCommand() {
+void classModel::command() {
     for (int i = 0; i < method.size(); ++i){
         std::vector<std::string> real_calls = method[i].findCalls("real");
         std::vector<std::string> pure_calls = method[i].findCalls("pure");
@@ -537,7 +724,7 @@ void classModel::stereotypeCommand() {
 }
 
 
-//stereotype collaborational-command
+//stereotype command collaborator
 //method is not const and
 //no attributes are written and
 //no pure calls, a() a::b() and
@@ -545,7 +732,7 @@ void classModel::stereotypeCommand() {
 //at least 1 call or parameter or local variable is written
 //Calls allowed:  f->g() where f is not a attribute, new f() (which isn't a real call)
 //
-void classModel::stereotypeCollaborationalCommand() {
+void classModel::commandCollaborator() {
     for (int i = 0; i < method.size(); ++i){
         std::vector<std::string> all_calls = method[i].findCalls("");
         bool hasCallOnAttribute = callsAttributesMethod(all_calls, method[i].getLocalVariables(), method[i].getParameterNames());
@@ -570,22 +757,22 @@ void classModel::stereotypeCollaborationalCommand() {
 
             bool not_command =  pureCallsCount == 0 && !hasCallOnAttribute;
             if (not_command && (all_calls.size() > 0 || local_var_written || param_written)){
-                method[i].setStereotype("collaborational-command");
+                method[i].setStereotype("command collaborator");
             }       
         }
     }
 }
 
 
-// Stereotype Collaborators
+// Stereotype Collaborator
 // at least one of the following is true:
-// makes a call to an attribute that is an object (only count pointers (* ->) [fix])
-// has a parameter that is an object.
-// has a local variable that is an object.
+// makes a call to an attribute that is an external object (only count pointers (* ->) [fix])
+// has a parameter that is an external object.
+// has a local variable that is an external object.
 //
 // what about returning an object attribtue !yes!
 //
-void classModel::stereotypeCollaborator() {
+void classModel::collaborator() {
     std::string param = "/src:parameter_list//src:parameter";
     std::string local_var = "//src:decl_stmt[not(ancestor::src:throw) and not(ancestor::src:catch)]";
     std::vector<std::string> non_primitive_attributes;
@@ -628,7 +815,7 @@ void classModel::stereotypeCollaborator() {
 // all non-primitive local variable names that match the return type of that function.
 // the variable in the return expression.
 
-void classModel::stereotypeFactory() {
+void classModel::factory() {
     for (int i = 0; i < method.size(); ++i){
         if (method[i].isFactory()){
             method[i].setStereotype("factory");
@@ -640,7 +827,7 @@ void classModel::stereotypeFactory() {
 // stereotype empty
 //
 //
-void classModel::stereotypeEmpty() {
+void classModel::empty() {
     for (int i = 0; i < method.size(); ++i){
         if (method[i].isEmptyMethod()){
             method[i].setStereotype("empty");
@@ -659,7 +846,9 @@ void classModel::stereotypeEmpty() {
 // has exactly 1 real call including new calls
 // does not use any data memebers
 //
-void classModel::stereotypeStateless() {
+// Both are degenerate
+//
+void classModel::stateless() {
     for (int i = 0; i < method.size(); ++i) {
         bool empty = method[i].isEmptyMethod();
         std::vector<std::string> calls = method[i].findCalls("");
@@ -667,17 +856,17 @@ void classModel::stereotypeStateless() {
         bool usedAttr = usesAttribute(i);
         bool hasCallOnAttribute = callsAttributesMethod(real_calls, method[i].getLocalVariables(), method[i].getParameterNames());
         usedAttr = usedAttr || hasCallOnAttribute;
-        if (!empty && calls.size() < 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " stateless");
-            if (method[i].getStereotype() == "nothing-yet stateless"){
+        if (!empty && calls.size() < 1 && !usedAttr) {
+            if (method[i].getStereotype() == NO_STEREOTYPE)
                 method[i].setStereotype("stateless");
-            }
+            else
+                method[i].setStereotype(method[i].getStereotype() + " stateless");
         }
-        if (!empty && calls.size() == 1 && !usedAttr){
-            method[i].setStereotype(method[i].getStereotype() + " wrapper");
-            if (method[i].getStereotype() == "nothing-yet wrapper"){
+        if (!empty && calls.size() == 1 && !usedAttr) {
+            if (method[i].getStereotype() == NO_STEREOTYPE)
                 method[i].setStereotype("wrapper");
-            }
+            else
+                method[i].setStereotype(method[i].getStereotype() + " wrapper");
         }
     }
 }
@@ -714,8 +903,8 @@ void classModel::returnsAttributes() {
 
 //
 //
-bool classModel::isAttribute(std::string& name) const {
-    trimWhitespace(name);
+bool classModel::isAttribute(const std::string& n) const {
+    std::string name = trimWhitespace(n);
     size_t left_sq_bracket = name.find("[");    // remove [] if the name is an array
     if (left_sq_bracket != std::string::npos){
         name = name.substr(0, left_sq_bracket);
@@ -760,7 +949,7 @@ int classModel::findAssignOperatorAttribute(int i, bool check_for_loop) const {
         std::string xpath = "//src:function[string(src:name)='";
         xpath += method[i].getName() + "' and string(src:type)='";
         xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-        xpath += method[i].getParameters() +"']//src:operator[.='";
+        xpath += method[i].getParametersXML() +"']//src:operator[.='";
         xpath += ASSIGNMENT_OPERATOR[j] + "' and not(ancestor::src:control)";
         xpath += " and not(ancestor::src:throw) and not(ancestor::src:catch)";
         if (check_for_loop) xpath += " and ancestor::src:for";
@@ -781,7 +970,7 @@ int classModel::findAssignOperatorAttribute(int i, bool check_for_loop) const {
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
             std::string var_name(unparsed);
             delete[] unparsed;
-            trimWhitespace(var_name); // removes whitespace
+            var_name = trimWhitespace(var_name); // removes whitespace
             if (isAttribute(var_name)) {
                  ++changed;
             } else if (inherits())
@@ -816,7 +1005,7 @@ int classModel::findIncrementedAttribute(int i, bool check_for_loop) const {
             std::string xpath = "//src:function[string(src:name)='";
             xpath += method[i].getName() + "' and string(src:type)='";
             xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-            xpath += method[i].getParameters() + "' and string(src:specifier)='";
+            xpath += method[i].getParametersXML() + "' and string(src:specifier)='";
             xpath += method[i].getConst() + "']//src:operator[.='";
             xpath += INC_OPS[j] + "' and not(ancestor::src:control)";
             xpath += " and not(ancestor::src:throw) and not(ancestor::src:catch)";
@@ -838,7 +1027,7 @@ int classModel::findIncrementedAttribute(int i, bool check_for_loop) const {
                 srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
                 std::string var_name(unparsed);
                 delete[] unparsed;
-                trimWhitespace(var_name);// removes whitespace
+                var_name = trimWhitespace(var_name);// removes whitespace
                 if (isAttribute(var_name)) {
                     ++changed;
                 } else if (inherits())
@@ -909,7 +1098,7 @@ bool classModel::usesAttributeObj(int i, const std::vector<std::string>& obj_nam
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-    xpath += method[i].getParameters() + "' and string(src:specifier)='";
+    xpath += method[i].getParametersXML() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:name[not(ancestor::src:throw) and not(ancestor::src:catch)]";
 
     archive = srcml_archive_create();
@@ -960,7 +1149,7 @@ bool classModel::usesAttribute(int i)  {
     std::string xpath = "//src:function[string(src:name)='";
     xpath += method[i].getName() + "' and string(src:type)='";
     xpath += method[i].getReturnType() + "' and string(src:parameter_list)='";
-    xpath += method[i].getParameters() + "' and string(src:specifier)='";
+    xpath += method[i].getParametersXML() + "' and string(src:specifier)='";
     xpath += method[i].getConst() + "']//src:expr[not(ancestor::src:throw) and";
     xpath += "not(ancestor::src:argument_list[@type='generic']) and not(ancestor::src:catch)]/src:name";
 
@@ -980,8 +1169,6 @@ bool classModel::usesAttribute(int i)  {
         std::string possible_attr(unparsed);
         delete[] unparsed;
 
-        if (PRIMITIVES.isPrimitive(possible_attr)) continue;  //Should never be a primitive type??? Remove??
-
         if (isAttribute(possible_attr)) {
             found = true;
         } else if (inherits())
@@ -1000,37 +1187,39 @@ bool classModel::usesAttribute(int i)  {
 
 
 
-
-
-
 //
-//  TODO: output the default stereotype if NO_STEREOTYPE - currently gives no attribute
-//  Copy and add in stereotype attribute on <function>
+//  Copy unit and add in stereotype attribute on <class> and <function>
+//  Example: <function st:stereotype="get"> ... </function>
+//           <class st:stereotype="boundary"> ... ></class>
 //
-//  Example <function stereotype="get">
-//
-srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
+srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit){
     int n = unitOneCount;
     int offset = 0;
     if (!oneUnit) {
         n = unitTwoCount;
         offset = unitOneCount;
     }
-
-    for (int i = 0; i < n; ++i){
-        std::string stereotype = method[i+offset].getStereotype();
-        if (stereotype == NO_STEREOTYPE && unitOneCount + unitTwoCount == 1) return nullptr;
-        if (stereotype != NO_STEREOTYPE){
-            std::string xpath = "//src:function[string(src:name)='";
-            xpath += method[i+offset].getName() + "' and string(src:type)='";
-            xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
-            xpath += method[i+offset].getParameters() + "' and string(src:specifier)='";
-            xpath += method[i+offset].getConst() + "']";
-            srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
-                                                   "http://www.srcML.org/srcML/stereotype",
-                                                   "stereotype", stereotype.c_str());
-        }
+    if (oneUnit) { //Add stereotype attribute to <class>
+        std::string xpath = "//src:class";
+        srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
+                                               "http://www.srcML.org/srcML/stereotype",
+                                               "stereotype", classStereotype.c_str());
     }
+
+    for (int i = 0; i < n; ++i) { //Add stereotype attribute to each method/function
+        std::string stereotype = method[i+offset].getStereotype();
+        //if (stereotype == NO_STEREOTYPE && unitOneCount + unitTwoCount == 1) return nullptr;  //Not sure why this is included?
+
+        std::string xpath = "//src:function[string(src:name)='";
+        xpath += method[i+offset].getName() + "' and string(src:type)='";
+        xpath += method[i+offset].getReturnType() + "' and string(src:parameter_list)='";
+        xpath += method[i+offset].getParametersXML() + "' and string(src:specifier)='";
+        xpath += method[i+offset].getConst() + "']";
+        srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
+                                               "http://www.srcML.org/srcML/stereotype",
+                                               "stereotype", stereotype.c_str());
+    }
+
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
     unit = srcml_transform_get_unit(result, 0);
@@ -1040,73 +1229,73 @@ srcml_unit* classModel::writeStereotypeAttribute(srcml_archive* archive, srcml_u
 
 
 
-
-
-//Basic output methods
+// Outputs a report file for a class (tab separated)
+//  filepath || class name || method || stereotypes
 //
-//
-void classModel::printReturnTypes(){
-    std::cout << "RETURN TYPES: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cout << method[i].getReturnType() << "\n";
-    }
-    std::cerr << std::endl;
-}
-
-//
-//
-void classModel::printStereotypes(){
-    std::cout << "STEREOTYPES: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cout << method[i].getStereotype() << "\n";
-    }
-    std::cerr << std::endl;
-}
-
-//
-//
-void classModel::printMethodNames(){
-    std::cout << "METHOD Names: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cerr << i << "  " << method[i].getName() << std::endl;
-    }
-}
-
-
-//
-//
-void classModel::printMethodHeaders(){
-    std::cout << "METHOD HEADERS: \n";
-    for (int i = 0; i < method.size(); ++i){
-        std::cerr << i << "  " << method[i].getHeader() << std::endl;
-    }
-}
-
-//
-//
-void classModel::printAttributes(){
-    std::cout << "ATTRIBUTES: \n";
-    std::cout << attribute.size() << " names\n";
-
-    for (int i = 0; i < attribute.size(); ++i){
-        std::cerr << "TYPE: " << attribute[i].getType() << " NAME: " << attribute[i].getName() << std::endl;
-    }
-
-}
-
-//
-//
-void classModel::printReportToFile(std::ofstream& output_file, const std::string& input_file_path){
-    int func_count = unitOneCount + unitTwoCount;
-    if (output_file.is_open()){
-        for (int i = 0; i < func_count; ++i){
-            output_file << input_file_path << "|" << method[i].getHeader() << "||" << method[i].getStereotype() << "\n";
+void classModel::outputReport(std::ofstream& out, const std::string& input_file_path){
+    if (out.is_open()) {
+        for (int i = 0; i < method.size(); ++i){
+            out << input_file_path << "\t" << className << "\t" << method[i].getHeader() << "\t" << method[i].getStereotype() << "\n";
         }
     }
 }
 
 
+// Output class information
+std::ostream& operator<<(std::ostream& out, const classModel& c) {
+    out << std::endl << "--------------------------------------" << std::endl;
+    out << "Class: " << c.className << std::endl;
+    out << "Class Stereotype: " << c.classStereotype << std::endl;
+    out << "# Methods: " << c.method.size() << std::endl;
+    for (int i = 0; i < c.method.size(); ++i) {
+        out <<  c.method[i] << std::endl;
+    }
+    out << "# Attributes: " << c.attribute.size() << std::endl;
+    for (int i = 0; i < c.attribute.size(); ++i) {
+        out << c.attribute[i] << std::endl;
+    }
+    out << "--------------------------------------" << std::endl;
+    return out;
+}
 
 
+//Output for testing
+void classModel::printReturnTypes(){
+    std::cerr << "RETURN TYPES: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << method[i].getReturnType() << "\n";
+    }
+    std::cerr << std::endl;
+}
 
+void classModel::printStereotypes(){
+    std::cerr << "STEREOTYPES: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << method[i].getStereotype() << "\n";
+    }
+    std::cerr << std::endl;
+}
+
+void classModel::printMethodNames(){
+    std::cerr << "METHOD Names: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << i << "  " << method[i].getName() << std::endl;
+    }
+}
+
+void classModel::printMethodHeaders(){
+    std::cerr << "METHOD HEADERS: \n";
+    for (int i = 0; i < method.size(); ++i){
+        std::cerr << i << "  " << method[i].getHeader() << std::endl;
+    }
+}
+
+void classModel::printAttributes(){
+    std::cerr << "ATTRIBUTES: \n";
+    std::cerr << attribute.size() << " names\n";
+    for (int i = 0; i < attribute.size(); ++i){
+        std::cerr << "TYPE: " << attribute[i].getType() << " NAME: " << attribute[i].getName() << std::endl;
+    }
+
+}
 

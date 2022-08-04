@@ -21,7 +21,7 @@
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;string&gt;</cpp:file></cpp:include>
 
-<class>class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisTick</name>
+<class st:stereotype="data-class">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisTick</name>
 <block>{<private type="default">
 
 </private><private>private:

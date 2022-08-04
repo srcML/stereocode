@@ -1,7 +1,7 @@
 //
 //  method.hpp
 //
-//  methodModel and attributeModel class for stereocode
+//  methodModel class for stereocode
 //
 //  Created by jmaletic on July 20 2022.
 //
@@ -18,22 +18,9 @@
 #include <algorithm>
 #include <srcml.h>
 #include "utils.hpp"
+#include "variable.hpp"
 
-//
-class variable {
-public:
-                variable ()                                           { name = ""; type = ""; };
-                variable (const std::string& s)                       { name = s;           };
-                variable (const std::string& n, const std::string& t) { name = n; type = t; };
-    void        setType  (const std::string& s)                       { type = s;           };
-    std::string getName  () const                                     { return name;        };
-    std::string getType  () const                                     { return type;        };
-
-private:
-    std::string name;
-    std::string type;
-};
-
+extern bool           DEBUG;
 
 //
 class methodModel {
@@ -43,8 +30,8 @@ public:
 
     std::string getName               () const { return name; };
     std::string getReturnType         () const { return returnType; };
-    std::string getParameters         () const { return parameters; };
-    std::string getHeader             () const { return header; };
+    std::string getParametersXML      () const { return parametersXML; };
+    std::string getHeader             () const { return headerXML; };
     std::string getConst              () const { if (constMethod) return "const"; else return ""; };
     int         getAttributesModified () const { return attributesModified; };
     bool        isConst               () const { return constMethod; };
@@ -67,15 +54,15 @@ public:
 
     void        setName               (const std::string& s) { name = s; };
     void        setReturnType         (const std::string& s) { returnType = s; };
-    void        setParameters         (const std::string& s) { parameters = s; };
-    void        setHeader             (const std::string& s) { header = s; };
+    void        setParametersXML      (const std::string& s) { parametersXML = s; };
+    void        setHeader             (const std::string& s) { headerXML = s; };
     void        setConst              (bool flag)            { constMethod = flag; };
     void        setReturnsAttribute   (bool flag)            { retAttribute = flag; };
     void        setAttributesModified (int n)                { attributesModified = n; };
     void        setLocalVariables     (const std::vector<std::string>& s) { localVariables = s; };
     void        setParameterNames     (const std::vector<std::string>& s) { parameterNames = s; };
     void        setParameterTypes     (const std::vector<std::string>& s) { parameterTypes = s; };
-    void        setStereotype         (const std::string& s) { stereotype = s; };
+    void        setStereotype         (const std::string&);
 
     bool        findConstructorCall   () const;
     bool        isFactory             () const;
@@ -84,14 +71,15 @@ public:
     bool        isVoidAccessor        () const;
     bool        variableChanged       (const std::string&) const;
 
+    friend std::ostream& operator<<(std::ostream&, const methodModel&);
 
-private:
+protected:
     std::string                 name;
-    std::string                 parameters;
+    std::string                 parametersXML;      //srcML of <parameter-list>
     std::vector<std::string>    parameterNames;
     std::vector<std::string>    parameterTypes;
     std::string                 srcML;               //srcML archive of the method
-    std::string                 header;
+    std::string                 headerXML;           //srcML of function header
     std::string                 returnType;
     bool                        constMethod;         //Is it a const method?
     bool                        retAttribute;        //Does it return any attributes?

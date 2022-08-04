@@ -7,10 +7,21 @@
 
 #include "utils.hpp"
 
+// Checks if name is global const format
+// Example: GLOBAL_FROMAT - upper case with "_"
+//
+bool isGlobalConstFormat(const std::string& name) {
+    bool result = true;
+    for (int k = 0; k < name.size(); ++k) {
+        if (!isupper(name[k]) && name[k] != '_') result = false;
+    }
+    return result;
+}
+
 
 // Checks if method is const
-bool checkConst(std::string function_srcml) {
-    trimWhitespace(function_srcml);
+bool checkConst(const std::string& srcml) {
+    std::string function_srcml = trimWhitespace(srcml);
     size_t end = function_srcml.find("{");
     std::string function_srcml_header = function_srcml.substr(0, end);
     if (function_srcml_header.find("<specifier>const</specifier><block>") != std::string::npos){
@@ -22,10 +33,11 @@ bool checkConst(std::string function_srcml) {
     }
 }
 
-//
 // Checks if a name could be an inheritied attribute
 //
 // REQUIRES: parentClass.size() > 0 - the class inherits from another class
+//
+// TODO: Should we check for global const?  - AxisModelLinear.cxx bool FLT_EQUAL( double x, double y ) has a global.
 //
 bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
                                       const std::vector<std::string>& local_var_names,
@@ -45,7 +57,7 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
         if (expr == local_var_names[k]) is_inherited = false;
     }
 
-    for(int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
+    for (int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
         if (expr[k] == '+' || expr[k] == '-' || expr[k] == '*' || expr[k] == '/'
             || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
             || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
@@ -53,10 +65,6 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
             is_inherited = false;
         }
     }
-
-    // expr is all uppercase letters
-    // assumed to be global variable
-    //if (upper_case(expr)) is_inherited = false;
 
     return is_inherited;
 }
@@ -83,87 +91,122 @@ int countPureCalls(const std::vector<std::string>& all_calls)  {
     return result;
 }
 
+
 //
 // Checks if a primitive type
-//
-bool isPrimitiveContainer(std::string return_type){
-    return_type = separateTypeName(return_type); // trim whitespace, specifiers and modifiers
-
-    // if the type is a vector or list, check if the element type is primitive
-    if(return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
-        size_t start = return_type.find("<") + 1;
-        size_t end = return_type.find(">");
-        return_type = return_type.substr(start, end - start);
-        // in the case of vector<vector<x>>
-        if (return_type.find("vector") != std::string::npos || return_type.find("list") != std::string::npos){
-            size_t start = return_type.find("<") + 1;
-            return_type = return_type.substr(start);
+//  Examples: int, bool, char, double, cont int, inline int
+//            vector<int>, map<int,int>, int[], int*, int&
+bool isPrimitiveContainer(const std::string& str) {
+    std::string s = removeSpecifiers(str);
+    s = WStoBlank(s);
+    //Remove std::vector, list, map, std::vector<list<x>>  std::map<int, int>
+    size_t pos = 0;
+    while ((pos = s.find("std::vector")) != std::string::npos) s.erase(pos, 11);
+    while ((pos = s.find("std::list")) != std::string::npos) s.erase(pos, 9);
+    while ((pos = s.find("std::set")) != std::string::npos) s.erase(pos, 8);
+    while ((pos = s.find("std::map")) != std::string::npos) s.erase(pos, 8);
+    while ((pos = s.find("vector")) != std::string::npos) s.erase(pos, 6);
+    while ((pos = s.find("list")) != std::string::npos) s.erase(pos, 4);
+    while ((pos = s.find("set")) != std::string::npos) s.erase(pos, 3);
+    while ((pos = s.find("map")) != std::string::npos) s.erase(pos, 3);
+    //Replace < > , with space
+    std::replace_if(s.begin(), s.end(), [](char c) { return c == ',' || c == '<' || c == '>'; }, ' ');
+    s = multiBlanksToBlank(Rtrim(Ltrim(s))); //Make one space between each name
+    if (s.find(" ") != std::string::npos) {  //Multiple type names
+        size_t start = 0;
+        size_t end = s.find(" ");
+        while (end != std::string::npos) {
+            if (!PRIMITIVES.isPrimitive(s.substr(start, end - start))) return false;
+            start = end + 1;
+            end = s.find(" ", start);
         }
+        return PRIMITIVES.isPrimitive(s.substr(start, end - start));
     }
-
-    // if the type is a map check if the key and value are both primivite
-    // assumes never get map<map<x,y>,z>
-    if (return_type.find("map") != std::string::npos){
-        size_t start = return_type.find("<") + 1;
-        size_t split = return_type.find(",");
-        size_t end = return_type.find(">");
-        std::string key = return_type.substr(start, split-start);
-        std::string value = return_type.substr(split + 1, end - split - 1);
-        return(PRIMITIVES.isPrimitive(key) && PRIMITIVES.isPrimitive(value));
-    }
-    // else check if primitive(NOT container).
-    return PRIMITIVES.isPrimitive(return_type);
-
+    return PRIMITIVES.isPrimitive(s);  //One type name
 }
 
 
 
-
 //
-// TODO: Should return a string with no side effect. But this is efficent
-//
-void trimWhitespace(std::string& str) {
-    str.erase(std::remove_if(str.begin(),
-                             str.end(),
-                             [](char c) { return (c == ' ' || c == '\t' || c == '\n'); }),
-              str.end());
-}
-
-//
+// Removes WS, specifiers, *, & from type name
 //
 std::string separateTypeName(const std::string& type){
-    std::string name = type;
-    trimWhitespace(name);
-    size_t stat = name.find("static");
-    if (stat != std::string::npos){
-        name.erase(stat, 6);
-    }
-    size_t mut = name.find("mutable");
-    if (mut != std::string::npos){
-        name.erase(mut, 7);
-    }
-    size_t in = name.find("inline");
-    if(in != std::string::npos){
-        name.erase(in, 6);
-    }
-    size_t virt = name.find("virtual");
-    if (virt != std::string::npos){
-        name.erase(virt, 7);
-    }
+    std::string result = trimWhitespace(type);
+    result = removeSpecifiers(result);
 
-    size_t star = name.find("*");
-    if (star != std::string::npos){
-        name.erase(star, 1);
-    }
-    size_t amp = name.find("&");
-    if (amp != std::string::npos){
-        name.erase(amp, 1);
-    }
+    return result;
+}
 
-    size_t con = name.find("const");
-    if (con != std::string::npos){
-        name.erase(con, 5);
-    }
-    return name;
+//
+// Removes specifiers, *, & from type name
+//
+std::string removeSpecifiers(const std::string& type) {
+    std::string result = type;
+    size_t pos = 0;
+    pos = result.find("static");
+    if (pos != std::string::npos) result.erase(pos, 6);
+    pos = result.find("mutable");
+    if (pos != std::string::npos) result.erase(pos, 7);
+    pos = result.find("inline");
+    if (pos != std::string::npos) result.erase(pos, 6);
+    pos = result.find("virtual");
+    if (pos != std::string::npos) result.erase(pos, 7);
+    pos = result.find("const");
+    if (pos != std::string::npos) result.erase(pos, 5);
+    pos = result.find("friend");
+    if (pos != std::string::npos) result.erase(pos, 6);
+    pos = result.find("*");
+    if (pos != std::string::npos) result.erase(pos, 1);
+    pos = result.find("&&");
+    if (pos != std::string::npos) result.erase(pos, 2);
+    pos = result.find("&");
+    if (pos != std::string::npos) result.erase(pos, 1);
+    pos = result.find("[]");
+    if (pos != std::string::npos) result.erase(pos, 2);
+
+    return result;
+}
+
+
+//Removes all whitespace from string (' ', /t, /n)
+std::string trimWhitespace(const std::string& s) {
+    std::string result(s);
+    result.erase(std::remove_if(result.begin(),
+                                result.end(),
+                                [](char c) { return isspace(c); } ),
+                 result.end());
+    return result;
+}
+
+//Trim blanks off the left of string
+std::string Ltrim(const std::string& s) {
+    std::string result(s);
+    while (result[0] == ' ') result.erase(0, 1);
+    return result;
+}
+
+//Trim blanks of the right of string
+std::string Rtrim(const std::string& s) {
+    std::string result(s);
+    while (result[result.size()-1] == ' ') result.erase(result.size()-1, 1);
+    return result;
+}
+
+//Normalize multiple blanks to one blank
+std::string multiBlanksToBlank(const std::string& s) {
+    std::string result(s);
+    size_t pos = 0;
+    while ((pos = result.find("  ")) != std::string::npos) result.erase(pos, 1);
+    return result;
+}
+
+// Converts all whitespace to blanks  ('\r' => ' ')
+std::string WStoBlank(const std::string& s) {
+    std::string result(s);
+    std::replace_if(result.begin(),
+                    result.end(),
+                    [](char c) { return isspace(c); },
+                    ' ');
+    return result;
 }
 
