@@ -11,9 +11,9 @@ project(Stereocode)
 # C++17 standard
 set(CMAKE_CXX_STANDARD 17)
 
-# Use Release build type if not specified
+# Use Debug build type if not specified
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Debug)
 endif()
 
 file(GLOB STEREOCODE_SOURCE *.cpp *.hpp)
