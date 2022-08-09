@@ -38,6 +38,7 @@ std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
 // REQUIRES: out.open(fname)
 std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
     for (std::string i : prims.ptypes) out << i << std::endl;
+    for (std::string i : prims.usertypes) out << i << std::endl;
     return out;
 }
 

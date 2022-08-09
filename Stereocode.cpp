@@ -29,36 +29,29 @@ std::vector<std::string> readFileNames(const std::string&);
 //Globals
 primitiveTypes PRIMITIVES;                        //Primitives type per language + any user supplied
 bool           DEBUG = false;                     //Debug flag from CLI option
-int            METHODS_PER_CLASS_THRESHOLD = 21; //Threshhold for large class stereotype (from ICSM10)
+int            METHODS_PER_CLASS_THRESHOLD = 21;  //Threshhold for large class stereotype (from ICSM10)
 
-int main(int argc, char const *argv[])
-{
+int main(int argc, char const *argv[]) {
     CLI::App app{"StereoCode: Determines method stereotypes"};
 
-    std::string fileList = "";
     std::string inputFile = "";
     std::string primitivesFile = "";
     std::string outputFile = "";
     bool outputReport = false;
     bool overWriteInput = false;
-    std::vector<std::string> inputFileList;
+    int  error = 0;
 
-    app.add_option("-a,--archive",     inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp units)");
-    app.add_option("-o,--output-file", outputFile,     "File name of output - srcML archive with stereotypes");
-    app.add_option("-l,--list-file",   fileList,       "File name that contains a list (one per line) of srcML archives");
-    app.add_option("-p,--primitives",  primitivesFile, "File name of user supplied primitive types (one per line)");
-    app.add_flag  ("-r,--report",      outputReport,   "Output optional report file - *.report.txt (off by default)");
-    app.add_flag  ("-v,--overwrite",   overWriteInput, "Over write input file with stereotype output (off by default)");
-    app.add_flag  ("-d,--debug",       DEBUG,          "Turn on debug mode");
-    app.add_option("-c,--large-class", METHODS_PER_CLASS_THRESHOLD, "The # of methods threshold for a large class stereotype (default=21)");
+    app.add_option("-a,--input-archive", inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp pairs)");
+    app.add_option("-o,--output-file",   outputFile,     "File name of output - srcML archive with stereotypes");
+    app.add_option("-p,--primitives",    primitivesFile, "File name of user supplied primitive types (one per line)");
+    app.add_flag  ("-r,--report",        outputReport,   "Output optional report file - *.report.txt (off by default)");
+    app.add_flag  ("-v,--overwrite",     overWriteInput, "Over write input file with stereotype output (off by default)");
+    app.add_flag  ("-d,--debug",         DEBUG,          "Turn on debug mode");
+    app.add_option("-c,--large-class",   METHODS_PER_CLASS_THRESHOLD, "The # of methods threshold for a large class stereotype (default=21)");
 
     CLI11_PARSE(app, argc, argv);
 
-    if (inputFile != "")                      //One class input archive
-        inputFileList.push_back(inputFile);
-    else if (fileList != "")                   //A list of archives
-        inputFileList = readFileNames(fileList);
-    else {
+    if (inputFile == "") {              //Must have input
         std::cerr << "Error: No input given " << std::endl;
         return -1;
     }
@@ -75,18 +68,21 @@ int main(int argc, char const *argv[])
 
     if (DEBUG) std::cerr << std::endl << "Computing stereotypes for the following class: " << std::endl << std::endl;
 
-    for (int i = 0; i < inputFileList.size(); ++i){
-        int error;
-        srcml_archive* archive = srcml_archive_create();
-        error = srcml_archive_read_open_filename(archive, inputFileList[i].c_str());   //Read a srcML archive file
+    srcml_archive* archive = srcml_archive_create();
+    srcml_unit* firstUnit;
+    srcml_unit* secondUnit;
+
+    for (int i = 0; i < 1; ++i) {  //Working for one hpp/cpp pair in archive only
+
+        error = srcml_archive_read_open_filename(archive, inputFile.c_str());   //Read a srcML archive file
         if (error) {
-            std::cerr << "Error: File not found: " << inputFileList[i] << ", error == " << error << "\n";
+            std::cerr << "Error: File not found: " << inputFile << ", error == " << error << "\n";
             return -1;
         }
         //In the case of C++ there will normally be two units, a hpp, cpp pair. But may only have a hpp
         //In case of other languages just one unit
-        srcml_unit* firstUnit = srcml_archive_read_unit(archive);   //.hpp, .java, .cs, etc
-        srcml_unit* secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
+        firstUnit = srcml_archive_read_unit(archive);   //.hpp, .java, .cs, etc
+        secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
 
         classModel  aClass  = classModel(archive, firstUnit, secondUnit);  //Construct class and do initial anaylsis
         aClass.ComputeMethodStereotype();                                  //Analysis for method stereotypes
@@ -94,8 +90,8 @@ int main(int argc, char const *argv[])
 
         if (outputReport) {        //Optionally output a report (tab separated) path, class name, method, stereotype
             std::ofstream reportFile;
-            reportFile.open(inputFileList[i] + ".report.txt");
-            aClass.outputReport(reportFile, inputFileList[i]);
+            reportFile.open(inputFile + ".report.txt");
+            aClass.outputReport(reportFile, inputFile);
             reportFile.close();
         }
 
@@ -113,9 +109,9 @@ int main(int argc, char const *argv[])
         }
         //Output srcML with stereotype attributes to some file
         if (overWriteInput)
-            outputFile = inputFileList[i];                    //Overwrite input file
-        else if (fileList != "" || outputFile == "")          //Not specified, no overwrite
-            outputFile = inputFileList[i] + ".annotated.xml"; //Default output file name
+            outputFile = inputFile;                           //Overwrite input file
+        else
+            outputFile = inputFile + ".annotated.xml";       //Default output file name
         error = srcml_archive_write_open_filename(output_archive, outputFile.c_str());
         if (error) {
             std::cerr << "Error opening: " << outputFile << std::endl;
