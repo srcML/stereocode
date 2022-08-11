@@ -164,12 +164,12 @@ int main(int argc, char const *argv[]) {
 
     //Clean up
     srcml_archive_close(archive);
+    srcml_archive_free(archive);
     srcml_archive_close(output_archive);
     srcml_archive_free(output_archive);
-    srcml_archive_free(archive);
     if (outputReport) reportFile.close();
-    
     if (DEBUG) std::cerr << std::endl << "StereoCode completed." << std::endl;
+
     return 0;
 }
 

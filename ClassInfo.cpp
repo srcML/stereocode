@@ -184,6 +184,7 @@ void classModel::findMethods(srcml_archive* archive, srcml_unit* unit, bool oneU
         srcml_archive_write_open_memory(temp, &str, &s);
         srcml_archive_write_unit(temp, result_unit);
         srcml_archive_close(temp);
+        srcml_archive_free(temp);
         std::string xml(str);
         free(str);
 
@@ -233,9 +234,10 @@ void classModel::findMethodNames() {
         method[i].setName(name);
 
         srcml_unit_free(unit);
+        srcml_transform_free(result);
         srcml_clear_transforms(archive);
         srcml_archive_close(archive);
-        srcml_transform_free(result);
+        srcml_archive_free(archive);
     }
 }
 
@@ -267,10 +269,11 @@ void classModel::findParameterLists() {
         method[i].setParametersXML(parameter_list);
 
         srcml_unit_free(unit);
+        srcml_transform_free(result);
         srcml_clear_transforms(archive);
         srcml_archive_close(archive);
-        srcml_transform_free(result);
-    }
+        srcml_archive_free(archive);
+     }
 }
 
 //
@@ -302,9 +305,10 @@ void classModel::findMethodReturnTypes(){
         method[i].setReturnType(type);
 
         srcml_unit_free(unit);
+        srcml_transform_free(result);
         srcml_clear_transforms(archive);
         srcml_archive_close(archive);
-        srcml_transform_free(result);
+        srcml_archive_free(archive);
     }
 }
 
@@ -978,9 +982,10 @@ int classModel::findAssignOperatorAttribute(int i, bool check_for_loop) const {
                 }
         }
         srcml_unit_free(unit);
+        srcml_transform_free(result);
         srcml_clear_transforms(archive);
         srcml_archive_close(archive);
-        srcml_transform_free(result);
+        srcml_archive_free(archive);
     }
     return changed;
 }
@@ -1036,9 +1041,10 @@ int classModel::findIncrementedAttribute(int i, bool check_for_loop) const {
                     }
             }
             srcml_unit_free(unit);
+            srcml_transform_free(result);
             srcml_clear_transforms(archive);
             srcml_archive_close(archive);
-            srcml_transform_free(result);
+            srcml_archive_free(archive);
         }
     }
     return changed;
@@ -1125,9 +1131,10 @@ bool classModel::usesAttributeObj(int i, const std::vector<std::string>& obj_nam
         }
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return found;
 }
@@ -1177,9 +1184,10 @@ bool classModel::usesAttribute(int i)  {
             }
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return found;
 }

@@ -57,9 +57,10 @@ bool methodModel::findConstructorCall() const{
         found = true;
 
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return found;
 }
@@ -105,9 +106,10 @@ std::vector<std::string> methodModel::findReturnExpressions(bool getter) const {
         returnExpressions.push_back(expr);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return returnExpressions;
 }
@@ -166,9 +168,10 @@ bool methodModel::isEmptyMethod() const {
     int n = srcml_transform_get_unit_size(result);
 
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return n == 1;
 }
@@ -216,9 +219,11 @@ bool methodModel::containsNonPrimitive(const std::string& x, const std::string& 
 
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
+
     return contains;
 }
 
@@ -262,9 +267,10 @@ bool methodModel::variableChanged(const std::string& var_name) const {
         }
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return changed;
 }
@@ -343,9 +349,10 @@ std::vector<std::string> methodModel::findLocalVariables() const {
         locals.push_back(var_name);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return locals;
 }
@@ -389,9 +396,10 @@ std::vector<std::string> methodModel::findParameterNames() const {
         names.push_back(param_name);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return names;
 }
@@ -434,9 +442,10 @@ std::vector<std::string> methodModel::findParameterTypes() const {
         types.push_back(param_type);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return types;
 }
@@ -489,9 +498,10 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
         }
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return calls;
 }
