@@ -123,20 +123,17 @@ void classModel::findAttributeTypes(srcml_archive* archive, srcml_unit* unit){
     for (int i = 0; i < number_of_result_units; ++i){
         result_unit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(result_unit);
-        
-        char* unparsed = new char[type.size() + 1];
-        std::strcpy(unparsed, type.c_str());
-        size_t size = type.size();
 
+        char* unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
-
         if (type == "<type ref=\"prev\"/>"){
             type = prev;
         }else{  
             type = unparsed;
             prev = type;
         }
-        delete[] unparsed;
+        free(unparsed);
 
         attribute[i].setType(type);
     }
@@ -193,11 +190,12 @@ void classModel::findMethods(srcml_archive* archive, srcml_unit* unit, bool oneU
         std::string function = srcml_unit_get_srcml(result_unit);
 
         bool isConstMethod = checkConst(function);
-        char * unparsed = new char [function.size() + 1];
-        size_t size = function.size() + 1;
+
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(result_unit, &unparsed, &size);
         std::string header(unparsed);
-        delete[] unparsed;
+        free(unparsed);
         
         header = header.substr(0, header.find("{"));
         header.erase(std::remove(header.begin(), header.end(), '\n'), header.end());  //remove newline characters
@@ -226,11 +224,11 @@ void classModel::findMethodNames() {
         resultUnit = srcml_transform_get_unit(result, 0);
 
         std::string name_srcml = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [name_srcml.size() + 1];
-        size_t size = name_srcml.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string name(unparsed);
-        delete[] unparsed;
+        free(unparsed);
 
         method[i].setName(name);
 
@@ -260,12 +258,11 @@ void classModel::findParameterLists() {
         resultUnit = srcml_transform_get_unit(result, 0);
 
         std::string name_srcml = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [name_srcml.size() + 1];
-        size_t size = name_srcml.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-
         std::string parameter_list(unparsed);
-        delete[] unparsed;
+        free(unparsed);
 
         method[i].setParametersXML(parameter_list);
 
@@ -295,13 +292,12 @@ void classModel::findMethodReturnTypes(){
         resultUnit = srcml_transform_get_unit(result, 0);
 
         std::string return_type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char[return_type.size() + 1];
-        std::strcpy (unparsed, return_type.c_str());
-        size_t size = return_type.size() +1;
 
+        char * unparsed = nullptr;
+        size_t size = 0;
         int error = srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string type(unparsed);
-        delete[] unparsed;
+        free(unparsed);
 
         method[i].setReturnType(type);
 
@@ -965,11 +961,13 @@ int classModel::findAssignOperatorAttribute(int i, bool check_for_loop) const {
         for (int k = 0; k < n; ++k){
             resultUnit = srcml_transform_get_unit(result, k);
             std::string name = srcml_unit_get_srcml(resultUnit);
-            char * unparsed = new char [name.size() + 1];
-            size_t size = name.size() + 1;
+
+            char * unparsed = nullptr;
+            size_t size = 0;
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
             std::string var_name(unparsed);
-            delete[] unparsed;
+            free(unparsed);
+
             var_name = trimWhitespace(var_name); // removes whitespace
             if (isAttribute(var_name)) {
                  ++changed;
@@ -1022,11 +1020,12 @@ int classModel::findIncrementedAttribute(int i, bool check_for_loop) const {
             if (n != 0){
                 resultUnit = srcml_transform_get_unit(result, 0);
                 std::string name = srcml_unit_get_srcml(resultUnit);
-                char * unparsed = new char [name.size() + 1];
-                size_t size = name.size() + 1;
+                char *unparsed = nullptr;
+                size_t size = 0;
                 srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
                 std::string var_name(unparsed);
-                delete[] unparsed;
+                free(unparsed);
+
                 var_name = trimWhitespace(var_name);// removes whitespace
                 if (isAttribute(var_name)) {
                     ++changed;
@@ -1111,11 +1110,11 @@ bool classModel::usesAttributeObj(int i, const std::vector<std::string>& obj_nam
     for (int i = 0; i < n; ++i){
         resultUnit = srcml_transform_get_unit(result, i);
         std::string attribute_name = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [attribute_name.size() + 1];
-        size_t size = attribute_name.size() + 1;
+        char *unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string attr_name(unparsed);
-        delete[] unparsed;
+        free(unparsed);
         for (int j = 0; j < obj_names.size(); ++j) {
             if (attr_name == obj_names[j]){
                 srcml_clear_transforms(archive);
@@ -1163,11 +1162,11 @@ bool classModel::usesAttribute(int i)  {
     for (int j = 0; j < n; ++j){
         resultUnit = srcml_transform_get_unit(result, j);
         std::string name = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [name.size() + 1];
-        size_t size = name.size() + 1;
+        char *unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string possible_attr(unparsed);
-        delete[] unparsed;
+        free(unparsed);
 
         if (isAttribute(possible_attr)) {
             found = true;

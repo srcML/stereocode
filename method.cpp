@@ -96,11 +96,11 @@ std::vector<std::string> methodModel::findReturnExpressions(bool getter) const {
         if (expr.find("<expr><literal type=\"number\"") == 0) {
             expr = "#";
         } else {
-            char * unparsed = new char [expr.size() + 1];
-            size_t size = expr.size() + 1;
+            char *unparsed = nullptr;
+            size_t size = 0;
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
             expr = unparsed;
-            delete[] unparsed;
+            free(unparsed);
         }
         returnExpressions.push_back(expr);
     }
@@ -201,11 +201,11 @@ bool methodModel::containsNonPrimitive(const std::string& x, const std::string& 
     for (int i = 0; i < n; ++i){
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [type.size() + 1];
-        size_t size = type.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string param_type(unparsed);
-        delete[] unparsed;
+        free(unparsed);
         // handles case of (void) for param list
         if (n == 1 && x == "/src:parameter_list//src:parameter" && param_type == "void")
             break;
@@ -330,11 +330,11 @@ std::vector<std::string> methodModel::findLocalVariables() const {
     for (int j = 0; j < n; ++j){
         resultUnit = srcml_transform_get_unit(result, j);
         std::string var_name = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [var_name.size() + 1];
-        size_t size = var_name.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         var_name = unparsed;
-        delete[] unparsed;
+        free(unparsed);
         var_name = trimWhitespace(var_name);
         size_t arr = var_name.find("[");
         if (arr != std::string::npos){
@@ -380,11 +380,11 @@ std::vector<std::string> methodModel::findParameterNames() const {
     for (int i = 0; i < n; ++i){
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [type.size() + 1];
-        size_t size = type.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string param_name(unparsed);
-        delete[] unparsed;
+        free(unparsed);
 
         names.push_back(param_name);
     }
@@ -426,11 +426,11 @@ std::vector<std::string> methodModel::findParameterTypes() const {
     for (int i = 0; i < n; ++i){
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [type.size() + 1];
-        size_t size = type.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string param_type(unparsed);
-        delete[] unparsed;
+        free(unparsed);
         types.push_back(param_type);
     }
     srcml_unit_free(unit);
@@ -478,11 +478,11 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
     for (int i = 0; i < n; ++i){
         resultUnit = srcml_transform_get_unit(result, i);
         std::string call = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [call.size() + 1];
-        size_t size = call.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         call = unparsed;
-        delete[] unparsed;
+        free(unparsed);
         call = trimWhitespace(call);
         if (call != "assert" && !isPrimitiveContainer(call)) {
             calls.push_back(call);
