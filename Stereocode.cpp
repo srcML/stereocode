@@ -27,20 +27,20 @@
 
 //Globals
 primitiveTypes PRIMITIVES;                        //Primitives type per language + any user supplied
-bool           DEBUG = false;                     //Debug flag from CLI option
 int            METHODS_PER_CLASS_THRESHOLD = 21;  //Threshhold for large class stereotype (from ICSM10)
+bool           DEBUG = false;                     //Debug flag from CLI option
 
 int main(int argc, char const *argv[]) {
+    std::string inputFile      = "";
+    std::string primitivesFile = "";
+    std::string outputFile     = "";
+    bool        outputReport   = false;
+    bool        overWriteInput = false;
+    int         error          = 0;
+
     CLI::App app{"StereoCode: Determines method stereotypes"};
 
-    std::string inputFile = "";
-    std::string primitivesFile = "";
-    std::string outputFile = "";
-    bool outputReport = false;
-    bool overWriteInput = false;
-    int  error = 0;
-
-    app.add_option("-a,--input-archive", inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp pairs)");
+    app.add_option("input-archive",      inputFile,      "File name of a srcML archive of a class (for C++ it is the hpp and cpp pairs)")->required();
     app.add_option("-o,--output-file",   outputFile,     "File name of output - srcML archive with stereotypes");
     app.add_option("-p,--primitives",    primitivesFile, "File name of user supplied primitive types (one per line)");
     app.add_flag  ("-r,--report",        outputReport,   "Output optional report file - *.report.txt (off by default)");
@@ -50,11 +50,7 @@ int main(int argc, char const *argv[]) {
 
     CLI11_PARSE(app, argc, argv);
 
-    if (inputFile == "") {              //Must have input
-        std::cerr << "Error: No input given " << std::endl;
-        return -1;
-    }
-    if (primitivesFile != "") {       //Add user defined primitive types to initial set
+    if (primitivesFile != "") {        //Add user defined primitive types to initial set
         std::ifstream in(primitivesFile);
         if (in.is_open())
             in >> PRIMITIVES;
@@ -107,18 +103,12 @@ int main(int argc, char const *argv[]) {
     firstUnit = srcml_archive_read_unit(archive); //.hpp, .java, .cs, etc
     while (firstUnit) {
         unitLanguage = srcml_unit_get_language(firstUnit);
-
-        std::cout << "LANGUAGE: " << unitLanguage << std::endl;
-
-
         twoUnits = false;
         if (unitLanguage == "C++") {
             secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
             unitFilename = srcml_unit_get_filename(secondUnit);
             if (!isHeaderFile(unitFilename))
                 twoUnits = true;  //It is a .cpp file
-            std::cout << "FILENAME: " << unitFilename << std::endl;
-
         }
         if (twoUnits)
             aClass  = classModel(archive, firstUnit, secondUnit);  //Construct class and do initial anaylsis
@@ -144,9 +134,7 @@ int main(int argc, char const *argv[]) {
             srcml_unit_free(secondUnit);
             firstUnit = NULL;
             secondUnit = NULL;
-            std::cout << "IN TWOUNITS" << std::endl;
-            firstUnit = srcml_archive_read_unit(archive);  //Why infinite loop???
-            std::cout << "HERE1" << std::endl;
+            firstUnit = srcml_archive_read_unit(archive);
         } else if (secondUnit) {  //Second is a hpp
             srcml_unit_free(firstUnit);
             firstUnit = secondUnit;
@@ -157,7 +145,6 @@ int main(int argc, char const *argv[]) {
             secondUnit = NULL;
             firstUnit = srcml_archive_read_unit(archive);
         }
-        std::cout << "HERE2" << std::endl;
 
         aClass  = classModel();
     }
