@@ -101,12 +101,17 @@ int main(int argc, char const *argv[]) {
     //In the case of C++ there will normally be two units, a hpp, cpp pair. But may only have a hpp
     //In case of other languages just one unit
     firstUnit = srcml_archive_read_unit(archive); //.hpp, .java, .cs, etc
+    
     while (firstUnit) {
+        
         unitLanguage = srcml_unit_get_language(firstUnit);
         twoUnits = false;
         if (unitLanguage == "C++") {
             secondUnit = srcml_archive_read_unit(archive);  //.cpp - only C++ has two units (hpp is first)
-            unitFilename = srcml_unit_get_filename(secondUnit);
+            if (secondUnit != nullptr) {
+                unitFilename = srcml_unit_get_filename(secondUnit);
+            }
+                
             if (!isHeaderFile(unitFilename))
                 twoUnits = true;  //It is a .cpp file
         }
@@ -115,9 +120,9 @@ int main(int argc, char const *argv[]) {
         else
             aClass  = classModel(archive, firstUnit, 0);
 
-        aClass.ComputeMethodStereotype();                                  //Analysis for method stereotypes
+        aClass.ComputeMethodStereotype();                                 //Analysis for method stereotypes
         aClass.ComputeClassStereotype();                                   //Analysis for class stereotype
-
+        
         //Add class & method stereotypes as attributes to both units
         firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
         if (twoUnits) secondUnit = aClass.outputUnitWithStereotypes(archive, secondUnit, false);
@@ -128,10 +133,10 @@ int main(int argc, char const *argv[]) {
 
         if (outputReport) aClass.outputReport(reportFile, inputFile);
         if (DEBUG) std::cerr << aClass << std::endl;
-
-        if (twoUnits) {
+ 
+        if (twoUnits) { 
             srcml_unit_free(firstUnit);
-            srcml_unit_free(secondUnit);
+            // srcml_unit_free(secondUnit);  -----------------------> LINE REMOVED
             firstUnit = NULL;
             secondUnit = NULL;
             firstUnit = srcml_archive_read_unit(archive);
@@ -139,7 +144,7 @@ int main(int argc, char const *argv[]) {
             srcml_unit_free(firstUnit);
             firstUnit = secondUnit;
             secondUnit = NULL;
-        } else {                  //Only one unit read
+        } else {                 //Only one unit read
             srcml_unit_free(firstUnit);
             firstUnit = NULL;
             secondUnit = NULL;
@@ -150,6 +155,7 @@ int main(int argc, char const *argv[]) {
     }
 
     //Clean up
+    
     srcml_archive_close(archive);
     srcml_archive_free(archive);
     srcml_archive_close(output_archive);

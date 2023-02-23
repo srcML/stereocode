@@ -1123,8 +1123,6 @@ bool classModel::usesAttributeObj(int i, const std::vector<std::string>& obj_nam
         free(unparsed);
         for (int j = 0; j < obj_names.size(); ++j) {
             if (attr_name == obj_names[j]) {
-                srcml_clear_transforms(archive);
-                srcml_transform_free(result);
                 found = true;
                 break;
             }
