@@ -112,7 +112,7 @@ int main(int argc, char const *argv[]) {
                 unitFilename = srcml_unit_get_filename(secondUnit);
             }
                 
-            if (!isHeaderFile(unitFilename) && unitFilename.size() != 0) //if condition ALTERED
+            if (!isHeaderFile(unitFilename))
                 twoUnits = true;  //It is a .cpp file
         }
         if (twoUnits)
@@ -122,8 +122,6 @@ int main(int argc, char const *argv[]) {
 
         aClass.ComputeMethodStereotype();                                 //Analysis for method stereotypes
         aClass.ComputeClassStereotype();                                   //Analysis for class stereotype
-
-        unitFilename.clear();
         
         //Add class & method stereotypes as attributes to both units
         firstUnit = aClass.outputUnitWithStereotypes(archive, firstUnit, true);

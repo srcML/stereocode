@@ -1,5 +1,0 @@
-AxisModelBase.xml
-AxisModelLinear.xml
-AxisModelLog.xml
-AxisTick.xml
-Range.xml

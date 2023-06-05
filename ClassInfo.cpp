@@ -1224,16 +1224,11 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
                                                "http://www.srcML.org/srcML/stereotype",
                                                "stereotype", stereotype.c_str());
     }
-    
+
     srcml_transform_result* result;
     srcml_unit_apply_transforms(archive, unit, &result);
-    int error = srcml_unit_apply_transforms(archive, unit, &result);
     unit = srcml_transform_get_unit(result, 0);
     srcml_clear_transforms(archive);
-
-    srcml_unit* rtn_unit = srcml_unit_clone(unit);
-    // srcml_transform_free(result);                //Seg Fault
-    unit = rtn_unit;
     return unit;
 }
 

@@ -2,7 +2,7 @@
 
 ## Prerequitsites
 - [srcml 1.0](https://www.srcml.org/)
-- [cmake 3.18+](https://cmake.org/)
+- [cmake 3.17+](https://cmake.org/)
 
 
 ## What does it do?
@@ -15,26 +15,29 @@ It takes a class (in srcML) as input, conducts static analysis on the code, and 
 Users of stereocode use this output as input to additional processing or analysis.  For example, the stereotype information can be added as documentation (comments, doxgen, javadoc) to the source code.
 
 ## Installation and Build
-intall srcml version 1.0 and cmake version 3.18 or later on Linux/Unix/MacOS
+Intall srcml version 1.0 and cmake version 3.17 or later on Linux/Unix/MacOS.
 
-clone or download this repo
+Clone or download this repo.
 
-build using cmake
+Build using cmake.
 
 ```
-cmake path/CMakeLists.txt
+cmake CMakeLists.txt -B build_path
+```
 
-#from location with created makefile
+From build_path with created makefile
+```
 make
 ```
 
 ## Usage
 
-Stereocode is run on the command line
+Stereocode is run on the command line.
 
-Example: Range.xml is a srcML archive
+Demo: <br>
+ExamplesArchive.xml is a srcML archive.
 ```
-./stereocode -a stereocode_tests/Range.xml
+./stereocode examples/ExamplesArchive.xml
 ```
 
 Help
@@ -48,21 +51,12 @@ srcml foo.hpp foo.cpp -o foo.xml
 stereocode -a foo.xml
 ```
 
+Examples can be found in the `examples` folder
 
-Stereocode expects each srcML archive file to contain only one class definition.  For C++ the archive typically will have two units with the .hpp first and .cpp second.  
-
-Example archives can be found in the `stereocode_tests` folder
-
-There are a predefined set of primitive (base) types for each language.  Additional primitive type (system specific) can be suppled by the user (--primitives option).
+There are a predefined set of primitive (base) types for each language.  Additional primitive type (system specific) can be supplied by the user (--primitives option).
 
 
 ## Options
-
--a, --archive \[relative path] - Specify a single input srcML archive. Archives passed in this options must have one class.
-
--l, --list-file \[relative path] - This option is to specify a file containing a list paths of archives described above in the -a option. Paths are relative to the stereocode executable file. Each path must be on a new line.
-
--a or -l options are required to provide input.
 
 -o, output-file \[relative path] - Specify a file the name of the output file.  If not specified output is input-fname.annotated.xml
 
@@ -77,10 +71,9 @@ There are a predefined set of primitive (base) types for each language.  Additio
 -d, --debug - Option to turn on some output for debugging. 
 
 
-
 ## Output
 
-Stereocode outputs an annotated archive for each input archive and optionaly a report file.
+Stereocode outputs an annotated archive for each input archive and optionally a report file.
 
 By default annotated archives have the same name/path as the input archive with `annotated.xml` at the end of the name.  There are options to overwrite the input file or specify a output file name.
 
@@ -89,40 +82,6 @@ The class and function tags are given a stereotype attribute:
 <class st:stereotype="entity"> ... </class>
 <function st:stereotype="get"> ... </function>
 ```
-
-Class stereotypes:
-- unclassified
-- entity
-- minimal-entity
-- data-provider
-- command
-- boundary
-- control
-- pure-control
-- factory
-- large-class
-- lazy-class
-- degenerate
-- data-class
-- small-class
-
-Method stereotypes:
-- unclassified
-- get
-- non-const-get
-- set
-- predicate
-- property
-- void-accessor
-- collaborator
-- command
-- non-void-command
-- controller
-- factory
-- empty
-- stateless
-- wrapper
-
 
 ## Developer Notes:
 
