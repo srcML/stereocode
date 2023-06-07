@@ -1,18 +1,17 @@
 //
-//  method.hpp
+//  variable.hpp
 //
 //  variable (name, type) class for stereocode
 //
 //  Created by jmaletic on July 20 2022.
 //
 
-#ifndef stereocodeVARIABLE_HPP
-#define stereocodeVARIABLE_HPP
+#ifndef VARIABLE_HPP
+#define VARIABLE_HPP
 
 #include <iostream>
 #include <string>
 
-//
 class variable {
 public:
                 variable ()                                           { name = ""; type = ""; };
@@ -29,8 +28,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream&, const variable&);
-
-
-
 
 #endif

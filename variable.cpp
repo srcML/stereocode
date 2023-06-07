@@ -7,8 +7,6 @@
 
 #include "variable.hpp"
 
-
-
 std::ostream& operator<<(std::ostream& out, const variable& m) {
     out << "(" << m.getType() << " : " << m.getName() << ") ";
     return out;

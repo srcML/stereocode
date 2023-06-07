@@ -3,9 +3,7 @@
 
 #include "ClassInfo.hpp"
 
-//
-//  secondUnit is only for C++ in which case firstUnit is hpp and secondUnit is cpp
-//
+
 classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit) : classModel() {
     language = srcml_unit_get_language(firstUnit);
     PRIMITIVES.setLanguage(language);
@@ -47,7 +45,7 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
         srcml_unit* result_unit = srcml_transform_get_unit(result,i);
         std::string name = srcml_unit_get_srcml(result_unit);
 
-        // chop off begining and ending <name></name>
+        // Chop off beginning and ending <name></name>
         size_t end_position = name.find("</name>");
         name = name.substr(6,end_position-6);
 
@@ -1224,8 +1222,7 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
                                                "http://www.srcML.org/srcML/stereotype",
                                                "stereotype", stereotype.c_str());
     }
-
-    srcml_transform_result* result;
+    srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     unit = srcml_transform_get_unit(result, 0);
     srcml_clear_transforms(archive);

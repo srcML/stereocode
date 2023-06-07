@@ -6,8 +6,8 @@
 //  Created by jmaletic on 7/6/22.
 //
 
-#ifndef stereocodeUTILS_HPP
-#define stereocodeUTILS_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <string>
 #include <cstring>
@@ -35,9 +35,6 @@ const std::vector<std::string> CLASS_STEREOTYPE =
 
 const std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
 
-const std::vector<std::string> HEADER_FILE_EXTENSION = {".hpp", ".h", ".HPP", ".H", ".hxx", ".hh", ".h++", ".i", ".ii", ".tcc"};
-
-bool         isHeaderFile         (const std::string&);
 bool         isGlobalConstFormat  (const std::string&);
 bool         checkConst           (const std::string&);
 bool         isInheritedAttribute (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);

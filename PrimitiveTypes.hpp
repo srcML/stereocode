@@ -19,7 +19,7 @@
 
 class primitiveTypes {
 public:
-    primitiveTypes() : language(""), ptypes() {};
+    primitiveTypes() : language("") {};
 
     bool isPrimitive(const std::string&) const;
     void addPrimitive(const std::string&);
