@@ -1,11 +1,24 @@
-//
-// Stereocode Main
-//
-// Creation: 2021
-//
-// Given a srcML archive, each method/function is annotated with a stereotype as an
-//   attribute on <function stereotype="get"> ... </function>
-
+/**
+ * @file Stereocode.cpp
+ *
+ * @copyright Copyright (C) 2010-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of Stereocode.
+ * 
+ * Stereocode is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Stereocode is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Stereocode; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include <iostream>
 #include <fstream>
@@ -20,9 +33,8 @@
 #include "ClassInfo.hpp"
 #include "PrimitiveTypes.hpp"
 
-
 primitiveTypes PRIMITIVES;                        // Primitives type per language + any user supplied
-int            METHODS_PER_CLASS_THRESHOLD = 21;  // Threshhold for large class stereotype (from ICSM10)
+int            METHODS_PER_CLASS_THRESHOLD = 21;  // Threshold for large class stereotype (from ICSM10)
 bool           DEBUG = false;                     // Debug flag from CLI option
 
 int main(int argc, char const *argv[]) {
@@ -63,18 +75,18 @@ int main(int argc, char const *argv[]) {
 
     if (DEBUG) std::cerr << std::endl << "Computing stereotypes for the following class: " << std::endl << std::endl;
 
-    srcml_archive* archive                  = srcml_archive_create();
-    srcml_archive* output_archive           = srcml_archive_create();
-    srcml_unit*    firstUnit                = nullptr;
-    srcml_unit*    secondUnit               = nullptr;
-    srcml_unit*    firstUnitTransformed     = nullptr;
-    srcml_unit*    secondUnitTransformed    = nullptr;
-    std::ofstream  reportFile;
-    std::string    unitLanguage;
-    std::string    unitFilename;
-    classModel     aClass;
-    //bool           twoUnits       = false;
-    int            error          = 0;
+    srcml_archive*              archive                  = srcml_archive_create();
+    srcml_archive*              output_archive           = srcml_archive_create();
+    srcml_unit*                 firstUnit                = nullptr;
+    srcml_unit*                 secondUnit               = nullptr;
+    srcml_unit*                 firstUnitTransformed     = nullptr;
+    srcml_unit*                 secondUnitTransformed    = nullptr;
+    srcml_transform_result*     result                   = nullptr;
+    std::ofstream               reportFile;
+    std::string                 unitLanguage;
+    std::string                 unitFilename;
+    classModel                  aClass;
+    int                         error;
 
     error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
     if (error) {
@@ -104,9 +116,8 @@ int main(int argc, char const *argv[]) {
     while (firstUnit) {
         unitLanguage = srcml_unit_get_language(firstUnit);
 
-        if (unitLanguage == "C++") {
+        if (unitLanguage == "C++") { 
             secondUnit = srcml_archive_read_unit(archive);
-            //if(secondUnit) twoUnits = true;
         }
 
         aClass  = classModel(archive, firstUnit, secondUnit);  // Construct class and do initial analysis
@@ -116,20 +127,22 @@ int main(int argc, char const *argv[]) {
         
 
         // Add class & method stereotypes as attributes to both units
-        firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, firstUnit, true);
+        firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, firstUnit, &result, true);
         srcml_archive_write_unit(output_archive, firstUnitTransformed);
-        srcml_unit_free(firstUnitTransformed);
+        srcml_transform_free(result); // Will also clear "firstUnitTransformed" since it is contained in "result".
         srcml_unit_free(firstUnit);
         firstUnitTransformed = nullptr;
-        firstUnit = nullptr;
+        firstUnit            = nullptr;
+        result               = nullptr;
 
         if (secondUnit){
-            secondUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, false); 
+            secondUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, &result, false); 
             srcml_archive_write_unit(output_archive, secondUnitTransformed);
-            srcml_unit_free(secondUnitTransformed);
+            srcml_transform_free(result);
             srcml_unit_free(secondUnit);
             secondUnitTransformed = nullptr;
-            secondUnit = nullptr;
+            secondUnit            = nullptr;
+            result                = nullptr;   
         } 
 
         if (outputReport) aClass.outputReport(reportFile, inputFile);
@@ -137,11 +150,13 @@ int main(int argc, char const *argv[]) {
 
         firstUnit = srcml_archive_read_unit(archive);      
     }
-    //Clean up
+
+    // Clean up
     srcml_archive_close(archive);
     srcml_archive_free(archive);
     srcml_archive_close(output_archive);
     srcml_archive_free(output_archive);
+    
     if (outputReport) reportFile.close();
     if (DEBUG) std::cerr << std::endl << "StereoCode completed." << std::endl;
 

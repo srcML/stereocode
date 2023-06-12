@@ -1,8 +1,26 @@
-//classModel for stereocode
-//
+/**
+ * @file ClassInfo.cpp
+ *
+ * @copyright Copyright (C) 2010-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of Stereocode.
+ * 
+ * Stereocode is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Stereocode is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Stereocode; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include "ClassInfo.hpp"
-
 
 classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit* secondUnit) : classModel() {
     language = srcml_unit_get_language(firstUnit);
@@ -16,7 +34,7 @@ classModel::classModel(srcml_archive* archive, srcml_unit* firstUnit, srcml_unit
 
     //Get the methods
     findMethods(archive, firstUnit, true);
-    if (secondUnit) findMethods(archive, secondUnit, false);
+    if (secondUnit) findMethods(archive, secondUnit, false); // Skip if there is no second unit
 
     //Get basic information on methods
     findMethodNames();
@@ -88,7 +106,7 @@ void classModel::findAttributeNames(srcml_archive* archive, srcml_unit* unit) {
     int number_of_result_units = srcml_transform_get_unit_size(result);
 
     srcml_unit* result_unit = nullptr;
-    // proessing results to collect variable names.
+    // processing results to collect variable names.
     for (int i = 0; i < number_of_result_units; ++i) {
         result_unit = srcml_transform_get_unit(result,i);
         std::string name = srcml_unit_get_srcml(result_unit);
@@ -97,7 +115,7 @@ void classModel::findAttributeNames(srcml_archive* archive, srcml_unit* unit) {
         size_t end_position = name.find("</name>");
         name = name.substr(0,end_position);
 
-        // chop off begining <name>(regular variables) or <name><name>(arrays)
+        // chop off beginning <name>(regular variables) or <name><name>(arrays)
         while (name.substr(0,6) == "<name>")
             name.erase(0,6);
 
@@ -394,8 +412,7 @@ void classModel::ComputeClassStereotype() {
         }
         if ( (s.find("empty") != std::string::npos) ||
              (s.find("stateless") != std::string::npos) ||
-             (s.find("wrapper") != std::string::npos) ||
-             (s.find("incidental") != std::string::npos) ) {
+             (s.find("wrapper") != std::string::npos)) {
             degenerates += i;
         }
     }
@@ -532,12 +549,12 @@ void classModel::ComputeMethodStereotype() {
 
 // Stereotype get:
 // method is const,
-// contains at least 1 return statement that returns a data memeber
+// contains at least 1 return statement that returns a data member
 // return expression must be in the form 'return a;' or 'return *a;'
 
 // Stereotype non-const get:
 // method is not const
-// contains at least 1 return statement that returns a data memeber
+// contains at least 1 return statement that returns a data member
 // return expression must be in the form 'return a;' or 'return *a;'
 void classModel::getter() {
     for (int i = 0; i < method.size(); ++i) {
@@ -842,7 +859,7 @@ void classModel::empty() {
 // stereotype wrapper
 // is not empty
 // has exactly 1 real call including new calls
-// does not use any data memebers
+// does not use any data members
 //
 // Both are degenerate
 //
@@ -1195,7 +1212,7 @@ bool classModel::usesAttribute(int i)  {
 //  Example: <function st:stereotype="get"> ... </function>
 //           <class st:stereotype="boundary"> ... ></class>
 //
-srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_unit* unit, bool oneUnit) {
+srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_unit* unit, srcml_transform_result** result, bool oneUnit) {
     int n = unitOneCount;
     int offset = 0;
     if (!oneUnit) {
@@ -1222,9 +1239,9 @@ srcml_unit* classModel::outputUnitWithStereotypes(srcml_archive* archive, srcml_
                                                "http://www.srcML.org/srcML/stereotype",
                                                "stereotype", stereotype.c_str());
     }
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    unit = srcml_transform_get_unit(result, 0);
+
+    srcml_unit_apply_transforms(archive, unit, result);
+    unit = srcml_transform_get_unit(*result, 0); // "result" contains a list of units. "unit" is simply a pointer to the unit at the specified index.
     srcml_clear_transforms(archive);
     return unit;
 }

@@ -1,9 +1,24 @@
-//
-//  method.cpp
-//  
-//
-//  Created by jmaletic on July 20 2022.
-//
+/**
+ * @file method.cpp
+ *
+ * @copyright Copyright (C) 2010-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of Stereocode.
+ * 
+ * Stereocode is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Stereocode is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Stereocode; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ */
 
 #include "method.hpp"
 
@@ -12,9 +27,7 @@ methodModel::methodModel() : name(), parametersXML(),
                              srcML(), headerXML(),
                              returnType(), constMethod(false),
                              retAttribute(false), attributesModified(0),
-                             localVariables(), stereotype(NO_STEREOTYPE) {
-
-};
+                             localVariables(), stereotype(NO_STEREOTYPE) {};
 
 
 methodModel::methodModel(const std::string& xml, const std::string& s, bool f) : methodModel() {
@@ -31,7 +44,7 @@ void methodModel::setStereotype (const std::string& s) {
 
 //
 //
-// Finds a constuctor call that is after a new operator that matches the class name
+// Finds a constructor call that is after a new operator that matches the class name
 //
 bool methodModel::findConstructorCall() const{
     bool found = false;
@@ -430,7 +443,6 @@ std::vector<std::string> methodModel::findParameterTypes() const {
     srcml_unit_apply_transforms(archive, unit, &result);
 
     int n = srcml_transform_get_unit_size(result);
-
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
@@ -453,8 +465,9 @@ std::vector<std::string> methodModel::findParameterTypes() const {
 
 
 
-// returns a list of call names that are not below throw or following new: when pure_call is false
-// does not include calls following the . or -> operators: when pure_call is true
+// returns a list of call names that are not below throw or catch
+// does not include calls following new: when call_type is real
+// does not include calls following the . or -> operators: when call_type is pure
 //
 std::vector<std::string> methodModel::findCalls(const std::string& call_type) const {
     std::vector<std::string> calls;
