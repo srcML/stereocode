@@ -22,6 +22,13 @@
 
 #include "utils.hpp"
 
+// Does it have a .hpp file extension?
+bool isHeaderFile(const std::string& fname) {
+    for (std::string ext : HEADER_FILE_EXTENSION)
+        if (fname.find(ext) != std::string::npos) return true;
+    return false;
+}
+
 // Checks if name is global const format
 // Example: GLOBAL_FROMAT - upper case with "_"
 //

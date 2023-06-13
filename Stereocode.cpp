@@ -38,6 +38,7 @@ int            METHODS_PER_CLASS_THRESHOLD = 21;  // Threshold for large class s
 bool           DEBUG = false;                     // Debug flag from CLI option
 
 int main(int argc, char const *argv[]) {
+
     std::string inputFile      = "";
     std::string primitivesFile = "";
     std::string outputFile     = "";
@@ -81,14 +82,15 @@ int main(int argc, char const *argv[]) {
     srcml_unit*                 secondUnit               = nullptr;
     srcml_unit*                 firstUnitTransformed     = nullptr;
     srcml_unit*                 secondUnitTransformed    = nullptr;
-    srcml_transform_result*     result                   = nullptr;
+    srcml_transform_result*     resultFirst              = nullptr;
+    srcml_transform_result*     resultSecond             = nullptr;
     std::ofstream               reportFile;
-    std::string                 unitLanguage;
-    std::string                 unitFilename;
     classModel                  aClass;
     int                         error;
+    bool                        hppFirst                 = false;
 
     error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
+
     if (error) {
         std::cerr << "Error: File not found: " << inputFile << ", error == " << error << "\n";
         return -1;
@@ -111,44 +113,62 @@ int main(int argc, char const *argv[]) {
         reportFile.open(inputFile + ".report.txt");
     }
 
-    firstUnit = srcml_archive_read_unit(archive); //.hpp, .java, .cs, etc
+
+    // Currently, only C++ is supported.
+    // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter)
+    // A single class is expected in each unit
+    
+    firstUnit = srcml_archive_read_unit(archive);
+    secondUnit = srcml_archive_read_unit(archive);
 
     while (firstUnit) {
-        unitLanguage = srcml_unit_get_language(firstUnit);
-
-        if (unitLanguage == "C++") { 
-            secondUnit = srcml_archive_read_unit(archive);
-        }
-
-        aClass  = classModel(archive, firstUnit, secondUnit);  // Construct class and do initial analysis
-
+        
+        if (isHeaderFile(srcml_unit_get_filename(firstUnit))) { hppFirst = true; }
+        
+        if(hppFirst){ aClass  = classModel(archive, firstUnit, secondUnit); }
+        else{ aClass  = classModel(archive, secondUnit, firstUnit); }
+        
         aClass.ComputeMethodStereotype();                          // Analysis for method stereotypes
         aClass.ComputeClassStereotype();                           // Analysis for class stereotype
         
-
         // Add class & method stereotypes as attributes to both units
-        firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, firstUnit, &result, true);
-        srcml_archive_write_unit(output_archive, firstUnitTransformed);
-        srcml_transform_free(result); // Will also clear "firstUnitTransformed" since it is contained in "result".
-        srcml_unit_free(firstUnit);
-        firstUnitTransformed = nullptr;
-        firstUnit            = nullptr;
-        result               = nullptr;
-
-        if (secondUnit){
-            secondUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, &result, false); 
-            srcml_archive_write_unit(output_archive, secondUnitTransformed);
-            srcml_transform_free(result);
-            srcml_unit_free(secondUnit);
-            secondUnitTransformed = nullptr;
-            secondUnit            = nullptr;
-            result                = nullptr;   
-        } 
-
+        if(hppFirst){ 
+            firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, firstUnit, &resultFirst, hppFirst); 
+            if (aClass.getUnitTwoCount() != 0){ secondUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, &resultSecond, !hppFirst ); } 
+            srcml_archive_write_unit(output_archive, firstUnitTransformed); 
+            srcml_archive_write_unit(output_archive, secondUnitTransformed);        
+        }
+        else{ 
+            firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, &resultSecond, !hppFirst);
+            if (aClass.getUnitOneCount() != 0){ secondUnitTransformed = aClass.outputUnitWithStereotypes(archive, firstUnit, &resultFirst, hppFirst); }
+            srcml_archive_write_unit(output_archive, secondUnitTransformed); 
+            srcml_archive_write_unit(output_archive, firstUnitTransformed);
+        }
+    
         if (outputReport) aClass.outputReport(reportFile, inputFile);
         if (DEBUG) std::cerr << aClass << std::endl;
 
-        firstUnit = srcml_archive_read_unit(archive);      
+        // Clean
+        if(hppFirst){ 
+            if(aClass.getUnitTwoCount() != 0){ 
+                srcml_transform_free(resultSecond);  // Will also clear "secondUnitTransformed" since it is contained in "result*". 
+            } 
+            srcml_transform_free(resultFirst); // Will also clear "firstUnitTransformed" since it is contained in "result*". 
+        }
+        else{
+             if(aClass.getUnitOneCount() != 0){ 
+                srcml_transform_free(resultFirst); 
+            } 
+            srcml_transform_free(resultSecond);
+        }
+
+        srcml_unit_free(firstUnit);
+        srcml_unit_free(secondUnit);
+           
+        firstUnit = srcml_archive_read_unit(archive);    
+        secondUnit = srcml_archive_read_unit(archive);
+
+        hppFirst = false;  
     }
 
     // Clean up
@@ -161,5 +181,4 @@ int main(int argc, char const *argv[]) {
     if (DEBUG) std::cerr << std::endl << "StereoCode completed." << std::endl;
 
     return 0;
-}
-
+}   

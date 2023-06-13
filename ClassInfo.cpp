@@ -785,7 +785,7 @@ void classModel::commandCollaborator() {
 // has a parameter that is an external object.
 // has a local variable that is an external object.
 //
-// what about returning an object attribtue !yes!
+// what about returning an object attribute !yes!
 //
 void classModel::collaborator() {
     std::string param = "/src:parameter_list//src:parameter";

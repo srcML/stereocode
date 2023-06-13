@@ -34,10 +34,12 @@ make
 
 Stereocode is run on the command line.
 
+Stereocode expects each srcML archive file, or unit, to contain only one class definition. For C++, the archive typically will have units consisting of .hpp and .cpp. 
+
 Demo: <br>
-ExamplesArchive.xml is a srcML archive.
+Examples.xml is a srcML archive.
 ```
-./stereocode examples/ExamplesArchive.xml
+./stereocode examples/Examples.xml
 ```
 
 Help
@@ -47,8 +49,13 @@ Help
 
 Tool chain 
 ```
-srcml foo.hpp foo.cpp -o foo.xml
-stereocode -a foo.xml
+srcml example1.hpp example1.cpp example2.hpp example2.cpp -o Examples.xml
+./stereocode Examples.xml
+
+// or
+
+srcml example1.cpp example1.hpp example2.cpp example2.hpp -o Examples.xml
+./stereocode Examples.xml
 ```
 
 Examples can be found in the `examples` folder
