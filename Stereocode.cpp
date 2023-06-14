@@ -48,12 +48,12 @@ int main(int argc, char const *argv[]) {
 
     CLI::App app{"StereoCode: Determines method stereotypes"};
     
-    app.add_option("input-archive",      inputFile,      "File name of a srcML archive")->required();
-    app.add_option("-o,--output-file",   outputFile,     "File name of output - srcML archive with stereotypes");
-    app.add_option("-p,--primitives",    primitivesFile, "File name of user supplied primitive types (one per line)");
-    app.add_flag  ("-r,--report",        outputReport,   "Output optional report file - *.report.txt (off by default)");
-    app.add_flag  ("-v,--overwrite",     overWriteInput, "Over write input file with stereotype output (off by default)");
-    app.add_flag  ("-d,--debug",         DEBUG,          "Turn on debug mode");
+    app.add_option("input-archive",      inputFile,                   "File name of a srcML archive")->required();
+    app.add_option("-o,--output-file",   outputFile,                  "File name of output - srcML archive with stereotypes");
+    app.add_option("-p,--primitives",    primitivesFile,              "File name of user supplied primitive types (one per line)");
+    app.add_flag  ("-r,--report",        outputReport,                "Output optional report file - *.report.txt (off by default)");
+    app.add_flag  ("-v,--overwrite",     overWriteInput,              "Over write input file with stereotype output (off by default)");
+    app.add_flag  ("-d,--debug",         DEBUG,                       "Turn on debug mode (off by default)");
     app.add_option("-c,--large-class",   METHODS_PER_CLASS_THRESHOLD, "The # of methods threshold for a large class stereotype (default=21)");
 
     CLI11_PARSE(app, argc, argv);
@@ -93,6 +93,8 @@ int main(int argc, char const *argv[]) {
 
     if (error) {
         std::cerr << "Error: File not found: " << inputFile << ", error == " << error << "\n";
+        srcml_archive_free(archive);
+        srcml_archive_free(output_archive);
         return -1;
     }
 
@@ -100,12 +102,17 @@ int main(int argc, char const *argv[]) {
     error = srcml_archive_register_namespace(output_archive, "st", "http://www.srcML.org/srcML/stereotype"); 
     if (error) {
         std::cerr << "Error registering namespace" << std::endl;
+        srcml_archive_free(archive);
+        srcml_archive_free(output_archive);
         return -1;
     }
 
     error = srcml_archive_write_open_filename(output_archive, outputFile.c_str());
     if (error) {
         std::cerr << "Error opening: " << outputFile << std::endl;
+        srcml_archive_close(archive);
+        srcml_archive_free(archive);
+        srcml_archive_free(output_archive);
         return -1;
     }
 
@@ -117,6 +124,7 @@ int main(int argc, char const *argv[]) {
     // Currently, only C++ is supported.
     // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter)
     // A single class is expected in each unit
+    // Also works for a single .hpp file
     
     firstUnit = srcml_archive_read_unit(archive);
     secondUnit = srcml_archive_read_unit(archive);
@@ -164,6 +172,13 @@ int main(int argc, char const *argv[]) {
 
         srcml_unit_free(firstUnit);
         srcml_unit_free(secondUnit);
+
+        firstUnit = nullptr;
+        secondUnit = nullptr;
+        firstUnitTransformed = nullptr;
+        secondUnitTransformed = nullptr;
+        resultFirst = nullptr;
+        resultSecond = nullptr;
            
         firstUnit = srcml_archive_read_unit(archive);    
         secondUnit = srcml_archive_read_unit(archive);
