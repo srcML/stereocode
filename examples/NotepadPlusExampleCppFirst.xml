@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Notepad_plus_Window.cpp" hash="9668c2a63f79f6644ea7e7f170ed78bc8cef0d95"><comment type="line">// This file is part of Notepad++ project</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Notepad_plus_Window.cpp" hash="5cfea69b85e7303440c03b6534681943bd7b33ed"><comment type="line">// This file is part of Notepad++ project</comment>
 <comment type="line">// Copyright (C)2021 Don HO &lt;don.h@free.fr&gt;</comment>
 
 <comment type="line">// This program is free software: you can redistribute it and/or modify</comment>
@@ -427,7 +427,7 @@
 </block_content>}</block></function>
 </unit>
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C" filename="Notepad_plus_Window.h" hash="559db38a522fe0370ae19c2ab322ddf59d243989"><comment type="line">// This file is part of Notepad++ project</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Notepad_plus_Window.h" hash="af85e524cc2ae3e3b35bb4866f8f90432c962cdd"><comment type="line">// This file is part of Notepad++ project</comment>
 <comment type="line">// Copyright (C)2021 Don HO &lt;don.h@free.fr&gt;</comment>
 
 <comment type="line">// This program is free software: you can redistribute it and/or modify</comment>
@@ -484,38 +484,38 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 "</literal></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
 
 
-<decl_stmt><decl><type><name>class</name></type> <name>Notepad_plus_Window</name> <range>: <expr><name>public</name> <name>Window</name>
-<block>{
-<expr><name>public</name><operator>:</operator>
-	<name>void</name> <call><name>init</name><argument_list>(<argument><expr><name>HINSTANCE</name></expr></argument>, <argument><expr><name>HWND</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>cmdLine</name></expr></argument>, <argument><expr><name>CmdLineParams</name> <operator>*</operator><name>cmdLineParams</name></expr></argument>)</argument_list></call></expr>;
+<class>class <name>Notepad_plus_Window</name> <super_list>: <super><specifier>public</specifier> <name>Window</name></super></super_list>
+<block>{<private type="default">
+</private><public>public:
+	<function_decl><type><name>void</name></type> <name>init</name><parameter_list>(<parameter><decl><type><name>HINSTANCE</name></type></decl></parameter>, <parameter><decl><type><name>HWND</name></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>cmdLine</name></decl></parameter>, <parameter><decl><type><name>CmdLineParams</name> <modifier>*</modifier></type><name>cmdLineParams</name></decl></parameter>)</parameter_list>;</function_decl>
 
-	<expr><name>bool</name> <macro><name>isDlgsMsg</name><argument_list>(<argument>MSG *msg</argument>)</argument_list></macro> <specifier>const</specifier></expr>;
+	<function_decl><type><name>bool</name></type> <name>isDlgsMsg</name><parameter_list>(<parameter><decl><type><name>MSG</name> <modifier>*</modifier></type><name>msg</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-	<expr><name>HACCEL</name> <macro><name>getAccTable</name><argument_list>()</argument_list></macro> <specifier>const</specifier> <block>{
+	<function><type><name>HACCEL</name></type> <name>getAccTable</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<return>return <expr><call><name><name>_notepad_plus_plus_core</name><operator>.</operator><name>getAccTable</name></name><argument_list>()</argument_list></call></expr>;</return>
-	}</block></expr>;
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
-	<expr><name>bool</name> <macro><name>emergency</name><argument_list>(<argument>const generic_string&amp; emergencySavedDir</argument>)</argument_list></macro> <block>{
+	<function><type><name>bool</name></type> <name>emergency</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>generic_string</name><modifier>&amp;</modifier></type> <name>emergencySavedDir</name></decl></parameter>)</parameter_list> <block>{<block_content>
 		<return>return <expr><call><name><name>_notepad_plus_plus_core</name><operator>.</operator><name>emergency</name></name><argument_list>(<argument><expr><name>emergencySavedDir</name></expr></argument>)</argument_list></call></expr>;</return>
-	}</block></expr>;
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
-	<expr><name>bool</name> <macro><name>isPrelaunch</name><argument_list>()</argument_list></macro> <specifier>const</specifier> <block>{
+	<function><type><name>bool</name></type> <name>isPrelaunch</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<return>return <expr><name>_isPrelaunch</name></expr>;</return>
-	}</block></expr>;
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
-	<expr><name>void</name> <macro><name>setIsPrelaunch</name><argument_list>(<argument>bool val</argument>)</argument_list></macro> <block>{
-		<expr><name>_isPrelaunch</name> <operator>=</operator> <name>val</name></expr>;
-	}</block></expr>;
+	<function><type><name>void</name></type> <name>setIsPrelaunch</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>val</name></decl></parameter>)</parameter_list> <block>{<block_content>
+		<expr_stmt><expr><name>_isPrelaunch</name> <operator>=</operator> <name>val</name></expr>;</expr_stmt>
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
-	<expr><name>generic_string</name> <macro><name>getPluginListVerStr</name><argument_list>()</argument_list></macro> <specifier>const</specifier> <block>{
+	<function><type><name>generic_string</name></type> <name>getPluginListVerStr</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<return>return <expr><call><name><name>_notepad_plus_plus_core</name><operator>.</operator><name>getPluginListVerStr</name></name><argument_list>()</argument_list></call></expr>;</return>
-	}</block></expr>;
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
-	<expr><name>virtual</name> <name>void</name> <macro><name>destroy</name><argument_list>()</argument_list></macro> <block>{
+	<function><type><specifier>virtual</specifier> <name>void</name></type> <name>destroy</name><parameter_list>()</parameter_list> <block>{<block_content>
 		<if_stmt><if>if <condition>(<expr><name>_hIconAbsent</name></expr>)</condition><block type="pseudo"><block_content>
-			<expr_stmt><expr><operator>::</operator><call><name>DestroyIcon</name><argument_list>(<argument><expr><name>_hIconAbsent</name></expr></argument>)</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
-		<operator>::</operator><call><name>DestroyWindow</name><argument_list>(<argument><expr><name>_hSelf</name></expr></argument>)</argument_list></call></block></expr>;
-	}</block></expr></range></decl>;</decl_stmt>
+			<expr_stmt><expr><call><name><operator>::</operator><name>DestroyIcon</name></name><argument_list>(<argument><expr><name>_hIconAbsent</name></expr></argument>)</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
+		<expr_stmt><expr><call><name><operator>::</operator><name>DestroyWindow</name></name><argument_list>(<argument><expr><name>_hSelf</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
 	<function><type><specifier>static</specifier> <specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>getClassName</name><parameter_list>()</parameter_list> <block>{<block_content>
 		<return>return <expr><name>_className</name></expr>;</return>
@@ -531,34 +531,34 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 
 	<function><type><specifier>static</specifier> <name>void</name></type> <name>loadIcon</name><parameter_list>(<parameter><decl><type><name>HINSTANCE</name></type> <name>hinst</name></decl></parameter>, <parameter><decl><type><name>wchar_t</name><modifier>*</modifier></type> <name>pszName</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>cx</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>cy</name></decl></parameter>, <parameter><decl><type><name>HICON</name><modifier>*</modifier></type> <name>icon</name></decl></parameter>)</parameter_list>
 	<block>{<block_content>
-		<if_stmt><if>if <condition>(<expr><operator>::</operator><call><name>LoadIconWithScaleDown</name><argument_list>(<argument><expr><name>hinst</name></expr></argument>, <argument><expr><name>pszName</name></expr></argument>, <argument><expr><name>cx</name></expr></argument>, <argument><expr><name>cy</name></expr></argument>, <argument><expr><name>icon</name></expr></argument>)</argument_list></call> <operator>!=</operator> <name>S_OK</name></expr>)</condition>
+		<if_stmt><if>if <condition>(<expr><call><name><operator>::</operator><name>LoadIconWithScaleDown</name></name><argument_list>(<argument><expr><name>hinst</name></expr></argument>, <argument><expr><name>pszName</name></expr></argument>, <argument><expr><name>cx</name></expr></argument>, <argument><expr><name>cy</name></expr></argument>, <argument><expr><name>icon</name></expr></argument>)</argument_list></call> <operator>!=</operator> <name>S_OK</name></expr>)</condition>
 		<block>{<block_content>
-			<expr_stmt><expr><operator>*</operator><name>icon</name> <operator>=</operator> <call><name><name>static_cast</name><argument_list type="generic">&lt;<argument><expr><name>HICON</name></expr></argument>&gt;</argument_list></name><argument_list>(<argument><expr><operator>::</operator><call><name>LoadImage</name><argument_list>(<argument><expr><name>hinst</name></expr></argument>, <argument><expr><name>pszName</name></expr></argument>, <argument><expr><name>IMAGE_ICON</name></expr></argument>, <argument><expr><name>cx</name></expr></argument>, <argument><expr><name>cy</name></expr></argument>, <argument><expr><name>LR_DEFAULTCOLOR</name></expr></argument>)</argument_list></call></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+			<expr_stmt><expr><operator>*</operator><name>icon</name> <operator>=</operator> <cast type="static">static_cast<argument_list type="generic">&lt;<argument><expr><name>HICON</name></expr></argument>&gt;</argument_list><argument_list>(<argument><expr><call><name><operator>::</operator><name>LoadImage</name></name><argument_list>(<argument><expr><name>hinst</name></expr></argument>, <argument><expr><name>pszName</name></expr></argument>, <argument><expr><name>IMAGE_ICON</name></expr></argument>, <argument><expr><name>cx</name></expr></argument>, <argument><expr><name>cy</name></expr></argument>, <argument><expr><name>LR_DEFAULTCOLOR</name></expr></argument>)</argument_list></call></expr></argument>)</argument_list></cast></expr>;</expr_stmt>
 		</block_content>}</block></if></if_stmt>
 	</block_content>}</block></function>
 
 	<function><type><specifier>static</specifier> <name>void</name></type> <name>loadTrayIcon</name><parameter_list>(<parameter><decl><type><name>HINSTANCE</name></type> <name>hinst</name></decl></parameter>, <parameter><decl><type><name>HICON</name><modifier>*</modifier></type> <name>icon</name></decl></parameter>)</parameter_list>
 	<block>{<block_content>
-		<expr_stmt><expr><call><name>loadIcon</name><argument_list>(<argument><expr><name>hinst</name></expr></argument>, <argument><expr><call><name>MAKEINTRESOURCE</name><argument_list>(<argument><expr><name>IDI_M30ICON</name></expr></argument>)</argument_list></call></expr></argument>, <argument><expr><operator>::</operator><call><name>GetSystemMetrics</name><argument_list>(<argument><expr><name>SM_CXSMICON</name></expr></argument>)</argument_list></call></expr></argument>, <argument><expr><operator>::</operator><call><name>GetSystemMetrics</name><argument_list>(<argument><expr><name>SM_CYSMICON</name></expr></argument>)</argument_list></call></expr></argument>, <argument><expr><name>icon</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+		<expr_stmt><expr><call><name>loadIcon</name><argument_list>(<argument><expr><name>hinst</name></expr></argument>, <argument><expr><call><name>MAKEINTRESOURCE</name><argument_list>(<argument><expr><name>IDI_M30ICON</name></expr></argument>)</argument_list></call></expr></argument>, <argument><expr><call><name><operator>::</operator><name>GetSystemMetrics</name></name><argument_list>(<argument><expr><name>SM_CXSMICON</name></expr></argument>)</argument_list></call></expr></argument>, <argument><expr><call><name><operator>::</operator><name>GetSystemMetrics</name></name><argument_list>(<argument><expr><name>SM_CYSMICON</name></expr></argument>)</argument_list></call></expr></argument>, <argument><expr><name>icon</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
 	</block_content>}</block></function>
 
-<label><name>private</name>:</label>
+</public><private>private:
 	<decl_stmt><decl><type><name>Notepad_plus</name></type> <name>_notepad_plus_plus_core</name></decl>;</decl_stmt>
 	<function_decl><type><specifier>static</specifier> <name>LRESULT</name> <name>CALLBACK</name></type> <name>Notepad_plus_Proc</name><parameter_list>(<parameter><decl><type><name>HWND</name></type> <name>hwnd</name></decl></parameter>, <parameter><decl><type><name>UINT</name></type> <name>Message</name></decl></parameter>, <parameter><decl><type><name>WPARAM</name></type> <name>wParam</name></decl></parameter>, <parameter><decl><type><name>LPARAM</name></type> <name>lParam</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>LRESULT</name></type> <name>runProc</name><parameter_list>(<parameter><decl><type><name>HWND</name></type> <name>hwnd</name></decl></parameter>, <parameter><decl><type><name>UINT</name></type> <name>Message</name></decl></parameter>, <parameter><decl><type><name>WPARAM</name></type> <name>wParam</name></decl></parameter>, <parameter><decl><type><name>LPARAM</name></type> <name>lParam</name></decl></parameter>)</parameter_list>;</function_decl>
 
 	<decl_stmt><decl><type><specifier>static</specifier> <specifier>const</specifier> <name>TCHAR</name></type> <name><name>_className</name><index>[<expr><literal type="number">32</literal></expr>]</index></name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isPrelaunch</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_disablePluginsManager</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isPrelaunch</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_disablePluginsManager</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
 	<decl_stmt><decl><type><name>QuoteParams</name></type> <name>_quoteParams</name></decl>;</decl_stmt> <comment type="line">// keep the availability of quote parameters for thread using</comment>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name>wstring</name> <name>_userQuote</name></expr>;</expr_stmt> <comment type="line">// keep the availability of this string for thread using</comment>
+	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>wstring</name></name></type> <name>_userQuote</name></decl>;</decl_stmt> <comment type="line">// keep the availability of this string for thread using</comment>
 
-	<decl_stmt><decl><type><name>HICON</name></type> <name>_hIconAbsent</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-};
+	<decl_stmt><decl><type><name>HICON</name></type> <name>_hIconAbsent</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+</private>}</block>;</class>
 </unit>
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" xmlns:omp="http://www.srcML.org/srcML/openmp" revision="1.0.0" language="C++" filename="Notepad_plus.cpp" hash="62716e400d6c34deeacf3c8c69259cdca4622722"><comment type="line">// This file is part of Notepad++ project</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" xmlns:omp="http://www.srcML.org/srcML/openmp" revision="1.0.0" language="C++" filename="Notepad_plus.cpp" hash="27cd36b9f5fffd72515bc52c176f7a2cab3274b0"><comment type="line">// This file is part of Notepad++ project</comment>
 <comment type="line">// Copyright (C)2021 Don HO &lt;don.h@free.fr&gt;</comment>
 
 <comment type="line">// This program is free software: you can redistribute it and/or modify</comment>
@@ -9195,7 +9195,7 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 </block_content>}</block></function>
 </unit>
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C" filename="Notepad_plus.h" hash="8ace729e2540c5cc31060dd92387395d9c0c6136"><comment type="line">// This file is part of Notepad++ project</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Notepad_plus.h" hash="f54dd906e83e2968e8934ef8dd14bdc36524aff7"><comment type="line">// This file is part of Notepad++ project</comment>
 <comment type="line">// Copyright (C)2021 Don HO &lt;don.h@free.fr&gt;</comment>
 
 <comment type="line">// This program is free software: you can redistribute it and/or modify</comment>
@@ -9276,73 +9276,73 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 <struct_decl>struct <name>TaskListInfo</name>;</struct_decl>
 
 
-<struct>struct <macro><name>VisibleGUIConf</name></macro> <name>final</name>
-<block>{
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isPostIt</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isFullScreen</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isDistractionFree</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+<struct>struct <name>VisibleGUIConf</name> <specifier>final</specifier>
+<block>{<public type="default">
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isPostIt</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isFullScreen</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isDistractionFree</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">//Used by postit &amp; fullscreen</comment>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isMenuShown</name> <init>= <expr><name>true</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isMenuShown</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>DWORD_PTR</name></type> <name>_preStyle</name> <init>= <expr><operator>(</operator><name>WS_OVERLAPPEDWINDOW</name> <operator>|</operator> <name>WS_CLIPCHILDREN</name><operator>)</operator></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">//used by postit</comment>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isTabbarShown</name> <init>= <expr><name>true</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isAlwaysOnTop</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isStatusbarShown</name> <init>= <expr><name>true</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isTabbarShown</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isAlwaysOnTop</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isStatusbarShown</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">//used by fullscreen</comment>
 	<decl_stmt><decl><type><name>WINDOWPLACEMENT</name></type> <name>_winPlace</name> <init>= <expr><block>{}</block></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">//used by distractionFree</comment>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_was2ViewModeOn</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>DockingCont</name><operator>*</operator></expr></argument>&gt;</argument_list></name> <name>_pVisibleDockingContainers</name></expr>;</expr_stmt>
-}</block>;</struct>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_was2ViewModeOn</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>DockingCont</name><modifier>*</modifier></expr></argument>&gt;</argument_list></name></type> <name>_pVisibleDockingContainers</name></decl>;</decl_stmt>
+</public>}</block>;</struct>
 
 <struct>struct <name>QuoteParams</name>
-<block>{
+<block>{<public type="default">
 	<enum>enum <name>Speed</name> <block>{ <decl><name>slow</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>, <decl><name>rapid</name></decl>, <decl><name>speedOfLight</name></decl> }</block>;</enum>
 
-	<macro><name>QuoteParams</name><argument_list>()</argument_list></macro> <block>{<block_content/>}</block><empty_stmt>;</empty_stmt>
-	<macro><name>QuoteParams</name><argument_list>(<argument>const wchar_t* quoter</argument>, <argument>Speed speed</argument>, <argument>bool shouldBeTrolling</argument>, <argument>int encoding</argument>, <argument>LangType lang</argument>, <argument>const wchar_t* quote</argument>)</argument_list></macro> :
-		<expr_stmt><expr><call><name>_quoter</name><argument_list>(<argument><expr><name>quoter</name></expr></argument>)</argument_list></call></expr><operator>,</operator> <expr><call><name>_speed</name><argument_list>(<argument><expr><name>speed</name></expr></argument>)</argument_list></call></expr><operator>,</operator> <expr><call><name>_shouldBeTrolling</name><argument_list>(<argument><expr><name>shouldBeTrolling</name></expr></argument>)</argument_list></call></expr><operator>,</operator> <expr><call><name>_encoding</name><argument_list>(<argument><expr><name>encoding</name></expr></argument>)</argument_list></call></expr><operator>,</operator> <expr><call><name>_lang</name><argument_list>(<argument><expr><name>lang</name></expr></argument>)</argument_list></call></expr><operator>,</operator> <macro><name>_quote</name><argument_list>(<argument>quote</argument>)</argument_list></macro> <expr><block>{}</block>
+	<constructor><name>QuoteParams</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></constructor><empty_stmt>;</empty_stmt>
+	<constructor><name>QuoteParams</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>quoter</name></decl></parameter>, <parameter><decl><type><name>Speed</name></type> <name>speed</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>shouldBeTrolling</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>encoding</name></decl></parameter>, <parameter><decl><type><name>LangType</name></type> <name>lang</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>quote</name></decl></parameter>)</parameter_list> <member_init_list>:
+		<call><name>_quoter</name><argument_list>(<argument><expr><name>quoter</name></expr></argument>)</argument_list></call>, <call><name>_speed</name><argument_list>(<argument><expr><name>speed</name></expr></argument>)</argument_list></call>, <call><name>_shouldBeTrolling</name><argument_list>(<argument><expr><name>shouldBeTrolling</name></expr></argument>)</argument_list></call>, <call><name>_encoding</name><argument_list>(<argument><expr><name>encoding</name></expr></argument>)</argument_list></call>, <call><name>_lang</name><argument_list>(<argument><expr><name>lang</name></expr></argument>)</argument_list></call>, <call><name>_quote</name><argument_list>(<argument><expr><name>quote</name></expr></argument>)</argument_list></call> </member_init_list><block>{<block_content/>}</block></constructor>
 
-	<name>void</name> <macro><name>reset</name><argument_list>()</argument_list></macro> <block>{
-		<expr><name>_quoter</name> <operator>=</operator> <name>nullptr</name></expr>;
-		<expr><name>_speed</name> <operator>=</operator> <name>rapid</name></expr>;
-		<expr><name>_shouldBeTrolling</name> <operator>=</operator> <name>false</name></expr>;
-		<expr><name>_encoding</name> <operator>=</operator> <name>SC_CP_UTF8</name></expr>;
-		<expr><name>_lang</name> <operator>=</operator> <name>L_TEXT</name></expr>;
-		<expr><name>_quote</name> <operator>=</operator> <name>nullptr</name></expr>;
-	}</block></expr>;</expr_stmt>
+	<function><type><name>void</name></type> <name>reset</name><parameter_list>()</parameter_list> <block>{<block_content>
+		<expr_stmt><expr><name>_quoter</name> <operator>=</operator> <literal type="null">nullptr</literal></expr>;</expr_stmt>
+		<expr_stmt><expr><name>_speed</name> <operator>=</operator> <name>rapid</name></expr>;</expr_stmt>
+		<expr_stmt><expr><name>_shouldBeTrolling</name> <operator>=</operator> <literal type="boolean">false</literal></expr>;</expr_stmt>
+		<expr_stmt><expr><name>_encoding</name> <operator>=</operator> <name>SC_CP_UTF8</name></expr>;</expr_stmt>
+		<expr_stmt><expr><name>_lang</name> <operator>=</operator> <name>L_TEXT</name></expr>;</expr_stmt>
+		<expr_stmt><expr><name>_quote</name> <operator>=</operator> <literal type="null">nullptr</literal></expr>;</expr_stmt>
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
-	<decl_stmt><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>_quoter</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>_quoter</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>Speed</name></type> <name>_speed</name> <init>= <expr><name>rapid</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_shouldBeTrolling</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_shouldBeTrolling</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>int</name></type> <name>_encoding</name> <init>= <expr><name>SC_CP_UTF8</name></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>LangType</name></type> <name>_lang</name> <init>= <expr><name>L_TEXT</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>_quote</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-}</block>;</struct>
+	<decl_stmt><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>_quote</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+</public>}</block>;</struct>
 
-<decl_stmt><decl><type><name>class</name></type> <name>CustomFileDialog</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>Notepad_plus_Window</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>AnsiCharPanel</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>ClipboardHistoryPanel</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>VerticalFileSwitcher</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>ProjectPanel</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>DocumentMap</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>FunctionListPanel</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>class</name></type> <name>FileBrowser</name></decl>;</decl_stmt>
+<class_decl>class <name>CustomFileDialog</name>;</class_decl>
+<class_decl>class <name>Notepad_plus_Window</name>;</class_decl>
+<class_decl>class <name>AnsiCharPanel</name>;</class_decl>
+<class_decl>class <name>ClipboardHistoryPanel</name>;</class_decl>
+<class_decl>class <name>VerticalFileSwitcher</name>;</class_decl>
+<class_decl>class <name>ProjectPanel</name>;</class_decl>
+<class_decl>class <name>DocumentMap</name>;</class_decl>
+<class_decl>class <name>FunctionListPanel</name>;</class_decl>
+<class_decl>class <name>FileBrowser</name>;</class_decl>
 <struct_decl>struct <name>QuoteParams</name>;</struct_decl>
 
-<decl_stmt><decl><type><name>class</name> <name>Notepad_plus</name></type> <name>final</name>
-<block>{<block_content>
-<decl_stmt><decl><type><name>friend</name> <name>class</name></type> <name>Notepad_plus_Window</name></decl>;</decl_stmt>
-<decl_stmt><decl><type><name>friend</name> <name>class</name></type> <name>FileManager</name></decl>;</decl_stmt>
+<class>class <name>Notepad_plus</name> <specifier>final</specifier>
+<block>{<private type="default">
+<friend>friend <class_decl>class <name>Notepad_plus_Window</name>;</class_decl></friend>
+<friend>friend <class_decl>class <name>FileManager</name>;</class_decl></friend>
 
-<label><name>public</name>:</label>
-	<expr_stmt><expr><call><name>Notepad_plus</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
-	<expr_stmt><expr><operator>~</operator><call><name>Notepad_plus</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+</private><public>public:
+	<macro><name>Notepad_plus</name><argument_list>()</argument_list></macro><empty_stmt>;</empty_stmt>
+	<destructor_decl><name>~Notepad_plus</name><parameter_list>()</parameter_list>;</destructor_decl>
 
 	<function_decl><type><name>LRESULT</name></type> <name>init</name><parameter_list>(<parameter><decl><type><name>HWND</name></type> <name>hwnd</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>LRESULT</name></type> <name>process</name><parameter_list>(<parameter><decl><type><name>HWND</name></type> <name>hwnd</name></decl></parameter>, <parameter><decl><type><name>UINT</name></type> <name>Message</name></decl></parameter>, <parameter><decl><type><name>WPARAM</name></type> <name>wParam</name></decl></parameter>, <parameter><decl><type><name>LPARAM</name></type> <name>lParam</name></decl></parameter>)</parameter_list>;</function_decl>
@@ -9358,19 +9358,19 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<comment type="line" format="doxygen">//! \name File Operations</comment>
 	<comment type="line">//@{</comment>
 	<comment type="line">//The doXXX functions apply to a single buffer and dont need to worry about views, with the excpetion of doClose, since closing one view doesnt have to mean the document is gone</comment>
-	<decl_stmt><decl><type><name>BufferID</name></type> <name>doOpen</name><argument_list>(<argument><expr><specifier>const</specifier> <name>generic_string</name><operator>&amp;</operator> <name>fileName</name></expr></argument>, <argument><expr><name>bool</name> <name>isRecursive</name> <operator>=</operator> <name>false</name></expr></argument>, <argument><expr><name>bool</name> <name>isReadOnly</name> <operator>=</operator> <name>false</name></expr></argument>, <argument><expr><name>int</name> <name>encoding</name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr></argument>, <argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>backupFileName</name> <operator>=</operator> <name>NULL</name></expr></argument>, <argument><expr><name>FILETIME</name> <name>fileNameTimestamp</name> <operator>=</operator> <block>{}</block></expr></argument>)</argument_list></decl>;</decl_stmt>
-	<function_decl><type><name>bool</name></type> <name>doReload</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>alert</name> <init>= <expr><name>true</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><name>bool</name></type> <name>doSave</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>filename</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSaveCopy</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>doClose</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>doDeleteBackup</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<decl_stmt><decl><type><name>BufferID</name></type> <name>doOpen</name><argument_list>(<argument><expr><specifier>const</specifier> <name>generic_string</name><operator>&amp;</operator> <name>fileName</name></expr></argument>, <argument><expr><name>bool</name> <name>isRecursive</name> <operator>=</operator> <literal type="boolean">false</literal></expr></argument>, <argument><expr><name>bool</name> <name>isReadOnly</name> <operator>=</operator> <literal type="boolean">false</literal></expr></argument>, <argument><expr><name>int</name> <name>encoding</name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr></argument>, <argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>backupFileName</name> <operator>=</operator> <name>NULL</name></expr></argument>, <argument><expr><name>FILETIME</name> <name>fileNameTimestamp</name> <operator>=</operator> <block>{}</block></expr></argument>)</argument_list></decl>;</decl_stmt>
+	<function_decl><type><name>bool</name></type> <name>doReload</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>alert</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>doSave</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>filename</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSaveCopy</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>doClose</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>doDeleteBackup</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<comment type="line">//bool doDelete(const TCHAR *fileName) const {return ::DeleteFile(fileName) != 0;};</comment>
 
 	<function_decl><type><name>void</name></type> <name>fileOpen</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>fileNew</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>bool</name></type> <name>fileReload</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileClose</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name> <init>= <expr><name>BUFFER_INVALID</name></expr></init></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>curView</name> <init>= <expr><operator>-</operator><literal type="number">1</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>	<comment type="line">//use curView to override view to close from</comment>
-	<function_decl><type><name>bool</name></type> <name>fileCloseAll</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>doDeleteBackup</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSnapshotMode</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>fileCloseAll</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>doDeleteBackup</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSnapshotMode</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileCloseAllButCurrent</name><parameter_list>()</parameter_list>;</function_decl>
-	<decl_stmt><decl><type><name>bool</name></type> <name>fileCloseAllGiven</name><argument_list>(<argument><expr><specifier>const</specifier> <name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>&gt;</argument_list></name><operator>&amp;</operator> <name>krvecBufferIndexes</name></expr></argument>)</argument_list></decl>;</decl_stmt>
+	<function_decl><type><name>bool</name></type> <name>fileCloseAllGiven</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>&gt;</argument_list></name><modifier>&amp;</modifier></type> <name>krvecBufferIndexes</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileCloseAllToLeft</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileCloseAllToRight</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileCloseAllUnchanged</name><parameter_list>()</parameter_list>;</function_decl>
@@ -9378,7 +9378,7 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>bool</name></type> <name>fileSaveAllConfirm</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileSaveAll</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileSaveSpecific</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>generic_string</name><modifier>&amp;</modifier></type> <name>fileNameToSave</name></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><name>bool</name></type> <name>fileSaveAs</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name> <init>= <expr><name>BUFFER_INVALID</name></expr></init></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSaveCopy</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>fileSaveAs</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name> <init>= <expr><name>BUFFER_INVALID</name></expr></init></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSaveCopy</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileDelete</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name> <init>= <expr><name>BUFFER_INVALID</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>fileRename</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name> <init>= <expr><name>BUFFER_INVALID</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
@@ -9401,43 +9401,43 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>void</name></type> <name>saveCurrentSession</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>saveFindHistory</name><parameter_list>()</parameter_list>;</function_decl>
 
-	<function_decl><type><name>void</name></type> <name>getCurrentOpenedFiles</name><parameter_list>(<parameter><decl><type><name>Session</name><modifier>&amp;</modifier></type> <name>session</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>includUntitledDoc</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>getCurrentOpenedFiles</name><parameter_list>(<parameter><decl><type><name>Session</name><modifier>&amp;</modifier></type> <name>session</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>includUntitledDoc</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function_decl><type><name>bool</name></type> <name>fileLoadSession</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name><modifier>*</modifier></type> <name>fn</name> <init>= <expr><name>nullptr</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>fileSaveSession</name><parameter_list>(<parameter><decl><type><name>size_t</name></type> <name>nbFile</name></decl></parameter>, <parameter><decl><type><name>TCHAR</name> <modifier>*</modifier><modifier>*</modifier></type> <name>fileNames</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>sessionFile2save</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>includeFileBrowser</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
-	<function_decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>fileSaveSession</name><parameter_list>(<parameter><decl><type><name>size_t</name></type> <name>nbFile</name> <init>= <expr><literal type="number">0</literal></expr></init></decl></parameter>, <parameter><decl><type><name>TCHAR</name><modifier>*</modifier><modifier>*</modifier></type> <name>fileNames</name> <init>= <expr><name>nullptr</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>fileLoadSession</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name><modifier>*</modifier></type> <name>fn</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>fileSaveSession</name><parameter_list>(<parameter><decl><type><name>size_t</name></type> <name>nbFile</name></decl></parameter>, <parameter><decl><type><name>TCHAR</name> <modifier>*</modifier><modifier>*</modifier></type> <name>fileNames</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>sessionFile2save</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>includeFileBrowser</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>fileSaveSession</name><parameter_list>(<parameter><decl><type><name>size_t</name></type> <name>nbFile</name> <init>= <expr><literal type="number">0</literal></expr></init></decl></parameter>, <parameter><decl><type><name>TCHAR</name><modifier>*</modifier><modifier>*</modifier></type> <name>fileNames</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>bool</name></type> <name>doBlockComment</name><parameter_list>(<parameter><decl><type><name>comment_mode</name></type> <name>currCommentMode</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>doStreamComment</name><parameter_list>()</parameter_list>;</function_decl>
-	<function_decl><type><name>bool</name></type> <name>undoStreamComment</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>tryBlockComment</name> <init>= <expr><name>true</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>undoStreamComment</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>tryBlockComment</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>bool</name></type> <name>addCurrentMacro</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>macroPlayback</name><parameter_list>(<parameter><decl><type><name>Macro</name></type></decl></parameter>)</parameter_list>;</function_decl>
 
     <function_decl><type><name>void</name></type> <name>loadLastSession</name><parameter_list>()</parameter_list>;</function_decl>
-	<function_decl><type><name>bool</name></type> <name>loadSession</name><parameter_list>(<parameter><decl><type><name>Session</name> <modifier>&amp;</modifier></type> <name>session</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSnapshotMode</name> <init>= <expr><name>false</name></expr></init></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>shouldLoadFileBrowser</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>loadSession</name><parameter_list>(<parameter><decl><type><name>Session</name> <modifier>&amp;</modifier></type> <name>session</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isSnapshotMode</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>shouldLoadFileBrowser</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>void</name></type> <name>prepareBufferChangedDialog</name><parameter_list>(<parameter><decl><type><name>Buffer</name> <modifier>*</modifier></type> <name>buffer</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>notifyBufferChanged</name><parameter_list>(<parameter><decl><type><name>Buffer</name> <modifier>*</modifier></type> <name>buffer</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>mask</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>findInFinderFiles</name><parameter_list>(<parameter><decl><type><name>FindersInfo</name> <modifier>*</modifier></type><name>findInFolderInfo</name></decl></parameter>)</parameter_list>;</function_decl>
 
-	<decl_stmt><decl><type><name>bool</name></type> <name>createFilelistForFiles</name><argument_list>(<argument><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>fileNames</name></expr></argument>)</argument_list></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>createFilelistForProjects</name><argument_list>(<argument><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>fileNames</name></expr></argument>)</argument_list></decl>;</decl_stmt>
+	<function_decl><type><name>bool</name></type> <name>createFilelistForFiles</name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>fileNames</name></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>createFilelistForProjects</name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>fileNames</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>findInFiles</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>findInProjects</name><parameter_list>()</parameter_list>;</function_decl>
-	<decl_stmt><decl><type><name>bool</name></type> <name>findInFilelist</name><argument_list>(<argument><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>fileList</name></expr></argument>)</argument_list></decl>;</decl_stmt>
+	<function_decl><type><name>bool</name></type> <name>findInFilelist</name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>fileList</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>replaceInFiles</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>replaceInProjects</name><parameter_list>()</parameter_list>;</function_decl>
-	<decl_stmt><decl><type><name>bool</name></type> <name>replaceInFilelist</name><argument_list>(<argument><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>fileList</name></expr></argument>)</argument_list></decl>;</decl_stmt>
+	<function_decl><type><name>bool</name></type> <name>replaceInFilelist</name><parameter_list>(<parameter><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>fileList</name></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>void</name></type> <name>setFindReplaceFolderFilter</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>dir</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>filters</name></decl></parameter>)</parameter_list>;</function_decl>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <call><name>addNppComponents</name><argument_list>(<argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>destDir</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>extFilterName</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>extFilter</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <call><name>addNppPlugins</name><argument_list>(<argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>extFilterName</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>extFilter</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
-    <decl_stmt><decl><type><name>int</name></type> <name>getHtmlXmlEncoding</name><argument_list>(<argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>fileName</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
+	<function_decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name></type> <name>addNppComponents</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>destDir</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>extFilterName</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>extFilter</name></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name></type> <name>addNppPlugins</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>extFilterName</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>extFilter</name></decl></parameter>)</parameter_list>;</function_decl>
+    <function_decl><type><name>int</name></type> <name>getHtmlXmlEncoding</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>fileName</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-	<expr_stmt><expr><name>HACCEL</name> <macro><name>getAccTable</name><argument_list>()</argument_list></macro> <specifier>const</specifier><block>{
+	<function><type><name>HACCEL</name></type> <name>getAccTable</name><parameter_list>()</parameter_list> <specifier>const</specifier><block>{<block_content>
 		<return>return <expr><call><name><name>_accelerator</name><operator>.</operator><name>getAccTable</name></name><argument_list>()</argument_list></call></expr>;</return>
-	}</block></expr></expr_stmt><empty_stmt>;</empty_stmt>
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
 	<function_decl><type><name>bool</name></type> <name>emergency</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>generic_string</name><modifier>&amp;</modifier></type> <name>emergencySavedDir</name></decl></parameter>)</parameter_list>;</function_decl>
 
@@ -9446,24 +9446,24 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
 	<function_decl><type><name>void</name></type> <name>launchDocumentBackupTask</name><parameter_list>()</parameter_list>;</function_decl>
-	<decl_stmt><decl><type><name>int</name></type> <name>getQuoteIndexFrom</name><argument_list>(<argument><expr><specifier>const</specifier> <name>wchar_t</name><operator>*</operator> <name>quoter</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>void</name></type> <name>showQuoteFromIndex</name><argument_list>(<argument><expr><name>int</name> <name>index</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>void</name></type> <name>showQuote</name><argument_list>(<argument><expr><specifier>const</specifier> <name>QuoteParams</name><operator>*</operator> <name>quote</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
+	<function_decl><type><name>int</name></type> <name>getQuoteIndexFrom</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>wchar_t</name><modifier>*</modifier></type> <name>quoter</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>showQuoteFromIndex</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>index</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>showQuote</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>QuoteParams</name><modifier>*</modifier></type> <name>quote</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-	<expr_stmt><expr><name>generic_string</name> <macro><name>getPluginListVerStr</name><argument_list>()</argument_list></macro> <specifier>const</specifier> <block>{
+	<function><type><name>generic_string</name></type> <name>getPluginListVerStr</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<return>return <expr><call><name><name>_pluginsAdminDlg</name><operator>.</operator><name>getPluginListVerStr</name></name><argument_list>()</argument_list></call></expr>;</return>
-	}</block></expr></expr_stmt><empty_stmt>;</empty_stmt>
+	</block_content>}</block></function><empty_stmt>;</empty_stmt>
 
 	<function_decl><type><name>void</name></type> <name>minimizeDialogs</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>restoreMinimizeDialogs</name><parameter_list>()</parameter_list>;</function_decl>
 
-	<function_decl><type><name>void</name></type> <name>refreshDarkMode</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>resetStyle</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>refreshDarkMode</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>resetStyle</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
-<label><name>private</name>:</label>
-	<decl_stmt><decl><type><name>Notepad_plus_Window</name><modifier>*</modifier></type> <name>_pPublicInterface</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>Window</name><modifier>*</modifier></type> <name>_pMainWindow</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+</public><private>private:
+	<decl_stmt><decl><type><name>Notepad_plus_Window</name><modifier>*</modifier></type> <name>_pPublicInterface</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>Window</name><modifier>*</modifier></type> <name>_pMainWindow</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>DockingManager</name></type> <name>_dockingManager</name></decl>;</decl_stmt>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>&gt;</argument_list></name> <name>_internalFuncIDs</name></expr>;</expr_stmt>
+	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></type> <name>_internalFuncIDs</name></decl>;</decl_stmt>
 
 	<decl_stmt><decl><type><name>AutoCompletion</name></type> <name>_autoCompleteMain</name></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>AutoCompletion</name></type> <name>_autoCompleteSub</name></decl>;</decl_stmt> <comment type="line">// each Scintilla has its own autoComplete</comment>
@@ -9472,17 +9472,17 @@ filePath : file or folder name to open (absolute or relative path name)\r\
     <decl_stmt><decl><type><name>NativeLangSpeaker</name></type> <name>_nativeLangSpeaker</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>DocTabView</name></type> <name>_mainDocTab</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>DocTabView</name></type> <name>_subDocTab</name></decl>;</decl_stmt>
-    <decl_stmt><decl><type><name>DocTabView</name><modifier>*</modifier></type> <name>_pDocTab</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>DocTabView</name><modifier>*</modifier></type> <name>_pNonDocTab</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>DocTabView</name><modifier>*</modifier></type> <name>_pDocTab</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>DocTabView</name><modifier>*</modifier></type> <name>_pNonDocTab</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>ScintillaEditView</name></type> <name>_subEditView</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>ScintillaEditView</name></type> <name>_mainEditView</name></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>ScintillaEditView</name></type> <name>_invisibleEditView</name></decl>;</decl_stmt> <comment type="line">// for searches</comment>
 	<decl_stmt><decl><type><name>ScintillaEditView</name></type> <name>_fileEditView</name></decl>;</decl_stmt>      <comment type="line">// for FileManager</comment>
-    <decl_stmt><decl><type><name>ScintillaEditView</name><modifier>*</modifier></type> <name>_pEditView</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>ScintillaEditView</name><modifier>*</modifier></type> <name>_pNonEditView</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>ScintillaEditView</name><modifier>*</modifier></type> <name>_pEditView</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>ScintillaEditView</name><modifier>*</modifier></type> <name>_pNonEditView</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 
-    <decl_stmt><decl><type><name>SplitterContainer</name><modifier>*</modifier></type> <name>_pMainSplitter</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>SplitterContainer</name><modifier>*</modifier></type> <name>_pMainSplitter</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>SplitterContainer</name></type> <name>_subSplitter</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>ContextMenu</name></type> <name>_tabPopupMenu</name></decl>;</decl_stmt>
@@ -9495,7 +9495,7 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<decl_stmt><decl><type><name>IconList</name></type> <name>_docTabIconListDarkMode</name></decl>;</decl_stmt>
 
     <decl_stmt><decl><type><name>StatusBar</name></type> <name>_statusBar</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_toReduceTabBar</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_toReduceTabBar</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>ReBar</name></type> <name>_rebarTop</name></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>ReBar</name></type> <name>_rebarBottom</name></decl>;</decl_stmt>
 
@@ -9520,17 +9520,17 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<decl_stmt><decl><type><name>DocumentPeeker</name></type> <name>_documentPeeker</name></decl>;</decl_stmt>
 
 	<comment type="line">// a handle list of all the Notepad++ dialogs</comment>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>HWND</name></expr></argument>&gt;</argument_list></name> <name>_hModelessDlgs</name></expr>;</expr_stmt>
+	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>HWND</name></expr></argument>&gt;</argument_list></name></type> <name>_hModelessDlgs</name></decl>;</decl_stmt>
 
 	<decl_stmt><decl><type><name>LastRecentFileList</name></type> <name>_lastRecentFileList</name></decl>;</decl_stmt>
 
 	<decl_stmt><decl><type><name>WindowsMenu</name></type> <name>_windowsMenu</name></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>HMENU</name></type> <name>_mainMenuHandle</name> <init>= <expr><name>NULL</name></expr></init></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>bool</name></type> <name>_sysMenuEntering</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_sysMenuEntering</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">// make sure we don't recursively call doClose when closing the last file with -quitOnEmpty</comment>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isAttemptingCloseOnQuit</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isAttemptingCloseOnQuit</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">// For FullScreen/PostIt/DistractionFree features</comment>
 	<decl_stmt><decl><type><name>VisibleGUIConf</name></type>	<name>_beforeSpecialView</name></decl>;</decl_stmt>
@@ -9540,36 +9540,36 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 
 	<comment type="line">// Keystroke macro recording and playback</comment>
 	<decl_stmt><decl><type><name>Macro</name></type> <name>_macro</name></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_recordingMacro</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_playingBackMacro</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_recordingSaved</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_recordingMacro</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_playingBackMacro</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_recordingSaved</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>RunMacroDlg</name></type> <name>_runMacroDlg</name></decl>;</decl_stmt>
 
 	<comment type="line">// For conflict detection when saving Macros or RunCommands</comment>
-	<decl_stmt><decl><type><name>ShortcutMapper</name><modifier>*</modifier></type> <name>_pShortcutMapper</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>ShortcutMapper</name><modifier>*</modifier></type> <name>_pShortcutMapper</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">// For hotspot</comment>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_linkTriggered</name> <init>= <expr><name>true</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isFolding</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_linkTriggered</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isFolding</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
 	<comment type="line">//For Dynamic selection highlight</comment>
 	<decl_stmt><decl><type><name>Sci_CharacterRangeFull</name></type> <name>_prevSelectedRange</name></decl>;</decl_stmt>
 
 	<comment type="line">//Synchronized Scolling</comment>
-	<struct>struct <macro><name>SyncInfo</name></macro> <name>final</name>
-	<block>{
+	<struct>struct <name>SyncInfo</name> <specifier>final</specifier>
+	<block>{<public type="default">
 		<decl_stmt><decl><type><name>intptr_t</name></type> <name>_line</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</decl_stmt>
 		<decl_stmt><decl><type><name>intptr_t</name></type> <name>_column</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</decl_stmt>
-		<decl_stmt><decl><type><name>bool</name></type> <name>_isSynScollV</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-		<decl_stmt><decl><type><name>bool</name></type> <name>_isSynScollH</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+		<decl_stmt><decl><type><name>bool</name></type> <name>_isSynScollV</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+		<decl_stmt><decl><type><name>bool</name></type> <name>_isSynScollH</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
-		<expr_stmt><expr><name>bool</name> <macro><name>doSync</name><argument_list>()</argument_list></macro> <specifier>const</specifier> <block>{<return>return <expr><operator>(</operator><name>_isSynScollV</name> <operator>||</operator> <name>_isSynScollH</name><operator>)</operator></expr>;</return> }</block></expr></expr_stmt>
-	}</block>
+		<function><type><name>bool</name></type> <name>doSync</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content><return>return <expr><operator>(</operator><name>_isSynScollV</name> <operator>||</operator> <name>_isSynScollH</name><operator>)</operator></expr>;</return> </block_content>}</block></function>
+	</public>}</block>
 	<decl><name>_syncInfo</name></decl>;</struct>
 
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isUDDocked</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isUDDocked</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>trayIconControler</name><modifier>*</modifier></type> <name>_pTrayIco</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>trayIconControler</name><modifier>*</modifier></type> <name>_pTrayIco</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>intptr_t</name></type> <name>_zoomOriginalValue</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</decl_stmt>
 
 	<decl_stmt><decl><type><name>Accelerator</name></type> <name>_accelerator</name></decl>;</decl_stmt>
@@ -9578,29 +9578,29 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<decl_stmt><decl><type><name>PluginsManager</name></type> <name>_pluginsManager</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><name>ButtonDlg</name></type> <name>_restoreButton</name></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isFileOpening</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isAdministrator</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isFileOpening</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isAdministrator</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>bool</name></type> <name>_isNppSessionSavedAtExit</name> <init>= <expr><name>false</name></expr></init></decl>;</decl_stmt> <comment type="line">// guard flag, it prevents emptying of the Notepad++ session.xml in case of multiple WM_ENDSESSION or WM_CLOSE messages</comment>
+	<decl_stmt><decl><type><name>bool</name></type> <name>_isNppSessionSavedAtExit</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl>;</decl_stmt> <comment type="line">// guard flag, it prevents emptying of the Notepad++ session.xml in case of multiple WM_ENDSESSION or WM_CLOSE messages</comment>
 
 	<decl_stmt><decl><type><name>ScintillaCtrls</name></type> <name>_scintillaCtrls4Plugins</name></decl>;</decl_stmt>
 
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>std</name><operator>::</operator><name><name>pair</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>, <argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></expr></argument> &gt;</argument_list></name> <name>_hideLinesMarks</name></expr>;</expr_stmt>
+	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name><name>std</name><operator>::</operator><name>pair</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>, <argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></expr></argument> &gt;</argument_list></name></type> <name>_hideLinesMarks</name></decl>;</decl_stmt>
 	<decl_stmt><decl><type><name>StyleArray</name></type> <name>_hotspotStyles</name></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>AnsiCharPanel</name><modifier>*</modifier></type> <name>_pAnsiCharPanel</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>ClipboardHistoryPanel</name><modifier>*</modifier></type> <name>_pClipboardHistoryPanel</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>VerticalFileSwitcher</name><modifier>*</modifier></type> <name>_pDocumentListPanel</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>ProjectPanel</name><modifier>*</modifier></type> <name>_pProjectPanel_1</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>ProjectPanel</name><modifier>*</modifier></type> <name>_pProjectPanel_2</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>ProjectPanel</name><modifier>*</modifier></type> <name>_pProjectPanel_3</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>AnsiCharPanel</name><modifier>*</modifier></type> <name>_pAnsiCharPanel</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>ClipboardHistoryPanel</name><modifier>*</modifier></type> <name>_pClipboardHistoryPanel</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>VerticalFileSwitcher</name><modifier>*</modifier></type> <name>_pDocumentListPanel</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>ProjectPanel</name><modifier>*</modifier></type> <name>_pProjectPanel_1</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>ProjectPanel</name><modifier>*</modifier></type> <name>_pProjectPanel_2</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>ProjectPanel</name><modifier>*</modifier></type> <name>_pProjectPanel_3</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>FileBrowser</name><modifier>*</modifier></type> <name>_pFileBrowser</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>FileBrowser</name><modifier>*</modifier></type> <name>_pFileBrowser</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 
-	<decl_stmt><decl><type><name>DocumentMap</name><modifier>*</modifier></type> <name>_pDocMap</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>FunctionListPanel</name><modifier>*</modifier></type> <name>_pFuncList</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>DocumentMap</name><modifier>*</modifier></type> <name>_pDocMap</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	<decl_stmt><decl><type><name>FunctionListPanel</name><modifier>*</modifier></type> <name>_pFuncList</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
 
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>HWND</name></expr></argument>&gt;</argument_list></name> <name>_sysTrayHiddenHwnd</name></expr>;</expr_stmt>
+	<decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>HWND</name></expr></argument>&gt;</argument_list></name></type> <name>_sysTrayHiddenHwnd</name></decl>;</decl_stmt>
 
 	<function_decl><type><name>BOOL</name></type> <name>notify</name><parameter_list>(<parameter><decl><type><name>SCNotification</name> <modifier>*</modifier></type><name>notification</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>command</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>id</name></decl></parameter>)</parameter_list>;</function_decl>
@@ -9643,22 +9643,22 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>void</name></type> <name>docGotoAnotherEditView</name><parameter_list>(<parameter><decl><type><name>FileTransferMode</name></type> <name>mode</name></decl></parameter>)</parameter_list>;</function_decl>	<comment type="line">//TransferMode</comment>
 	<function_decl><type><name>void</name></type> <name>docOpenInNewInstance</name><parameter_list>(<parameter><decl><type><name>FileTransferMode</name></type> <name>mode</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>x</name> <init>= <expr><literal type="number">0</literal></expr></init></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>y</name> <init>= <expr><literal type="number">0</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function_decl><type><name>void</name></type> <name>loadBufferIntoView</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dontClose</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>		<comment type="line">//Doesnt _activate_ the buffer</comment>
+	<function_decl><type><name>void</name></type> <name>loadBufferIntoView</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dontClose</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>		<comment type="line">//Doesnt _activate_ the buffer</comment>
 	<function_decl><type><name>bool</name></type> <name>removeBufferFromView</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>)</parameter_list>;</function_decl>	<comment type="line">//Activates alternative of possible, or creates clean document if not clean already</comment>
 
-	<function_decl><type><name>bool</name></type> <name>activateBuffer</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>forceApplyHilite</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>			<comment type="line">//activate buffer in that view if found</comment>
+	<function_decl><type><name>bool</name></type> <name>activateBuffer</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>id</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>forceApplyHilite</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>			<comment type="line">//activate buffer in that view if found</comment>
 	<function_decl><type><name>void</name></type> <name>notifyBufferActivated</name><parameter_list>(<parameter><decl><type><name>BufferID</name></type> <name>bufid</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>view</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>performPostReload</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>whichOne</name></decl></parameter>)</parameter_list>;</function_decl>
 <comment type="line">//END: Document management</comment>
 
-	<function_decl><type><name>int</name></type> <name>doSaveOrNot</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>fn</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isMulti</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>int</name></type> <name>doSaveOrNot</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>fn</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isMulti</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>int</name></type> <name>doReloadOrNot</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>fn</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dirty</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>int</name></type> <name>doCloseOrNot</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>fn</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>int</name></type> <name>doDeleteOrNot</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>fn</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>int</name></type> <name>doSaveAll</name><parameter_list>()</parameter_list>;</function_decl>
 
-	<decl_stmt><decl><type><name>void</name></type> <name>enableMenu</name><argument_list>(<argument><expr><name>int</name> <name>cmdID</name></expr></argument>, <argument><expr><name>bool</name> <name>doEnable</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>void</name></type> <name>enableCommand</name><argument_list>(<argument><expr><name>int</name> <name>cmdID</name></expr></argument>, <argument><expr><name>bool</name> <name>doEnable</name></expr></argument>, <argument><expr><name>int</name> <name>which</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
+	<function_decl><type><name>void</name></type> <name>enableMenu</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>cmdID</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>doEnable</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>enableCommand</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>cmdID</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>doEnable</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>which</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>checkClipboard</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>checkDocState</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>checkUndoState</name><parameter_list>()</parameter_list>;</function_decl>
@@ -9668,57 +9668,57 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>void</name></type> <name>dropFiles</name><parameter_list>(<parameter><decl><type><name>HDROP</name></type> <name>hdrop</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>checkModifiedDocument</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>bCheckOnlyCurrentBuffer</name></decl></parameter>)</parameter_list>;</function_decl>
 
-    <decl_stmt><decl><type><name>void</name></type> <name>getMainClientRect</name><argument_list>(<argument><expr><name>RECT</name> <operator>&amp;</operator> <name>rc</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<expr_stmt><expr><name>void</name> <macro><name>staticCheckMenuAndTB</name><argument_list>()</argument_list></macro> <specifier>const</specifier></expr>;</expr_stmt>
-	<expr_stmt><expr><name>void</name> <macro><name>dynamicCheckMenuAndTB</name><argument_list>()</argument_list></macro> <specifier>const</specifier></expr>;</expr_stmt>
-	<decl_stmt><decl><type><name>void</name></type> <name>enableConvertMenuItems</name><argument_list>(<argument><expr><name>EolType</name> <name>f</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<expr_stmt><expr><name>void</name> <macro><name>checkUnicodeMenuItems</name><argument_list>()</argument_list></macro> <specifier>const</specifier></expr>;</expr_stmt>
+    <function_decl><type><name>void</name></type> <name>getMainClientRect</name><parameter_list>(<parameter><decl><type><name>RECT</name> <modifier>&amp;</modifier></type> <name>rc</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>staticCheckMenuAndTB</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>dynamicCheckMenuAndTB</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>enableConvertMenuItems</name><parameter_list>(<parameter><decl><type><name>EolType</name></type> <name>f</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>checkUnicodeMenuItems</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 
-	<function_decl><type><name>generic_string</name></type> <name>getLangDesc</name><parameter_list>(<parameter><decl><type><name>LangType</name></type> <name>langType</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>getName</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>generic_string</name></type> <name>getLangDesc</name><parameter_list>(<parameter><decl><type><name>LangType</name></type> <name>langType</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>getName</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>void</name></type> <name>setLangStatus</name><parameter_list>(<parameter><decl><type><name>LangType</name></type> <name>langType</name></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>void</name></type> <name>setDisplayFormat</name><parameter_list>(<parameter><decl><type><name>EolType</name></type> <name>f</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>setUniModeText</name><parameter_list>()</parameter_list>;</function_decl>
-	<decl_stmt><decl><type><name>void</name></type> <name>checkLangsMenu</name><argument_list>(<argument><expr><name>int</name> <name>id</name></expr></argument>)</argument_list> const</decl> ;</decl_stmt>
+	<function_decl><type><name>void</name></type> <name>checkLangsMenu</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>id</name></decl></parameter>)</parameter_list> <specifier>const</specifier> ;</function_decl>
     <function_decl><type><name>void</name></type> <name>setLanguage</name><parameter_list>(<parameter><decl><type><name>LangType</name></type> <name>langType</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>LangType</name></type> <name>menuID2LangType</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>cmdID</name></decl></parameter>)</parameter_list>;</function_decl>
 
-	<decl_stmt><decl><type><name>BOOL</name></type> <name>processIncrFindAccel</name><argument_list>(<argument><expr><name>MSG</name> <operator>*</operator><name>msg</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>BOOL</name></type> <name>processFindAccel</name><argument_list>(<argument><expr><name>MSG</name> <operator>*</operator><name>msg</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
+	<function_decl><type><name>BOOL</name></type> <name>processIncrFindAccel</name><parameter_list>(<parameter><decl><type><name>MSG</name> <modifier>*</modifier></type><name>msg</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>BOOL</name></type> <name>processFindAccel</name><parameter_list>(<parameter><decl><type><name>MSG</name> <modifier>*</modifier></type><name>msg</name></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
 
-	<decl_stmt><decl><type><name>void</name></type> <name>checkMenuItem</name><argument_list>(<argument><expr><name>int</name> <name>itemID</name></expr></argument>, <argument><expr><name>bool</name> <name>willBeChecked</name></expr></argument>)</argument_list> const <block>{<block_content>
-		<expr_stmt><expr><operator>::</operator><call><name>CheckMenuItem</name><argument_list>(<argument><expr><name>_mainMenuHandle</name></expr></argument>, <argument><expr><name>itemID</name></expr></argument>, <argument><expr><name>MF_BYCOMMAND</name> <operator>|</operator> <operator>(</operator><ternary><condition><expr><name>willBeChecked</name></expr>?</condition><then><expr><name>MF_CHECKED</name></expr></then><else>:<expr><name>MF_UNCHECKED</name></expr></else></ternary><operator>)</operator></expr></argument>)</argument_list></call></expr>;</expr_stmt>
-	</block_content>}</block></decl></decl_stmt>
+	<function><type><name>void</name></type> <name>checkMenuItem</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>itemID</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>willBeChecked</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content>
+		<expr_stmt><expr><call><name><operator>::</operator><name>CheckMenuItem</name></name><argument_list>(<argument><expr><name>_mainMenuHandle</name></expr></argument>, <argument><expr><name>itemID</name></expr></argument>, <argument><expr><name>MF_BYCOMMAND</name> <operator>|</operator> <operator>(</operator><ternary><condition><expr><name>willBeChecked</name></expr>?</condition><then><expr><name>MF_CHECKED</name></expr></then><else>:<expr><name>MF_UNCHECKED</name></expr></else></ternary><operator>)</operator></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+	</block_content>}</block></function>
 
 	<function_decl><type><name>bool</name></type> <name>isConditionExprLine</name><parameter_list>(<parameter><decl><type><name>intptr_t</name></type> <name>lineNumber</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>intptr_t</name></type> <name>findMachedBracePos</name><parameter_list>(<parameter><decl><type><name>size_t</name></type> <name>startPos</name></decl></parameter>, <parameter><decl><type><name>size_t</name></type> <name>endPos</name></decl></parameter>, <parameter><decl><type><name>char</name></type> <name>targetSymbol</name></decl></parameter>, <parameter><decl><type><name>char</name></type> <name>matchedSymbol</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>maintainIndentation</name><parameter_list>(<parameter><decl><type><name>TCHAR</name></type> <name>ch</name></decl></parameter>)</parameter_list>;</function_decl>
 
-	<function_decl><type><name>void</name></type> <name>addHotSpot</name><parameter_list>(<parameter><decl><type><name>ScintillaEditView</name><modifier>*</modifier></type> <name>view</name> <init>= <expr><name>nullptr</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>addHotSpot</name><parameter_list>(<parameter><decl><type><name>ScintillaEditView</name><modifier>*</modifier></type> <name>view</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
-    <decl_stmt><decl><type><name>void</name></type> <name>bookmarkAdd</name><argument_list>(<argument><expr><name>intptr_t</name> <name>lineno</name></expr></argument>)</argument_list> const <block>{<block_content>
+    <function><type><name>void</name></type> <name>bookmarkAdd</name><parameter_list>(<parameter><decl><type><name>intptr_t</name></type> <name>lineno</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<if_stmt><if>if <condition>(<expr><name>lineno</name> <operator>==</operator> <operator>-</operator><literal type="number">1</literal></expr>)</condition><block type="pseudo"><block_content>
 			<expr_stmt><expr><name>lineno</name> <operator>=</operator> <call><name><name>_pEditView</name><operator>-&gt;</operator><name>getCurrentLineNumber</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
 		<if_stmt><if>if <condition>(<expr><operator>!</operator><call><name>bookmarkPresent</name><argument_list>(<argument><expr><name>lineno</name></expr></argument>)</argument_list></call></expr>)</condition><block type="pseudo"><block_content>
 			<expr_stmt><expr><call><name><name>_pEditView</name><operator>-&gt;</operator><name>execute</name></name><argument_list>(<argument><expr><name>SCI_MARKERADD</name></expr></argument>, <argument><expr><name>lineno</name></expr></argument>, <argument><expr><name>MARK_BOOKMARK</name></expr></argument>)</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
-	</block_content>}</block></decl></decl_stmt>
+	</block_content>}</block></function>
 
-    <decl_stmt><decl><type><name>void</name></type> <name>bookmarkDelete</name><argument_list>(<argument><expr><name>size_t</name> <name>lineno</name></expr></argument>)</argument_list> const <block>{<block_content>
-		<if_stmt><if>if <condition>(<expr><name>lineno</name> <operator>==</operator> <call><name><name>static_cast</name><argument_list type="generic">&lt;<argument><expr><name>size_t</name></expr></argument>&gt;</argument_list></name><argument_list>(<argument><expr><operator>-</operator><literal type="number">1</literal></expr></argument>)</argument_list></call></expr>)</condition><block type="pseudo"><block_content>
+    <function><type><name>void</name></type> <name>bookmarkDelete</name><parameter_list>(<parameter><decl><type><name>size_t</name></type> <name>lineno</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content>
+		<if_stmt><if>if <condition>(<expr><name>lineno</name> <operator>==</operator> <cast type="static">static_cast<argument_list type="generic">&lt;<argument><expr><name>size_t</name></expr></argument>&gt;</argument_list><argument_list>(<argument><expr><operator>-</operator><literal type="number">1</literal></expr></argument>)</argument_list></cast></expr>)</condition><block type="pseudo"><block_content>
 			<expr_stmt><expr><name>lineno</name> <operator>=</operator> <call><name><name>_pEditView</name><operator>-&gt;</operator><name>getCurrentLineNumber</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
 		<while>while <condition>(<expr><call><name>bookmarkPresent</name><argument_list>(<argument><expr><name>lineno</name></expr></argument>)</argument_list></call></expr>)</condition><block type="pseudo"><block_content>
 			<expr_stmt><expr><call><name><name>_pEditView</name><operator>-&gt;</operator><name>execute</name></name><argument_list>(<argument><expr><name>SCI_MARKERDELETE</name></expr></argument>, <argument><expr><name>lineno</name></expr></argument>, <argument><expr><name>MARK_BOOKMARK</name></expr></argument>)</argument_list></call></expr>;</expr_stmt></block_content></block></while>
-	</block_content>}</block></decl></decl_stmt>
+	</block_content>}</block></function>
 
-    <decl_stmt><decl><type><name>bool</name></type> <name>bookmarkPresent</name><argument_list>(<argument><expr><name>intptr_t</name> <name>lineno</name></expr></argument>)</argument_list> const <block>{<block_content>
+    <function><type><name>bool</name></type> <name>bookmarkPresent</name><parameter_list>(<parameter><decl><type><name>intptr_t</name></type> <name>lineno</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<if_stmt><if>if <condition>(<expr><name>lineno</name> <operator>==</operator> <operator>-</operator><literal type="number">1</literal></expr>)</condition><block type="pseudo"><block_content>
 			<expr_stmt><expr><name>lineno</name> <operator>=</operator> <call><name><name>_pEditView</name><operator>-&gt;</operator><name>getCurrentLineNumber</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
 		<decl_stmt><decl><type><name>LRESULT</name></type> <name>state</name> <init>= <expr><call><name><name>_pEditView</name><operator>-&gt;</operator><name>execute</name></name><argument_list>(<argument><expr><name>SCI_MARKERGET</name></expr></argument>, <argument><expr><name>lineno</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
 		<return>return <expr><operator>(</operator><operator>(</operator><name>state</name> <operator>&amp;</operator> <operator>(</operator><literal type="number">1</literal> <operator>&lt;&lt;</operator> <name>MARK_BOOKMARK</name><operator>)</operator><operator>)</operator> <operator>!=</operator> <literal type="number">0</literal><operator>)</operator></expr>;</return>
-	</block_content>}</block></decl></decl_stmt>
+	</block_content>}</block></function>
 
-    <decl_stmt><decl><type><name>void</name></type> <name>bookmarkToggle</name><argument_list>(<argument><expr><name>intptr_t</name> <name>lineno</name></expr></argument>)</argument_list> const <block>{<block_content>
+    <function><type><name>void</name></type> <name>bookmarkToggle</name><parameter_list>(<parameter><decl><type><name>intptr_t</name></type> <name>lineno</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content>
 		<if_stmt><if>if <condition>(<expr><name>lineno</name> <operator>==</operator> <operator>-</operator><literal type="number">1</literal></expr>)</condition><block type="pseudo"><block_content>
 			<expr_stmt><expr><name>lineno</name> <operator>=</operator> <call><name><name>_pEditView</name><operator>-&gt;</operator><name>getCurrentLineNumber</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt></block_content></block></if></if_stmt>
 
@@ -9726,14 +9726,14 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 			<expr_stmt><expr><call><name>bookmarkDelete</name><argument_list>(<argument><expr><name>lineno</name></expr></argument>)</argument_list></call></expr>;</expr_stmt></block_content></block></if>
 		<else>else<block type="pseudo"><block_content>
 			<expr_stmt><expr><call><name>bookmarkAdd</name><argument_list>(<argument><expr><name>lineno</name></expr></argument>)</argument_list></call></expr>;</expr_stmt></block_content></block></else></if_stmt>
-	</block_content>}</block></decl></decl_stmt>
+	</block_content>}</block></function>
 
     <function_decl><type><name>void</name></type> <name>bookmarkNext</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>forwardScan</name></decl></parameter>)</parameter_list>;</function_decl>
-	<expr_stmt><expr><name>void</name> <macro><name>bookmarkClearAll</name><argument_list>()</argument_list></macro> <specifier>const</specifier> <block>{
-		<expr><call><name><name>_pEditView</name><operator>-&gt;</operator><name>execute</name></name><argument_list>(<argument><expr><name>SCI_MARKERDELETEALL</name></expr></argument>, <argument><expr><name>MARK_BOOKMARK</name></expr></argument>)</argument_list></call></expr>;
-	}</block>
+	<function><type><name>void</name></type> <name>bookmarkClearAll</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
+		<expr_stmt><expr><call><name><name>_pEditView</name><operator>-&gt;</operator><name>execute</name></name><argument_list>(<argument><expr><name>SCI_MARKERDELETEALL</name></expr></argument>, <argument><expr><name>MARK_BOOKMARK</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+	</block_content>}</block></function>
 
-	<name>void</name> <call><name>copyMarkedLines</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+	<function_decl><type><name>void</name></type> <name>copyMarkedLines</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>cutMarkedLines</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>deleteMarkedLines</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>isMarked</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>pasteToMarkedLines</name><parameter_list>()</parameter_list>;</function_decl>
@@ -9756,10 +9756,10 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>int</name></type> <name>getBOMSize</name><parameter_list>(<parameter><decl><type><name>UniMode</name></type></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><name>void</name></type> <name>showAutoComp</name><parameter_list>()</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>autoCompFromCurrentFile</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>autoInsert</name> <init>= <expr><name>true</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>autoCompFromCurrentFile</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>autoInsert</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>showFunctionComp</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>showPathCompletion</name><parameter_list>()</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>showFunctionNextHint</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>isNext</name> <init>= <expr><name>true</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>showFunctionNextHint</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>isNext</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 
 	<comment type="line">//void changeStyleCtrlsLang(HWND hDlg, int *idArray, const char **translatedText);</comment>
 	<function_decl><type><name>void</name></type> <name>setCodePageForInvisibleView</name><parameter_list>(<parameter><decl><type><name>Buffer</name> <specifier>const</specifier><modifier>*</modifier></type> <name>pBuffer</name></decl></parameter>)</parameter_list>;</function_decl>
@@ -9767,7 +9767,7 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>bool</name></type> <name>findInOpenedFiles</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>findInCurrentFile</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>isEntireDoc</name></decl></parameter>)</parameter_list>;</function_decl>
 
-	<decl_stmt><decl><type><name>void</name></type> <name>getMatchedFileNames</name><argument_list>(<argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator><name>dir</name></expr></argument>, <argument><expr><name>size_t</name> <name>level</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>patterns</name></expr></argument>, <argument><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>fileNames</name></expr></argument>, <argument><expr><name>bool</name> <name>isRecursive</name></expr></argument>, <argument><expr><name>bool</name> <name>isInHiddenDir</name></expr></argument>)</argument_list></decl>;</decl_stmt>
+	<function_decl><type><name>void</name></type> <name>getMatchedFileNames</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>dir</name></decl></parameter>, <parameter><decl><type><name>size_t</name></type> <name>level</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>patterns</name></decl></parameter>, <parameter><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>fileNames</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isRecursive</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isInHiddenDir</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>doSynScorll</name><parameter_list>(<parameter><decl><type><name>HWND</name></type> <name>hW</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>setWorkingDir</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>dir</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>str2Cliboard</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>generic_string</name> <modifier>&amp;</modifier></type> <name>str2cpy</name></decl></parameter>)</parameter_list>;</function_decl>
@@ -9776,7 +9776,7 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>int</name></type> <name>getLangFromMenuName</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>langName</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>generic_string</name></type> <name>getLangFromMenu</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Buffer</name> <modifier>*</modifier></type> <name>buf</name></decl></parameter>)</parameter_list>;</function_decl>
 
-    <decl_stmt><decl><type><name>generic_string</name></type> <name>exts2Filters</name><argument_list>(<argument><expr><specifier>const</specifier> <name>generic_string</name><operator>&amp;</operator> <name>exts</name></expr></argument>, <argument><expr><name>int</name> <name>maxExtsLen</name> <operator>=</operator> <operator>-</operator><literal type="number">1</literal></expr></argument>)</argument_list> const</decl>;</decl_stmt> <comment type="line">// maxExtsLen default value -1 makes no limit of whole exts length</comment>
+    <function_decl><type><name>generic_string</name></type> <name>exts2Filters</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>generic_string</name><modifier>&amp;</modifier></type> <name>exts</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>maxExtsLen</name> <init>= <expr><operator>-</operator><literal type="number">1</literal></expr></init></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl> <comment type="line">// maxExtsLen default value -1 makes no limit of whole exts length</comment>
 	<function_decl><type><name>int</name></type> <name>setFileOpenSaveDlgFilters</name><parameter_list>(<parameter><decl><type><name>CustomFileDialog</name> <modifier>&amp;</modifier></type> <name>fDlg</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>showAllExt</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>langType</name> <init>= <expr><operator>-</operator><literal type="number">1</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl> <comment type="line">// showAllExt should be true if it's used for open file dialog - all set exts should be used for filtering files</comment>
 	<function_decl><type><name>Style</name> <modifier>*</modifier></type> <name>getStyleFromName</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type><name>styleName</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>bool</name></type> <name>dumpFiles</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>outdir</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>fileprefix</name> <init>= <expr><call><name>TEXT</name><argument_list>(<argument><expr><literal type="string">""</literal></expr></argument>)</argument_list></call></expr></init></decl></parameter>)</parameter_list>;</function_decl>	<comment type="line">//helper func</comment>
@@ -9784,14 +9784,14 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>void</name></type> <name>drawAutocompleteColoursFromTheme</name><parameter_list>(<parameter><decl><type><name>COLORREF</name></type> <name>fgColor</name></decl></parameter>, <parameter><decl><type><name>COLORREF</name></type> <name>bgColor</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>drawDocumentMapColoursFromStylerArray</name><parameter_list>()</parameter_list>;</function_decl>
 
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <macro><name>loadCommandlineParams</name><argument_list>(<argument>const TCHAR * commandLine</argument>, <argument>const CmdLineParams * pCmdParams</argument>)</argument_list></macro> <block>{
-		<expr><specifier>const</specifier> <name>CmdLineParamsDTO</name> <name>dto</name> <operator>=</operator> <name>CmdLineParamsDTO</name><operator>::</operator><call><name>FromCmdLineParams</name><argument_list>(<argument><expr><operator>*</operator><name>pCmdParams</name></expr></argument>)</argument_list></call></expr>;
+	<function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name></type> <name>loadCommandlineParams</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>commandLine</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>CmdLineParams</name> <modifier>*</modifier></type> <name>pCmdParams</name></decl></parameter>)</parameter_list> <block>{<block_content>
+		<decl_stmt><decl><type><specifier>const</specifier> <name>CmdLineParamsDTO</name></type> <name>dto</name> <init>= <expr><call><name><name>CmdLineParamsDTO</name><operator>::</operator><name>FromCmdLineParams</name></name><argument_list>(<argument><expr><operator>*</operator><name>pCmdParams</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
 		<return>return <expr><call><name>loadCommandlineParams</name><argument_list>(<argument><expr><name>commandLine</name></expr></argument>, <argument><expr><operator>&amp;</operator><name>dto</name></expr></argument>)</argument_list></call></expr>;</return>
-	}</block></expr></expr_stmt>
-	<expr_stmt><expr><name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <call><name>loadCommandlineParams</name><argument_list>(<argument><expr><specifier>const</specifier> <name>TCHAR</name> <operator>*</operator> <name>commandLine</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>CmdLineParamsDTO</name> <operator>*</operator> <name>pCmdParams</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
-	<expr_stmt><expr><name>bool</name> <macro><name>noOpenedDoc</name><argument_list>()</argument_list></macro> <specifier>const</specifier></expr>;</expr_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>goToPreviousIndicator</name><argument_list>(<argument><expr><name>int</name> <name>indicID2Search</name></expr></argument>, <argument><expr><name>bool</name> <name>isWrap</name> <operator>=</operator> <name>true</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
-	<decl_stmt><decl><type><name>bool</name></type> <name>goToNextIndicator</name><argument_list>(<argument><expr><name>int</name> <name>indicID2Search</name></expr></argument>, <argument><expr><name>bool</name> <name>isWrap</name> <operator>=</operator> <name>true</name></expr></argument>)</argument_list> const</decl>;</decl_stmt>
+	</block_content>}</block></function>
+	<function_decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name></type> <name>loadCommandlineParams</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>TCHAR</name> <modifier>*</modifier></type> <name>commandLine</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>CmdLineParamsDTO</name> <modifier>*</modifier></type> <name>pCmdParams</name></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>noOpenedDoc</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>goToPreviousIndicator</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>indicID2Search</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isWrap</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
+	<function_decl><type><name>bool</name></type> <name>goToNextIndicator</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>indicID2Search</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isWrap</name> <init>= <expr><literal type="boolean">true</literal></expr></init></decl></parameter>)</parameter_list> <specifier>const</specifier>;</function_decl>
 	<function_decl><type><name>int</name></type> <name>wordCount</name><parameter_list>()</parameter_list>;</function_decl>
 
 	<function_decl><type><name>void</name></type> <name>wsTabConvert</name><parameter_list>(<parameter><decl><type><name>spaceTab</name></type> <name>whichWay</name></decl></parameter>)</parameter_list>;</function_decl>
@@ -9801,13 +9801,13 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><name>void</name></type> <name>removeDuplicateLines</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>launchAnsiCharPanel</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>launchClipboardHistoryPanel</name><parameter_list>()</parameter_list>;</function_decl>
-	<function_decl><type><name>void</name></type> <name>launchDocumentListPanel</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>changeFromBtnCmd</name> <init>= <expr><name>false</name></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>launchDocumentListPanel</name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>changeFromBtnCmd</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>checkProjectMenuItem</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>launchProjectPanel</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>cmdID</name></decl></parameter>, <parameter><decl><type><name>ProjectPanel</name> <modifier>*</modifier><modifier>*</modifier></type> <name>pProjPanel</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>panelID</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>launchDocMap</name><parameter_list>()</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>launchFunctionList</name><parameter_list>()</parameter_list>;</function_decl>
-	<decl_stmt><decl><type><name>void</name></type> <name>launchFileBrowser</name><argument_list>(<argument><expr><specifier>const</specifier> <name>std</name><operator>::</operator><name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <operator>&amp;</operator> <name>folders</name></expr></argument>, <argument><expr><specifier>const</specifier> <name>generic_string</name><operator>&amp;</operator> <name>selectedItemPath</name></expr></argument>, <argument><expr><name>bool</name> <name>fromScratch</name> <operator>=</operator> <name>false</name></expr></argument>)</argument_list></decl>;</decl_stmt>
-	<expr_stmt><expr><name>void</name> <macro><name>showAllQuotes</name><argument_list>()</argument_list></macro> <specifier>const</specifier></expr>;</expr_stmt>
+	<function_decl><type><name>void</name></type> <name>launchFileBrowser</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>generic_string</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>folders</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>generic_string</name><modifier>&amp;</modifier></type> <name>selectedItemPath</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>fromScratch</name> <init>= <expr><literal type="boolean">false</literal></expr></init></decl></parameter>)</parameter_list>;</function_decl>
+	<function_decl><type><name>void</name></type> <name>showAllQuotes</name><parameter_list>()</parameter_list> <specifier>const</specifier>;</function_decl>
 	<function_decl><type><specifier>static</specifier> <name>DWORD</name> <name>WINAPI</name></type> <name>threadTextPlayer</name><parameter_list>(<parameter><decl><type><name>void</name> <modifier>*</modifier></type><name>text2display</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><specifier>static</specifier> <name>DWORD</name> <name>WINAPI</name></type> <name>threadTextTroller</name><parameter_list>(<parameter><decl><type><name>void</name> <modifier>*</modifier></type><name>params</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><specifier>static</specifier> <name>int</name></type> <name>getRandomAction</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>ranNum</name></decl></parameter>)</parameter_list>;</function_decl>
@@ -9825,19 +9825,19 @@ filePath : file or folder name to open (absolute or relative path name)\r\
 	<function_decl><type><specifier>static</specifier> <name>DWORD</name> <name>WINAPI</name></type> <name>backupDocument</name><parameter_list>(<parameter><decl><type><name>void</name> <modifier>*</modifier></type><name>params</name></decl></parameter>)</parameter_list>;</function_decl>
 
 	<function_decl><type><specifier>static</specifier> <name>DWORD</name> <name>WINAPI</name></type> <name>monitorFileOnChange</name><parameter_list>(<parameter><decl><type><name>void</name> <modifier>*</modifier></type> <name>params</name></decl></parameter>)</parameter_list>;</function_decl>
-	<struct>struct <macro><name>MonitorInfo</name></macro> <name>final</name> <block>{
-		<macro><name>MonitorInfo</name><argument_list>(<argument>Buffer *buf</argument>, <argument>HWND nppHandle</argument>)</argument_list></macro> :
-			<expr_stmt><expr><call><name>_buffer</name><argument_list>(<argument><expr><name>buf</name></expr></argument>)</argument_list></call></expr><operator>,</operator> <macro><name>_nppHandle</name><argument_list>(<argument>nppHandle</argument>)</argument_list></macro> <expr><block>{}</block></expr>;</expr_stmt>
-		<decl_stmt><decl><type><name>Buffer</name> <modifier>*</modifier></type><name>_buffer</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-		<decl_stmt><decl><type><name>HWND</name></type> <name>_nppHandle</name> <init>= <expr><name>nullptr</name></expr></init></decl>;</decl_stmt>
-	}</block>;</struct>
+	<struct>struct <name>MonitorInfo</name> <specifier>final</specifier> <block>{<public type="default">
+		<constructor><name>MonitorInfo</name><parameter_list>(<parameter><decl><type><name>Buffer</name> <modifier>*</modifier></type><name>buf</name></decl></parameter>, <parameter><decl><type><name>HWND</name></type> <name>nppHandle</name></decl></parameter>)</parameter_list> <member_init_list>:
+			<call><name>_buffer</name><argument_list>(<argument><expr><name>buf</name></expr></argument>)</argument_list></call>, <call><name>_nppHandle</name><argument_list>(<argument><expr><name>nppHandle</name></expr></argument>)</argument_list></call> </member_init_list><block>{<block_content/>}</block></constructor><empty_stmt>;</empty_stmt>
+		<decl_stmt><decl><type><name>Buffer</name> <modifier>*</modifier></type><name>_buffer</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+		<decl_stmt><decl><type><name>HWND</name></type> <name>_nppHandle</name> <init>= <expr><literal type="null">nullptr</literal></expr></init></decl>;</decl_stmt>
+	</public>}</block>;</struct>
 
 	<function_decl><type><name>void</name></type> <name>monitoringStartOrStopAndUpdateUI</name><parameter_list>(<parameter><decl><type><name>Buffer</name><modifier>*</modifier></type> <name>pBuf</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>isStarting</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>createMonitoringThread</name><parameter_list>(<parameter><decl><type><name>Buffer</name><modifier>*</modifier></type> <name>pBuf</name></decl></parameter>)</parameter_list>;</function_decl>
 	<function_decl><type><name>void</name></type> <name>updateCommandShortcuts</name><parameter_list>()</parameter_list>;</function_decl>
 
 	<function_decl><type><name>HBITMAP</name></type> <name>generateSolidColourMenuItemIcon</name><parameter_list>(<parameter><decl><type><name>COLORREF</name></type> <name>colour</name></decl></parameter>)</parameter_list>;</function_decl>
-</block_content>}</block></decl></decl_stmt><empty_stmt>;</empty_stmt>
+</private>}</block>;</class>
 </unit>
 
 </unit>

@@ -1,6 +1,6 @@
 # Stereocode 1.0
 
-## Prerequitsites
+## Prerequisites
 - [srcml 1.0](https://www.srcml.org/)
 - [cmake 3.17+](https://cmake.org/)
 
@@ -95,7 +95,9 @@ The class and function tags are given a stereotype attribute:
 The initial version of this code base was developed by Doleh and documented in his MS Thesis December 2021 at Kent State University.   Previously, a prototype of stereocode was developed by Collard and Dragan for Dragan's dissertation in December 2010 at KSU.  This prototype was further extended for DySDoc 2018 by Decker and Collard.
 
 Developers of stereocode 1.0:
+- Ali Al-Ramadan - Kent State University
 - Michael L. Collard - University of Akron
 - Michael Decker - Bowling Green State University
 - Zane Doleh - Kent State University
 - Jonathan I. Maletic - Kent State University
+- Nick Weber - Kent State University

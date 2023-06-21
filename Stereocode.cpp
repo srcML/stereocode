@@ -1,23 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file Stereocode.cpp
+ * @file variable.hpp
  *
- * @copyright Copyright (C) 2010-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
  *
- * This file is part of Stereocode.
- * 
- * Stereocode is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * Stereocode is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Stereocode; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
+ * This file is part of the Stereocode application.
  */
 
 #include <iostream>
@@ -122,15 +109,20 @@ int main(int argc, char const *argv[]) {
 
 
     // Currently, only C++ is supported.
-    // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter)
-    // A single class is expected in each unit
-    // Also works for a single .hpp file
-    
+    // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter) or a single .hpp file.
+    // A single class is expected in each unit.
+
     firstUnit = srcml_archive_read_unit(archive);
     secondUnit = srcml_archive_read_unit(archive);
 
     while (firstUnit) {
+        std::string language = srcml_unit_get_language(firstUnit);
         
+        if(language != "C++"){
+            std::cerr << "Input must be a C++ archive/file" << std::endl;
+            remove(outputFile.c_str());
+            return -1;
+        }
         if (isHeaderFile(srcml_unit_get_filename(firstUnit))) { hppFirst = true; }
         
         if(hppFirst){ aClass  = classModel(archive, firstUnit, secondUnit); }
