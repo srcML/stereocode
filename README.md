@@ -10,7 +10,7 @@ Stereocode classifies methods and classes with one or more stereotypes.
 
 Class and method stereotypes are defined in two papers appearing in IEEE International Conference on Software Maintenance (ICSM) 2006 and 2010 by Dragan, Collard, and Maletic.
 
-It takes a class (in srcML) as input, conducts static analysis on the code, and annotates the srcML with the stereotype of the class and each method in the class.  The output is in srcML with stereotype attributes on the class and function tags.  
+The Stereocode application accepts an archive consisting of .hpp and .cpp file pair(s) in srcML format as input. It performs static analysis on the code and annotates the srcML with labels indicating the stereotypes of the classes and their methods. The output is produced in srcML format, with stereotype attributes embedded in the class and function tags.
 
 Users of stereocode use this output as input to additional processing or analysis.  For example, the stereotype information can be added as documentation (comments, doxgen, javadoc) to the source code.
 
@@ -23,10 +23,8 @@ Build using cmake.
 
 ```
 cmake CMakeLists.txt -B build_path
-```
 
-From build_path with created makefile
-```
+# From build_path with created makefile
 make
 ```
 
@@ -34,12 +32,25 @@ make
 
 Stereocode is run on the command line.
 
-Stereocode expects each srcML archive file, or unit, to contain only one class definition. For C++, the archive typically will have units consisting of .hpp and .cpp. 
+Stereocode expects each pair in the srcML archive file to contain only one class definition. For C++, the archive typically will have pairs of .hpp and .cpp. where each pair corresponds to a single class. 
 
-Demo: <br>
-Examples.xml is a srcML archive.
+
+Demo: 
 ```
-./stereocode examples/Examples.xml
+# Toolchain
+
+srcml example1.hpp example1.cpp example2.hpp example2.cpp -o Examples.xml
+./stereocode Examples.xml
+
+# The .cpp files can be placed first
+
+srcml example1.cpp example1.hpp example2.cpp example2.hpp -o Examples.xml
+./stereocode Examples.xml
+
+# Using a single .hpp file
+
+srcml example1.hpp -o example1hpp.xml
+./stereocode example1hpp.xml
 ```
 
 Help
@@ -47,16 +58,6 @@ Help
 ./stereocode --help
 ```
 
-Tool chain 
-```
-srcml example1.hpp example1.cpp example2.hpp example2.cpp -o Examples.xml
-./stereocode Examples.xml
-
-// or
-
-srcml example1.cpp example1.hpp example2.cpp example2.hpp -o Examples.xml
-./stereocode Examples.xml
-```
 
 Examples can be found in the `examples` folder
 
