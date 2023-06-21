@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file variable.hpp
+ * @file ClassInfo.hpp
  *
  * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
  *
