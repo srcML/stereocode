@@ -1,8 +1,14 @@
-#ifndef CLASS_INFO_HPP
-#define CLASS_INFO_HPP
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file ClassInfo.hpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
-//classModel for stereocode
-// 
+#ifndef CLASSINFO_HPP
+#define CLASSINFO_HPP
 
 #include <iostream>
 #include <fstream>
@@ -34,7 +40,7 @@ public:
     bool        inherits        ()      const { return parentClass.size() > 0; };
     bool        isAttribute     (const std::string&) const;
 
-    srcml_unit* outputUnitWithStereotypes(srcml_archive*, srcml_unit*, bool);
+    srcml_unit* outputUnitWithStereotypes(srcml_archive*, srcml_unit*, srcml_transform_result**, bool);
     void        outputReport(std::ofstream&, const std::string&);
 
     void findClassName(srcml_archive*, srcml_unit*);

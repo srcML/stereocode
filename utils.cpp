@@ -1,11 +1,20 @@
-//
-//  utils.cpp
-//  
-//
-//  Created by jmaletic on 7/6/22.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file utils.cpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
 #include "utils.hpp"
+
+// Does it have a .hpp file extension?
+bool isHeaderFile(const std::string& fname) {
+    for (std::string ext : HEADER_FILE_EXTENSION)
+        if (fname.find(ext) != std::string::npos) return true;
+    return false;
+}
 
 // Checks if name is global const format
 // Example: GLOBAL_FROMAT - upper case with "_"
@@ -24,9 +33,9 @@ bool checkConst(const std::string& srcml) {
     std::string function_srcml = trimWhitespace(srcml);
     size_t end = function_srcml.find("{");
     std::string function_srcml_header = function_srcml.substr(0, end);
-    if (function_srcml_header.find("<specifier>const</specifier><block>") != std::string::npos){
+    if (function_srcml_header.find("<specifier>const</specifier><block>") != std::string::npos) {
         return true;
-    } else if (function_srcml_header.find("</parameter_list><specifier>const</specifier>") != std::string::npos){
+    } else if (function_srcml_header.find("</parameter_list><specifier>const</specifier>") != std::string::npos) {
         return true;
     } else {
         return false;
@@ -41,7 +50,7 @@ bool checkConst(const std::string& srcml) {
 //
 bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
                                       const std::vector<std::string>& local_var_names,
-                                      const std::string& expr){
+                                      const std::string& expr) {
     bool is_inherited = true;
     // checks for literal return expression
     if (expr == "#") is_inherited = false;
@@ -61,7 +70,7 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
         if (expr[k] == '+' || expr[k] == '-' || expr[k] == '*' || expr[k] == '/'
             || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
             || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
-            || expr[k] == '.' || expr[k] == '?' || expr[k] == ':' || expr[k] == '"'){
+            || expr[k] == '.' || expr[k] == '?' || expr[k] == ':' || expr[k] == '"') {
             is_inherited = false;
         }
     }
@@ -76,7 +85,7 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
 //
 int countPureCalls(const std::vector<std::string>& all_calls)  {
     int result = all_calls.size();
-    for (int i = 0; i < all_calls.size(); ++i){
+    for (int i = 0; i < all_calls.size(); ++i) {
         size_t colon = all_calls[i].find(":");
         size_t dot   = all_calls[i].find(".");
         size_t arrow = all_calls[i].find("->");
@@ -130,7 +139,7 @@ bool isPrimitiveContainer(const std::string& str) {
 //
 // Removes WS, specifiers, *, & from type name
 //
-std::string separateTypeName(const std::string& type){
+std::string separateTypeName(const std::string& type) {
     std::string result = trimWhitespace(type);
     result = removeSpecifiers(result);
 

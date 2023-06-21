@@ -1,13 +1,14 @@
-//
-//  utils.hpp
-//
-//  Utilities and supporting materials for stereocode
-//
-//  Created by jmaletic on 7/6/22.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file utils.hpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
-#ifndef stereocodeUTILS_HPP
-#define stereocodeUTILS_HPP
+#ifndef UTILS_HPP
+#define UTILS_HPP
 
 #include <string>
 #include <cstring>
@@ -16,7 +17,6 @@
 #include <algorithm>
 #include <cctype>
 #include "PrimitiveTypes.hpp"
-
 
 extern primitiveTypes PRIMITIVES;
 extern bool           DEBUG;
@@ -35,6 +35,9 @@ const std::vector<std::string> CLASS_STEREOTYPE =
 
 const std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "<<"};
 
+const std::vector<std::string> HEADER_FILE_EXTENSION = {".hpp", ".h", ".HPP", ".H", ".hxx", ".hh", ".h++", ".i", ".ii", ".tcc"};
+
+bool         isHeaderFile         (const std::string&);
 bool         isGlobalConstFormat  (const std::string&);
 bool         checkConst           (const std::string&);
 bool         isInheritedAttribute (const std::vector<std::string>&, const std::vector<std::string>&, const std::string&);

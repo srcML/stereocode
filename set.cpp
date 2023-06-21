@@ -1,11 +1,12 @@
-//File:   set.cpp
-//
-//Programmer:   Dr. J. Maletic   
-//Date:         7/2022
-//Description:  Definition for Set ADT.
-//              Set of integers
-//
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file set.cpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
+
 #include "set.hpp"
 
 inline bool isValid(int x) {

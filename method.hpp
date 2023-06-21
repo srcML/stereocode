@@ -1,13 +1,14 @@
-//
-//  method.hpp
-//
-//  methodModel class for stereocode
-//
-//  Created by jmaletic on July 20 2022.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file method.hpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
-#ifndef stereocodeMETHOD_HPP
-#define stereocodeMETHOD_HPP
+#ifndef METHOD_HPP
+#define METHOD_HPP
 
 #include <iostream>
 #include <fstream>
@@ -38,7 +39,7 @@ public:
     bool        returnsAttribute      () const { return retAttribute; };
     std::string getStereotype         () const { return stereotype; };
 
-    std::string getsrcML () const {return srcML; };
+    std::string getsrcML              () const { return srcML; };
 
     std::vector<std::string> getLocalVariables() const { return localVariables; };
     std::vector<std::string> getParameterNames() const { return parameterNames; };

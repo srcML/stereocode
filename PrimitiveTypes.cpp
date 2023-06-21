@@ -1,9 +1,11 @@
-//
-//  PrimitiveTypes.cpp
-//  
-//
-//  Created by jmaletic on 7/6/22.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file PrimitiveTypes.cpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
 #include "PrimitiveTypes.hpp"
 
@@ -38,6 +40,7 @@ std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
 // REQUIRES: out.open(fname)
 std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
     for (std::string i : prims.ptypes) out << i << std::endl;
+    for (std::string i : prims.usertypes) out << i << std::endl;
     return out;
 }
 

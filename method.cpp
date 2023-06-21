@@ -1,9 +1,11 @@
-//
-//  method.cpp
-//  
-//
-//  Created by jmaletic on July 20 2022.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file method.cpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
 #include "method.hpp"
 
@@ -12,9 +14,7 @@ methodModel::methodModel() : name(), parametersXML(),
                              srcML(), headerXML(),
                              returnType(), constMethod(false),
                              retAttribute(false), attributesModified(0),
-                             localVariables(), stereotype(NO_STEREOTYPE) {
-
-};
+                             localVariables(), stereotype(NO_STEREOTYPE) {};
 
 
 methodModel::methodModel(const std::string& xml, const std::string& s, bool f) : methodModel() {
@@ -31,7 +31,7 @@ void methodModel::setStereotype (const std::string& s) {
 
 //
 //
-// Finds a constuctor call that is after a new operator that matches the class name
+// Finds a constructor call that is after a new operator that matches the class name
 //
 bool methodModel::findConstructorCall() const{
     bool found = false;
@@ -57,9 +57,10 @@ bool methodModel::findConstructorCall() const{
         found = true;
 
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return found;
 }
@@ -75,7 +76,7 @@ std::vector<std::string> methodModel::findReturnExpressions(bool getter) const {
     xpath += getReturnType() + "' and string(src:parameter_list)='";
     xpath += getParametersXML() + "' and string(src:specifier)='";
     xpath += getConst() + "']//src:return/src:expr";
-    if (getter){
+    if (getter) {
         xpath += "[(count(*)=1 and src:name) or (count(*)=2 and *[1][self::src:operator='*'] and *[2][self::src:name])]";
     }
     srcml_archive*          archive = nullptr;
@@ -96,18 +97,19 @@ std::vector<std::string> methodModel::findReturnExpressions(bool getter) const {
         if (expr.find("<expr><literal type=\"number\"") == 0) {
             expr = "#";
         } else {
-            char * unparsed = new char [expr.size() + 1];
-            size_t size = expr.size() + 1;
+            char *unparsed = nullptr;
+            size_t size = 0;
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
             expr = unparsed;
-            delete[] unparsed;
+            free(unparsed);
         }
         returnExpressions.push_back(expr);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return returnExpressions;
 }
@@ -126,7 +128,7 @@ bool methodModel::isFactory() const {
     bool returns_new   = false;
     bool returns_param = false;
 
-    for (int i = 0; i < return_expressions.size(); ++i){
+    for (int i = 0; i < return_expressions.size(); ++i) {
         for (int j = 0; j < getLocalVariables().size(); ++j) {
             if(return_expressions[i] == getLocalVariables()[j])
                  returns_local = true;
@@ -166,9 +168,10 @@ bool methodModel::isEmptyMethod() const {
     int n = srcml_transform_get_unit_size(result);
 
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return n == 1;
 }
@@ -198,27 +201,29 @@ bool methodModel::containsNonPrimitive(const std::string& x, const std::string& 
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    for (int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [type.size() + 1];
-        size_t size = type.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string param_type(unparsed);
-        delete[] unparsed;
+        free(unparsed);
         // handles case of (void) for param list
         if (n == 1 && x == "/src:parameter_list//src:parameter" && param_type == "void")
             break;
-        if (!isPrimitiveContainer(param_type) && param_type != className){
+        if (!isPrimitiveContainer(param_type) && param_type != className) {
             contains = true;
             break;
         }
 
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
+
     return contains;
 }
 
@@ -248,23 +253,24 @@ bool methodModel::variableChanged(const std::string& var_name) const {
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    for (int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string next_element = srcml_unit_get_srcml(resultUnit);
         int equal_sign_count = 0;
-        for (int j = 0; j < next_element.size(); ++j){
-            if (next_element[j] == '='){
+        for (int j = 0; j < next_element.size(); ++j) {
+            if (next_element[j] == '=') {
                 equal_sign_count++;
             }
         }
-        if (equal_sign_count == 1){
+        if (equal_sign_count == 1) {
             changed = true;
         }
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return changed;
 }
@@ -277,22 +283,22 @@ bool methodModel::isVoidAccessor() const {
     std::vector<std::string> names = getParameterNames();
     std::string returnType = separateTypeName(getReturnType());
 
-    for (int j = 0; j < types.size(); ++j){
+    for (int j = 0; j < types.size(); ++j) {
         bool reference = types[j].find("&") != std::string::npos;
         bool constant = types[j].find("const") != std::string::npos;
         bool primitive = isPrimitiveContainer(types[j]);
 
         // if the parameter type contains an &, is not const and is primitive
         // and the return type of the method is void.
-        if (reference && !constant && primitive && returnType == "void" && isConst()){
+        if (reference && !constant && primitive && returnType == "void" && isConst()) {
             bool param_changed = variableChanged(names[j]);
-                if (param_changed || getStereotype() == NO_STEREOTYPE){
+                if (param_changed || getStereotype() == NO_STEREOTYPE) {
                 return true;
             }
         }
     }
     if (returnType == "void" && isConst() &&
-        getStereotype() == NO_STEREOTYPE){
+        getStereotype() == NO_STEREOTYPE) {
         return true;
     }
     return false;
@@ -327,25 +333,26 @@ std::vector<std::string> methodModel::findLocalVariables() const {
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    for (int j = 0; j < n; ++j){
+    for (int j = 0; j < n; ++j) {
         resultUnit = srcml_transform_get_unit(result, j);
         std::string var_name = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [var_name.size() + 1];
-        size_t size = var_name.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         var_name = unparsed;
-        delete[] unparsed;
+        free(unparsed);
         var_name = trimWhitespace(var_name);
         size_t arr = var_name.find("[");
-        if (arr != std::string::npos){
+        if (arr != std::string::npos) {
             var_name.erase(arr, arr-var_name.size());
         }
         locals.push_back(var_name);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return locals;
 }
@@ -377,21 +384,22 @@ std::vector<std::string> methodModel::findParameterNames() const {
 
     int n = srcml_transform_get_unit_size(result);
 
-    for (int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [type.size() + 1];
-        size_t size = type.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string param_name(unparsed);
-        delete[] unparsed;
+        free(unparsed);
 
         names.push_back(param_name);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return names;
 }
@@ -422,21 +430,21 @@ std::vector<std::string> methodModel::findParameterTypes() const {
     srcml_unit_apply_transforms(archive, unit, &result);
 
     int n = srcml_transform_get_unit_size(result);
-
-    for (int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [type.size() + 1];
-        size_t size = type.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string param_type(unparsed);
-        delete[] unparsed;
+        free(unparsed);
         types.push_back(param_type);
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return types;
 }
@@ -444,8 +452,9 @@ std::vector<std::string> methodModel::findParameterTypes() const {
 
 
 
-// returns a list of call names that are not below throw or following new: when pure_call is false
-// does not include calls following the . or -> operators: when pure_call is true
+// returns a list of call names that are not below throw or catch
+// does not include calls following new: when call_type is real
+// does not include calls following the . or -> operators: when call_type is pure
 //
 std::vector<std::string> methodModel::findCalls(const std::string& call_type) const {
     std::vector<std::string> calls;
@@ -475,23 +484,24 @@ std::vector<std::string> methodModel::findCalls(const std::string& call_type) co
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    for (int i = 0; i < n; ++i){
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string call = srcml_unit_get_srcml(resultUnit);
-        char * unparsed = new char [call.size() + 1];
-        size_t size = call.size() + 1;
+        char * unparsed = nullptr;
+        size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         call = unparsed;
-        delete[] unparsed;
+        free(unparsed);
         call = trimWhitespace(call);
         if (call != "assert" && !isPrimitiveContainer(call)) {
             calls.push_back(call);
         }
     }
     srcml_unit_free(unit);
+    srcml_transform_free(result);
     srcml_clear_transforms(archive);
     srcml_archive_close(archive);
-    srcml_transform_free(result);
+    srcml_archive_free(archive);
 
     return calls;
 }

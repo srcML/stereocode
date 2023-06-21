@@ -1,18 +1,18 @@
-//
-//  method.hpp
-//
-//  variable (name, type) class for stereocode
-//
-//  Created by jmaletic on July 20 2022.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file variable.hpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
-#ifndef stereocodeVARIABLE_HPP
-#define stereocodeVARIABLE_HPP
+#ifndef VARIABLE_HPP
+#define VARIABLE_HPP
 
 #include <iostream>
 #include <string>
 
-//
 class variable {
 public:
                 variable ()                                           { name = ""; type = ""; };
@@ -29,8 +29,5 @@ private:
 };
 
 std::ostream& operator<<(std::ostream&, const variable&);
-
-
-
 
 #endif

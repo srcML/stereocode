@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Example1.hpp" hash="19c0b9de28046b92bdb03d876d265d5d7d2caf89"><comment type="line">// Project 1 MESI cache coherence protocol</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.hpp" hash="ea09bb31e7de58e0cad7f3edfa329209097eb0a8"><comment type="line">// Project 1 MESI cache coherence protocol</comment>
 <comment type="line">// This file contains class definition for Processor</comment>
 <comment type="line">// and important global variables.</comment>
 
@@ -22,7 +22,13 @@
     <function><type><name>double</name></type> <name>testingMultipleReturns</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>j</name></decl></parameter>)</parameter_list> <specifier>const</specifier> <block>{<block_content><if_stmt><if>if <condition>(<expr><name>j</name> <operator>==</operator> <literal type="number">10</literal></expr>)</condition><block>{<block_content><return>return <expr><literal type="number">1.0</literal></expr>;</return></block_content>}</block></if> <else>else<block type="pseudo"><block_content> <return>return <expr><literal type="number">2.0</literal></expr>;</return></block_content></block></else></if_stmt></block_content>}</block></function>
     <function><type><name>int</name></type> <name>GetCache2</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>)</parameter_list> <block>{<block_content><return>return <expr><name><name>cache</name><index>[<expr><name>i</name></expr>]</index></name></expr>;</return></block_content>}</block></function>
     <function><type><name>int</name></type> <name>GetID2</name><parameter_list>()</parameter_list> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
+    
+    <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;
+    <argument><expr><name>int</name>     <modifier>*</modifier></expr></argument>   &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
+    <function><type><name><name>std</name><operator>::</operator><name>map</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> , <argument><expr><name>char</name> <modifier>&amp;</modifier></expr></argument>  &gt;</argument_list></name></type> <name>TestingPrimitiveReturn</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>helloworld</name></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
+
+    
 
     <constructor_decl><name>Processor</name><parameter_list>()</parameter_list>;</constructor_decl>
     <constructor_decl><name>Processor</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list>;</constructor_decl>
@@ -30,11 +36,6 @@
     <function_decl><type><name>void</name></type> <name>ReadData</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>int</name> <modifier>*</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>ChangeCacheState</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>string</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
     <function_decl><type><name>string</name></type> <name>TestingMultipleAttributeReturns</name><parameter_list>(<parameter><decl><type><name>bool</name></type></decl></parameter>, <parameter><decl><type><name>bool</name></type></decl></parameter>)</parameter_list>;</function_decl>
-
-    <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;
-    <argument><expr><name>int</name>    <modifier>*</modifier></expr></argument>    &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
-
-    <function><type><name><name>std</name><operator>::</operator><name>map</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> , <argument><expr><name>char</name> <modifier>&amp;</modifier></expr></argument> &gt;</argument_list></name></type> <name>TestingPrimitiveReturn</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>helloworld</name></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
     <function_decl><type><name>void</name></type> <name>TestingCommand</name><parameter_list>()</parameter_list>;</function_decl>
     <function_decl><type><name>void</name></type> <name>IncrementDataMember</name><parameter_list>()</parameter_list>;</function_decl>
@@ -50,7 +51,7 @@
 </private>}</block>;</class>
 </unit>
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="Example1.cpp" hash="8fc683a32c4c524a40513d255e401cd9d206c1a5">
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.cpp" hash="8f1e6f94ad63d9c5e13d67eebd41e730420bc372">
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"Example1.hpp"</cpp:file></cpp:include>
 
@@ -139,5 +140,88 @@
 <function><type><name>void</name></type> <name><name>Processor</name><operator>::</operator><name>IncrementDataMember</name></name><parameter_list>()</parameter_list><block>{<block_content>
     <expr_stmt><expr><operator>++</operator><name>anotherDataMember</name></expr>;</expr_stmt>
 </block_content>}</block></function></unit>
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example2.hpp" hash="78b69daa533fbcf2bed2d8f5345c4d370bae0c93"><comment type="line">// example2.hpp</comment>
+<comment type="line">// testing for stereocode</comment>
+
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;vector&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;iostream&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;string&gt;</cpp:file></cpp:include>
+
+<class>class <name>example2</name>
+<block>{<private type="default">
+</private><public>public:
+    <constructor_decl><name>example2</name><parameter_list>()</parameter_list>;</constructor_decl>
+    <destructor_decl><name>~example2</name><parameter_list>()</parameter_list>;</destructor_decl>
+    <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> &gt;</argument_list></name></type> <name>function1</name><parameter_list>()</parameter_list><block>{<block_content><return>return <expr><name>dataMember1</name></expr></return></block_content>}</block></function>
+
+    <function_decl><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt; <argument><expr><name><name>std</name><operator>::</operator><name>string</name></name></expr></argument> &gt;</argument_list></name></type> <name>function2</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>j</name></decl></parameter>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>Processor</name></type> <name>function3</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>, <parameter><decl><type><name>double</name></type></decl></parameter>, <parameter><decl><type><name>string</name></type></decl></parameter>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>void</name></type> <name>function4</name><parameter_list>(<parameter><decl><type><name>Processor</name></type></decl></parameter>, <parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list>;</function_decl>
+    
+    <function_decl><type><name>void</name></type> <name>voidAccessor</name><parameter_list>(<parameter><decl><type><name>int</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list>;</function_decl>
+
+    <function_decl><type><name>Processor</name></type> <name>ProcessorFactory</name><parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>, <parameter><decl><type><name>double</name></type></decl></parameter>, <parameter><decl><type><name>string</name></type></decl></parameter>)</parameter_list>;</function_decl>
+
+</public><private>private:
+    <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></type> <name>dataMember1</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>string</name></type> <name>j</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>Processor</name></type> <name>p1</name></decl>;</decl_stmt>
+
+</private>}</block>;</class></unit>
+
+<unit revision="1.0.0" language="C++" filename="example2.cpp" hash="7af5764f33db98c6cb698589206f24cc967564a9"><comment type="line">// example2.cpp</comment>
+<comment type="line">// test for stereocode</comment>
+
+<constructor><name><name>example2</name><operator>::</operator><name>example2</name></name><parameter_list>()</parameter_list><block>{<block_content>
+</block_content>}</block></constructor>
+
+<destructor><name><name>example2</name><operator>::</operator><name>~example2</name></name><parameter_list>()</parameter_list><block>{<block_content>
+</block_content>}</block></destructor>
+
+<function><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt; <argument><expr><name><name>std</name><operator>::</operator><name>string</name></name></expr></argument> &gt;</argument_list></name></type> <name><name>example2</name><operator>::</operator><name>function2</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>j</name></decl></parameter>)</parameter_list><block>{<block_content>
+    <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>list</name><argument_list type="generic">&lt;<argument><expr><name>string</name></expr></argument>&gt;</argument_list></name></type> <name>ret</name> <init>= <expr><block>{<expr><name>j</name></expr>}</block></expr></init></decl>;</decl_stmt>
+
+    <return>return <expr><name>ret</name></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><name>Processor</name></type> <name><name>example2</name><operator>::</operator><name>function3</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>j</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>s</name></decl></parameter>)</parameter_list><block>{<block_content>
+    <decl_stmt><decl><type><name>Processor</name></type> <name>pil</name></decl>;</decl_stmt>
+
+    <expr_stmt><expr><call><name><name>p1</name><operator>.</operator><name>doSomething</name></name><argument_list>(<argument><expr><name>i</name></expr></argument>,<argument><expr><name>j</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+
+    <expr_stmt><expr><call><name><name>p1</name><operator>.</operator><name>doSomethingElse</name></name><argument_list>(<argument><expr><name>s</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+
+    <expr_stmt><expr><call><name>outsideFunction</name><argument_list>(<argument><expr><name>p1</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+
+    <return>return <expr><name>pil</name></expr>;</return>
+</block_content>}</block></function>
+
+<function><type><name>void</name></type> <name><name>example2</name><operator>::</operator><name>function4</name></name><parameter_list>(<parameter><decl><type><name>Processor</name></type> <name>p2</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>k</name></decl></parameter>)</parameter_list><block>{<block_content>
+    <expr_stmt><expr><call><name><name>p2</name><operator>.</operator><name>doSomething</name></name><argument_list>(<argument><expr><name>k</name></expr></argument>, <argument><expr><literal type="number">11.5</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+
+    <expr_stmt><expr><name>k</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
+
+    <return>return;</return>
+</block_content>}</block></function>
+<function><type><name>void</name></type> <name><name>example2</name><operator>::</operator><name>voidAccessor</name></name><parameter_list>(<parameter><decl><type><name>int</name><modifier>&amp;</modifier></type> <name>k</name></decl></parameter>)</parameter_list><block>{<block_content>
+    <expr_stmt><expr><name>k</name> <operator>=</operator> <literal type="number">5</literal></expr>;</expr_stmt>
+    <if_stmt><if>if <condition>(<expr><literal type="boolean">true</literal></expr>)</condition>
+    <block>{<block_content>
+        <expr_stmt><expr><name>k</name> <operator>+=</operator> <literal type="number">100</literal></expr>;</expr_stmt>
+        <comment type="block">/* code */</comment>
+    </block_content>}</block></if></if_stmt>
+
+</block_content>}</block></function>
+
+<function><type><name>Processor</name></type> <name><name>example2</name><operator>::</operator><name>ProcessorFactory</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>i</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>j</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>k</name></decl></parameter>)</parameter_list><block>{<block_content>
+    <decl_stmt><decl><type><name>Processor</name></type> <name>p</name> <init>= <expr><call><name>Processor</name><argument_list>(<argument><expr><name>i</name></expr></argument>,<argument><expr><name>j</name></expr></argument>,<argument><expr><name>k</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+
+    <return>return <expr><name>p</name></expr>;</return>
+</block_content>}</block></function>
+
+</unit>
 
 </unit>

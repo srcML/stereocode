@@ -1,25 +1,23 @@
-//
-//  PrimitiveTypes.hpp
-//
-//  A set of primitive types for stereocode
-//   The type names in this set will be considered primitives so
-//   there will be no collaboration assumed
-//
-//  Created by jmaletic on 7/6/22.
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file PrimitiveTypes.hpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
-#ifndef PrimitiveTypes_HPP
-#define PrimitiveTypes_HPP
+#ifndef PRIMITIVETYPES_HPP
+#define PRIMITIVETYPES_HPP
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <set>
 
-
 class primitiveTypes {
 public:
-    primitiveTypes() : language(""), ptypes() {};
+    primitiveTypes() : language("") {};
 
     bool isPrimitive(const std::string&) const;
     void addPrimitive(const std::string&);

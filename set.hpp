@@ -1,13 +1,14 @@
-//File:   set.hpp
-//
-//Programmer:   Dr. J. Maletic
-//Date:         7/2022
-//Description:  Definition for Set ADT.
-//              Set of integers
-//
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file set.hpp
+ *
+ * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
 
-#ifndef CS2_SET_HPP_
-#define CS2_SET_HPP_
+#ifndef SET_HPP
+#define SET_HPP
 
 #include <iostream>
 #include <initializer_list>
