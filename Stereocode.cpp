@@ -76,6 +76,7 @@ int main(int argc, char const *argv[]) {
     classModel                  aClass;
     int                         error;
     bool                        hppFirst                 = false;
+    bool                        languageWarn             = false;
 
     error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
 
@@ -94,7 +95,7 @@ int main(int argc, char const *argv[]) {
         srcml_archive_free(output_archive);
         return -1;
     }
-
+    
     error = srcml_archive_write_open_filename(output_archive, outputFile.c_str());
     if (error) {
         std::cerr << "Error opening: " << outputFile << std::endl;
@@ -116,14 +117,19 @@ int main(int argc, char const *argv[]) {
     secondUnit = srcml_archive_read_unit(archive);
 
     while (firstUnit) {
-        std::string language = srcml_unit_get_language(firstUnit);
-
-        if (language != "C++"){
-            std::cerr << "Input must be a C++ archive/file" << std::endl;
-            remove(outputFile.c_str());
-            return -1;
-        }
-        
+        // Issue a single warning whenever the unit/input is not C++.
+        if(!languageWarn){
+            std::string languageFirstUnit = srcml_unit_get_language(firstUnit);
+            std::string languageSecondUnit = srcml_unit_get_language(secondUnit);
+            if (languageFirstUnit != "C++"){
+                std::cerr << "Warning: stereocode is only designed for C++" << std::endl;
+                languageWarn = true;
+            }
+            if (secondUnit && languageSecondUnit != "C++"){
+                std::cerr << "Warning: stereocode is only designed for C++" << std::endl;
+                languageWarn = true;    
+            }
+        }     
         if (isHeaderFile(srcml_unit_get_filename(firstUnit))) 
             hppFirst = true;
         
