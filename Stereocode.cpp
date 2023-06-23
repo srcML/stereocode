@@ -37,7 +37,7 @@ int main(int argc, char const *argv[]) {
     
     app.add_option("input-archive",      inputFile,                   "File name of a srcML archive")->required();
     app.add_option("-o,--output-file",   outputFile,                  "File name of output - srcML archive with stereotypes");
-    app.add_option("-p,--primitives",    primitivesFile,              "File name of user supplied primitive types (one per line)");
+    app.add_option("-p,--primitives",    primitivesFile,              "File name of user supplied primitive types [one per line]");
     app.add_flag  ("-r,--report",        outputReport,                "Output optional report file - *.report.txt (off by default)");
     app.add_flag  ("-v,--overwrite",     overWriteInput,              "Over write input file with stereotype output (off by default)");
     app.add_flag  ("-d,--debug",         DEBUG,                       "Turn on debug mode (off by default)");
@@ -55,11 +55,14 @@ int main(int argc, char const *argv[]) {
         }
         in.close();
     }
+    
 
     if (overWriteInput)
         outputFile = inputFile;                        // Overwrite input file
-    else if (outputFile == "")                         
-        outputFile = inputFile + ".annotated.xml";     // Default output file name if output file name is not specified
+    else if (outputFile == "") {
+        std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
+        outputFile = InputFileNoExt + ".stereotypes.xml";     // Default output file name if output file name is not specified
+    }                       
 
     if (DEBUG) 
         std::cerr << std::endl << "Computing stereotypes for the following class: " << std::endl << std::endl;
