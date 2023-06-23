@@ -31,7 +31,7 @@ int main(int argc, char const *argv[]) {
     std::string outputFile     = "";
     bool        outputReport   = false;
     bool        overWriteInput = false;
-
+    bool        defaultOutput  = false;
 
     CLI::App app{"StereoCode: Determines method stereotypes"};
     
@@ -62,6 +62,7 @@ int main(int argc, char const *argv[]) {
     else if (outputFile == "") {
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
         outputFile = InputFileNoExt + ".stereotypes.xml";     // Default output file name if output file name is not specified
+        defaultOutput = true;
     }                       
 
     if (DEBUG) 
@@ -197,6 +198,8 @@ int main(int argc, char const *argv[]) {
     srcml_archive_close(output_archive);
     srcml_archive_free(output_archive);
     
+    if(defaultOutput)
+        std::cout<<"Output file stored in: "<<outputFile<<std::endl;
     if (outputReport)
         reportFile.close();
     if (DEBUG)
