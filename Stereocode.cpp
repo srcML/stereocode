@@ -120,15 +120,17 @@ int main(int argc, char const *argv[]) {
         // Issue a single warning whenever the unit/input is not C++.
         if(!languageWarn){
             std::string languageFirstUnit = srcml_unit_get_language(firstUnit);
-            std::string languageSecondUnit = srcml_unit_get_language(secondUnit);
             if (languageFirstUnit != "C++"){
                 std::cerr << "Warning: stereocode is only designed for C++" << std::endl;
                 languageWarn = true;
             }
-            if (secondUnit && languageSecondUnit != "C++"){
-                std::cerr << "Warning: stereocode is only designed for C++" << std::endl;
-                languageWarn = true;    
-            }
+            if (secondUnit){
+                std::string languageSecondUnit = srcml_unit_get_language(secondUnit);
+                if (languageSecondUnit != "C++"){
+                    std::cerr << "Warning: stereocode is only designed for C++" << std::endl;
+                    languageWarn = true;    
+                }
+            }   
         }     
         if (isHeaderFile(srcml_unit_get_filename(firstUnit))) 
             hppFirst = true;
