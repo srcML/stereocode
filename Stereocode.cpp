@@ -14,6 +14,7 @@
 #include <vector>
 #include <set>
 #include <algorithm>
+#include <filesystem>
 
 #include <srcml.h>
 #include "CLI11.hpp"
@@ -55,11 +56,11 @@ int main(int argc, char const *argv[]) {
         }
         in.close();
     }
-    
 
-    if (overWriteInput)
-        outputFile = inputFile;                        // Overwrite input file
-    else if (outputFile == "") {
+    if (overWriteInput){                // If overWriteInput and outputFile are both specified, then outputFile is ignored
+        outputFile = "temp.xml";
+    }
+    else if (outputFile == "") {        // Skip if output file is specified                               
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
         outputFile = InputFileNoExt + ".stereotypes.xml";     // Default output file name if output file name is not specified
         defaultOutput = true;
@@ -109,20 +110,19 @@ int main(int argc, char const *argv[]) {
         return -1;
     }
 
-    //Optionally output a report (tab separated) path, class name, method, stereotype
+    // Optionally output a report (tab separated) path, class name, method, stereotype
     if (outputReport) 
         reportFile.open(inputFile + ".report.txt");
 
-    // Currently, only C++ is supported.
-    // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter) or a single .hpp file.
-    // A single class is expected in each unit.
+    // Currently, only C++ is supported
+    // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter) or a single .hpp file
+    // A single class is expected in each unit
 
     firstUnit = srcml_archive_read_unit(archive);
     secondUnit = srcml_archive_read_unit(archive);
 
-    while (firstUnit) {
-        // Issue a single warning whenever the unit/input is not C++.
-        if(!languageWarn){
+    while (firstUnit) {     
+        if(!languageWarn){ // Issue a single warning whenever the unit/input is not C++
             std::string languageFirstUnit = srcml_unit_get_language(firstUnit);
             if (languageFirstUnit != "C++"){
                 std::cerr << "Warning: stereocode is only designed for C++" << std::endl;
@@ -166,11 +166,11 @@ int main(int argc, char const *argv[]) {
         if (DEBUG)
             std::cerr << aClass << std::endl;
 
-        // Clean
+        // Clean up
         if (hppFirst){ 
             if (aClass.getUnitTwoCount() != 0)
-                srcml_transform_free(resultSecond);  // Will also clear "secondUnitTransformed" since it is contained in "result*".  
-            srcml_transform_free(resultFirst); // Will also clear "firstUnitTransformed" since it is contained in "result*". 
+                srcml_transform_free(resultSecond);  // Will also clear "secondUnitTransformed" since it is contained in "result*"
+            srcml_transform_free(resultFirst);       // Will also clear "firstUnitTransformed" since it is contained in "result*"
         }
         else {
             if (aClass.getUnitOneCount() != 0)
@@ -198,9 +198,13 @@ int main(int argc, char const *argv[]) {
     srcml_archive_close(archive);
     srcml_archive_free(archive);
     srcml_archive_close(output_archive);
-    srcml_archive_free(output_archive);
-    
-    if(defaultOutput)
+    srcml_archive_free(output_archive);   
+
+    if(overWriteInput){
+        std::filesystem::remove(inputFile);
+        std::filesystem::rename(outputFile, inputFile);
+    }
+    if(defaultOutput && !overWriteInput)
         std::cout<<"Output file stored in: "<<outputFile<<std::endl;
     if (outputReport)
         reportFile.close();
