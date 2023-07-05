@@ -29,22 +29,12 @@ target_include_directories(stereocode PRIVATE /usr/local/include)
 set(CMAKE_EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external) # Creates folder if doesn't exists.
 file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.3.2/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp) # Name of file is needed since content of file itself are being downloaded.
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
+target_include_directories(OrderBy PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
 # Search (in common directories) and link the dynamic library libsrcml.
 find_library(LIBSRCML_LINK NAMES libsrcml libsrcml.1 libsrcml.1.dylib libsrcml.so.1 libsrcml.so)
 target_link_directories(stereocode PRIVATE /usr/local/lib)
 target_link_libraries(stereocode ${LIBSRCML_LINK})
-
-# CLI11 download
-include(FetchContent)
-FetchContent_Declare(cli11
-  URL https://github.com/CLIUtils/CLI11/releases/download/v2.2.0/CLI11.hpp
-  DOWNLOAD_NO_EXTRACT TRUE
-)
-FetchContent_MakeAvailable(cli11)
-add_library(cli11 INTERFACE IMPORTED)
-target_include_directories(cli11 SYSTEM INTERFACE ${cli11_SOURCE_DIR})
-target_link_libraries(OrderBy PRIVATE cli11)
 
 install(TARGETS OrderBy)
 
