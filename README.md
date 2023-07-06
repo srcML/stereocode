@@ -28,6 +28,8 @@ cmake CMakeLists.txt -B build_path
 make
 ```
 
+Note: The cmake file will build both the stereocode and OrderBy tools.
+
 ## Usage
 
 Stereocode is run on the command line.
@@ -108,13 +110,13 @@ Developers of stereocode 1.0:
 # OrderBy
 
 ## Prerequisites
-- [cmake](https://cmake.org/)
+- [cmake 3.17+](https://cmake.org/)
 
 ## What does it do?
 OrderBy orders header and implementation files by directory path with the header file occurring first and the implementation file coming second.
 
 OrderBy expects a relative/absolute file path as input and traverses the directory (and subdirectories) recursively to order files together.
-Files MUST have the same absolute directory path to be considered a pair (must reside in same directory).
+Files MUST have the same absolute directory path to be considered a pair (must reside in same subdirectory).
 
 Ex: 'user/bar/foo.hpp' and 'user/foo.cpp' will NOT be considered a pair.
 
@@ -127,6 +129,8 @@ Build using cmake:
 ```
 cmake [path to CMakeLists.txt]
 ```
+
+Note: The cmake file will build both the stereocode and OrderBy tools.
 
 ## Usage
 
