@@ -57,10 +57,7 @@ int main(int argc, char const *argv[]) {
         in.close();
     }
 
-    if (overWriteInput){                // If overWriteInput and outputFile are both specified, then outputFile is ignored
-        outputFile = "temp.xml";
-    }
-    else if (outputFile == "") {        // Skip if output file is specified                               
+    if (outputFile == "") {                                   // Skip if output file is specified                               
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
         outputFile = InputFileNoExt + ".stereotypes.xml";     // Default output file name if output file name is not specified
         defaultOutput = true;
@@ -201,10 +198,16 @@ int main(int argc, char const *argv[]) {
     srcml_archive_free(output_archive);   
 
     if(overWriteInput){
-        std::filesystem::remove(inputFile);
-        std::filesystem::rename(outputFile, inputFile);
+        if(defaultOutput){
+            std::filesystem::remove(inputFile);
+            std::filesystem::rename(outputFile, inputFile);
+        }
+        else{
+            std::filesystem::remove(inputFile);
+            std::filesystem::copy_file(outputFile, inputFile);
+        }
     }
-    if(defaultOutput && !overWriteInput)
+    else if(defaultOutput)
         std::cout<<"Output file stored in: "<<outputFile<<std::endl;
     if (outputReport)
         reportFile.close();
