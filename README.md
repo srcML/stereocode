@@ -128,6 +128,9 @@ Build using cmake:
 
 ```
 cmake [path to CMakeLists.txt]
+
+# From build_path with created makefile
+make
 ```
 
 Note: The cmake file will build both the stereocode and OrderBy tools.
