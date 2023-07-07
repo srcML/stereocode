@@ -14,7 +14,7 @@ The Stereocode application accepts an archive consisting of .hpp and .cpp file p
 
 Users of stereocode use this output as input to additional processing or analysis.  For example, the stereotype information can be added as documentation (comments, doxgen, javadoc) to the source code.
 
-### Integrated utility: OrderBy
+### Integrated utility: *OrderBy*
 OrderBy is a Sterecode utility tool that allows for an entire system of files to be used as input to Stereocode in an efficient manner.
 
 OrderBy orders header and implementation files by directory path with the header file occurring first and the implementation file coming second.
@@ -98,7 +98,7 @@ There are a predefined set of primitive (base) types for each language.  Additio
 
 ## Options
 
-###Stereocode options
+### Stereocode options
 
 -o, output-file \[relative path] - Specify a file the name of the output file.  If not specified output is input-fname.annotated.xml
 
@@ -112,7 +112,7 @@ There are a predefined set of primitive (base) types for each language.  Additio
 
 -d, --debug - Option to turn on some output for debugging. 
 
-###OrderBy options
+### OrderBy options
 
   -o, --output [file name] - File name of output - ordered list of file names (prints ordered pairs to cmd line by default
   
