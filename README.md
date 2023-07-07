@@ -73,12 +73,17 @@ Stereocode is run on the command line.
 Stereocode expects each pair in the srcML archive file to contain only one class definition. For C++, the archive typically will have pairs of .hpp and .cpp. where each pair corresponds to a single class. 
 
 
-Demo: 
+Toolchain demo: 
 ```
-# Toolchain
+# Using entire system of files
 
 ./OrderBy [relative/absolute file path] -o Examples.txt -f
 srcml --files-from Examples.txt -o Examples.xml
+./stereocode Examples.xml
+
+# Using small number of files
+
+srcml example1.hpp example1.cpp example2.hpp example2.cpp -o Examples.xml
 ./stereocode Examples.xml
 
 # Using a single .hpp file
