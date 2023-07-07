@@ -14,6 +14,7 @@ The Stereocode application accepts an archive consisting of .hpp and .cpp file p
 
 Users of stereocode use this output as input to additional processing or analysis.  For example, the stereotype information can be added as documentation (comments, doxgen, javadoc) to the source code.
 
+
 ### Integrated utility: *OrderBy*
 OrderBy is a Sterecode utility tool that allows for an entire system of files to be used as input to Stereocode in an efficient manner.
 
@@ -47,6 +48,7 @@ Supported Implementation (second) file extensions:
 - .c++
 - .C
 
+
 ## Installation and Build
 Intall srcml version 1.0 and cmake version 3.17 or later on Linux/Unix/MacOS.
 
@@ -62,6 +64,7 @@ make
 ```
 
 Note: The cmake file will build both the stereocode and OrderBy tools.
+
 
 ## Usage
 
@@ -112,6 +115,7 @@ There are a predefined set of primitive (base) types for each language.  Additio
 
 -d, --debug - Option to turn on some output for debugging. 
 
+
 ### OrderBy options
 
   -o, --output [file name] - File name of output - ordered list of file names (prints ordered pairs to cmd line by default
@@ -123,6 +127,7 @@ There are a predefined set of primitive (base) types for each language.  Additio
   -q, --quiet - Disables warnings (warnings on by default)
   
   -f, --fullPath - Output contains full path of each file (relative path by default)
+  
 
 ## Output
 
@@ -135,6 +140,7 @@ The class and function tags are given a stereotype attribute:
 <class st:stereotype="entity"> ... </class>
 <function st:stereotype="get"> ... </function>
 ```
+
 
 ## Developer Notes:
 
