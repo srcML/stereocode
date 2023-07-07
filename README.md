@@ -14,6 +14,41 @@ The Stereocode application accepts an archive consisting of .hpp and .cpp file p
 
 Users of stereocode use this output as input to additional processing or analysis.  For example, the stereotype information can be added as documentation (comments, doxgen, javadoc) to the source code.
 
+
+### Integrated utility: *OrderBy*
+OrderBy is a Sterecode utility tool that allows for an entire system of files to be used as input to Stereocode in an efficient manner.
+
+OrderBy orders header and implementation files by directory path with the header file occurring first and the implementation file coming second.
+
+OrderBy expects a relative/absolute file path as input and traverses the directory (and subdirectories) recursively to order files together.
+Files MUST have the same absolute directory path to be considered a pair (must reside in same subdirectory).
+
+Ex: 'user/bar/foo.hpp' and 'user/foo.cpp' will NOT be considered a pair.
+
+Implementation files that do not have a corresponding header file are considered unpaired and will not be contained in the outputted file of pairs.
+
+Supported header (first) file extensions:
+- .h
+- .hpp
+- .hxx
+- .hh
+- .h++
+- .H
+- .i
+- .ii
+- .tcc
+  
+Supported Implementation (second) file extensions: 
+- .c
+- .cpp
+- .CPP
+- .cp
+- .cxx
+- .cc
+- .c++
+- .C
+
+
 ## Installation and Build
 Intall srcml version 1.0 and cmake version 3.17 or later on Linux/Unix/MacOS.
 
@@ -28,6 +63,9 @@ cmake CMakeLists.txt -B build_path
 make
 ```
 
+Note: The cmake file will build both the stereocode and OrderBy tools.
+
+
 ## Usage
 
 Stereocode is run on the command line.
@@ -35,16 +73,17 @@ Stereocode is run on the command line.
 Stereocode expects each pair in the srcML archive file to contain only one class definition. For C++, the archive typically will have pairs of .hpp and .cpp. where each pair corresponds to a single class. 
 
 
-Demo: 
+Toolchain demo: 
 ```
-# Toolchain
+# Using entire system of files
 
-srcml example1.hpp example1.cpp example2.hpp example2.cpp -o Examples.xml
+./OrderBy [relative/absolute file path] -o Examples.txt -f
+srcml --files-from Examples.txt -o Examples.xml
 ./stereocode Examples.xml
 
-# The .cpp files can be placed first
+# Using small number of files
 
-srcml example1.cpp example1.hpp example2.cpp example2.hpp -o Examples.xml
+srcml example1.hpp example1.cpp example2.hpp example2.cpp -o Examples.xml
 ./stereocode Examples.xml
 
 # Using a single .hpp file
@@ -56,6 +95,7 @@ srcml example1.hpp -o example1hpp.xml
 Help
 ```
 ./stereocode --help
+./OrderBy --help
 ```
 
 
@@ -65,6 +105,8 @@ There are a predefined set of primitive (base) types for each language.  Additio
 
 
 ## Options
+
+### Stereocode options
 
 -o, output-file \[relative path] - Specify a file the name of the output file.  If not specified output is input-fname.annotated.xml
 
@@ -79,6 +121,19 @@ There are a predefined set of primitive (base) types for each language.  Additio
 -d, --debug - Option to turn on some output for debugging. 
 
 
+### OrderBy options
+
+  -o, --output [file name] - File name of output - ordered list of file names (prints ordered pairs to cmd line by default
+  
+  -w, --warningReport [file name] - Output optional report file for unpaired .cpp (off by default)
+  
+  -n, --nonrecursive - Enables nonrecursive traversion of subdirectories (off by default)
+  
+  -q, --quiet - Disables warnings (warnings on by default)
+  
+  -f, --fullPath - Output contains full path of each file (relative path by default)
+  
+
 ## Output
 
 Stereocode outputs an annotated archive for each input archive and optionally a report file.
@@ -90,6 +145,7 @@ The class and function tags are given a stereotype attribute:
 <class st:stereotype="entity"> ... </class>
 <function st:stereotype="get"> ... </function>
 ```
+
 
 ## Developer Notes:
 
