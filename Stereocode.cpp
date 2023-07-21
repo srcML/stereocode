@@ -79,7 +79,7 @@ int main(int argc, char const *argv[]) {
     int                         error;
     bool                        hppFirst                 = false;
     bool                        languageWarn             = false;
-
+    
     error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
 
     if (error) {
@@ -113,10 +113,10 @@ int main(int argc, char const *argv[]) {
 
     // Currently, only C++ is supported
     // Input is expected to be an archive of .hpp and .cpp files (order doesn't matter) or a single .hpp file
-    // A single class is expected in each unit
+    // A single class is expected in each unit\
 
     firstUnit = srcml_archive_read_unit(archive);
-    secondUnit = srcml_archive_read_unit(archive);
+    secondUnit = srcml_archive_read_unit(archive);    
 
     while (firstUnit) {     
         if(!languageWarn){ // Issue a single warning whenever the unit/input is not C++
@@ -142,14 +142,17 @@ int main(int argc, char const *argv[]) {
             aClass  = classModel(archive, secondUnit, firstUnit);
         
         aClass.ComputeMethodStereotype();                          // Analysis for method stereotypes
-        aClass.ComputeClassStereotype();                           // Analysis for class stereotype
-        
+        aClass.ComputeClassStereotype();                           // Analysis for class stereotype 
+
         // Add class & method stereotypes as attributes to both units
         if (hppFirst){ 
+            if(srcml_archive_is_solitary_unit(archive)) 
+                srcml_archive_enable_solitary_unit(output_archive); 
+ 
             firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, firstUnit, &resultFirst, hppFirst); 
             if (aClass.getUnitTwoCount() != 0){ secondUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, &resultSecond, !hppFirst ); } 
-            srcml_archive_write_unit(output_archive, firstUnitTransformed); 
-            srcml_archive_write_unit(output_archive, secondUnitTransformed);        
+            srcml_archive_write_unit(output_archive, firstUnitTransformed);   
+            srcml_archive_write_unit(output_archive, secondUnitTransformed);
         }
         else { 
             firstUnitTransformed = aClass.outputUnitWithStereotypes(archive, secondUnit, &resultSecond, !hppFirst);
