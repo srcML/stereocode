@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.hpp" hash="808fa4d8c59dcbb3cd5d5457ffa4e559f4014db4"><comment type="line">// Project 1 MESI cache coherence protocol</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.hpp" hash="10e8116bb46f8fbe3de20569ffa031b3407dfdfc"><comment type="line">// Project 1 MESI cache coherence protocol</comment>
 <comment type="line">// This file contains class definition for Processor</comment>
 <comment type="line">// and important global variables.</comment>
 
@@ -24,7 +24,7 @@
     <function><type><name>int</name></type> <name>GetID2</name><parameter_list>()</parameter_list> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
     
     <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;
-    <argument><expr><name>int</name>     <modifier>*</modifier></expr></argument>   &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
+    <argument><expr><name>int</name>     <modifier>*</modifier></expr></argument>   &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type> <name>x</name></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
     <function><type><name><name>std</name><operator>::</operator><name>map</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> , <argument><expr><name>char</name> <modifier>&amp;</modifier></expr></argument>  &gt;</argument_list></name></type> <name>TestingPrimitiveReturn</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>helloworld</name></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
