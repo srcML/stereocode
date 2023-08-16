@@ -10,20 +10,9 @@
 #ifndef CLASSINFO_HPP
 #define CLASSINFO_HPP
 
-#include <iostream>
 #include <fstream>
-#include <string>
-#include <cstring>
-#include <vector>
-#include <set>
-#include <algorithm>
-#include <srcml.h>
-#include "PrimitiveTypes.hpp"
-#include "utils.hpp"
-#include "variable.hpp"
 #include "method.hpp"
 #include "set.hpp"
-
 
 extern primitiveTypes PRIMITIVES;
 extern bool           DEBUG;
@@ -31,18 +20,15 @@ extern int            METHODS_PER_CLASS_THRESHOLD;
 
 class classModel {
 public:
-    classModel () : className(), parentClass(), attribute(), method(), unitOneCount(0), unitTwoCount(0), language() {};
+    classModel () : className(), parentClass(), attribute(), method(), unitOneCount(0), unitTwoCount(0), language(), classStereotype() {};
     classModel (srcml_archive*, srcml_unit*, srcml_unit*);
 
-    std::string getClassName    ()      const { return className;    };
-    int         getUnitOneCount ()      const { return unitOneCount; };
-    int         getUnitTwoCount ()      const { return unitTwoCount; };
-    bool        inherits        ()      const { return parentClass.size() > 0; };
-    bool        isAttribute     (const std::string&) const;
-
-    srcml_unit* outputUnitWithStereotypes(srcml_archive*, srcml_unit*, srcml_transform_result**, bool);
-    void        outputReport(std::ofstream&, const std::string&);
-
+    std::string getClassStereotype   ()      const;
+    std::string getClassName         ()      const { return className;    };
+    int         getUnitOneCount      ()      const { return unitOneCount; };
+    int         getUnitTwoCount      ()      const { return unitTwoCount; };
+    bool        inherits             ()      const { return parentClass.size() > 0; };
+    
     void findClassName(srcml_archive*, srcml_unit*);
     void findParentClassName(srcml_archive*, srcml_unit*);
     void findAttributeNames(srcml_archive*, srcml_unit*);
@@ -52,18 +38,18 @@ public:
     void findMethodNames();
     void findParameterLists();
     void findMethodReturnTypes();
-    void findParameterTypes();
-    void findParameterNames();
-    void findLocalVariableNames();
+    void findLocalVariablesNames();
+    void findLocalVariablesTypes();
+    void findParametersNames();
+    void findParametersTypes();
+    void findAllCalls();
+    
+    void isAttributeReturned();
+    void isAttributeUsed();
+    void isParameterModified();
+    void isEmptyMethod();
+    
     void countChangedAttributes();
-    void returnsAttributes();
-    int  findAssignOperatorAttribute(int, bool) const;
-    int  findIncrementedAttribute(int, bool) const;
-    bool usesAttributeObj(int, const std::vector<std::string>&);
-    bool usesAttribute(int);
-    bool callsAttributesMethod(const std::vector<std::string>&,
-                               const std::vector<std::string>&,
-                               const std::vector<std::string>&);
 
     void ComputeClassStereotype();
     void ComputeMethodStereotype();
@@ -71,32 +57,35 @@ public:
     void setter();
     void predicate();
     void property();
-    void voidAccessor();
+    void accessor();
     void command();
-    void commandCollaborator();
-    void collaborator();
+    void collaboratorController();
     void factory();
     void empty();
     void stateless();
+    void wrapper();
 
-    void printMethodHeaders();
+    srcml_unit* outputUnitWithStereotypes(srcml_archive*, srcml_unit*, srcml_transform_result**, bool);
+    void        outputReport(std::ofstream&, const std::string&);
+    
+
     void printReturnTypes();
     void printStereotypes();
-    void printAttributes();
     void printMethodNames();
-
+    void printMethodHeaders();
+    void printAttributes();
+    
     friend std::ostream& operator<<(std::ostream&, const classModel&);
 
 protected:
     std::string                 className;
     std::vector<std::string>    parentClass;
-    std::vector<variable>       attribute;
+    std::vector<AttributeInfo>  attribute;
     std::vector<methodModel>    method;
-    int                         unitOneCount;    //Methods in .hpp, .java, .cs, etc.
-    int                         unitTwoCount;    //Methods in .cpp - only C++ has two units
-    std::string                 language;        //Language: "C++", "C#", "Java", "C"
-    std::string                 classStereotype; //Class stereotype
+    int                         unitOneCount;    // Methods in .hpp, .java, .cs, etc.
+    int                         unitTwoCount;    // Methods in .cpp - only C++ has two units
+    std::string                 language;        // Language: "C++", "C#", "Java", "C"
+    std::vector<std::string>    classStereotype; // Class stereotype
 }; 
-
 
 #endif

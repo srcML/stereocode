@@ -388,24 +388,24 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   <expr_stmt><expr><name>m_use_pmag</name> <operator>=</operator> <name>use_p_mag</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getLabelLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get controller"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getLabelLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_label_location</name></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="get collaborator"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get controller"><type><name>AxisLoc</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>getScaleLocation</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_scale_location</name></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="set collaborator"><type><name>void</name></type>
+<function st:stereotype="set controller"><type><name>void</name></type>
 <name><name>AxisModelBase</name><operator>::</operator>
 <name>setTicks</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name> <argument_list type="generic">&lt; <argument><expr><name>AxisTick</name></expr></argument> &gt;</argument_list></name> <modifier>&amp;</modifier></type> <name>ticks</name></decl></parameter>)</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_ticks</name> <operator>=</operator> <name>ticks</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="get collaborator"><type><specifier>const</specifier> <name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type>
+<function st:stereotype="get controller"><type><specifier>const</specifier> <name><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>AxisTick</name></expr></argument>&gt;</argument_list></name> <modifier>&amp;</modifier></type>
 <name><name>AxisModelBase</name><operator>::</operator><name>getTicks</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><name>m_ticks</name></expr>;</return>
@@ -418,7 +418,7 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setRange</name></name> <argument_list>( <argument><expr><name>low</name></expr></argument>, <argument><expr><name>high</name></expr></argument>, <argument><expr><name>pos</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command controller"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setRange</name></name><parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><call><name><name>range</name><operator>.</operator><name>length</name></name> <argument_list>()</argument_list></call> <operator>&lt;</operator> <name>DBL_EPSILON</name></expr> )</condition> <block>{<block_content>
     <return>return;</return>
@@ -447,7 +447,7 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
 
 </block_content>}</block></function>
 
-<function st:stereotype="set collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setIntersectRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r1</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r2</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command controller"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setIntersectRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r1</name></decl></parameter>, <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>r2</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>r1</name></expr>;</expr_stmt>
   <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setIntersect</name></name> <argument_list>( <argument><expr><name>r2</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
@@ -461,7 +461,7 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   <expr_stmt><expr><call><name><name>m_range</name><operator>.</operator><name>setPos</name></name><argument_list>( <argument><expr><name>pos</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUnionRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command controller"><type><name>void</name></type> <name><name>AxisModelBase</name><operator>::</operator><name>setUnionRange</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if<condition>( <expr><name>m_empty</name></expr> )</condition> <block>{<block_content>
     <expr_stmt><expr><name>m_range</name> <operator>=</operator> <name>range</name></expr>;</expr_stmt>
@@ -478,7 +478,7 @@ $Id: AxisModelBase.cxx,v 1.124 2004/08/19 10:16:02 kaustuv Exp $
   <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <literal type="boolean">true</literal></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="get command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRange</name></name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter>)</parameter_list> <specifier>const</specifier>
+<function st:stereotype="get command controller"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name><name>AxisModelBase</name><operator>::</operator><name>getRange</name></name><parameter_list>(<parameter><decl><type><name>bool</name></type> <name>scaled</name></decl></parameter>)</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
 
   <if_stmt><if>if<condition>(<expr><operator>!</operator><name>scaled</name></expr>)</condition><block type="pseudo"><block_content>

@@ -25,7 +25,7 @@ $Id: AxisModelLog.h,v 1.53 2004/05/02 17:18:34 pfkeb Exp $
     @author Paul F. Kunz &lt;Paul_Kunz@slac.stanford.edu&gt; 
     @author Oded Wurman &lt;owurman@stanford.edu&gt;
 */</comment>
-<class st:stereotype="entity command boundary">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLog</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
+<class st:stereotype="control">class <macro><name>MDL_HIPPOPLOT_API</name></macro> <name>AxisModelLog</name> <super_list>: <super><specifier>public</specifier> <name>AxisModelBase</name></super></super_list>
 <block>{<private type="default">
 
   <comment type="block" format="doxygen">/** Sets the tick step, and the magnitude power magnitude (the
@@ -125,22 +125,22 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
 </block_content>}</block></destructor>
 
 <comment type="block">/* virtual */</comment>
-<function st:stereotype="factory collaborator wrapper"><type><name>AxisModelBase</name> <modifier>*</modifier></type> <name><name>AxisModelLog</name><operator>::</operator><name>clone</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
+<function st:stereotype="factory controller wrapper"><type><name>AxisModelBase</name> <modifier>*</modifier></type> <name><name>AxisModelLog</name><operator>::</operator><name>clone</name></name><parameter_list>()</parameter_list> <specifier>const</specifier>
 <block>{<block_content>
   <return>return <expr><operator>new</operator> <call><name>AxisModelLog</name><argument_list>( <argument><expr><operator>*</operator><name>this</name></expr></argument> )</argument_list></call></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="non-void-command"><type><specifier>inline</specifier> <name>double</name></type> <name>FLT_EQUAL</name><parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>y</name></decl></parameter> )</parameter_list>
+<function st:stereotype="property"><type><specifier>inline</specifier> <name>double</name></type> <name>FLT_EQUAL</name><parameter_list>( <parameter><decl><type><name>double</name></type> <name>x</name></decl></parameter>, <parameter><decl><type><name>double</name></type> <name>y</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <return>return <expr><operator>(</operator> <operator>(</operator><name>double</name><operator>)</operator><call><name>fabs</name><argument_list>( <argument><expr><name>x</name> <operator>-</operator> <name>y</name></expr></argument> )</argument_list></call> <operator>&lt;=</operator> <literal type="number">2.0</literal> <operator>*</operator> <operator>(</operator> <name>y</name> <operator>*</operator> <name>FLT_EPSILON</name> <operator>+</operator> <name>FLT_MIN</name> <operator>)</operator> <operator>)</operator></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="predicate collaborator stateless"><type><name>bool</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
+<function st:stereotype="stateless"><type><name>bool</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>isLog</name></name><parameter_list>()</parameter_list> <specifier>const</specifier> 
 <block>{<block_content> 
   <return>return <expr><literal type="boolean">true</literal></expr>;</return> 
 </block_content>}</block></function>
 
-<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>setTickStep</name></name><parameter_list>()</parameter_list>
+<function st:stereotype="command controller"><type><name>void</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>setTickStep</name></name><parameter_list>()</parameter_list>
 <block>{<block_content>
   <decl_stmt><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name> <init>= <expr><call><name>getRange</name><argument_list>(<argument><expr><literal type="boolean">true</literal></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
   <decl_stmt><decl><type><name>double</name></type> <name>low</name> <init>= <expr><call><name><name>range</name><operator>.</operator><name>low</name></name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt>
@@ -160,7 +160,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
   <expr_stmt><expr><name>m_tick_step</name> <operator>=</operator> <call><name>pow</name><argument_list>( <argument><expr><literal type="number">10.0</literal></expr></argument>, <argument><expr><name>m_tmag</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="non-void-command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> 
+<function st:stereotype="get command controller"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> 
 <name><name>AxisModelLog</name><operator>::</operator><name>adjustValues</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>limit</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
 
@@ -257,7 +257,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
 
 </block_content>}</block></function>
 
-<function st:stereotype="non-void-command collaborator"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> 
+<function st:stereotype="get command controller"><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> 
 <name><name>AxisModelLog</name><operator>::</operator><name>adjustLogValues</name></name> <parameter_list>()</parameter_list>
 <block>{<block_content>
 
@@ -285,7 +285,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
   <return>return <expr><name>m_range</name></expr>;</return>
 </block_content>}</block></function>
 
-<function st:stereotype="non-void-command"><type><name>double</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>nextStep</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>current</name></decl></parameter> )</parameter_list>
+<function st:stereotype="get command"><type><name>double</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>nextStep</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>current</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <decl_stmt><decl><type><name>double</name></type> <name>tick_step</name> <init>= <expr><call><name>getTickStep</name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt> <comment type="line">// Must already be called</comment>
   <if_stmt><if>if<condition>( <expr><name>tick_step</name> <operator>==</operator> <literal type="number">1.0</literal></expr> )</condition> <block>{<block_content>
@@ -326,7 +326,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
 
 <comment type="block" format="doxygen">/** @todo Change this to an array of good ticks rather than hardcoded
     in here.  */</comment>
-<function st:stereotype="non-void-command"><type><name>double</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>prevStep</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>current</name></decl></parameter> )</parameter_list>
+<function st:stereotype="get command"><type><name>double</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>prevStep</name></name> <parameter_list>( <parameter><decl><type><name>double</name></type> <name>current</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <decl_stmt><decl><type><name>double</name></type> <name>tick_step</name> <init>= <expr><call><name>getTickStep</name><argument_list>()</argument_list></call></expr></init></decl>;</decl_stmt> <comment type="line">// It must already be called.</comment>
   <if_stmt><if>if<condition>( <expr><name>tick_step</name> <operator>==</operator> <literal type="number">1.0</literal></expr> )</condition> <block>{<block_content>
@@ -365,7 +365,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
 <comment type="block" format="doxygen">/** @todo Check is in place to keep it from length of 0,
 	but it's fairly hacked (length &gt; 0.0001).  This whole
 	topic needs discussion. */</comment>
-<function st:stereotype="non-void-command collaborator"><type><name>Range</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>calcLow</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<function st:stereotype="get command controller"><type><name>Range</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>calcLow</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><call><name>startDragging</name> <argument_list>( <argument><expr><name>dragging</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 
@@ -388,7 +388,7 @@ $Id: AxisModelLog.cxx,v 1.102 2004/05/02 17:18:34 pfkeb Exp $
 <comment type="block" format="doxygen">/** @todo Check is in place to keep it from length of 0,
 	but it's fairly hacked (length &gt; 0.0001).  This whole
 	topic needs discussion. */</comment>
-<function st:stereotype="non-void-command collaborator"><type><name>Range</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>calcHigh</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
+<function st:stereotype="get command controller"><type><name>Range</name></type> <name><name>AxisModelLog</name><operator>::</operator><name>calcHigh</name></name> <parameter_list>( <parameter><decl><type><name>int</name></type> <name>parm</name></decl></parameter>, <parameter><decl><type><name>bool</name></type> <name>dragging</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <expr_stmt><expr><call><name>startDragging</name> <argument_list>( <argument><expr><name>dragging</name></expr></argument> )</argument_list></call></expr>;</expr_stmt>
 

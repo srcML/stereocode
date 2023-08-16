@@ -15,13 +15,11 @@ bool primitiveTypes::isPrimitive(const std::string& s) const {
     return (ptypes.find(s) != ptypes.end()) || (usertypes.find(s) != usertypes.end());
 }
 
-
 // Adds s to user specified primitives if not already present
 //
 void primitiveTypes::addPrimitive(const std::string& s) {
     if (!isPrimitive(s)) usertypes.insert(s);
 }
-
 
 // Reads a set of user defined primitive types to be added to a list
 //
@@ -43,10 +41,6 @@ std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
     for (std::string i : prims.usertypes) out << i << std::endl;
     return out;
 }
-
-
-
-
 
 //Initially ptypes is empty or has user defined types.
 //
@@ -81,7 +75,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "bool"
         };
     }
-    if (language == "C#") {  //NOT correct
+    if (language == "C#") {  
         ptypes = {
             "int",
             "short",
@@ -95,7 +89,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "bool"
         };
     }
-    if (language == "Java") {  //NOT correct
+    if (language == "Java") {  
         ptypes = {
             "int",
             "short",
@@ -109,7 +103,4 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "bool"
         };
     }
-
 }
-
-
