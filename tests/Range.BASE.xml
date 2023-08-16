@@ -165,7 +165,7 @@ $Id: Range.h,v 1.47 2004/05/23 23:34:01 pfkeb Exp $
 </block_content>}</block></function>
 
 
-<function st:stereotype="command collaborator"><template>template <parameter_list>&lt; <parameter><type><name>class</name></type> <name>Iterator</name></parameter> &gt;</parameter_list></template>
+<function st:stereotype="command controller"><template>template <parameter_list>&lt; <parameter><type><name>class</name></type> <name>Iterator</name></parameter> &gt;</parameter_list></template>
 <type><name>void</name></type>
 <name><name>Range</name><operator>::</operator>
 <name>setRange</name></name> <parameter_list>( <parameter><decl><type><name>Iterator</name></type> <name>first</name></decl></parameter>, <parameter><decl><type><name>Iterator</name></type> <name>end</name></decl></parameter> )</parameter_list>
@@ -361,7 +361,7 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
   <expr_stmt><expr><name>m_empty</name> <operator>=</operator> <name>yes</name></expr>;</expr_stmt>
 </block_content>}</block></function>
 
-<function st:stereotype="command"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setUnion</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setUnion</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>m_empty</name></expr> )</condition> <block>{<block_content>
     <expr_stmt><expr><name>m_min</name> <operator>=</operator> <name><name>range</name><operator>.</operator><name>m_min</name></name></expr>;</expr_stmt>
@@ -379,7 +379,7 @@ $Id: Range.cxx,v 1.51 2004/05/23 23:34:01 pfkeb Exp $
 
 </block_content>}</block></function>
 
-<function st:stereotype="command"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setIntersect</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
+<function st:stereotype="command collaborator"><type><name>void</name></type> <name><name>Range</name><operator>::</operator><name>setIntersect</name></name> <parameter_list>( <parameter><decl><type><specifier>const</specifier> <name>Range</name> <modifier>&amp;</modifier></type> <name>range</name></decl></parameter> )</parameter_list>
 <block>{<block_content>
   <if_stmt><if>if <condition>( <expr><name>m_min</name> <operator>&gt;</operator> <name><name>range</name><operator>.</operator><name>m_max</name></name> <operator>||</operator> <name>m_max</name> <operator>&lt;</operator> <name><name>range</name><operator>.</operator><name>m_min</name></name></expr> )</condition><block type="pseudo"><block_content> <return>return;</return></block_content></block></if></if_stmt>
   <expr_stmt><expr><name>m_min</name> <operator>=</operator> <call><name>max</name> <argument_list>( <argument><expr><name>m_min</name></expr></argument>, <argument><expr><name><name>range</name><operator>.</operator><name>m_min</name></name></expr></argument> )</argument_list></call></expr>;</expr_stmt>

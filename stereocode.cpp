@@ -7,19 +7,8 @@
  * This file is part of the Stereocode application.
  */
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <unordered_map>
-#include <vector>
-#include <set>
-#include <algorithm>
-#include <filesystem>
-
-#include <srcml.h>
 #include "CLI11.hpp"
 #include "ClassInfo.hpp"
-#include "PrimitiveTypes.hpp"
 
 primitiveTypes PRIMITIVES;                        // Primitives type per language + any user supplied
 int            METHODS_PER_CLASS_THRESHOLD = 21;  // Threshold for large class stereotype (from ICSM10)
@@ -135,7 +124,7 @@ int main(int argc, char const *argv[]) {
         }     
         if (isHeaderFile(srcml_unit_get_filename(firstUnit))) 
             hppFirst = true;
-        
+
         if (hppFirst)
             aClass  = classModel(archive, firstUnit, secondUnit);
         else

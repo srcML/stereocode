@@ -11,8 +11,6 @@
 #define PRIMITIVETYPES_HPP
 
 #include <iostream>
-#include <fstream>
-#include <string>
 #include <set>
 
 class primitiveTypes {
@@ -27,10 +25,9 @@ public:
     friend std::istream& operator>>(std::istream&, primitiveTypes&);
 
 private:
-    std::string                 language;  //Language: "C++", "C#", "Java", "C"
-    std::set<std::string>       ptypes;    //List of language primitives
-    std::set<std::string>       usertypes;    //List of user defined primitives 
+    std::string                 language;      // Language: "C++", "C#", "Java", "C"
+    std::set<std::string>       ptypes;        // List of language primitives
+    std::set<std::string>       usertypes;     // List of user defined primitives 
 };
-
 
 #endif

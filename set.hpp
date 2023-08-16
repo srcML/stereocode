@@ -17,7 +17,7 @@
 // A set of integers from {0, 1, ... SET_DOMAIN-1}
 // CLASS INV: all elements must be between 0 and SET_DOMAIN-1
 //
-const int SET_DOMAIN = 500; //Or whatever
+const int SET_DOMAIN = 5000; //Or whatever
 
 class set {
 public:
