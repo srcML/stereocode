@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0">
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.hpp" hash="ea09bb31e7de58e0cad7f3edfa329209097eb0a8"><comment type="line">// Project 1 MESI cache coherence protocol</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.hpp" hash="10e8116bb46f8fbe3de20569ffa031b3407dfdfc"><comment type="line">// Project 1 MESI cache coherence protocol</comment>
 <comment type="line">// This file contains class definition for Processor</comment>
 <comment type="line">// and important global variables.</comment>
 
@@ -24,7 +24,7 @@
     <function><type><name>int</name></type> <name>GetID2</name><parameter_list>()</parameter_list> <block>{<block_content><return>return <expr><name>pid</name></expr>;</return></block_content>}</block></function>
     
     <function><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;
-    <argument><expr><name>int</name>     <modifier>*</modifier></expr></argument>   &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
+    <argument><expr><name>int</name>     <modifier>*</modifier></expr></argument>   &gt;</argument_list></name></type> <name>AnotherTest</name><parameter_list>(<parameter><decl><type><name>object</name><modifier>&amp;</modifier></type> <name>x</name></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
     <function><type><name><name>std</name><operator>::</operator><name>map</name><argument_list type="generic">&lt; <argument><expr><name>int</name></expr></argument> , <argument><expr><name>char</name> <modifier>&amp;</modifier></expr></argument>  &gt;</argument_list></name></type> <name>TestingPrimitiveReturn</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>helloworld</name></type></decl></parameter>)</parameter_list><block>{<block_content/>}</block></function>
 
@@ -51,7 +51,7 @@
 </private>}</block>;</class>
 </unit>
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.cpp" hash="8f1e6f94ad63d9c5e13d67eebd41e730420bc372">
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example1.cpp" hash="a847ce88f107e032dcd370dbe47fe4feb3df7bd9">
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>"Example1.hpp"</cpp:file></cpp:include>
 
@@ -141,7 +141,7 @@
     <expr_stmt><expr><operator>++</operator><name>anotherDataMember</name></expr>;</expr_stmt>
 </block_content>}</block></function></unit>
 
-<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example2.hpp" hash="78b69daa533fbcf2bed2d8f5345c4d370bae0c93"><comment type="line">// example2.hpp</comment>
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="example2.hpp" hash="b71a644b1d7863dc3ae4049a3e9eb29e9911b87e"><comment type="line">// example2.hpp</comment>
 <comment type="line">// testing for stereocode</comment>
 
 <cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;vector&gt;</cpp:file></cpp:include>
@@ -172,7 +172,7 @@
 
 </private>}</block>;</class></unit>
 
-<unit revision="1.0.0" language="C++" filename="example2.cpp" hash="7af5764f33db98c6cb698589206f24cc967564a9"><comment type="line">// example2.cpp</comment>
+<unit revision="1.0.0" language="C++" filename="example2.cpp" hash="e23fe5918ae0820095bff556ee7c37e89da75aaf"><comment type="line">// example2.cpp</comment>
 <comment type="line">// test for stereocode</comment>
 
 <constructor><name><name>example2</name><operator>::</operator><name>example2</name></name><parameter_list>()</parameter_list><block>{<block_content>

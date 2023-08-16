@@ -21,7 +21,7 @@ public:
     int GetID2() {return pid;}
     
     std::vector<
-    int     *   > AnotherTest(object&){}
+    int     *   > AnotherTest(object& x){}
 
     std::map< int , char &  > TestingPrimitiveReturn(const helloworld){}
 
