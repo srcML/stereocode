@@ -16,86 +16,88 @@
 class methodModel {
 public:
     methodModel();
-    methodModel(const std::string&, const std::string&, bool);
+    methodModel(srcml_archive*, srcml_unit*, std::string, int);
 
-    std::vector<std::string> findReturnExpressions         (bool) const;
-    std::vector<std::string> findLocalVariables            (const std::string&, bool);
-    std::vector<std::string> findParameters                (const std::string&, bool);
-    std::vector<std::string> findCalls                     (const std::string&, bool) const;
-    int                      findAssignOperatorAttribute   (std::vector<AttributeInfo>&, bool);
-    int                      findIncrementedAttribute      (std::vector<AttributeInfo>&, bool);
+    std::vector<std::string> getLocalVariablesNames     () const                { return localVariableName; }
+    std::vector<std::string> getLocalVariablesTypes     () const                { return localVariableType; }
+    std::vector<std::string> getParameterNames          () const                { return parameterName;     }
+    std::vector<std::string> getParameterTypes          () const                { return parameterType;     }
+    std::vector<std::string> getFunctionCalls           () const                { return functionCall;      }
+    std::vector<std::string> getMethodCalls             () const                { return methodCall;        }
+    std::vector<std::string> getConstructorCalls        () const                { return constructorCall;   }
+    std::vector<std::string> getReturnExpressions       () const                { return returnExpression;  }
 
-    std::string getName                   () const { return name; };
-    std::string getReturnType             () const { return returnType; };
-    std::string getParametersList         () const { return parametersList; };
-    std::string getIsConst                () const { if (constMethod) return "const"; else return ""; };
-    std::string getHeader                 () const { return header; };
-    std::string getStereotype             () const;
-    std::string getMethod                 () const { return method; };
-    int         getAttributesModified     () const { return attributesModified; };
-    bool        getConst                  () const { return constMethod; };
-    bool        getIsAttributeReturned    () const { return isAttributeReturned; };
-    bool        getIsAttributeUsed        () const { return isAttributeUsed; };
-    bool        getIsEmpty                () const { return isEmpty; };
-    bool        getIsParamChanged         () const { return isParamChanged; };
+    std::string              getName                    () const                { return methodName;       }
+    std::string              getMethodHeader            () const                { return methodHeader;     }
+    std::string              getReturnType              () const                { return returnType;       }
+    std::string              getReturnTypeSeparated     () const                { return returnTypeSeparated;       }
+    std::string              getStereotype              () const;
+    std::vector<std::string> getStereotypeList          () const                { return stereotype;       }
+    std::string              getMethodSrcML             () const                { return methodSrcML;           }
+    bool                     getConstMethod             () const                { return constMethod;           }
+    bool                     getAttributeReturned       () const                { return attributeReturned;     }
+    bool                     getParaOrLocalReturned     () const                { return paraOrLocalReturned;     }
+    bool                     getReturnsNew              () const                { return returnsNew;     }
+    bool                     getAttributeUsed           () const                { return attributeUsed;         }
+    bool                     getEmpty                   () const                { return empty;                 }
+    bool                     getParameterChanged        () const                { return parameterChanged;      }
+    bool                     getNonPrimitiveAttribute   () const                { return nonPrimitiveAttribute; }
+    bool                     getNonPrimitiveExternal    () const                { return nonPrimitiveExternal;  }
+    int                      getAttributeModified       () const                { return attributeModified;     }
+    std::string              getXpath                   (int unitNumber)        { return xpath[unitNumber];     }   
+    
+    void                     setStereotype              (const std::string&);
 
-    std::vector<std::string> getLocalVariablesNames() const      { return localVariablesNames; };
-    std::vector<std::string> getLocalVariablesTypes() const      { return localVariablesTypes; };
-    std::vector<std::string> getParameterNames     () const      { return parametersNames; };
-    std::vector<std::string> getParameterTypes     () const      { return parametersTypes; };
-    std::vector<std::string> getFunctionCalls      () const      { return functionCalls; };
-    std::vector<std::string> getMethodCalls        () const      { return methodCalls; };
-    std::vector<std::string> getConstructorCalls   () const      { return constructorCalls; };
+    void                     findMethodInfo             (srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&, std::string);
+    void                     findMethodName             (srcml_archive*, srcml_unit*);
+    void                     findMethodReturnType       (srcml_archive*, srcml_unit*);
+    void                     findParameterList          (srcml_archive*, srcml_unit*);
+    void                     findLocalVariablesNames    (srcml_archive*, srcml_unit*);
+    void                     findLocalVariablesTypes    (srcml_archive*, srcml_unit*);
+    void                     findParametersNames        (srcml_archive*, srcml_unit*);
+    void                     findParametersTypes        (srcml_archive*, srcml_unit*);
+    void                     findAllCalls               (srcml_archive*, srcml_unit*);
+    void                     findReturnExpressions      (srcml_archive*, srcml_unit*);   
+    int                      findAssignOperatorAttribute(srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&);
+    int                      findIncrementedAttribute   (srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&);
+    std::vector<std::string> findCalls                  (srcml_archive*, srcml_unit*, const std::string&, bool) const;
 
-    void        setName                   (const std::string& s)              { name = s; };
-    void        setReturnType             (const std::string& s)              { returnType = s; };
-    void        setParametersList         (const std::string& s)              { parametersList = s; };
-    void        setHeader                 (const std::string& s)              { header = s; };
-    void        setConst                  (bool flag)                         { constMethod = flag; };
-    void        setIsAttributeReturned    (bool flag)                         { isAttributeReturned = flag; };
-    void        setIsAttributeUsed        (bool flag)                         { isAttributeUsed = flag;};
-    void        setIsEmpty                (bool flag)                         { isEmpty = flag;};
-    void        setIsParamChanged         (bool flag)                         { isParamChanged = flag;};
-    void        setAttributesModified     (int n)                             { attributesModified = n; };
-    void        setLocalVariablesNames    (const std::vector<std::string>& s) { localVariablesNames = s; };
-    void        setLocalVariablesTypes    (const std::vector<std::string>& s) { localVariablesTypes = s; };
-    void        setParameterNames         (const std::vector<std::string>& s) { parametersNames = s; };
-    void        setParameterTypes         (const std::vector<std::string>& s) { parametersTypes = s; };
-    void        setFunctionCalls          (const std::vector<std::string>& s) { functionCalls = s; };
-    void        setMethodCalls            (const std::vector<std::string>& s) { methodCalls = s; };
-    void        setConstructorCalls       (const std::vector<std::string>& s) { constructorCalls = s; };
-    void        setStereotype             (const std::string&);
-
-    bool        variableChanged           (const std::string& ) const;
-    bool        usesAttribute             (std::vector<AttributeInfo>&, bool);
-    bool        usesNonPrimitiveAttributes(const std::vector<AttributeInfo>&, std::string);
-    bool        callsOnAttributes         (std::vector<AttributeInfo>&, std::string);
-    bool        callsOnArguments          (std::vector<AttributeInfo>&, std::string, int);
-    bool        isEmptyMethod             ();
-    bool        returnsAttribute          (std::vector<AttributeInfo>&, bool);
-
-    friend      std::ostream& operator<<(std::ostream&, const methodModel&);
+    void                     isAttributeUsed           (srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&, std::string className);
+    bool                     usesNonPrimitiveAttributes(const std::vector<AttributeInfo>&, std::string);
+    bool                     callOnAttribute           (std::vector<AttributeInfo>&, std::string);
+    bool                     callOnArgument            (std::vector<AttributeInfo>&, std::string, int);
+    void                     isEmpty                   (srcml_archive*, srcml_unit*);
+    void                     isAttributeReturned       (std::vector<AttributeInfo>&, std::string);
+    void                     countChangedAttribute     (srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&);
 
 protected:
-    std::string                       name;                // method name unparsed
-    std::string                       returnType;          // method return type unparsed
-    std::string                       parametersList;      // SrcML of <parameter_list>
-    std::vector<std::string>          parametersNames;     // parameter name unparsed
-    std::vector<std::string>          parametersTypes;     // parameter type unparsed
-    std::vector<std::string>          localVariablesNames; // local variables names unparsed
-    std::vector<std::string>          localVariablesTypes; // local variables types unparsed
-    std::vector<std::string>          stereotype;          // method stereotype
-    std::vector<std::string>          functionCalls;       // a(), b()
-    std::vector<std::string>          methodCalls;         // a.b()
-    std::vector<std::string>          constructorCalls;    // uses "new"
-    std::string                       method;              // SrcML of the method as an archive
-    std::string                       header;              // method header unparsed (all before { ) 
-    bool                              constMethod;         // Is it a const method?
-    bool                              isAttributeReturned; // Does it return any attribute?
-    bool                              isAttributeUsed;     // Does it use any attribute in an expression?
-    bool                              isParamChanged;      // Does change any parameter passed by reference?
-    bool                              isEmpty;             // Empty method (comments not counted)
-    int                               attributesModified;  // # of attributes modified
+    std::string                             methodName;                    // Method name
+    std::string                             methodHeader;                  // Method header (all before {)
+    std::string                             returnType;                    // Method return type
+    std::string                             returnTypeSeparated;           // Returned type with specifiers and whitespaces removed
+    std::string                             parameterList;                 // Method parameter list
+    std::vector<std::string>                parameterName;                 // List of all parameters names
+    std::vector<std::string>                parameterType;                 // List of all parameters names
+    std::vector<std::string>                localVariableName;             // List of all local variables names
+    std::vector<std::string>                localVariableType;             // List of all local variables types
+    std::vector<std::string>                stereotype;                    // stereotype
+    std::vector<std::string>                functionCall;                  // a(), b()
+    std::vector<std::string>                methodCall;                    // a.b()
+    std::vector<std::string>                constructorCall;               // uses "new" operator
+    std::vector<std::string>                returnExpression;              // List of all return expressions in a method
+    std::unordered_map<int, std::string>    xpath;                         // unit number along with unique xpath for the method
+    std::string                             methodSrcML;                   // Method srcML
+    bool                                    constMethod;                   // Is it a const method?
+    bool                                    attributeReturned;             // Does it return any attribute?
+    bool                                    paraOrLocalReturned;           // Does it return a local or a parameter?
+    bool                                    returnsNew;                    // Does return expression contain 'new' operator?
+    bool                                    attributeUsed;                 // Does it use any attribute?
+    bool                                    parameterChanged;              // Does it change any parameter passed by reference?
+    bool                                    empty;                         // Empty method (comments not counted)
+    bool                                    nonPrimitiveAttribute;         // True if method uses at least 1 non-primitive attribute
+    bool                                    nonPrimitiveExternal;          // True if all of the non-primitive attributes (if any) are not of the same type as class   
+    int                                     attributeModified;             // Number of modified attributes 
+    
 };
 
 #endif

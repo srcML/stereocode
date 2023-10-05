@@ -9,14 +9,6 @@
 
 #include "utils.hpp"
 
-// Checks if file is header file using its extension
-//
-bool isHeaderFile(const std::string& fname) {
-    for (const std::string& ext : HEADER_FILE_EXTENSION)
-        if (fname.find(ext) != std::string::npos) return true;
-    return false;
-}
-
 // Checks if method is const
 //
 bool checkConst(const std::string& srcml) {
@@ -27,34 +19,6 @@ bool checkConst(const std::string& srcml) {
     return false;
 }
 
-// Checks if a name could be an inherited attribute
-//
-// REQUIRES: parentClass.size() > 0 - the class inherits from another class
-//
-bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
-                                      const std::vector<std::string>& local_var_names,
-                                      const std::string& expr) {
-    bool is_inherited = true;
-    
-    // Checks for literal return expression
-    if (expr == "#") is_inherited = false;
-    if (expr == "true" || expr == "false" || expr == "TRUE" || expr == "FALSE") is_inherited = false;
-
-    // expr is a keyword that is not a attribute
-    if (expr == "this" || expr == "cout" || expr == "endl") is_inherited = false;
-
-    for (int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
-        if (expr[k] == '+' || expr[k] == '-' || expr[k] == '*' || expr[k] == '/'
-            || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
-            || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
-            || expr[k] == '.' || expr[k] == '?' || expr[k] == ':' || expr[k] == '"') {
-            is_inherited = false;
-        }
-    }
-
-    return is_inherited;
-}
-
 // Checks if a primitive type
 //  Examples: int, bool, char, double, cont int, inline int
 //            vector<int>, map<int,int>, int[], int*, int&
@@ -62,10 +26,11 @@ bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
 bool isPrimitiveContainer(const std::string& str) {
     std::string s = removeSpecifiers(str);
 
-    std::vector<std::string> containers = {"std::vector", "std::list", "std::set", "std::map", 
+    std::vector<std::string> containers = {"std::vector", "std::list", "std::set", "std::map", "std::unordered_multimap", "std::unordered_multiset"
                                            "std::unordered_map", "std::forward_list", "std::array", "std::stack", 
-                                           "std::queue", "vector", "list", "set", "map", "unordered_map", "array",
-                                           "forward_list", "stack", "queue"};
+                                           "std::queue", "std::priority_queue", "std::deque", "std::multiset", "std::unordered_set"
+                                           "std::multimap", "vector", "list", "set", "map", "unordered_map", "array", "multimap", "unordered_multimap"
+                                           "forward_list", "stack", "queue", "priority_queue", "deque", "multiset", "unordered_set", "unordered_multiset"};
     for (const std::string& container : containers) {
         size_t pos = s.find(container);
         if (pos != std::string::npos) {
@@ -75,40 +40,48 @@ bool isPrimitiveContainer(const std::string& str) {
 
     std::replace_if(s.begin(), s.end(), [](char c) { return c == '<' || c == '>'; }, ' ');
     s = trimWhitespace(s);
-    std::replace_if(s.begin(), s.end(), [](char c) { return c == ','; }, ' ');
 
-    if (s.find(" ") != std::string::npos) {  // Multiple type names
+    if (s.find(",") != std::string::npos) {  // Multiple type names
         size_t start = 0;
-        size_t end = s.find(" ");
+        size_t end = s.find(",");
         while (end != std::string::npos) {
             if (!PRIMITIVES.isPrimitive(s.substr(start, end - start))) return false;
             start = end + 1;
-            end = s.find(" ", start);
+            end = s.find(",", start);
         }
-        return PRIMITIVES.isPrimitive(s.substr(start, s.size() - start));
+        return PRIMITIVES.isPrimitive(s.substr(start, end - start));
     }
     return PRIMITIVES.isPrimitive(s);  // One type name
 }
 
-// Checks if possible_Attr is an attribute
+// Checks if possibleAttribute is an attribute
 //
-bool isAttribute(const std::vector<AttributeInfo>& attribute, const std::vector<std::string>& parameter_names,
-                 const std::vector<std::string>& local_var_names, const std::string& possible_attr) {
-    std::string name = trimWhitespace(possible_attr);
-    size_t left_sq_bracket = name.find("[");    // remove [] if the name is an array
-    if (left_sq_bracket != std::string::npos) {
-        name = name.substr(0, left_sq_bracket);
+bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::string>& parameterName,
+                 const std::vector<std::string>& localVariableName, const std::string& possibleAttribute, bool modified, int& attributeIndex, int& parameterIndex) {
+    
+    // A local variable or a parameter could overshadow an attribute if it has the same name. 
+    for (size_t i = 0; i < parameterName.size(); ++i) { 
+        if (possibleAttribute == parameterName[i]) {
+            parameterIndex = i;
+            attributeIndex = -2; // Parameter or local is found
+            return false;
+        }
     }
-    for (int i = 0; i < parameter_names.size(); ++i) { 
-        if (name == parameter_names[i]) return false;
+    for (size_t i = 0; i < localVariableName.size(); ++i) { 
+        if (possibleAttribute == localVariableName[i]) {
+            attributeIndex = -2; // Parameter or local is found
+            return false;
+        }
     }
-    for (int i = 0; i < local_var_names.size(); ++i) { 
-        if (name == local_var_names[i]) return false;
+    for (size_t i = 0; i < attribute.size(); ++i) {
+        if (possibleAttribute == attribute[i].getName()){
+            if (modified && attribute[i].getModified()) return false;
+            if (modified) attribute[i].setModified(true);
+            attributeIndex = i;
+            return true; 
+        } 
     }
-    for (int i = 0; i < attribute.size(); ++i) {
-        if (name == attribute[i].getName()) return true; 
-    }
-    return false;
+    return false; // Not an attribute, or local, or parameter
 }
 
 // Check if an attribute already exists in the list of attributes
@@ -147,8 +120,7 @@ std::string separateTypeName(const std::string& type) {
 // Removes all whitespace from string
 //
 std::string trimWhitespace(const std::string& s) {
-    std::string result;
-    result.reserve(s.size()); // Preallocate memory for efficiency
+    std::string result = "";
     for (const char& c : s) {
         if (!isspace(c)) result += c;    
     }
@@ -180,8 +152,7 @@ std::string Rtrim(const std::string& s) {
 // Normalize multiple blanks to one blank
 //
 std::string multiBlanksToBlank(const std::string& s) {
-    std::string result;
-    result.reserve(s.size()); // Preallocate memory for efficiency
+    std::string result = "";
     bool prevSpace = false;
     for (const char& c : s) {
         if (isspace(c)) {
@@ -201,10 +172,30 @@ std::string multiBlanksToBlank(const std::string& s) {
 // Converts all whitespace to blanks
 //
 std::string WStoBlank(const std::string& s) {
-    std::string result;
-    result.reserve(s.size()); // Preallocate memory for efficiency
+    std::string result = "";
     for (const char& c : s) {
         result += isspace(c) ? ' ' : c;
+    }
+    return result;
+}
+
+
+// Removes namespaces from method names
+//
+std::string removeNamespace(const std::string& methodName) {
+    std::string result = methodName;
+
+    // Find the last occurrence of '::' to extract the method name and its preceding parts
+    size_t lastDoubleColon = methodName.rfind("::");
+    if (lastDoubleColon != std::string::npos) {
+        // Find the second last occurrence of '::' to extract the class name and the remaining part
+        size_t secondLastDoubleColon = methodName.rfind("::", lastDoubleColon - 1);
+        if (secondLastDoubleColon != std::string::npos) {
+            result = methodName.substr(secondLastDoubleColon + 2);  // Skip '::'
+        } 
+        else {
+            result = methodName ;  // If '::' not found, return the entire input
+        }
     }
     return result;
 }

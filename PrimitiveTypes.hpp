@@ -11,23 +11,23 @@
 #define PRIMITIVETYPES_HPP
 
 #include <iostream>
-#include <set>
+#include <unordered_set>
 
 class primitiveTypes {
 public:
-    primitiveTypes() : language("") {};
+         primitiveTypes () : language(), ptypes(), usertypes() {};
 
-    bool isPrimitive(const std::string&) const;
-    void addPrimitive(const std::string&);
-    void setLanguage(const std::string&);
+    bool isPrimitive    (const std::string&) const;
+    void addPrimitive   (const std::string&);
+    void setLanguage    (const std::string&);
 
     friend std::ostream& operator<<(std::ostream&, const primitiveTypes&);
     friend std::istream& operator>>(std::istream&, primitiveTypes&);
 
 private:
-    std::string                 language;      // Language: "C++", "C#", "Java", "C"
-    std::set<std::string>       ptypes;        // List of language primitives
-    std::set<std::string>       usertypes;     // List of user defined primitives 
+    std::string                           language;      // Language: "C++", "C#", "Java", "C"
+    std::unordered_set<std::string>       ptypes;        // List of language primitives
+    std::unordered_set<std::string>       usertypes;     // List of user defined primitives 
 };
 
 #endif
