@@ -27,7 +27,6 @@ void primitiveTypes::addPrimitive(const std::string& s) {
 //  fname will list each type name one per line
 //  No spaces in type name if compound long int => longint
 //
-//
 std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
     std::string name;
     while(std::getline(in, name)) prims.addPrimitive(name);
@@ -36,6 +35,7 @@ std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
 
 // Outputs list of all primitive types defined
 // REQUIRES: out.open(fname)
+//
 std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
     for (std::string i : prims.ptypes) out << i << std::endl;
     for (std::string i : prims.usertypes) out << i << std::endl;
@@ -49,7 +49,6 @@ std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
 //
 void primitiveTypes::setLanguage(const std::string& lang) {
     if (language == lang) return;        //Same language (done)
-    if (language != "") ptypes.clear();  //Change of language
     language = lang;
 
     if (language == "C++") {
