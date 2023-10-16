@@ -11,7 +11,7 @@
 #define CLASSMODEL_HPP
 
 #include <fstream>
-#include "method.hpp"
+#include "MethodModel.hpp"
 
 extern primitiveTypes PRIMITIVES;
 extern int            METHODS_PER_CLASS_THRESHOLD;
@@ -56,14 +56,14 @@ public:
     srcml_unit*                                   outputUnitWithStereotypes(srcml_archive*, srcml_unit*, srcml_transform_result**, bool);
 
     
-    std::string                                   getClassStereotype        () const;
-    std::string                                   getClassName              () const { return className;           }
-    std::vector<std::string>                      getParentClassName        () const { return parentClassName;     }
-    std::vector<AttributeInfo>                    getAttribute              () const { return attribute;           }
-    std::vector<AttributeInfo>                    getNonPrivateAttribute    () const { return nonPrivateAttribute; }
-    std::unordered_map<std::string, methodModel>  getMethod                 () const { return method;              }
-    std::vector<std::string>                      getFriendFunctionName     () const { return friendFunctionName;  }
-    std::string                                   getXpath                  (int unitNumber)  { return xpath[unitNumber];  }
+          std::string                                   getClassStereotype        () const;
+          std::string                                   getClassName              () const          { return className;           }
+    const std::vector<std::string>&                     getParentClassName        () const          { return parentClassName;     }
+          std::vector<AttributeInfo>                    getAttribute              () const          { return attribute;           }
+    const std::vector<AttributeInfo>&                   getNonPrivateAttribute    () const          { return nonPrivateAttribute; }
+          std::unordered_map<std::string, methodModel>& getMethod                 ()                { return method;              }
+    const std::vector<std::string>&                     getFriendFunctionName     () const          { return friendFunctionName;  }
+          std::string                                   getXpath                  (int unitNumber)  { return xpath[unitNumber];  }
 
 protected:
     std::vector<std::string>                     classStereotype;        // Class stereotype

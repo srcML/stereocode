@@ -1,0 +1,774 @@
+Class name:                                                           Class stereotype:                                                     
+TempFile                                                              control small-class                                                   
+
+Method name:                                                          Method stereotype:                                                    
+c_str                                                                 property factory controller                                           
+operator const std::string &                                          get                                                                   
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+TApp                                                                  control small-class                                                   
+
+Method name:                                                          Method stereotype:                                                    
+run                                                                   command controller                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+AobjWrapper                                                           data-class small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+value                                                                 get controller                                                        
+operator=                                                             non-const property set collaborator                                   
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+objWrapperRestricted                                                  data-class small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+value                                                                 get controller                                                        
+operator=                                                             non-const property set collaborator                                   
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+vopt                                                                  unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+badlywrapped                                                          control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+set                                                                   set controller                                                        
+get                                                                   get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+NotStreamable                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+SimpleFormatter                                                       degenerate small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+make_help                                                             stateless                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Unstreamable                                                          data-class small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+set_x                                                                 set                                                                   
+get_x                                                                 get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+complex_new                                                           control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+imag                                                                  get controller                                                        
+real                                                                  get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+AsNumberWithUnit                                                      control small-class                                                   
+
+Method name:                                                          Method stereotype:                                                    
+generate_description                                                  non-void command controller                                           
+validate_mapping                                                      non-const accessor command controller                                 
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+spair                                                                 unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+CheckedTransformer                                                    unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+RequiresError                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+EvilConfig                                                            degenerate small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+from_config                                                           controller stateless                                                  
+to_config                                                             stateless                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+InvalidError                                                          unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ValidationError                                                       unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Config                                                                small-class                                                           
+
+Method name:                                                          Method stereotype:                                                    
+from_file                                                             factory collaborator                                                  
+to_flag                                                               controller                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+CallForVersion                                                        unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+MyFormatter                                                           degenerate small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+make_option_opts                                                      stateless                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+IPV4Validator                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Bound                                                                 unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ExcludesError                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ConfigError                                                           factory degenerate small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+NotConfigurable                                                       factory collaborator wrapper                                          
+Extras                                                                factory collaborator wrapper                                          
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ParseError                                                            unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ArgumentMismatch                                                      factory control                                                       
+
+Method name:                                                          Method stereotype:                                                    
+PartialType                                                           non-void command factory collaborator                                 
+FlagOverride                                                          factory collaborator wrapper                                          
+TypedAtLeast                                                          non-void command factory collaborator                                 
+AtMost                                                                non-void command factory collaborator                                 
+AtLeast                                                               non-void command factory collaborator                                 
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Success                                                               unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+IncorrectConstruction                                                 factory degenerate                                                    
+
+Method name:                                                          Method stereotype:                                                    
+MultiOptionPolicy                                                     factory collaborator wrapper                                          
+AfterMultiOpt                                                         factory collaborator wrapper                                          
+SetFlag                                                               factory collaborator wrapper                                          
+ChangeNotVector                                                       factory collaborator wrapper                                          
+Set0Opt                                                               factory collaborator wrapper                                          
+MissingOption                                                         factory collaborator wrapper                                          
+PositionalFlag                                                        factory collaborator wrapper                                          
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+RuntimeError                                                          unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+dobjWrapper                                                           control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+ivalue                                                                get controller                                                        
+dvalue                                                                get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ConfigJSON                                                            degenerate small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+from_config                                                           factory controller wrapper                                            
+to_config                                                             controller                                                            
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+is_direct_constructible                                               unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Option_group                                                          control                                                               
+
+Method name:                                                          Method stereotype:                                                    
+add_options                                                           command controller                                                    
+add_options                                                           command controller wrapper                                            
+add_subcommand                                                        non-void command controller                                           
+add_option                                                            non-void command controller                                           
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+AsSizeValue                                                           command degenerate small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+AsSizeValue::get_mapping                                              non-void command collaborator                                         
+AsSizeValue::init_mapping                                             collaborator stateless                                                
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+AutoTimer                                                             unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+doubleWrapper                                                         control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+value                                                                 get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ConfigINI                                                             unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+stringWrapper                                                         data-provider data-class small-class                                  
+
+Method name:                                                          Method stereotype:                                                    
+value                                                                 get                                                                   
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+is_tuple_like                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ConstructionError                                                     unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ExistingPathValidator                                                 unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ConversionError                                                       factory degenerate small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+TrueFalse                                                             factory collaborator wrapper                                          
+TooManyInputsFlag                                                     factory collaborator wrapper                                          
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+FuzzApp                                                               control small-class                                                   
+
+Method name:                                                          Method stereotype:                                                    
+FuzzApp::generateApp                                                  non-const property non-void command controller                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+BadNameString                                                         factory degenerate                                                    
+
+Method name:                                                          Method stereotype:                                                    
+MultiPositionalNames                                                  factory collaborator wrapper                                          
+DashesOnly                                                            factory collaborator wrapper                                          
+MissingDash                                                           factory collaborator wrapper                                          
+BadLongName                                                           factory collaborator wrapper                                          
+OneCharName                                                           factory collaborator wrapper                                          
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+intWrapper64                                                          control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+value                                                                 get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ConfigBase                                                            unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+ConfigBase::to_config                                                 property controller                                                   
+ConfigBase::from_config                                               property controller                                                   
+comment                                                               non-const property set collaborator                                   
+arrayBounds                                                           non-const property non-void command collaborator                      
+arrayDelimiter                                                        non-const property set collaborator                                   
+maxLayers                                                             non-const property set collaborator                                   
+quoteCharacter                                                        non-const property non-void command collaborator                      
+indexRef                                                              non-const get                                                         
+index                                                                 non-const property set collaborator                                   
+valueSeparator                                                        non-const property set collaborator                                   
+parentSeparator                                                       non-const property set collaborator                                   
+sectionRef                                                            non-const get                                                         
+section                                                               get                                                                   
+section                                                               non-const property set collaborator                                   
+index                                                                 get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+FormatterLambda                                                       degenerate small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+make_help                                                             controller wrapper                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+App                                                                   unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+App::_move_option                                                     non-const property non-void command factory collaborator              
+App::_move_to_missing                                                 non-const property non-void command collaborator                      
+App::_compare_subcommand_names                                        controller                                                            
+App::_trigger_pre_parse                                               non-const property non-void command controller                        
+App::_find_subcommand                                                 property factory collaborator                                         
+App::_has_remaining_positionals                                       property controller                                                   
+App::_count_remaining_positionals                                     property controller                                                   
+App::_parse_config                                                    non-const property non-void command controller                        
+App::_parse                                                           non-void command controller                                           
+App::_parse                                                           non-const accessor non-void command collaborator                      
+App::_process_extras                                                  non-const property non-void command collaborator                      
+App::_process_requirements                                            non-const property non-void command factory collaborator              
+App::_get_fallthrough_parent                                          non-const property non-void command collaborator                      
+App::_process_help_flags                                              property collaborator                                                 
+App::_process_callbacks                                               non-const property non-void command collaborator                      
+App::_valid_subcommand                                                property factory collaborator                                         
+App::_configure                                                       non-const property non-void command collaborator                      
+App::_validate                                                        property factory collaborator                                         
+App::remaining_for_passthrough                                                                                                              
+App::remaining                                                        property collaborator                                                 
+App::check_name                                                       property controller                                                   
+App::get_display_name                                                 get                                                                   
+App::get_option_no_throw                                              property factory collaborator                                         
+App::get_option_no_throw                                              non-const property non-void command factory collaborator              
+App::get_options                                                      non-const property non-void command factory controller                
+App::get_options                                                      property factory controller                                           
+App::help                                                             property controller                                                   
+App::_parse_stream                                                    non-const property non-void command controller                        
+App::remove_needs                                                     non-const property non-void command controller                        
+App::remove_excludes                                                  non-const property non-void command controller                        
+App::get_subcommands                                                  non-const property non-void command factory collaborator              
+App::get_subcommands                                                  property factory collaborator                                         
+App::exit                                                             property factory collaborator                                         
+App::parse                                                            non-void command controller                                           
+App::increment_parsed                                                 non-const property non-void command collaborator                      
+App::remaining_size                                                   property collaborator                                                 
+App::parse_char_t                                                     non-const property non-void command controller                        
+App::parse                                                            controller wrapper                                                    
+App::parse                                                            controller wrapper                                                    
+App::parse                                                            non-void command controller                                           
+App::clear                                                            non-const property non-void command collaborator                      
+App::_process_extras                                                  non-const accessor non-void command collaborator                      
+App::get_option_group                                                 property factory collaborator                                         
+App::get_subcommand_ptr                                               get collaborator                                                      
+App::_process_config_file                                             non-const property non-void command controller                        
+config_to_str                                                         property controller                                                   
+usage                                                                 non-const property set collaborator                                   
+got_subcommand                                                        controller wrapper                                                    
+disabled_by_default                                                   non-const property set collaborator                                   
+App::count_all                                                        property collaborator                                                 
+add_option_function                                                   non-void command controller                                           
+usage                                                                 non-const property set collaborator                                   
+App::set_help_flag                                                    non-const get non-void command controller                             
+footer                                                                non-const property set collaborator                                   
+App::_add_flag_internal                                               non-void command controller                                           
+require_option                                                        non-const property non-void command collaborator                      
+add_option_group                                                      non-void command controller                                           
+positionals_at_end                                                    non-const property set collaborator                                   
+get_description                                                       get                                                                   
+App::get_subcommand                                                   get factory collaborator                                              
+App::parse                                                            non-const property non-void command collaborator                      
+count                                                                                                                                       
+App::_process_config_file                                             non-const property non-void command controller                        
+add_flag                                                              non-void command factory controller                                   
+App::run_callback                                                     non-const property non-void command collaborator                      
+operator bool                                                         property                                                              
+App::_recognize                                                       property collaborator                                                 
+parse_complete_callback                                               non-const property set collaborator                                   
+App::_process                                                         non-void command controller                                           
+require_option                                                        non-const property non-void command collaborator                      
+App::_parse_positional                                                non-const property non-void command factory collaborator              
+config_formatter                                                      non-const property set collaborator                                   
+add_flag                                                              non-void command factory controller                                   
+add_flag                                                              non-void command factory controller                                   
+App::add_subcommand                                                   non-void command factory collaborator                                 
+excludes                                                              non-const property non-void command collaborator                      
+parsed                                                                property controller                                                   
+count                                                                 get                                                                   
+add_flag                                                              non-void command factory controller                                   
+require_subcommand                                                    non-const property non-void command collaborator                      
+allow_config_extras                                                   non-const property non-void command collaborator                      
+pre_callback                                                          empty                                                                 
+App::remove_excludes                                                  non-const property non-void command collaborator                      
+add_flag                                                              non-void command factory controller                                   
+validate_positionals                                                  non-const property set collaborator                                   
+add_option_no_stream                                                  non-void command factory controller                                   
+get_usage                                                             property controller                                                   
+App::get_subcommand_ptr                                               property collaborator                                                 
+required                                                              non-const property set collaborator                                   
+get_help_all_ptr                                                      get controller                                                        
+App::_parse_subcommand                                                non-const property non-void command collaborator                      
+App::ignore_underscore                                                non-const property non-void command collaborator                      
+needs                                                                 non-const property non-void command collaborator                      
+final_callback                                                        non-const property set collaborator                                   
+preparse_callback                                                     non-const property set collaborator                                   
+enabled_by_default                                                    non-const property set collaborator                                   
+allow_config_extras                                                   non-const property set collaborator                                   
+callback                                                              non-const property non-void command collaborator                      
+silent                                                                non-const property set collaborator                                   
+add_option                                                            non-void command factory controller                                   
+App::remove_option                                                    non-const property non-void command factory controller                
+configurable                                                          non-const property set collaborator                                   
+needs                                                                 non-const property non-void command collaborator                      
+allow_windows_style_options                                           non-const property set collaborator                                   
+formatter_fn                                                          non-const property set collaborator                                   
+add_option                                                            non-void command factory controller                                   
+App::_parse_single                                                    non-const accessor non-void command collaborator                      
+get_allow_extras                                                      get controller                                                        
+get_config_ptr                                                        get controller                                                        
+validate_optional_arguments                                           non-const property set collaborator                                   
+description                                                           non-const property set collaborator                                   
+get_config_ptr                                                        non-const get controller                                              
+App::version                                                          property controller                                                   
+allow_extras                                                          non-const property set collaborator                                   
+App::get_subcommand                                                   collaborator wrapper                                                  
+App::parse_from_stream                                                non-const property non-void command controller                        
+excludes                                                              non-const property non-void command collaborator                      
+option_defaults                                                       non-const property controller                                         
+get_positionals_at_end                                                get controller                                                        
+get_formatter                                                         get controller                                                        
+get_require_option_max                                                get                                                                   
+get_immediate_callback                                                get controller                                                        
+get_validate_positionals                                              get controller                                                        
+get_config_formatter                                                  get controller                                                        
+App::_process_env                                                     non-const property non-void command collaborator                      
+failure_message                                                       set collaborator                                                      
+get_option                                                            controller wrapper                                                    
+App::remove_subcommand                                                non-const property non-void command factory collaborator              
+App::get_subcommand                                                   property factory collaborator                                         
+get_config_formatter_base                                             property factory controller                                           
+get_option                                                            controller wrapper                                                    
+prefix_command                                                        non-const property set collaborator                                   
+get_disabled_by_default                                               property controller                                                   
+operator[]                                                            factory controller wrapper                                            
+disabled                                                              non-const property set collaborator                                   
+get_ignore_underscore                                                 get controller                                                        
+get_fallthrough                                                       get controller                                                        
+get_allow_windows_style_options                                       get controller                                                        
+get_configurable                                                      get controller                                                        
+get_subcommands                                                       get collaborator                                                      
+get_group                                                             get                                                                   
+App::get_subcommand_ptr                                               property collaborator                                                 
+require_subcommand                                                    non-const property non-void command collaborator                      
+get_footer                                                            property controller                                                   
+get_require_subcommand_min                                            get                                                                   
+group                                                                 non-const property set collaborator                                   
+get_require_subcommand_max                                            get                                                                   
+App::_parse_single_config                                             non-const property non-void command collaborator                      
+get_help_ptr                                                          non-const get controller                                              
+App::ensure_utf8                                                      non-const property non-void command factory controller                
+get_prefix_command                                                    get controller                                                        
+get_disabled                                                          get controller                                                        
+get_enabled_by_default                                                property controller                                                   
+get_validate_optional_arguments                                       get controller                                                        
+get_silent                                                            get controller                                                        
+get_allow_config_extras                                               get controller                                                        
+add_option                                                            non-void command factory controller                                   
+get_required                                                          get controller                                                        
+get_help_ptr                                                          get controller                                                        
+get_version_ptr                                                       non-const get controller                                              
+get_version_ptr                                                       get controller                                                        
+get_parent                                                            non-const get collaborator                                            
+fallthrough                                                           non-const property set collaborator                                   
+get_require_option_min                                                get                                                                   
+get_parent                                                            get collaborator                                                      
+got_subcommand                                                        factory controller wrapper                                            
+get_name                                                              get                                                                   
+get_aliases                                                           get                                                                   
+App::parse                                                            non-const property non-void command controller                        
+clear_aliases                                                         non-const property non-void command collaborator                      
+parse_order                                                           get controller                                                        
+App::get_groups                                                       property controller                                                   
+operator[]                                                            factory controller wrapper                                            
+App::name                                                             non-const property non-void command collaborator                      
+App::alias                                                            non-const property non-void command collaborator                      
+App::immediate_callback                                               non-const property non-void command collaborator                      
+App::_parse_arg                                                       non-const property non-void command factory collaborator              
+App::ignore_case                                                      non-const property non-void command collaborator                      
+App::add_option                                                       non-const property non-void command controller                        
+get_ignore_case                                                       get controller                                                        
+App::set_help_all_flag                                                non-const get non-void command controller                             
+require_option                                                        non-const property non-void command collaborator                      
+App::set_version_flag                                                 non-const get non-void command controller                             
+App::parse                                                            non-const property non-void command collaborator                      
+App::set_version_flag                                                 non-const get non-void command controller                             
+footer                                                                non-const property set collaborator                                   
+App::add_flag_callback                                                non-void command factory controller                                   
+App::add_flag_function                                                non-void command factory controller                                   
+formatter                                                             non-const property set collaborator                                   
+App::set_config                                                       non-const get non-void command controller                             
+App::remove_needs                                                     non-const property non-void command collaborator                      
+require_subcommand                                                    non-const property non-void command collaborator                      
+App::add_subcommand                                                   non-const property non-void command factory collaborator              
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Error                                                                 data-class small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+get_name                                                              get                                                                   
+get_exit_code                                                         get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+TApp_container_tuple                                                  unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+objWrapper                                                            control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+value                                                                 get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Streamable                                                            unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+is_complex                                                            unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+HorribleError                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+SimpleWrapper                                                         control data-class small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+getRef                                                                non-const get controller                                              
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+OptionBase                                                            control                                                               
+
+Method name:                                                          Method stereotype:                                                    
+OptionBase<CRTP>::copy_to                                             controller                                                            
+join                                                                  controller wrapper                                                    
+take_all                                                              controller wrapper                                                    
+take_first                                                            controller wrapper                                                    
+delimiter                                                             non-const property set controller                                     
+take_last                                                             controller wrapper                                                    
+group                                                                 non-const property set controller                                     
+get_ignore_underscore                                                 get controller                                                        
+configurable                                                          non-const property set controller                                     
+required                                                              non-const property set controller                                     
+mandatory                                                             factory controller wrapper                                            
+get_required                                                          get controller                                                        
+always_capture_default                                                non-const property set controller                                     
+get_multi_option_policy                                               get controller                                                        
+get_group                                                             get                                                                   
+join                                                                  controller wrapper                                                    
+get_ignore_case                                                       get controller                                                        
+get_configurable                                                      get controller                                                        
+get_disable_flag_override                                             get controller                                                        
+get_always_capture_default                                            get controller                                                        
+get_delimiter                                                         get controller                                                        
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+OptionNotFound                                                        unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Option                                                                large-class                                                           
+
+Method name:                                                          Method stereotype:                                                    
+Option::_add_result                                                   controller                                                            
+Option::_validate                                                                                                                           
+Option::excludes                                                      non-void command collaborator                                         
+Option::each                                                          non-void command factory collaborator                                 
+Option::matching_name                                                 property controller                                                   
+Option::transform                                                     non-void command factory collaborator                                 
+Option::get_validator                                                 non-void command factory controller                                   
+Option::add_result                                                    non-const accessor non-void command collaborator                      
+Option::type_size                                                     collaborator stateless                                                
+Option::get_validator                                                 controller wrapper                                                    
+Option::check                                                         non-void command collaborator                                         
+Option::remove_needs                                                  non-void command controller                                           
+Option::remove_excludes                                               non-void command controller                                           
+Option::transform                                                     non-void command collaborator                                         
+Option::expected                                                      collaborator stateless                                                
+Option::check                                                         non-void command collaborator                                         
+Option::expected                                                      collaborator stateless                                                
+Option::ignore_case                                                   non-void command collaborator                                         
+Option::ignore_underscore                                             non-void command collaborator                                         
+Option::multi_option_policy                                           collaborator stateless                                                
+Option::run_callback                                                  non-const property non-void command controller                        
+Option::_validate_results                                             controller                                                            
+Option::_reduce_results                                               controller                                                            
+Option::check_name                                                    property factory controller                                           
+                                                                      empty                                                                 
+Option::get_name                                                      get                                                                   
+Option::add_result                                                    non-void command collaborator                                         
+Option::get_flag_value                                                property controller                                                   
+Option::type_size                                                     collaborator stateless                                                
+Option::add_result                                                    non-void command collaborator                                         
+Option::reduced_results                                               controller                                                            
+Option::get_type_name                                                                                                                       
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+CallForHelp                                                           unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Validator                                                             control degenerate                                                    
+
+Method name:                                                          Method stereotype:                                                    
+Validator::_merge_description                                         non-const property non-void command factory controller                
+Validator::operator&                                                  factory collaborator                                                  
+Validator::operator()                                                 property controller                                                   
+operator|                                                             controller stateless                                                  
+Validator::operator|                                                  factory collaborator                                                  
+ignore_space                                                          non-void command                                                      
+smart_deref                                                           controller stateless                                                  
+search                                                                non-void command controller                                           
+smart_deref                                                           controller stateless                                                  
+Validator::description                                                collaborator stateless                                                
+search                                                                non-void command controller                                           
+generate_set                                                          non-void command controller                                           
+overflowCheck                                                         controller stateless                                                  
+generate_map                                                          non-void command controller                                           
+search                                                                non-void command controller                                           
+Validator::operator!                                                  property factory collaborator                                         
+overflowCheck                                                         controller stateless                                                  
+ignore_underscore                                                     wrapper                                                               
+checked_multiply                                                      controller wrapper                                                    
+checked_multiply                                                      non-const accessor non-void command controller                        
+ignore_case                                                           wrapper                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ExtrasError                                                           unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Formatter                                                             control                                                               
+
+Method name:                                                          Method stereotype:                                                    
+Formatter::make_option_usage                                          controller                                                            
+Formatter::make_option_desc                                           controller wrapper                                                    
+Formatter::make_groups                                                controller                                                            
+Formatter::make_group                                                 controller                                                            
+Formatter::make_positionals                                           controller                                                            
+Formatter::make_description                                           controller                                                            
+Formatter::make_usage                                                 controller                                                            
+Formatter::make_footer                                                controller                                                            
+Formatter::make_option_opts                                           controller                                                            
+Formatter::make_subcommands                                           controller                                                            
+Formatter::make_subcommand                                            property controller                                                   
+Formatter::make_option_name                                           controller                                                            
+make_option                                                           controller                                                            
+Formatter::make_help                                                  controller                                                            
+Formatter::make_expanded                                              property controller                                                   
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+NonexistentPathValidator                                              unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+FileError                                                             factory degenerate small-class                                        
+
+Method name:                                                          Method stereotype:                                                    
+Missing                                                               factory collaborator wrapper                                          
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Transformer                                                           unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Range                                                                 unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+OptionDefaults                                                        degenerate                                                            
+
+Method name:                                                          Method stereotype:                                                    
+delimiter                                                             collaborator stateless                                                
+disable_flag_override                                                 collaborator stateless                                                
+ignore_underscore                                                     collaborator stateless                                                
+ignore_case                                                           collaborator stateless                                                
+multi_option_policy                                                   collaborator stateless                                                
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+OptionAlreadyAdded                                                    degenerate small-class                                                
+
+Method name:                                                          Method stereotype:                                                    
+Excludes                                                              collaborator stateless                                                
+Requires                                                              collaborator stateless                                                
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+Timer                                                                 unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+operator/                                                             non-const property set collaborator                                   
+make_time_str                                                                                                                               
+time_it                                                               non-const property non-void command controller                        
+to_string                                                             property                                                              
+Big                                                                   wrapper                                                               
+make_time_str                                                         property controller                                                   
+Simple                                                                stateless                                                             
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+FormatterBase                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+get_column_width                                                      get                                                                   
+get_label                                                             property                                                              
+column_width                                                          set                                                                   
+label                                                                 set                                                                   
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+is_ostreamable                                                        unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+CallForAllHelp                                                        unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ExistingFileValidator                                                 unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+RequiredError                                                         factory control small-class                                           
+
+Method name:                                                          Method stereotype:                                                    
+Option                                                                non-void command factory collaborator                                 
+Subcommand                                                            non-void command factory collaborator                                 
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+TypeValidator                                                         unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+ExistingDirectoryValidator                                            unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+is_istreamable                                                        unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+FileOnDefaultPath                                                     unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------
+Class name:                                                           Class stereotype:                                                     
+IsMember                                                              unclassified                                                          
+
+Method name:                                                          Method stereotype:                                                    
+--------------------------------------------------------------------------------------------------------------------------------------------

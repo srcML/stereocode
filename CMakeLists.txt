@@ -20,7 +20,6 @@ file(GLOB STEREOCODE_SOURCE *.cpp *.hpp)
 
 # The stereocode application (target).
 add_executable(stereocode ${STEREOCODE_SOURCE})
-add_executable(OrderBy OrderBy/OrderBy.cpp)
 
 # Assumes srcml.h may be in this directory
 target_include_directories(stereocode PRIVATE /usr/local/include)
@@ -29,14 +28,11 @@ target_include_directories(stereocode PRIVATE /usr/local/include)
 set(CMAKE_EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external) # Creates folder if doesn't exists.
 file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.3.2/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp) # Name of file is needed since content of file itself are being downloaded.
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
-target_include_directories(OrderBy PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
 # Search (in common directories) and link the dynamic library libsrcml.
 find_library(LIBSRCML_LINK NAMES libsrcml libsrcml.1 libsrcml.1.dylib libsrcml.so.1 libsrcml.so)
 target_link_directories(stereocode PRIVATE /usr/local/lib)
 target_link_libraries(stereocode ${LIBSRCML_LINK})
-
-install(TARGETS OrderBy)
 
 # Turn on compiler warnings.
 add_compile_options(
@@ -49,7 +45,7 @@ add_compile_options(
 enable_testing()
 file(COPY tests DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB TESTFILES ${CMAKE_CURRENT_BINARY_DIR}/tests/*.xml)
-list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|stereotypes.xml|runtests.cmake")
+list(FILTER TESTFILES EXCLUDE REGEX ".xml.BASE.txt|.xml.report.txt|runtests.cmake")
 foreach(TEST ${TESTFILES})
     message(STATUS "Add test case ${TEST}")
     get_filename_component(DIRPART ${TEST} DIRECTORY)

@@ -15,17 +15,19 @@
 
 class primitiveTypes {
 public:
-         primitiveTypes () : language(), ptypes(), usertypes() {};
+                   primitiveTypes () : language(), ptypes(), usertypes() {};
 
-    bool isPrimitive    (const std::string&) const;
-    void addPrimitive   (const std::string&);
-    void setLanguage    (const std::string&);
+    bool           isPrimitive    (const std::string&) const;
+    
+    void           addPrimitive   (const std::string&);
+    void           setLanguage    (const std::string&);
 
-    friend std::ostream& operator<<(std::ostream&, const primitiveTypes&);
-    friend std::istream& operator>>(std::istream&, primitiveTypes&);
+    std::string    getLanguage    () const { return language; }
+
+    friend         std::istream& operator>>(std::istream&, primitiveTypes&);
 
 private:
-    std::string                           language;      // Language: "C++", "C#", "Java", "C"
+    std::string                           language;      // Language: "C++", "C#"
     std::unordered_set<std::string>       ptypes;        // List of language primitives
     std::unordered_set<std::string>       usertypes;     // List of user defined primitives 
 };

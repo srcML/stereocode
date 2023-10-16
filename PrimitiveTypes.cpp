@@ -33,15 +33,6 @@ std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
     return in;
 }
 
-// Outputs list of all primitive types defined
-// REQUIRES: out.open(fname)
-//
-std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
-    for (std::string i : prims.ptypes) out << i << std::endl;
-    for (std::string i : prims.usertypes) out << i << std::endl;
-    return out;
-}
-
 //Initially ptypes is empty or has user defined types.
 //
 // After language is determined then language specific primitive
@@ -54,52 +45,87 @@ void primitiveTypes::setLanguage(const std::string& lang) {
     if (language == "C++") {
         ptypes = {
             "short",
+            "shortint",
             "int",
-            "signed",
-            "unsigned",
+            "int8_t",
+            "int16_t",
+            "int32_t",
+            "int64_t",
+            "uint8_t",
+            "uint16_t",
+            "uint32_t",
+            "uint64_t",
             "long",
+            "longint",
+            "longlong",
+            "longlongint",
             "float",
             "double",
+            "longdouble",
             "char",
+            "byte",
             "string",
-            "string::size_type",
-            "string::npos",
-            "std::string",
-            "std::string::size_type",
-            "std::string::npos",
+            "size_type",
             "size_t",
             "wchar_t",
             "char16_t",
             "char32_t",
-            "bool"
+            "bool",
+            "ptrdiff_t"
         };
     }
     if (language == "C#") {  
         ptypes = {
-            "int",
-            "short",
-            "signed",
-            "unsigned",
-            "float",
-            "long",
-            "double",
+            "bool",
+            "byte",
+            "sbyte",
             "char",
+            "double",
+            "float",
+            "int",
+            "uint",
+            "long",
+            "ulong",
+            "short",
+            "ushort",
+            "decimal",
             "string",
-            "bool"
+            "Boolean", // Same as bool, but used as System.Boolean
+            "Byte",
+            "SByte",
+            "Char",
+            "Double",
+            "Single",
+            "Int32",
+            "UInt32",
+            "Int64",
+            "UInt64",
+            "Int16",
+            "IntPtr",
+            "UIntPtr",
+            "UInt16",
+            "Decimal",
+            "String",
         };
     }
-    if (language == "Java") {  
+    if (language == "Java") {
         ptypes = {
-            "int",
-            "short",
-            "signed",
-            "unsigned",
-            "float",
-            "long",
-            "double",
+            "boolean",
+            "byte",
             "char",
-            "string",
-            "bool"
+            "short",
+            "int",
+            "long",
+            "float",
+            "double",
+            "Byte",
+            "Character",
+            "Short",
+            "Integer",
+            "Long",
+            "Float",
+            "Double",
+            "String"
         };
     }
 }
