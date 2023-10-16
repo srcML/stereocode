@@ -12,6 +12,7 @@
 
 #include "ClassModel.hpp"
 #include <unordered_map>
+#include <iomanip> 
 
 class classModelCollection{
 public:
@@ -24,11 +25,11 @@ public:
     bool                 isFriendFunction       (srcml_archive*, srcml_unit*, methodModel&, std::string);
 
     void                 outputWithStereotypes  (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>);
-    void                 outputReport           (std::ofstream&, const std::string&);
+    void                 outputReport           (std::ofstream&);
 
 protected:
-    std::unordered_map<std::string, classModel>     classCollection;
-    std::vector<std::string> freeFunction;
+    std::unordered_map<std::string, classModel>     classCollection; // List of classes and their methods
+    std::vector<std::string>                        freeFunction;    // List of free functions
 };
 
 #endif

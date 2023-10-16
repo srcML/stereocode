@@ -18,17 +18,18 @@ classModel::classModel (srcml_archive* archive, srcml_unit* unit, std::string xp
 }
 
 void classModel::findClassInfo(srcml_archive* archive, srcml_unit* unit, int classOrder, int UnitNumber){
-    findFriendFunction(archive, unit);
+    if (PRIMITIVES.getLanguage() == "C++")
+        findFriendFunction(archive, unit);
     findParentClassName(archive, unit);
-    findNonPrivateAttributeName(archive, unit);
-    findNonPrivateAttributeType(archive, unit);
     findAttributeName(archive, unit);
     findAttributeType(archive, unit);
+    findNonPrivateAttributeName(archive, unit);
+    findNonPrivateAttributeType(archive, unit);
     findMethod(archive, unit, classOrder, UnitNumber);
 }
 
 void classModel::findFriendFunction(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:friend/src:function_decl/src:name";
+    std::string xpath = "//src:friend[count(ancestor::src:class) = 1]/src:function_decl/src:name";
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -48,7 +49,7 @@ void classModel::findFriendFunction(srcml_archive* archive, srcml_unit* unit) {
 }
 
 void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:class/src:name";
+    std::string xpath = "//src:class/src:name[count(ancestor::src:class) = 1]";
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -68,7 +69,7 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
 }
 
 void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:super_list/src:super/src:name";
+    std::string xpath = "//src:super_list[count(ancestor::src:class) = 1]/src:super/src:name";
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -89,7 +90,9 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
 }
 
 void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:decl_stmt[not(ancestor::src:function)]/src:decl/src:name";
+    std::string xpath = "//src:decl_stmt[not(ancestor::src:function)";
+    xpath += " and count(ancestor::src:class) = 1]/src:decl/src:name";
+
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -104,7 +107,7 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit) {
         std::string name = unparsed;
         free(unparsed);
 
-        // Chop off [] for arrays      
+        // Chop off [] for arrays  
         size_t start_position = name.find("[");
         if (start_position != std::string::npos){
             name = name.substr(0, start_position);
@@ -118,7 +121,8 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit) {
 }
 
 void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:decl_stmt[not(ancestor::src:function)]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
+    std::string xpath = "//src:decl_stmt[not(ancestor::src:function)";
+    xpath += " and count(ancestor::src:class) = 1]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -143,6 +147,7 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit) {
         }
 
         attribute[i].setType(type);
+        type = trimWhitespace(removeSpecifiers(type));
         if (!isPrimitiveContainer(type))
             attribute[i].setNonPrimitive(true); // True if attribute is not a primitive type.
         
@@ -154,7 +159,11 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit) {
 }
 
 void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:decl_stmt[not(ancestor::src:function) and not(ancestor::src:private)]/src:decl/src:name";
+    std::string xpath = "//src:decl_stmt[not(ancestor::src:function)";
+    if (PRIMITIVES.getLanguage() == "C++")
+        xpath += " and count(ancestor::src:class) = 1 and not(ancestor::src:private)]/src:decl/src:name";
+    else
+        xpath += " and count(ancestor::src:class) = 1  and *[1][src:type/src:specifier] and not(*[1][src:type/src:specifier='private'])]/src:decl/src:name";  
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -184,13 +193,17 @@ void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit*
 }
 
 void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:decl_stmt[not(ancestor::src:function) and not(ancestor::src:private)]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
+    std::string xpath = "//src:decl_stmt[not(ancestor::src:function)";
+    if (PRIMITIVES.getLanguage() == "C++")
+        xpath +=  " and count(ancestor::src:class) = 1 and not(ancestor::src:private)]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
+    else
+        xpath += " and count(ancestor::src:class) = 1 and *[1][src:type/src:specifier] and not(*[1][src:type/src:specifier='private'])]/src:decl/src:type";  
+    
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    std::ofstream f("a.txt");
     srcml_unit* resultUnit = nullptr;
     std::string prev = "";
     for (int i = 0; i < n; ++i) {
@@ -209,6 +222,9 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
         }
 
         nonPrivateAttribute[i].setType(type);
+        type = trimWhitespace(removeSpecifiers(type));
+        if (!isPrimitiveContainer(type))
+            nonPrivateAttribute[i].setNonPrimitive(true); 
         
         free(unparsed);
     }
@@ -216,9 +232,17 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
     srcml_transform_free(result);
 }
 
+// C# allow for local nested functions within methods.
+//  For our analysis:
+//      The outer method/function will ignore the definitions of the nested functions.
+//      Any use of the nested function(s) will still be considered. For example, a call to
+//          to a nested function within the outer method/function body is considered.
+//      The nested functions are analyzed in the same way. 
+//      But, any use of locals or parameters from the outer method/function(s) inside the nested functions is not considered.
+//  C++ and Java don't have nested functions.
 void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, int classOrder, int unitNumber) {
     int methodOrder = 1;
-    std::string xpath = "//src:function";
+    std::string xpath = "//src:function[count(ancestor::src:class) = 1]";
     srcml_append_transform_xpath(archive, xpath.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -269,7 +293,6 @@ void classModel::ComputeClassStereotype() {
         {"accessor", 0},
         {"set", 0},
         {"command", 0},
-        {"non-void-command", 0},
         {"collaborator", 0},
         {"controller", 0},
         {"factory", 0},
@@ -372,7 +395,7 @@ void classModel::ComputeClassStereotype() {
          classStereotype.push_back("data-class");
     
     // Small Class
-    if (allMethods < 3)
+    if ((0 < allMethods) && (allMethods < 3))
         classStereotype.push_back("small-class");
 
     // Final check if no stereotype was assigned
@@ -405,7 +428,7 @@ void classModel::ComputeMethodStereotype() {
 void classModel::getter() {
     for (auto& pair : method) {
         if (pair.second.getAttributeReturned() && !pair.second.getParameterChanged()) {
-            if (!pair.second.getConstMethod())
+            if (!pair.second.getConstMethod() && PRIMITIVES.getLanguage() == "C++")
                 pair.second.setStereotype("non-const");
             pair.second.setStereotype("get");
         }
@@ -421,7 +444,7 @@ void classModel::predicate() {
     for (auto& pair : method) {
         if (pair.second.getReturnTypeSeparated() == "bool" && !pair.second.getAttributeReturned() && 
             !pair.second.getParameterChanged() && pair.second.getAttributeUsed()) {
-            if (!pair.second.getConstMethod())
+            if (!pair.second.getConstMethod() && PRIMITIVES.getLanguage() == "C++")
                 pair.second.setStereotype("non-const");
             pair.second.setStereotype("predicate"); 
         }
@@ -438,7 +461,7 @@ void classModel::property() {
         std::string returnTypeSeparated = pair.second.getReturnTypeSeparated();
         if (returnTypeSeparated != "bool" && returnTypeSeparated != "void" && !pair.second.getAttributeReturned() && 
             !pair.second.getParameterChanged() && pair.second.getAttributeUsed()) {
-            if (!pair.second.getConstMethod())
+            if (!pair.second.getConstMethod() && PRIMITIVES.getLanguage() == "C++")
                 pair.second.setStereotype("non-const");
             pair.second.setStereotype("property");
         }
@@ -454,7 +477,7 @@ void classModel::property() {
 void classModel::accessor() {
     for (auto& pair : method) {
         if (pair.second.getParameterChanged()){
-            if (!pair.second.getConstMethod())
+            if (!pair.second.getConstMethod() && PRIMITIVES.getLanguage() == "C++")
                 pair.second.setStereotype("non-const");
             pair.second.setStereotype("accessor");       
         } 
@@ -462,7 +485,7 @@ void classModel::accessor() {
 }
 
 // Stereotype set:
-//     only 1 attribute has been changed.
+//     only 1 attribute is changed.
 //     covers the case of mutable attributes.
 //
 void classModel::setter() {
@@ -474,14 +497,17 @@ void classModel::setter() {
 }
 
 // stereotype command:
-//     Three cases:
-//          3) more than one attribute modified
-//          2) 1 attribute modified and the # of calls (method and function calls) is at least 2
-//          1) 0 attributes modified and there is at least 1 method or function call on an attribute or the # of calls is at least 2
-//     method is not const
-//     case 3 applies when attributes are mutable
-// stereotype non-void-command:        
-//      method has a 'void' return type
+//     Cases:
+//         a) More than one attribute modified.
+//         b) 1 Attribute modified and the # of calls (method and function calls) is at least 2.
+//         c) 0 attributes modified and there is at least 1 method or function call on an attribute or the # of calls is at least 2.
+//
+//     Method is not const (C++ only)
+//     Case 3 applies when attributes are mutable (C++ only)
+//
+// stereotype non-void-command (C++ only):        
+//      Same as command.
+//      Method has a 'void' return type
 //
 void classModel::command() {
     for (auto& pair : method) {
@@ -497,11 +523,10 @@ void classModel::command() {
         bool case2 = pair.second.getAttributeModified() == 1 && numOfCalls > 1;
         bool case3 = pair.second.getAttributeModified() > 1;
         if (case1 || case2 || case3) {
-            if (!pair.second.getConstMethod() || (case3 && pair.second.getConstMethod())){ // Handles case of mutable attributes
-                if (returnType == "void")
-                    pair.second.setStereotype("command");
-                else
-                    pair.second.setStereotype("non-void-command");    
+            if (!pair.second.getConstMethod() || (case3 && pair.second.getConstMethod())){ // Handles case of mutable attributes (C++ only)
+                if (PRIMITIVES.getLanguage() == "C++")
+                    if (returnType != "void") pair.second.setStereotype("non-void");  
+                pair.second.setStereotype("command");
             }
         } 
     }
@@ -514,20 +539,21 @@ void classModel::command() {
 //
 void classModel::factory() {
     for (auto& pair : method) {
-            bool     returnsNew          = pair.second.getReturnsNew();
-            bool     paraOrLocalReturned = pair.second.getParaOrLocalReturned();            
-            bool     returnsPtr          = pair.second.getReturnType().find("*") != std::string::npos;
-            bool     returnsObj          = !isPrimitiveContainer(pair.second.getReturnType());
+            bool     returnsNew          = pair.second.getReturnsNew();          
+            bool     returnsObj          = pair.second.getNonPrimitiveReturnType();
+            bool     paraOrLocalReturned = pair.second.getParaOrLocalReturned(); 
+            bool     attributeReturned   = pair.second.getAttributeReturned();  
+            bool     returnsCall         = pair.second.getReturnsCall();
 
             bool newCalls = false;    
             if (pair.second.getConstructorCalls().size() > 0) newCalls = true;
 
-            bool returnEx  = (paraOrLocalReturned || returnsNew || pair.second.getAttributeReturned());
-            bool isFactory = returnsPtr && returnsObj && newCalls && returnEx;
+            bool isFactory =  (returnsObj && ((returnsNew || 
+                              (newCalls && (paraOrLocalReturned || attributeReturned))) ||
+                              (returnsCall)));
 
-            if (isFactory) {
-                pair.second.setStereotype("factory");
-            }
+            if (isFactory) pair.second.setStereotype("factory");
+            
     }
 }
 
@@ -545,39 +571,28 @@ void classModel::collaboratorController() {
 
             // Check if method uses an attribute of a non-primitive type
             bool NonPrimitiveAttribute = pair.second.getNonPrimitiveAttribute();
-            bool NonPrimitiveAttributeExternal = pair.second.getNonPrimitiveExternal();
+            bool NonPrimitiveAttributeExternal = pair.second.getNonPrimitiveAttributeExternal();
             
             // Check for non-primitive local variable types
-            bool NonPrimitiveLocal = false;
-            bool NonPrimitiveLocalExternal = true;
-            for(std::string type: pair.second.getLocalVariablesTypes()){
-                if (!isPrimitiveContainer(type)){
-                    NonPrimitiveLocal = true;
-                    if (type.find(classNameTemp) != std::string::npos) NonPrimitiveLocalExternal = false;          
-                } 
-            }
+            bool NonPrimitiveLocal = pair.second.getNonPrimitiveLocal();
+            bool NonPrimitiveLocalExternal = pair.second.getNonPrimitiveLocalExternal();
+
 
             // Check for non-primitive parameter types
-            bool NonPrimitiveParamater = false;
-            bool NonPrimitiveParamaterExternal = true;
-            for(std::string type: pair.second.getParameterTypes()){ 
-                if (!isPrimitiveContainer(type)){
-                    NonPrimitiveParamater = true;
-                    if (type.find(classNameTemp) != std::string::npos) NonPrimitiveParamaterExternal = false;          
-                } 
-            }
+            bool NonPrimitiveParamater = pair.second.getNonPrimitiveParamater();
+            bool NonPrimitiveParamaterExternal = pair.second.getNonPrimitiveAttributeExternal();
+
 
             // Check for a non-primitive return type
             // Only ignores return of type void. Returns such as void* are not ignored
-            bool returnNonPrimitive = false;
-            bool returnNonPrimitiveExternal = true;
-            std::string methodReturnType = pair.second.getReturnType();
-            if (!isPrimitiveContainer(methodReturnType) && methodReturnType != "void"){
-                returnNonPrimitive = true;
-                if (methodReturnType.find(classNameTemp) != std::string::npos)
-                    returnNonPrimitiveExternal = false;         
-            }
-            if (NonPrimitiveAttribute || NonPrimitiveLocal || NonPrimitiveParamater || returnNonPrimitive){
+            // This is why void is not added to the list of primitives since void* can point to non-primitive
+            bool returnNonPrimitive = pair.second.getNonPrimitiveReturnType();
+            bool returnNonPrimitiveExternal = pair.second.getNonPrimitiveReturnTypeExternal();
+
+            bool returnCheck = returnNonPrimitive && (pair.second.getReturnTypeSeparated() != "void");
+
+            
+            if (NonPrimitiveAttribute || NonPrimitiveLocal || NonPrimitiveParamater || returnCheck){
                 if (NonPrimitiveAttributeExternal && NonPrimitiveLocalExternal && NonPrimitiveParamaterExternal && returnNonPrimitiveExternal)
                     pair.second.setStereotype("controller");     
                 else 
@@ -607,8 +622,7 @@ void classModel::stateless() {
         if(!pair.second.getEmpty()){
             bool usedAttr = pair.second.getAttributeUsed();
             bool noCalls = (pair.second.getMethodCalls().size() + pair.second.getFunctionCalls().size() + pair.second.getConstructorCalls().size()) == 0 ;
-            bool isStateless = pair.second.getAttributeModified() == 0 && pair.second.getReturnType() == "void" && !pair.second.getParameterChanged();
-            if (noCalls && (!usedAttr || isStateless)) {
+            if (noCalls && !usedAttr) {
                 pair.second.setStereotype("stateless");
             }
         }
@@ -625,10 +639,8 @@ void classModel::wrapper() {
         if(!pair.second.getEmpty()){
             bool usedAttr = pair.second.getAttributeUsed();
             bool callsWrapper = (pair.second.getMethodCalls().size() + pair.second.getFunctionCalls().size() + pair.second.getConstructorCalls().size()) == 1;
-            bool isWrapper = pair.second.getAttributeModified() == 0 && pair.second.getReturnType() == "void" && !pair.second.getParameterChanged();
-            if (callsWrapper && (!usedAttr || isWrapper)) {
-                pair.second.setStereotype("wrapper");
-            }
+            if (callsWrapper && !usedAttr)
+                pair.second.setStereotype("wrapper");         
         }
     }
 }
@@ -639,10 +651,7 @@ std::string classModel::getClassStereotype () const{
     for (const std::string &value : classStereotype)
         result += value + " ";
 
-    if (result != "")
-        return Rtrim(result);
+    if (result != "") return Rtrim(result);
         
     return result;
 }
-
-

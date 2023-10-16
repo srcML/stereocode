@@ -15,10 +15,8 @@
 
 class AttributeInfo {
 public:
-                AttributeInfo   () : name(), type(), modified(false), nonPrimitive(false) {}
+                AttributeInfo   () : name(), type(), modified(false), nonPrimitive(false)      {}
                 AttributeInfo   (const std::string& n) : AttributeInfo()                       { name = n;           }
-                AttributeInfo   (const std::string& n, const std::string& t) : AttributeInfo() { name = n; type = t; }
-    void        setName         (const std::string& n)                                         { name = n;           }
     void        setType         (const std::string& t)                                         { type = t;           }
     void        setModified     (const bool m)                                                 { modified = m;       }
     void        setNonPrimitive (const bool m)                                                 { nonPrimitive = m;   }
@@ -27,12 +25,10 @@ public:
     bool        getModified     () const                                                       { return modified;    }
     bool        getNonPrimitive () const                                                       { return nonPrimitive;}
 private:
-    std::string name;
-    std::string type;
-    bool modified;
+    std::string name;  
+    std::string type;  
+    bool modified;     
     bool nonPrimitive; // True if attribute is non-primitive
 };
-
-std::ostream& operator<<(std::ostream&, const AttributeInfo&);
 
 #endif

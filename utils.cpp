@@ -9,57 +9,48 @@
 
 #include "utils.hpp"
 
-// Checks if method is const
-//
-bool checkConst(const std::string& srcml) {
-    size_t end = srcml.find("{");
-    std::string functionSrcml = trimWhitespace(srcml.substr(0, end));
-    if (functionSrcml.find("<specifier>const</specifier><block>") != std::string::npos) return true;
-    else if (functionSrcml.find("</parameter_list><specifier>const</specifier>") != std::string::npos) return true; // Useful for methods such as void foo() const try {}
-    return false;
-}
-
-// Checks if a primitive type
-//  Examples: int, bool, char, double, cont int, inline int
-//            vector<int>, map<int,int>, int[], int*, int&
+// Checks if a container contains primitives.  
+// For example: std::vector<std::string>, std::map<int, std::string>.
+// Used for the collaborator and controller stereotypes on 
+//  the types of parameters, locals, method return and attributes
 //
 bool isPrimitiveContainer(const std::string& str) {
-    std::string s = removeSpecifiers(str);
-
-    std::vector<std::string> containers = {"std::vector", "std::list", "std::set", "std::map", "std::unordered_multimap", "std::unordered_multiset"
-                                           "std::unordered_map", "std::forward_list", "std::array", "std::stack", 
-                                           "std::queue", "std::priority_queue", "std::deque", "std::multiset", "std::unordered_set"
-                                           "std::multimap", "vector", "list", "set", "map", "unordered_map", "array", "multimap", "unordered_multimap"
-                                           "forward_list", "stack", "queue", "priority_queue", "deque", "multiset", "unordered_set", "unordered_multiset"};
-    for (const std::string& container : containers) {
-        size_t pos = s.find(container);
-        if (pos != std::string::npos) {
-            s.erase(pos, container.size());
-        }
+    std::string pattern= "";
+    if (PRIMITIVES.getLanguage() == "C++"){
+        pattern = "\\w+(?=::)|::|<|>|vector|list|set|map|unordered_map|array|multimap|signed|unsigned|unordered_multimap|";
+        pattern += "forward_list|stack|queue|priority_queue|deque|multiset|unordered_set|unordered_multiset";
     }
-
-    std::replace_if(s.begin(), s.end(), [](char c) { return c == '<' || c == '>'; }, ' ');
-    s = trimWhitespace(s);
-
-    if (s.find(",") != std::string::npos) {  // Multiple type names
-        size_t start = 0;
-        size_t end = s.find(",");
-        while (end != std::string::npos) {
-            if (!PRIMITIVES.isPrimitive(s.substr(start, end - start))) return false;
-            start = end + 1;
-            end = s.find(",", start);
-        }
-        return PRIMITIVES.isPrimitive(s.substr(start, end - start));
+    else if (PRIMITIVES.getLanguage() == "C#"){
+        pattern = "\\w+(?=\\.)|\\?|<|>|\\.|List|Dictionary|HashSet|Queue|Stack|SortedList|LinkedList|BitArray|";
+        pattern += "KeyedCollection|SortedSet|BlockingCollection|ConcurrentQueue|";
+        pattern += "ConcurrentStack|ConcurrentDictionary|ConcurrentBag|";
+        pattern += "ReadOnlyCollection|ReadOnlyDictionary|Tuple|ValueTuple|NameValueCollection|";
+        pattern += "StringCollection|StringDictionary|HybridDictionary|OrderedDictionary";
     }
-    return PRIMITIVES.isPrimitive(s);  // One type name
+    else if (PRIMITIVES.getLanguage() == "Java"){
+        pattern = "\\w+(?=\\.)|<|>|\\.|List|ArrayList|LinkedList|Set|HashSet|LinkedHashSet|SortedSet|TreeSet|";
+        pattern += "Map|HashMap|Hashtable|LinkedHashMap|SortedMap|TreeMap|Deque|ArrayDeque|Queue|";
+        pattern += "PriorityQueue|Vector|Stack|EnumSet|EnumMap|Iterator";
+    }
+    pattern = "(" + pattern + ")";
+    std::regex regexPattern(pattern);
+
+    std::string  result = std::regex_replace(str, regexPattern, "");
+    
+    std::istringstream ss(result);
+    std::string token = "";
+    while (std::getline(ss, token, ','))
+        if (!PRIMITIVES.isPrimitive(token)) return false;
+    return true;
+
 }
 
-// Checks if possibleAttribute is an attribute
+// Checks if possibleAttribute is an attribute (C++) or field (C# and Java)
 //
 bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::string>& parameterName,
                  const std::vector<std::string>& localVariableName, const std::string& possibleAttribute, bool modified, int& attributeIndex, int& parameterIndex) {
     
-    // A local variable or a parameter could overshadow an attribute if it has the same name. 
+    // A local variable or a parameter could overshadow an attribute, or a field, if it has the same name. 
     for (size_t i = 0; i < parameterName.size(); ++i) { 
         if (possibleAttribute == parameterName[i]) {
             parameterIndex = i;
@@ -84,57 +75,62 @@ bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::s
     return false; // Not an attribute, or local, or parameter
 }
 
-// Check if an attribute already exists in the list of attributes
-//
-bool isDuplicateAttribute (const std::vector<AttributeInfo>& attribute, const std::string& s){
-    for (const auto& attr: attribute){
-        if(attr.getName() == s) return true;
-    }
-    return false;
-}
-
-// Removes specifiers from type name
+// Removes specifiers from type name.
+// Used for the collaborator and controller stereotypes on 
+//  the types of parameters, locals, method return and attributes
 //
 std::string removeSpecifiers(const std::string& type) {
     std::string result = type;
-    std::vector<std::string> specifiers = {"static", "mutable", "inline", "virtual", "const", "friend", "*", "&&", "&", "[]"};
-    
-    for (const std::string& specifier : specifiers) {
-        size_t pos = result.find(specifier);
-        if (pos != std::string::npos) {
-            result.erase(pos, specifier.size());
-        }
+
+    // List of specifiers (you can expand this list as needed)
+    // Some specifiers need to be escaped for both the string and the regex engine as.
+    std::vector<std::string> specifiers;
+    std::string lang = PRIMITIVES.getLanguage();
+    if (lang == "C++"){
+        specifiers = { "const", "volatile", "inline", "virtual", "friend", "&", "&&", "\\*",
+                       "mutable", "static", "thread_local", "register", "constexpr", "explicit" };
+    }
+    else if (lang == "C#"){
+        specifiers = { "readonly", "ref", "out", "in", "unsafe", "internal", "params",
+                       "public", "private", "protected", "static", "virtual", "\\*", "volatile", "\\[.*?\\]",
+                       "this",  "override", "abstract",  "extern", "async", "partial", "explicit", "implicit"
+                       "new", "sealed", "event", "const" };
+    }
+    else if (lang == "Java"){
+        specifiers = { "public", "private", "protected", "static", "final", "transient",  "\\[.*?\\]",
+                       "volatile", "synchronized", "native", "strictfp", "abstract", "default" };
     }
 
-    return result;
-}
+    // Create a regex pattern of specifiers joined by the '|' (or) operator.
+    // \bword\b ensures that specifiers are matched only when they appear as 
+    //   whole words (except for certain specifiers), not as part of other words.
+    //   For example, a class called staticClass, the static in this name will be kept when 
+    //   removing the specifiers from the datatypes of its instances.
+    std::string pattern = "";
+    for (const auto& specifier : specifiers) {
+        if (pattern.size() > 0) pattern += "|";
+        
+        // If specifier is one of the special characters (like * or & or []), match them without word boundaries.
+        if (specifier == "\\*" || specifier == "&" || specifier == "\\[.*?\\]") 
+            pattern += specifier;     
+        else 
+            pattern += "\\b" + specifier + "\\b";     
+    }
 
-// Removes WS, specifiers, *, & from type name
-//
-std::string separateTypeName(const std::string& type) {
-    std::string result = trimWhitespace(type);
-    result = removeSpecifiers(result);
+    pattern = "(" + pattern + ")";
+    std::regex regexPattern(pattern);
+
+    // Use regex_replace to remove all specifiers from the input string
+    result = std::regex_replace(result, regexPattern, "");
+
     return result;
 }
 
 // Removes all whitespace from string
 //
 std::string trimWhitespace(const std::string& s) {
-    std::string result = "";
-    for (const char& c : s) {
-        if (!isspace(c)) result += c;    
-    }
-    return result;
-}
-
-// Trim blanks off the left of string
-//
-std::string Ltrim(const std::string& s) {
     std::string result = s;
-    size_t firstNonSpace = result.find_first_not_of(' ');
-    if (firstNonSpace != std::string::npos) {
-        return s.substr(firstNonSpace);
-    }
+    result.erase(std::remove_if(result.begin(), result.end(), [](unsigned char c) { return std::isspace(c); }), result.end());
     return result;
 }
 
@@ -149,53 +145,33 @@ std::string Rtrim(const std::string& s) {
     return result;
 }
 
-// Normalize multiple blanks to one blank
-//
-std::string multiBlanksToBlank(const std::string& s) {
-    std::string result = "";
-    bool prevSpace = false;
-    for (const char& c : s) {
-        if (isspace(c)) {
-            if (!prevSpace) {
-                result += ' ';
-                prevSpace = true;
-            }
-        } 
-        else {
-            result += c;
-            prevSpace = false;
-        }
-    }
-    return result;
-}
-
-// Converts all whitespace to blanks
-//
-std::string WStoBlank(const std::string& s) {
-    std::string result = "";
-    for (const char& c : s) {
-        result += isspace(c) ? ' ' : c;
-    }
-    return result;
-}
-
-
 // Removes namespaces from method names
+// For example, given:
+//  namespaceA::NamespaceB::ClassName::MethodName
+//  becomes:
+//  ClassName::MethodName
 //
 std::string removeNamespace(const std::string& methodName) {
     std::string result = methodName;
 
     // Find the last occurrence of '::' to extract the method name and its preceding parts
-    size_t lastDoubleColon = methodName.rfind("::");
+    size_t lastDoubleColon = result.rfind("::");
     if (lastDoubleColon != std::string::npos) {
         // Find the second last occurrence of '::' to extract the class name and the remaining part
-        size_t secondLastDoubleColon = methodName.rfind("::", lastDoubleColon - 1);
+        size_t secondLastDoubleColon = result.rfind("::", lastDoubleColon - 1);
         if (secondLastDoubleColon != std::string::npos) {
-            result = methodName.substr(secondLastDoubleColon + 2);  // Skip '::'
+            result = result.substr(secondLastDoubleColon + 2);  // Skip '::'
         } 
-        else {
-            result = methodName ;  // If '::' not found, return the entire input
-        }
     }
+    return result;
+}
+
+// Converts all whitespace to blanks  ('\r' => ' ')
+std::string WStoBlank(const std::string& s) {
+    std::string result(s);
+    std::replace_if(result.begin(),
+                    result.end(),
+                    [](char c) { return isspace(c); },
+                    ' ');
     return result;
 }
