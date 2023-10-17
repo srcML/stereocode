@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #ifndef ATTRIBUTEINFO_HPP
 #define ATTRIBUTEINFO_HPP
 

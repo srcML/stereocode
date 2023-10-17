@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #ifndef METHOD_HPP
 #define METHOD_HPP
 

@@ -15,6 +15,7 @@
 *Users can use this output for further processing or analysis. For instance, the stereotype information can be embedded as documentation in the source code (using comments, **Doxygen**, **Javadoc**, etc.).*
 
 The tool currently supports **C++**, **Java**, and **C#**.
+
 ## 🔧 Installation and Build
 1. Clone or download this repository.
 

@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #include "MethodModel.hpp"
 #include <fstream>
 

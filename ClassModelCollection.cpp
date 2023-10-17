@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #include "ClassModelCollection.hpp"
 
 classModelCollection::classModelCollection (srcml_archive* archive, std::vector<srcml_unit*> units) : classModelCollection() {

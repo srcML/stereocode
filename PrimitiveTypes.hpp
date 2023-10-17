@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #ifndef PRIMITIVETYPES_HPP
 #define PRIMITIVETYPES_HPP
 

@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #include "ClassModel.hpp"
 
 classModel::classModel () : classStereotype(), className(), parentClassName(), attribute(), 

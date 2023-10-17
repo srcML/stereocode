@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #ifndef CLASSMODEL_HPP
 #define CLASSMODEL_HPP
 

@@ -36,7 +36,7 @@ target_link_libraries(stereocode ${LIBSRCML_LINK})
 
 # Turn on compiler warnings.
 add_compile_options(
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall> # Adds "-Wall" to the options if the compiler is either GNU, Clang, or AppleClang
+    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall> # Adds "-Wall" to the options if the compiler is either GNU, Clang, or AppleClang.
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-pedantic>
     $<$<CXX_COMPILER_ID:MSVC>:/Wall>
@@ -51,6 +51,6 @@ foreach(TEST ${TESTFILES})
     get_filename_component(DIRPART ${TEST} DIRECTORY)
     get_filename_component(BASENAME ${TEST} NAME_WE)
     set(FULL_PATH_WITHOUT_EXTENSION "${DIRPART}/${BASENAME}")
-    # The -D option creates variables and pass them with the -P option to the runtests.cmake
+    # The -D option creates variables and pass them with the -P option to the runtests.cmake.
     add_test(NAME "${BASENAME}_test" COMMAND ${CMAKE_COMMAND} -DSTEREOCODE=$<TARGET_FILE:stereocode> -DTEST_FILE=${FULL_PATH_WITHOUT_EXTENSION} -P tests/runtests.cmake)
 endforeach()

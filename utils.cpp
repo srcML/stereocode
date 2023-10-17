@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #include "utils.hpp"
 
 // Checks if a container contains primitives.  

@@ -7,6 +7,7 @@
  * This file is part of the Stereocode application.
  */
 
+
 #include "PrimitiveTypes.hpp"
 
 // RETVAL == true if s == (ptypes[i] or usertypes[i])
