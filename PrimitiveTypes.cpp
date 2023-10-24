@@ -91,6 +91,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "ushort",
             "decimal",
             "string",
+            "void",
             "Boolean", // Same as bool, but used as System.Boolean
             "Byte",
             "SByte",
@@ -107,6 +108,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "UInt16",
             "Decimal",
             "String",
+            "Void"
         };
     }
     if (language == "Java") {
@@ -119,6 +121,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "long",
             "float",
             "double",
+            "void",
             "Byte",
             "Character",
             "Short",
@@ -126,7 +129,8 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "Long",
             "Float",
             "Double",
-            "String"
+            "String",
+            "Void"
         };
     }
 }

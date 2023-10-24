@@ -10,75 +10,7 @@
 
 #include "utils.hpp"
 
-// Checks if a container contains primitives.  
-// For example: std::vector<std::string>, std::map<int, std::string>.
-// Used for the collaborator and controller stereotypes on 
-//  the types of parameters, locals, method return and attributes
-//
-bool isPrimitiveContainer(const std::string& str) {
-    std::string pattern= "";
-    if (PRIMITIVES.getLanguage() == "C++"){
-        pattern = "\\w+(?=::)|::|<|>|vector|list|set|map|unordered_map|array|multimap|signed|unsigned|unordered_multimap|";
-        pattern += "forward_list|stack|queue|priority_queue|deque|multiset|unordered_set|unordered_multiset";
-    }
-    else if (PRIMITIVES.getLanguage() == "C#"){
-        pattern = "\\w+(?=\\.)|\\?|<|>|\\.|List|Dictionary|HashSet|Queue|Stack|SortedList|LinkedList|BitArray|";
-        pattern += "KeyedCollection|SortedSet|BlockingCollection|ConcurrentQueue|";
-        pattern += "ConcurrentStack|ConcurrentDictionary|ConcurrentBag|";
-        pattern += "ReadOnlyCollection|ReadOnlyDictionary|Tuple|ValueTuple|NameValueCollection|";
-        pattern += "StringCollection|StringDictionary|HybridDictionary|OrderedDictionary";
-    }
-    else if (PRIMITIVES.getLanguage() == "Java"){
-        pattern = "\\w+(?=\\.)|<|>|\\.|List|ArrayList|LinkedList|Set|HashSet|LinkedHashSet|SortedSet|TreeSet|";
-        pattern += "Map|HashMap|Hashtable|LinkedHashMap|SortedMap|TreeMap|Deque|ArrayDeque|Queue|";
-        pattern += "PriorityQueue|Vector|Stack|EnumSet|EnumMap|Iterator";
-    }
-    pattern = "(" + pattern + ")";
-    std::regex regexPattern(pattern);
-
-    std::string  result = std::regex_replace(str, regexPattern, "");
-    
-    std::istringstream ss(result);
-    std::string token = "";
-    while (std::getline(ss, token, ','))
-        if (!PRIMITIVES.isPrimitive(token)) return false;
-    return true;
-
-}
-
-// Checks if possibleAttribute is an attribute (C++) or field (C# and Java)
-//
-bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::string>& parameterName,
-                 const std::vector<std::string>& localVariableName, const std::string& possibleAttribute, bool modified, int& attributeIndex, int& parameterIndex) {
-    
-    // A local variable or a parameter could overshadow an attribute, or a field, if it has the same name. 
-    for (size_t i = 0; i < parameterName.size(); ++i) { 
-        if (possibleAttribute == parameterName[i]) {
-            parameterIndex = i;
-            attributeIndex = -2; // Parameter or local is found
-            return false;
-        }
-    }
-    for (size_t i = 0; i < localVariableName.size(); ++i) { 
-        if (possibleAttribute == localVariableName[i]) {
-            attributeIndex = -2; // Parameter or local is found
-            return false;
-        }
-    }
-    for (size_t i = 0; i < attribute.size(); ++i) {
-        if (possibleAttribute == attribute[i].getName()){
-            if (modified && attribute[i].getModified()) return false;
-            if (modified) attribute[i].setModified(true);
-            attributeIndex = i;
-            return true; 
-        } 
-    }
-    return false; // Not an attribute, or local, or parameter
-}
-
 // Removes specifiers from type name.
-// Used for the collaborator and controller stereotypes on 
-//  the types of parameters, locals, method return and attributes
 //
 std::string removeSpecifiers(const std::string& type) {
     std::string result = type;
@@ -126,6 +58,78 @@ std::string removeSpecifiers(const std::string& type) {
 
     return result;
 }
+
+// Remove containers
+// For example: std::vector<std::string>, std::map<int, std::string>.
+//
+std::string removeContainers(const std::string& type){
+    std::string pattern= "";
+    if (PRIMITIVES.getLanguage() == "C++"){
+        pattern = "\\w+(?=::)|::|<|>|vector|list|set|map|unordered_map|array|multimap|signed|unsigned|unordered_multimap|";
+        pattern += "forward_list|stack|queue|priority_queue|deque|multiset|unordered_set|unordered_multiset";
+    }
+    else if (PRIMITIVES.getLanguage() == "C#"){
+        pattern = "\\w+(?=\\.)|\\?|<|>|\\.|List|Dictionary|HashSet|Queue|Stack|SortedList|LinkedList|BitArray|";
+        pattern += "KeyedCollection|SortedSet|BlockingCollection|ConcurrentQueue|";
+        pattern += "ConcurrentStack|ConcurrentDictionary|ConcurrentBag|";
+        pattern += "ReadOnlyCollection|ReadOnlyDictionary|Tuple|ValueTuple|NameValueCollection|";
+        pattern += "StringCollection|StringDictionary|HybridDictionary|OrderedDictionary";
+    }
+    else if (PRIMITIVES.getLanguage() == "Java"){
+        pattern = "\\w+(?=\\.)|<|>|\\.|List|ArrayList|LinkedList|Set|HashSet|LinkedHashSet|SortedSet|TreeSet|";
+        pattern += "Map|HashMap|Hashtable|LinkedHashMap|SortedMap|TreeMap|Deque|ArrayDeque|Queue|";
+        pattern += "PriorityQueue|Vector|Stack|EnumSet|EnumMap|Iterator";
+    }
+    pattern = "(" + pattern + ")";
+    std::regex regexPattern(pattern);
+
+    std::string result = std::regex_replace(type, regexPattern, "");
+    return result;
+}
+
+
+// Checks if a type is primitive.  
+//
+bool isPrimitiveType(const std::string& type) {
+    std::istringstream ss(type);
+    std::string token = "";
+    while (std::getline(ss, token, ','))
+        if (!PRIMITIVES.isPrimitive(token)) return false;
+    return true;
+}
+
+
+// Checks if possibleAttribute is an attribute (C++) or field (C# and Java)
+//
+bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::string>& parameterName,
+                 const std::vector<std::string>& localVariableName, const std::string& possibleAttribute, bool modified, int& attributeIndex, int& parameterIndex) {
+    
+    // A local variable or a parameter could overshadow an attribute, or a field, if it has the same name. 
+    for (size_t i = 0; i < parameterName.size(); ++i) { 
+        if (possibleAttribute == parameterName[i]) {
+            parameterIndex = i;
+            attributeIndex = -2; // Parameter or local is found
+            return false;
+        }
+    }
+    for (size_t i = 0; i < localVariableName.size(); ++i) { 
+        if (possibleAttribute == localVariableName[i]) {
+            attributeIndex = -2; // Parameter or local is found
+            return false;
+        }
+    }
+    for (size_t i = 0; i < attribute.size(); ++i) {
+        if (possibleAttribute == attribute[i].getName()){
+            if (modified && attribute[i].getModified()) return false;
+            if (modified) attribute[i].setModified(true);
+            attributeIndex = i;
+            return true; 
+        } 
+    }
+    return false; // Not an attribute, or local, or parameter
+}
+
+
 
 // Removes all whitespace from string
 //

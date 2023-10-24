@@ -15,6 +15,7 @@
 #include <unordered_map>
 #include <iomanip> 
 
+
 class classModelCollection{
 public:
                          classModelCollection   () : classCollection(), freeFunction() {}
@@ -27,7 +28,7 @@ public:
 
     void                 outputWithStereotypes  (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>);
     void                 outputReport           (std::ofstream&);
-
+    void                 outputCSV();
 protected:
     std::unordered_map<std::string, classModel>     classCollection; // List of classes and their methods
     std::vector<std::string>                        freeFunction;    // List of free functions

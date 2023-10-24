@@ -45,7 +45,7 @@ add_compile_options(
 enable_testing()
 file(COPY tests DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB TESTFILES ${CMAKE_CURRENT_BINARY_DIR}/tests/*.xml)
-list(FILTER TESTFILES EXCLUDE REGEX ".xml.BASE.txt|.xml.report.txt|runtests.cmake")
+list(FILTER TESTFILES EXCLUDE REGEX ".xml.BASE.txt|.xml.report.txt|runtests.cmake|stereotypes.xml")
 foreach(TEST ${TESTFILES})
     message(STATUS "Add test case ${TEST}")
     get_filename_component(DIRPART ${TEST} DIRECTORY)

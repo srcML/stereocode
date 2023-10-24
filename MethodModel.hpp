@@ -40,17 +40,15 @@ public:
     bool                     getParaOrLocalReturned              () const                { return paraOrLocalReturned;             }
     bool                     getReturnsNew                       () const                { return returnsNew;                      }
     bool                     getReturnsCall                      () const                { return returnsCall;                     }
+    bool                     getMethodCallOnAttribute            () const                { return methodCallOnAttribute;           }
+    bool                     getFunctionCallOnAttribute          () const                { return functionCallOnAttribute;                     }
     bool                     getAttributeUsed                    () const                { return attributeUsed;                   }
     bool                     getEmpty                            () const                { return empty;                           }
     bool                     getParameterChanged                 () const                { return parameterChanged;                }
     bool                     getNonPrimitiveAttribute            () const                { return nonPrimitiveAttribute;           }
-    bool                     getNonPrimitiveAttributeExternal    () const                { return nonPrimitiveAttributeExternal;   }
     bool                     getNonPrimitiveReturnType           () const                { return nonPrimitiveReturnType;          }
-    bool                     getNonPrimitiveReturnTypeExternal   () const                { return nonPrimitiveReturnTypeExternal;  }
     bool                     getNonPrimitiveLocal                () const                { return nonPrimitiveLocal;               }
-    bool                     getNonPrimitiveLocalExternal        () const                { return nonPrimitiveLocalExternal;       }
-    bool                     getNonPrimitiveParamater            () const                { return nonPrimitiveParamater;           }
-    bool                     getNonPrimitiveParamaterExternal    () const                { return nonPrimitiveParamaterExternal;   }        
+    bool                     getNonPrimitiveParamater            () const                { return nonPrimitiveParamater;           }       
     int                      getAttributeModified                () const                { return attributeModified;               }
 
     std::string              getXpath                            (int unitNumber)        { return xpath[unitNumber];               }   
@@ -59,13 +57,13 @@ public:
 
     void                     findMethodInfo             (srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&, std::string);
     void                     findMethodName             (srcml_archive*, srcml_unit*);
-    void                     findMethodReturnType       (srcml_archive*, srcml_unit*, std::string);
+    void                     findMethodReturnType       (srcml_archive*, srcml_unit*);
     void                     findParameterList          (srcml_archive*, srcml_unit*);
     void                     findLocalVariablesNames    (srcml_archive*, srcml_unit*);
-    void                     findLocalVariablesTypes    (srcml_archive*, srcml_unit*, std::string);
+    void                     findLocalVariablesTypes    (srcml_archive*, srcml_unit*);
     void                     findParametersNames        (srcml_archive*, srcml_unit*);
-    void                     findParametersTypes        (srcml_archive*, srcml_unit*, std::string);
-    void                     findAllCalls               (srcml_archive*, srcml_unit*);
+    void                     findParametersTypes        (srcml_archive*, srcml_unit*);
+    void                     findAllCalls               (srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&);
     void                     findReturnCalls            (srcml_archive* , srcml_unit*);
     void                     findReturnExpressions      (srcml_archive*, srcml_unit*);   
     int                      findAssignOperatorAttribute(srcml_archive*, srcml_unit*, std::vector<AttributeInfo>&);
@@ -88,6 +86,7 @@ protected:
     std::string                             returnTypeSeparated;           // Returned type with specifiers and whitespaces removed
     std::string                             parameterList;                 // Method parameter list
     std::vector<std::string>                parameterName;                 // List of all parameters names
+    std::vector<std::string>                parameterNameUnparsed;         // List of all parameters names with array indicies kept
     std::vector<std::string>                parameterType;                 // List of all parameters names
     std::vector<std::string>                localVariableName;             // List of all local variables names
     std::vector<std::string>                localVariableType;             // List of all local variables types
@@ -96,26 +95,23 @@ protected:
     std::vector<std::string>                methodCall;                    // a.b()
     std::vector<std::string>                constructorCall;               // uses "new" operator
     std::vector<std::string>                returnExpression;              // List of all return expressions in a method
-    std::unordered_map<int, std::string>    xpath;                         // unit number along with unique xpath for the method
+    std::unordered_map<int, std::string>    xpath;                         // Unit number along with unique xpath for the method
     std::string                             methodSrcML;                   // Method srcML
-    bool                                    constMethod;                   // Is it a const method?
+    bool                                    constMethod;                   // Is it a const method? C++ only
     bool                                    attributeReturned;             // Does it return any attribute?
     bool                                    paraOrLocalReturned;           // Does it return a local or a parameter?
     bool                                    returnsNew;                    // Does any of the return expressions (if any) contain 'new' operator?
     bool                                    returnsCall;                   // Does any of the return expressions (if any) contain a call? 
+    bool                                    methodCallOnAttribute;         // Does method have any method call on attribute? 
+    bool                                    functionCallOnAttribute;       // Does method have any function call on attribute?
     bool                                    attributeUsed;                 // Does it use any attribute?
     bool                                    parameterChanged;              // Does it change any parameter passed by reference?
     bool                                    empty;                         // Empty method (comments not counted)
     bool                                    nonPrimitiveAttribute;         // True if method uses at least 1 non-primitive attribute
-    bool                                    nonPrimitiveAttributeExternal; // True if all of the non-primitive attributes (if any) are not of the same type as class  
     bool                                    nonPrimitiveReturnType;        // True if return type is non-primitive 
-    bool                                    nonPrimitiveReturnTypeExternal;// True if all of the non-primitive returns (if any) are not of the same type as class  
     bool                                    nonPrimitiveLocal;             // True if method uses at least 1 non-primitive local variable
-    bool                                    nonPrimitiveLocalExternal;     // True if all of the non-primitive local variables (if any) are not of the same type as class  
     bool                                    nonPrimitiveParamater;         // True if method uses at least 1 non-primitive parameter
-    bool                                    nonPrimitiveParamaterExternal; // True if all of the non-primitive parameters (if any) are not of the same type as class      
-    int                                     attributeModified;             // Number of modified attributes 
-    
+    int                                     attributeModified;             // Number of modified attributes    
 };
 
 #endif

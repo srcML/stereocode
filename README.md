@@ -1,25 +1,25 @@
 # 🛠 **Stereocode 1.0**
 
-## 📋 **Prerequisites**
-- [srcml 1.0+](https://www.srcml.org/)
-- [cmake 3.17+](https://cmake.org/)
-
 
 ## 💡 **What does it do?**
 **Stereocode** classifies **methods** and **classes** based on their **stereotypes**.
 
 > Class and method stereotypes are defined in two papers presented at the **IEEE International Conference on Software Maintenance (ICSM)** in 2006 and 2010 by Dragan, Collard, and Maletic.
 
-**Stereocode**  takes a srcML-formatted archive as input, performs static analysis on the code, and annotates the srcML with labels indicating the detected stereotypes. The output is a srcML format with stereotype attributes embedded within class and function tags. An optional report summarizing the stereotypes of classes and their methods can also be generated.
+**Stereocode**  takes a srcML-formatted archive as input, performs static analysis on the code, and annotates the srcML with labels indicating the detected stereotypes. The output is a srcML archive with stereotype attributes embedded within class and function tags. An optional report summarizing the stereotypes of classes and their methods can also be generated.
 
-*Users can use this output for further processing or analysis. For instance, the stereotype information can be embedded as documentation in the source code (using comments, **Doxygen**, **Javadoc**, etc.).*
+*This output can be used for further processing or analysis. For instance, the stereotype information can be embedded as documentation in the source code (using comments, **Doxygen**, **Javadoc**, etc.).*
 
 The tool currently supports **C++**, **Java**, and **C#**.
 
 ## 🔧 Installation and Build
-1. Clone or download this repository.
+1. Prerequisites
+- [srcml 1.1+](https://www.srcml.org/)
+- [cmake 3.17+](https://cmake.org/)
 
-2. Build using cmake:
+2. Clone or download this repository.
+
+3. Build using cmake:
 
 ```bash
 cmake CMakeLists.txt -B build_path
@@ -85,6 +85,7 @@ For more options and help:
 
 <span style='color: lightgreen;'>**-c, --large-class \[int]:**</span> Define a parameter to determine the large-class stereotype. Default is 21.
 
+Note: If you're processing large input archives, consider using the --report-only option as it avoids the slow XML output generation.
 
 ## 📄 Output
 

@@ -16,6 +16,7 @@
 
 extern primitiveTypes PRIMITIVES;
 extern int            METHODS_PER_CLASS_THRESHOLD;
+extern int methodC;
 
 class classModel {
 public:
@@ -58,6 +59,7 @@ public:
 
     
           std::string                                   getClassStereotype        () const;
+          std::vector<std::string>                      getStereotypeList         () const          { return classStereotype;     }
           std::string                                   getClassName              () const          { return className;           }
     const std::vector<std::string>&                     getParentClassName        () const          { return parentClassName;     }
           std::vector<AttributeInfo>                    getAttribute              () const          { return attribute;           }

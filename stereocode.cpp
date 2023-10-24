@@ -101,16 +101,19 @@ int main(int argc, char const *argv[]) {
         unit = srcml_archive_read_unit(archive);
     }
 
+    bool isCsv = false;
     // Find method and class stereotypes
     if (units.size() > 0){
         classModelCollection classObj(archive, units);
         if (!outputReportOnly)
             classObj.outputWithStereotypes(archive, outputArchive, units);
 
-       if (outputReport || outputReportOnly){
+        if (outputReport || outputReportOnly){
             classObj.outputReport(reportFile);
             reportFile.close();
         }
+        if (isCsv)
+            classObj.outputCSV();
     }
     
     // Clean up

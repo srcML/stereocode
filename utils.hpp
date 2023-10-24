@@ -22,11 +22,12 @@ extern       primitiveTypes PRIMITIVES;
 
 const        std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "\\?\\?=", ">>>=" };
 
-bool         isPrimitiveContainer (const std::string&);
+bool         isPrimitiveType      (const std::string&);
 bool         isAttribute          (std::vector<AttributeInfo>&, const std::vector<std::string>&, 
                                    const std::vector<std::string>&, const std::string&, bool, int&, int&);
 
 std::string  removeSpecifiers     (const std::string&);
+std::string  removeContainers     (const std::string&);
 std::string  trimWhitespace       (const std::string&);
 std::string  Ltrim                (const std::string&);
 std::string  Rtrim                (const std::string&);
