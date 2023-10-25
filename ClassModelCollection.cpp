@@ -104,7 +104,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
 //  you can inherit from generic class itself.
 // For example:
 //  myClass --> childClass : myClass<T> or childClass : myClass<int>
-//  specializedClass<int> --> childClass : myClass<int>
+//  specializedClass<int> --> childClass : specializedClass<int>
 //
 // In Java and C#, you can inherit from the generic class or specialize the inheritance.
 // For example:
@@ -135,7 +135,7 @@ void classModelCollection::findInheritedAttribute(){
 //  They could belong to a namespace or to an external class (class not defined in the archive),
 //   so classes need to be found first 
 //
-// Cases for functions and methods 
+// Cases for functions and methods (defined externally)
 //   Cases:
 //      Method (Foo) could belong to a specialized templated class: 
 //          template<typename T> class MyClass{}; // Generic templated class.
@@ -258,6 +258,7 @@ bool classModelCollection::isFriendFunction(srcml_archive* archive, srcml_unit* 
 //           <class st:stereotype="boundary"> ... ></class>
 //
 void classModelCollection::outputWithStereotypes(srcml_archive* archive, srcml_archive* outputArchive, std::vector<srcml_unit*> units) {   
+    bool isTransform = false;
     for (size_t i = 0; i < units.size(); i++){
         for (auto& pair : classCollection){  // Add stereotype attribute to each class
             std::string xpath = pair.second.getXpath(i);
@@ -265,6 +266,7 @@ void classModelCollection::outputWithStereotypes(srcml_archive* archive, srcml_a
                 srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
                                                     "http://www.srcML.org/srcML/stereotype",
                                                     "stereotype", pair.second.getClassStereotype().c_str());
+                isTransform = true;
             }
             std::unordered_map<std::string, methodModel>& method = pair.second.getMethod();
             for (auto& pairM : method) { // Add stereotype attribute to each method/function
@@ -275,19 +277,24 @@ void classModelCollection::outputWithStereotypes(srcml_archive* archive, srcml_a
                     srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
                                                     "http://www.srcML.org/srcML/stereotype",
                                                     "stereotype", stereotype.c_str());       
+                    isTransform = true;
                 }
             } 
         }
-        srcml_transform_result* result = nullptr; 
-        srcml_unit_apply_transforms(archive, units[i], &result);
-        int n = srcml_transform_get_unit_size(result);  
-        for (int i = 0; i < n; i++){
-            srcml_unit* tempUnit = srcml_transform_get_unit(result, i);
-            srcml_archive_write_unit(outputArchive, tempUnit);
+        if (isTransform){
+            srcml_transform_result* result = nullptr; 
+            srcml_unit_apply_transforms(archive, units[i], &result);
+            int n = srcml_transform_get_unit_size(result);  
+            for (int i = 0; i < n; i++){
+                srcml_unit* tempUnit = srcml_transform_get_unit(result, i);
+                srcml_archive_write_unit(outputArchive, tempUnit);
+            }
+            srcml_transform_free(result); 
+            srcml_clear_transforms(archive);   
         }
-        srcml_transform_free(result);                     
+        isTransform = false;
+                 
     }
-    srcml_clear_transforms(archive);
 }
 
 // Outputs a report file for a class (tab separated)
@@ -312,7 +319,7 @@ void classModelCollection::outputReport(std::ofstream& out) {
 }
 
 
-void classModelCollection::outputCSV() {
+void classModelCollection::outputCSV(std::string fname) {
     std::unordered_map<std::string, int> classStereotypes = {
         {"entity", 0},
         {"minimal-entity", 0},
@@ -352,7 +359,7 @@ void classModelCollection::outputCSV() {
 
     std::unordered_map<std::string, int> uniqueMethodStereotypes;  
 
-    std::ofstream out("method_class_stereotypes.csv");
+    std::ofstream out(fname+".method_class_stereotypes.csv");
   
     // Method and class stereotypes
     //
@@ -388,7 +395,7 @@ void classModelCollection::outputCSV() {
     out.close();
 
     // Stereotype View
-    std::ofstream outU("stereotype_view.csv");
+    std::ofstream outU(fname+".stereotype_view.csv");
     outU << "Unique Method Stereotype,Method Count,%" <<std::endl;
     int total = 0;
     for (auto& pair : uniqueMethodStereotypes){
@@ -401,7 +408,7 @@ void classModelCollection::outputCSV() {
 
     // Method View
     //
-    std::ofstream outM("method_view.csv");
+    std::ofstream outM(fname+".method_view.csv");
     outM << "Method Stereotype,Method Count,%" <<std::endl;
     total = 0;
     for (auto& pair : methodStereotypes){
@@ -414,7 +421,7 @@ void classModelCollection::outputCSV() {
 
     // Class View
     //
-    std::ofstream outS("class_view.csv");
+    std::ofstream outS(fname+".class_view.csv");
     total = 0;
     for (auto& pair : classStereotypes){
         outS << pair.first << ",";
@@ -426,7 +433,7 @@ void classModelCollection::outputCSV() {
 
     // Category view
     //
-    std::ofstream outC("category_view.csv");
+    std::ofstream outC(fname+".category_view.csv");
     outM << "Class Stereotype,Class Count,%" <<std::endl;
     int getters = methodStereotypes["get"] + methodStereotypes["non-const-get"];
     int accessors = getters + methodStereotypes["predicate"] + methodStereotypes["non-const-predicate"] +

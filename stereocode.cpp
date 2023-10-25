@@ -113,7 +113,7 @@ int main(int argc, char const *argv[]) {
             reportFile.close();
         }
         if (isCsv)
-            classObj.outputCSV();
+            classObj.outputCSV(inputFile);
     }
     
     // Clean up
