@@ -24,14 +24,14 @@ public:
          classModel                  (srcml_archive*, srcml_unit*, std::string, int);
          
     void findClassName               (srcml_archive*, srcml_unit*);
-    void findClassInfo               (srcml_archive*, srcml_unit*, int, int);
+    void findClassData               (srcml_archive*, srcml_unit*, int);
     void findFriendFunction          (srcml_archive*, srcml_unit*);
     void findParentClassName         (srcml_archive*, srcml_unit*);
     void findAttributeName           (srcml_archive*, srcml_unit*);
     void findAttributeType           (srcml_archive*, srcml_unit*);
     void findNonPrivateAttributeName (srcml_archive*, srcml_unit*);
     void findNonPrivateAttributeType (srcml_archive*, srcml_unit*);
-    void findMethod                  (srcml_archive*, srcml_unit*, int, int);
+    void findMethod                  (srcml_archive*, srcml_unit*, int);
     void findInheritedAttributes     ();
 
     void ComputeClassStereotype();

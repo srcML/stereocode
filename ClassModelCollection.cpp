@@ -18,7 +18,7 @@ classModelCollection::classModelCollection (srcml_archive* archive, std::vector<
     if (PRIMITIVES.getLanguage() == "C++")
         findFreeFunction(archive, units); 
 
-    for(auto& pair : classCollection){
+    for (auto& pair : classCollection){
         pair.second.ComputeMethodStereotype();
         pair.second.ComputeClassStereotype();
     }
@@ -42,7 +42,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
     int classOrder = 1;
     for (size_t j = 0; j < units.size(); j++){
         std::string lang = srcml_unit_get_language(units[j]);    
-        if (lang== "C++" || lang == "C#" || lang == "Java"){
+        if (lang == "C++" || lang == "C#" || lang == "Java"){
             PRIMITIVES.setLanguage(lang);    
             srcml_append_transform_xpath(archive, "//src:class[not(ancestor::src:class)]"); 
             srcml_transform_result* result = nullptr;
@@ -53,6 +53,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
             for (int i = 0; i < n; ++i) {    
                 resultUnit = srcml_transform_get_unit(result, i);
                 srcml_archive* temp = srcml_archive_create();
+
                 char* unparsed = nullptr;
                 size_t size = 0;
                 srcml_archive_write_open_memory(temp, &unparsed, &size);
@@ -63,11 +64,10 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
                 temp = srcml_archive_create();
                 srcml_archive_read_open_memory(temp, unparsed, size);
                 srcml_unit* unit = srcml_archive_read_unit(temp); // This unit is a class only, not a whole unit.
+                           
+                std::string xpath = "//src:class[not(ancestor::src:class)][" + std::to_string(classOrder) + "]";
                 
-                std::string fileName = srcml_unit_get_filename(resultUnit);
-                std::string xpath = "//src:unit[@filename='" + fileName + "']//src:class[" + std::to_string(classOrder) + "]";
-                
-                classModel c(temp, unit, xpath, i);
+                classModel c(temp, unit, xpath, j);
 
                 // In C++, class names are usually in the form of:
                 //      myClass  
@@ -84,7 +84,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
                 std::string className = trimWhitespace(c.getClassName()); // Remove all whitespace for easier matching with method names.
                 auto result = classCollection.insert({className, c}); // Only inserts key-value pair if they don't exist (class doesn't exists yet).
                 if (result.second) // Class doesn't exist and was inserted
-                    result.first->second.findClassInfo(temp, unit, classOrder, j); // Do class analysis.                             
+                    result.first->second.findClassData(temp, unit, j); // Do class analysis.                             
                 free(unparsed);
                 srcml_unit_free(unit);
                 srcml_archive_close(temp);
@@ -179,8 +179,7 @@ void classModelCollection::findFreeFunction(srcml_archive* archive, std::vector<
             srcml_archive_read_open_memory(unitArchive, unparsed, size);
             srcml_unit* unit = srcml_archive_read_unit(unitArchive);
 
-            std::string fileName = srcml_unit_get_filename(resultUnit);
-            std::string xpath = "//src:unit[@filename='" + fileName + "']//src:function[not(ancestor::src:class)][" + std::to_string(functionOrder) + "]";
+            std::string xpath = "//src:function[not(ancestor::src:class)][" + std::to_string(functionOrder) + "]";
 
             methodModel function(unitArchive, unit, xpath, j); // Create function and perform basic analysis on it
 
@@ -291,6 +290,9 @@ void classModelCollection::outputWithStereotypes(srcml_archive* archive, srcml_a
             }
             srcml_transform_free(result); 
             srcml_clear_transforms(archive);   
+        }
+        else{
+            srcml_archive_write_unit(outputArchive, units[i]);
         }
         isTransform = false;
                  

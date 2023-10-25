@@ -18,7 +18,7 @@ classModel::classModel (srcml_archive* archive, srcml_unit* unit, std::string xp
     findClassName(archive, unit);
 }
 
-void classModel::findClassInfo(srcml_archive* archive, srcml_unit* unit, int classOrder, int UnitNumber){
+void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, int UnitNumber){
     if (PRIMITIVES.getLanguage() == "C++")
         findFriendFunction(archive, unit);
     findParentClassName(archive, unit);
@@ -26,7 +26,27 @@ void classModel::findClassInfo(srcml_archive* archive, srcml_unit* unit, int cla
     findAttributeType(archive, unit);
     findNonPrivateAttributeName(archive, unit);
     findNonPrivateAttributeType(archive, unit);
-    findMethod(archive, unit, classOrder, UnitNumber);
+    findMethod(archive, unit, UnitNumber);
+}
+
+void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
+    std::string xpath = "//src:class/src:name[count(ancestor::src:class) = 1]";
+    srcml_append_transform_xpath(archive, xpath.c_str());
+    srcml_transform_result* result = nullptr;
+    srcml_unit_apply_transforms(archive, unit, &result);
+    int n = srcml_transform_get_unit_size(result);
+
+    if (n == 1){
+        srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
+        char *name = nullptr;
+        size_t size = 0;
+        srcml_unit_unparse_memory(resultUnit, &name, &size);
+        className = name;
+
+        free(name);    
+    }
+    srcml_clear_transforms(archive);
+    srcml_transform_free(result); 
 }
 
 void classModel::findFriendFunction(srcml_archive* archive, srcml_unit* unit) {
@@ -49,25 +69,7 @@ void classModel::findFriendFunction(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result); 
 }
 
-void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
-    std::string xpath = "//src:class/src:name[count(ancestor::src:class) = 1]";
-    srcml_append_transform_xpath(archive, xpath.c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1){
-        srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
-        char *name = nullptr;
-        size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &name, &size);
-        className = name;
-
-        free(name);    
-    }
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result); 
-}
 
 // C++ supports multiple inheritance.
 // Java and C# only support single inheritance from other classes,
@@ -250,10 +252,10 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
 // Nested functions in C# are ignored.
 // C++ and Java don't have nested functions.
 //
-void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, int classOrder, int unitNumber) {
+void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     int methodOrder = 1;
-    std::string xpath = "//src:function[count(ancestor::src:class) = 1]";
-    srcml_append_transform_xpath(archive, xpath.c_str());
+    std::string xpathM = "//src:function[count(ancestor::src:class) = 1]";
+    srcml_append_transform_xpath(archive, xpathM.c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -274,11 +276,9 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, int classO
         srcml_archive_read_open_memory(temp, unparsed, size);
         srcml_unit* unitM = srcml_archive_read_unit(temp);
 
-        std::string fileName = srcml_unit_get_filename(resultUnit);
-        std::string xpathM = "//src:unit[@filename='" + fileName + "']";
-        xpathM += "//src:class[" + std::to_string(classOrder) + "]//src:function[" + std::to_string(methodOrder) + "]";
+        std::string xpathN = xpath[unitNumber] + "//src:function[count(ancestor::src:class) = 1][" + std::to_string(methodOrder) + "]";
 
-        methodModel m(temp, unitM, xpathM, unitNumber); 
+        methodModel m(temp, unitM, xpathN, unitNumber); 
         addMethod(temp, unitM, m, trimWhitespace(m.getMethodHeader()));
 
         free(unparsed);
