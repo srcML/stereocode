@@ -12,8 +12,9 @@
 #include "CLI11.hpp"
 #include "ClassModelCollection.hpp"
 
-primitiveTypes PRIMITIVES;                        // Primitives type per language + any user supplied
-int            METHODS_PER_CLASS_THRESHOLD = 21;  // Threshold for large class stereotype (from ICSM10)
+primitiveTypes PRIMITIVES;                                           // Primitives type per language + any user supplied
+int            METHODS_PER_CLASS_THRESHOLD = 21;                     // Threshold for large class stereotype (from ICSM10)
+std::unordered_map<int, std::vector<std::pair<std::string, std::string>>> xpathList; // Vector index = unit number. Each map is a pair of xpath and stereotype
 
 int main(int argc, char const *argv[]) {
 
@@ -23,6 +24,7 @@ int main(int argc, char const *argv[]) {
     bool                outputReport       = false;
     bool                outputReportOnly   = false;
     bool                overWriteInput     = false;
+    bool                outputCsvViews     = false;
     srcml_archive*      archive            = srcml_archive_create();
     srcml_archive*      outputArchive      = srcml_archive_create();
     std::ofstream       reportFile;
@@ -31,13 +33,14 @@ int main(int argc, char const *argv[]) {
     CLI::App app{"StereoCode: Determines method and class stereotypes\n"
                  "Supports C++, Java, and C#\n" };
     
-    app.add_option("input-archive",      inputFile,                   "File name of a srcML archive")->required();
-    app.add_option("-o,--output-file",   outputFile,                  "File name of output - srcML archive with stereotypes (optional)");
-    app.add_option("-p,--primitives",    primitivesFile,              "File name of user supplied primitive types (one per line without spaces)");
-    app.add_flag  ("-r,--report",        outputReport,                "Output optional report file - *.report.txt.");
-    app.add_flag  ("-d,--report-only",   outputReportOnly,            "Only output a report file - *.report.txt. Overrides -o and -v.");
-    app.add_flag  ("-v,--overwrite",     overWriteInput,              "Over write input file with stereotype output. Overrides -o.");
-    app.add_option("-c,--large-class",   METHODS_PER_CLASS_THRESHOLD, "The # of methods threshold for a large class stereotype (default=21)");
+    app.add_option("input-archive",           inputFile,                   "File name of a srcML archive")->required();
+    app.add_option("-o,--output-file",        outputFile,                  "File name of output - srcML archive with stereotypes (optional)");
+    app.add_option("-p,--primitives",         primitivesFile,              "File name of user supplied primitive types (one per line without spaces)");
+    app.add_flag  ("-r,--report",             outputReport,                "Output optional report file - *.report.txt.");
+    app.add_flag  ("-d,--report-only",        outputReportOnly,            "Only output a report file - *.report.txt. Overrides -o and -v.");
+    app.add_flag  ("-v,--overwrite",          overWriteInput,              "Over write input file with stereotype output. Overrides -o.");
+    app.add_option("-c,--large-class",        METHODS_PER_CLASS_THRESHOLD, "The # of methods threshold for a large class stereotype (default=21)");
+    app.add_flag  ("-s,--stereotype-views",   outputCsvViews,              "Generate CSV files capturing different views of method and class stereotypes");
 
     CLI11_PARSE(app, argc, argv);
 
@@ -101,7 +104,6 @@ int main(int argc, char const *argv[]) {
         unit = srcml_archive_read_unit(archive);
     }
 
-    bool isCsv = false;
     // Find method and class stereotypes
     if (units.size() > 0){
         classModelCollection classObj(archive, units);
@@ -112,8 +114,11 @@ int main(int argc, char const *argv[]) {
             classObj.outputReport(reportFile);
             reportFile.close();
         }
-        if (isCsv)
-            classObj.outputCSV(inputFile);
+        if (outputCsvViews){
+             std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
+             classObj.outputCSV(InputFileNoExt+"_");
+        }
+            
     }
     
     // Clean up

@@ -15,23 +15,23 @@
 #include <unordered_map>
 #include <iomanip> 
 
-
 class classModelCollection{
 public:
-                         classModelCollection   () : classCollection(), freeFunction() {}
+                         classModelCollection   () : classCollection(), classGeneric(), freeFunction() {}
                          classModelCollection   (srcml_archive*, std::vector<srcml_unit*>);
 
     void                 findClassInfo          (srcml_archive*, std::vector<srcml_unit*>);
     void                 findFreeFunction       (srcml_archive*, std::vector<srcml_unit*>);
     void                 findInheritedAttribute ();
-    bool                 isFriendFunction       (srcml_archive*, srcml_unit*, methodModel&, std::string);
+    bool                 isFriendFunction       (srcml_archive*, srcml_unit*, methodModel&, std::string, int);
 
     void                 outputWithStereotypes  (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>);
     void                 outputReport           (std::ofstream&);
     void                 outputCSV              (std::string);
 protected:
-    std::unordered_map<std::string, classModel>     classCollection; // List of classes and their methods
-    std::vector<std::string>                        freeFunction;    // List of free functions
+    std::unordered_map<std::string, classModel>     classCollection;              // List of class names and their models
+    std::unordered_map<std::string, std::string>    classGeneric;                 // List of generic class names with and without <> to inheritance matching
+    std::vector<std::string>                        freeFunction;                 // List of free functions
 };
 
 #endif

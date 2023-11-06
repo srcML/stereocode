@@ -7,16 +7,12 @@
  * This file is part of the Stereocode application.
  */
 
-
 #include "ClassModelCollection.hpp"
 
 classModelCollection::classModelCollection (srcml_archive* archive, std::vector<srcml_unit*> units) : classModelCollection() {
-
     findClassInfo(archive, units); 
+    findFreeFunction(archive, units); 
     findInheritedAttribute();
-
-    if (PRIMITIVES.getLanguage() == "C++")
-        findFreeFunction(archive, units); 
 
     for (auto& pair : classCollection){
         pair.second.ComputeMethodStereotype();
@@ -24,31 +20,29 @@ classModelCollection::classModelCollection (srcml_archive* archive, std::vector<
     }
 }
 
-// Finds all classes in an archive. Performs analysis on these classes.
-// For C# and Java, interfaces are not considered.
-//      C# interfaces don't have any fields (attributes), but could have method definitions. 
-//      Java interfaces could have fields and methods definitions.
-// Structs are not being considered in C++ or C#. Java doesn't have structs.
-// Nested classes are ignored.
+// Finds all classes in an archive and performs analysis on these classes
 //
-// Cases for multiple classes with the same name. They could be:
-//      In Different namespaces.
-//      Differentiated by preprocessor directives.
-//      In different files.
-// Usually, these classes behave in the same way.
-// Thus, only one is stereotyped (first one collected) and is applied to all. 
+// In C++, class names are usually in the form of:
+//      myClass  
+// or  
+//      myClass<type1, type2, ...> for a specialized templated class from myClass
+// In C++, a specialized templated class can exist if there is a generic one
+//
+// In C# and Java, there is no concept of a specialized templated class, but one could define:
+//      myClass
+// or
+//      myClass<T, G, ... >
+// Where these two are different classes. First is a normal class and second is a generic 
 //
 void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<srcml_unit*> units){
-    int classOrder = 1;
     for (size_t j = 0; j < units.size(); j++){
         std::string lang = srcml_unit_get_language(units[j]);    
         if (lang == "C++" || lang == "C#" || lang == "Java"){
-            PRIMITIVES.setLanguage(lang);    
+            PRIMITIVES.setLanguage(lang); // Primitives change depending on the language of the unit
             srcml_append_transform_xpath(archive, "//src:class[not(ancestor::src:class)]"); 
             srcml_transform_result* result = nullptr;
             srcml_unit_apply_transforms(archive, units[j], &result);
             int n = srcml_transform_get_unit_size(result);
-
             srcml_unit* resultUnit = nullptr;
             for (int i = 0; i < n; ++i) {    
                 resultUnit = srcml_transform_get_unit(result, i);
@@ -63,75 +57,37 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
                     
                 temp = srcml_archive_create();
                 srcml_archive_read_open_memory(temp, unparsed, size);
-                srcml_unit* unit = srcml_archive_read_unit(temp); // This unit is a class only, not a whole unit.
-                           
-                std::string xpath = "//src:class[not(ancestor::src:class)][" + std::to_string(classOrder) + "]";
-                
-                classModel c(temp, unit, xpath, j);
+                srcml_unit* unit = srcml_archive_read_unit(temp); // This unit is a class only, not a whole unit
+             
+                classModel c(temp, unit, lang); // Builds class model with basic analysis
+                std::string className = trimWhitespace(c.getClassName());        
+                std::string classXpath = "//src:class[not(ancestor::src:class)][" + std::to_string(i + 1) + "]"; 
 
-                // In C++, class names are usually in the form of:
-                //      myClass  
-                // or  
-                //      myClass<type1, type2, ...> for specialized templated class from myClass.
-                // In C++, a specialized templated class can exist if there is a generic one.
-                //
-                // In C# and Java, there is no concept of a specialized templated class, but one could define:
-                //      myClass
-                // or
-                //      myClass<T, G, ... >
-                // Where these two are different classes. First is normal class and second is a generic. 
+                if (lang != "C++")
+                    classGeneric.insert({className.substr(0, className.find("<")), className}); // Needed for inheritance in Java and C#
 
-                std::string className = trimWhitespace(c.getClassName()); // Remove all whitespace for easier matching with method names.
-                auto result = classCollection.insert({className, c}); // Only inserts key-value pair if they don't exist (class doesn't exists yet).
-                if (result.second) // Class doesn't exist and was inserted
-                    result.first->second.findClassData(temp, unit, j); // Do class analysis.                             
+                auto result = classCollection.insert({className, c}); // Only insert if class doesn't exists yet
+                if (result.second) // True if class doesn't exist and was inserted
+                    result.first->second.findClassData(temp, unit, classXpath, j); // Do in-depth class analysis
+                else { // Class exists already
+                    if (lang == "C#" && c.getIsPartial())  // Class could be a partial class
+                        result.first->second.findClassData(temp, unit, classXpath, j);               
+                }                                             
                 free(unparsed);
                 srcml_unit_free(unit);
                 srcml_archive_close(temp);
-                srcml_archive_free(temp);       
-                classOrder++;     
+                srcml_archive_free(temp);           
             }   
             srcml_transform_free(result);
-            srcml_clear_transforms(archive);  
-            classOrder = 1;  
+            srcml_clear_transforms(archive);   
         }   
     }
 }
 
-// Finds inherited attributes for classes that inherit
-// In C++, you can inherit from a specialized templated class or
-//  you can specialize the inheritance itself from the generic class, or
-//  you can inherit from generic class itself.
-// For example:
-//  myClass --> childClass : myClass<T> or childClass : myClass<int>
-//  specializedClass<int> --> childClass : specializedClass<int>
-//
-// In Java and C#, you can inherit from the generic class or specialize the inheritance.
-// For example:
-//  myClass<T> --> childClass : myClass<T> or childClass : myClass<int>
-//
-// So, we need to match with the specialized templated classes first.
-//
-void classModelCollection::findInheritedAttribute(){
-     for(auto& pair : classCollection){
-        const std::vector<std::string>& parentClassName = pair.second.getParentClassName();
-        for (size_t i = 0; i < parentClassName.size(); i++){
-            if (classCollection.find(trimWhitespace(parentClassName[i])) != classCollection.end())
-                pair.second.appendInheritedAttribute(classCollection[parentClassName[i]].getNonPrivateAttribute());
-            else{
-                std::string parClassName = trimWhitespace(parentClassName[i]);
-                if (classCollection.find(parClassName) != classCollection.end()){
-                    pair.second.appendInheritedAttribute(classCollection[parentClassName[i]].getNonPrivateAttribute());
-                }
-            }
-        }       
-     }
-}
-
-
 // C++ only
-// Finds free functions as well as methods defined externally.
-// Free functions could also have :: in their names. 
+//
+// Finds free functions as well as methods defined externally
+// Free functions could also have :: in their names
 //  They could belong to a namespace or to an external class (class not defined in the archive),
 //   so classes need to be found first 
 //
@@ -155,99 +111,146 @@ void classModelCollection::findInheritedAttribute(){
 //          Foo(){}, namespaceA::Foo(){}, operator<<(){}, 
 //
 void classModelCollection::findFreeFunction(srcml_archive* archive, std::vector<srcml_unit*> units){
-    int functionOrder = 1;
+    PRIMITIVES.setLanguage("C++"); 
     for (size_t j = 0; j < units.size(); j++){
-        std::string lang = srcml_unit_get_language(units[j]);        
-        srcml_append_transform_xpath(archive, "//src:function[not(ancestor::src:class)]");
-        srcml_transform_result* result = nullptr;
-        srcml_unit_apply_transforms(archive, units[j], &result);
-        int n = srcml_transform_get_unit_size(result);  
+        std::string lang = srcml_unit_get_language(units[j]); 
+        if (lang == "C++"){
+            std::string lang = srcml_unit_get_language(units[j]);        
+            srcml_append_transform_xpath(archive, "//src:function[not(ancestor::src:class)]");
+            srcml_transform_result* result = nullptr;
+            srcml_unit_apply_transforms(archive, units[j], &result);
+            int n = srcml_transform_get_unit_size(result);  
 
-        srcml_unit* resultUnit = nullptr;
-        for (int i = 0; i < n; ++i) {
-            resultUnit = srcml_transform_get_unit(result, i);
-            
-            srcml_archive* unitArchive = srcml_archive_create();
-            char* unparsed = nullptr;
-            size_t size = 0;
-            srcml_archive_write_open_memory(unitArchive, &unparsed, &size);
-            srcml_archive_write_unit(unitArchive, resultUnit);
-            srcml_archive_close(unitArchive);
-            srcml_archive_free(unitArchive);
-            
-            unitArchive = srcml_archive_create();
-            srcml_archive_read_open_memory(unitArchive, unparsed, size);
-            srcml_unit* unit = srcml_archive_read_unit(unitArchive);
+            srcml_unit* resultUnit = nullptr;
+            for (int i = 0; i < n; i++) {
+                resultUnit = srcml_transform_get_unit(result, i);
+                
+                srcml_archive* unitArchive = srcml_archive_create();
+                char* unparsed = nullptr;
+                size_t size = 0;
+                srcml_archive_write_open_memory(unitArchive, &unparsed, &size);
+                srcml_archive_write_unit(unitArchive, resultUnit);
+                srcml_archive_close(unitArchive);
+                srcml_archive_free(unitArchive);
+                
+                unitArchive = srcml_archive_create();
+                srcml_archive_read_open_memory(unitArchive, unparsed, size);
+                srcml_unit* unit = srcml_archive_read_unit(unitArchive);
 
-            std::string xpath = "//src:function[not(ancestor::src:class)][" + std::to_string(functionOrder) + "]";
+                methodModel function(unitArchive, unit); // Builds function model and performs basic analysis on it
 
-            methodModel function(unitArchive, unit, xpath, j); // Create function and perform basic analysis on it
+                std::string xpathS = "//src:function[not(ancestor::src:class)][" + std::to_string(i+1) + "]";
 
-            // Method names are in the form of:
-            //      MyClass<int>::Foo, namespaceA::MyClass<int>::Foo, MyClass::Foo, 
-            // Free and friend functions are in the form:
-            //      Foo, operator<<
-            std::string functionName = trimWhitespace(removeNamespace(function.getMethodName())); // Removes namespaces if any.
+                // Method names are in the form of:
+                //      MyClass<int>::Foo, namespaceA::MyClass<int>::Foo, MyClass::Foo, 
+                // Free and friend functions are in the form:
+                //      Foo, operator<<
+                std::string functionName = trimWhitespace(removeNamespace(function.getName(), false, "C++")); // Removes namespaces if any
 
-            // Get the class name (if any). Else, it is a free function or a friend function name.
-            size_t isClassName = functionName.find("::");
-            if (isClassName != std::string::npos){ // Class found, it is a method.          
-                std::string className = functionName.substr(0, isClassName); 
-                if (classCollection.find(className) != classCollection.end()) {
-                    // Add method and perform the rest of the analysis             
-                    classCollection[className].addMethod(unitArchive, unit, function, trimWhitespace(function.getMethodHeader())); 
-                }          
-                else { // Case specialized template method belongs to the generic template class
-                    className = className.substr(0, className.find("<"));
-                    if (classCollection.find(className) != classCollection.end()){
-                        classCollection[className].addMethod(unitArchive, unit, function, trimWhitespace(function.getMethodHeader()));           
+                // Get the class name (if any). Else, it is a free function or a friend function name
+                size_t isClassName = functionName.find("::");
+                if (isClassName != std::string::npos){ // Class found, it is a method       
+                    std::string className = functionName.substr(0, isClassName); 
+                    if (classCollection.find(className) != classCollection.end()) { 
+                        // To avoid adding the method to a class of a different language
+                        if (classCollection[className].getUnitLanguage() == "C++") 
+                            // Add method and perform the rest of the analysis         
+                            classCollection[className].addMethod(unitArchive, unit, function, xpathS, j); 
+                    }          
+                    else { // Case specialized template method belongs to the generic template class
+                        className = className.substr(0, className.find("<"));
+                        if (classCollection.find(className) != classCollection.end()){
+                            if (classCollection[className].getUnitLanguage() == "C++")   
+                                classCollection[className].addMethod(unitArchive, unit, function, xpathS, j);         
+                        }
+                        else{
+                            freeFunction.push_back(xpathS);
+                        }
+                        
                     }
-                    else{
-                        freeFunction.push_back(function.getMethodHeader());
-                    }
-                    
                 }
-            }
-            else{
-                if (!isFriendFunction(unitArchive, unit, function, functionName)){ // Method could be a friend function
-                    freeFunction.push_back(function.getMethodHeader());
+                else{
+                    if (!isFriendFunction(unitArchive, unit, function, xpathS, j)) // Method could be a friend function
+                        freeFunction.push_back(xpathS);                
                 }
+                free(unparsed); 
+                srcml_unit_free(unit);
+                srcml_archive_close(unitArchive);
+                srcml_archive_free(unitArchive);
             }
-            free(unparsed); 
-            srcml_unit_free(unit);
-            srcml_archive_close(unitArchive);
-            srcml_archive_free(unitArchive);
-            functionOrder++;
+            srcml_transform_free(result);
+            srcml_clear_transforms(archive);            
         }
-        srcml_transform_free(result);
-        srcml_clear_transforms(archive);
-        functionOrder = 1;
-        
+    }
+}
+
+// Finds inherited attributes for classes that inherit
+// In C++, you can inherit from a specialized templated class or
+//  you can specialize the inheritance itself from the generic class, or
+//  you can inherit from the generic class itself.
+// For example:
+//  myClass --> childClass from myClass<T> or childClass from myClass<int>
+//  specializedClass<int> --> childClass from specializedClass<int>
+//
+// In Java and C#, you can inherit from the generic class or specialize the inheritance.
+// For example:
+//  myClass<T> --> childClass from myClass<T> or childClass from myClass<int>
+//
+void classModelCollection::findInheritedAttribute(){
+    for (auto& pair : classCollection){
+        std::string lang = pair.second.getUnitLanguage();
+        std::vector<std::string> parentClassName =  pair.second.getParentClassName();
+        for (size_t i = 0; i < parentClassName.size(); i++){
+            std::string parClassName = trimWhitespace(removeNamespace(parentClassName[i], true, lang));        
+            if (classCollection.find(parClassName) != classCollection.end())
+                pair.second.appendInheritedAttribute(classCollection[parClassName].getNonPrivateAttribute());
+            else {
+                parClassName = parClassName.substr(0, parClassName.find("<"));
+                if (lang == "Java" || lang == "C#"){
+                    if (classGeneric.find(parClassName) != classGeneric.end()) {
+                        pair.second.appendInheritedAttribute(classCollection[classGeneric[parClassName]].getNonPrivateAttribute());
+                    }
+                }
+                else {
+                    if (classCollection.find(parClassName) != classCollection.end()) {
+                        pair.second.appendInheritedAttribute(classCollection[parClassName].getNonPrivateAttribute());
+                    }
+                }
+            }
+        }        
     }
 }
 
 // C++ only
-// A friend function must always be in the same namespace as the class,
-//      unless it is declared with the global namespace in the class such as "friend dataType ::operator<<();""
-//      So it is usually in the form of "friend dataType operator<<();""
+// A friend function usually has a parameter of the same type as the class it belongs to
+// The assumption here is that friend functions are mostly used for operator overloading, 
+//  and cases where friend functions don't have a parameter that use the
+//  class name as a type are not checked for  
 //      
-bool classModelCollection::isFriendFunction(srcml_archive* archive, srcml_unit* unit, methodModel& method, std::string possibleFriendFunction){
-    for(auto& pair : classCollection){
-        const std::vector<std::string>& friendFunctionName = pair.second.getFriendFunctionName();
-        for (size_t i = 0; i < friendFunctionName.size(); i++){
-            std::string name = trimWhitespace(friendFunctionName[i]);
-            if (name == possibleFriendFunction){ // Match with whole key
-                // Parameters of friend function will usually have the class name
-                // Can be used to determine which class does the friend function belong to
-                std::vector<std::string> parameterTypes = method.getParameterTypes();
-                for (size_t j = 0; j < parameterTypes.size(); j++){ 
-                    if (parameterTypes[j].find(pair.first) != std::string::npos){
-                        pair.second.addMethod(archive, unit, method, trimWhitespace(method.getMethodHeader()));
-                        return true;
-                    }
-                }
+bool classModelCollection::isFriendFunction(srcml_archive* archive, srcml_unit* unit, methodModel& function, std::string xpathS, int unitNumber){
+    bool classNameFound = false;
+    std::vector<std::string> parameterTypes = function.getParameterTypeSeparated();
+    for (size_t j = 0; j < parameterTypes.size(); j++){ 
+        std::string paraType = parameterTypes[j];
+        if (classCollection.find(paraType) != classCollection.end()) {
+            if (classCollection[paraType].getUnitLanguage() == "C++")   
+                classNameFound = true;   
+        }       
+        else {
+            paraType = paraType.substr(0, paraType.find("<"));
+            if (classCollection.find(paraType) != classCollection.end()) {
+                if (classCollection[paraType].getUnitLanguage() == "C++")   
+                    classNameFound = true;    
             }
         }
+        if (classNameFound){
+            const std::unordered_set<std::string>& friendFunctions = classCollection[paraType].getFriendFunctionName();
+            if (friendFunctions.find(function.getName()) != friendFunctions.end()){
+                classCollection[paraType].addMethod(archive, unit, function,  xpathS, unitNumber);
+            }
+                
+        }
+        classNameFound = false;
     }
     return false;
 }
@@ -257,45 +260,28 @@ bool classModelCollection::isFriendFunction(srcml_archive* archive, srcml_unit* 
 //           <class st:stereotype="boundary"> ... ></class>
 //
 void classModelCollection::outputWithStereotypes(srcml_archive* archive, srcml_archive* outputArchive, std::vector<srcml_unit*> units) {   
-    bool isTransform = false;
-    for (size_t i = 0; i < units.size(); i++){
-        for (auto& pair : classCollection){  // Add stereotype attribute to each class
-            std::string xpath = pair.second.getXpath(i);
-            if (xpath != ""){
-                srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
-                                                    "http://www.srcML.org/srcML/stereotype",
-                                                    "stereotype", pair.second.getClassStereotype().c_str());
-                isTransform = true;
-            }
-            std::unordered_map<std::string, methodModel>& method = pair.second.getMethod();
-            for (auto& pairM : method) { // Add stereotype attribute to each method/function
-                xpath =  pairM.second.getXpath(i);
-                if (xpath != ""){
-                    
-                    std::string stereotype =  pairM.second.getStereotype();
-                    srcml_append_transform_xpath_attribute(archive, xpath.c_str(), "st",
-                                                    "http://www.srcML.org/srcML/stereotype",
-                                                    "stereotype", stereotype.c_str());       
-                    isTransform = true;
-                }
-            } 
-        }
+    for (size_t i = 0; i < units.size(); i++){ 
+        bool isTransform = false;
+        for (const auto& pairV : xpathList[i]) {  
+            srcml_append_transform_xpath_attribute(archive, pairV.first.c_str(), "st",
+                                    "http://www.srcML.org/srcML/stereotype",
+                                    "stereotype", pairV.second.c_str());
+            isTransform = true;
+            
+        }  
         if (isTransform){
             srcml_transform_result* result = nullptr; 
-            srcml_unit_apply_transforms(archive, units[i], &result);
-            int n = srcml_transform_get_unit_size(result);  
-            for (int i = 0; i < n; i++){
-                srcml_unit* tempUnit = srcml_transform_get_unit(result, i);
-                srcml_archive_write_unit(outputArchive, tempUnit);
-            }
+            srcml_unit_apply_transforms(archive, units[i], &result);  
+            srcml_unit* tempUnit = srcml_transform_get_unit(result, 0);
+            srcml_archive_write_unit(outputArchive, tempUnit);
+            
             srcml_transform_free(result); 
             srcml_clear_transforms(archive);   
         }
         else{
             srcml_archive_write_unit(outputArchive, units[i]);
-        }
-        isTransform = false;
-                 
+            srcml_clear_transforms(archive);  
+        } 
     }
 }
 
@@ -307,20 +293,22 @@ void classModelCollection::outputReport(std::ofstream& out) {
     const std::string line(WIDTH*2, '-');
     if (out.is_open()) {
         for (auto& pair : classCollection){
-            const  std::unordered_map<std::string, methodModel>& method = pair.second.getMethod();
+            const  std::vector<methodModel>& method = pair.second.getMethod();
             out << std::left << std::setw(WIDTH) << "Class name:" << std::setw(WIDTH) << "Class stereotype:" << std::endl;
             out << std::left << std::setw(WIDTH)  <<  pair.second.getClassName() << std::setw(WIDTH) << pair.second.getClassStereotype() << std::endl << std::endl;  
             out << std::left << std::setw(WIDTH) << "Method name:" << std::setw(WIDTH) << "Method stereotype:" << std::endl; 
-            for (const auto& pairM : method) {
-                out << std::left << std::setw(WIDTH) << WStoBlank(pairM.second.getMethodName()); 
-                out << std::setw(WIDTH) << pairM.second.getStereotype() << std::endl; 
+            for (const auto& m : method) {
+                out << std::left << std::setw(WIDTH) << WStoBlank(m.getName()); 
+                out << std::setw(WIDTH) << m.getStereotype() << std::endl; 
             }
             out << line << std::endl;
         }
     }
 }
 
-
+// Used to generate optional views for the distribution of method and class stereotypes
+// These views are generated in .csv files
+//
 void classModelCollection::outputCSV(std::string fname) {
     std::unordered_map<std::string, int> classStereotypes = {
         {"entity", 0},
@@ -360,8 +348,9 @@ void classModelCollection::outputCSV(std::string fname) {
     };
 
     std::unordered_map<std::string, int> uniqueMethodStereotypes;  
+    std::unordered_map<std::string, int> uniqueClassStereotypes;  
 
-    std::ofstream out(fname+".method_class_stereotypes.csv");
+    std::ofstream out(fname+"method_class_stereotypes.csv");
   
     // Method and class stereotypes
     //
@@ -374,15 +363,19 @@ void classModelCollection::outputCSV(std::string fname) {
             }
             std::string className =  "\"" + WStoBlank(pair.second.getClassName()) + "\"";
             std::string classStereotype =  pair.second.getClassStereotype();
-            const  std::unordered_map<std::string, methodModel>& method = pair.second.getMethod();
-            for (const auto& pairM : method) {
-                std::string methodName =  "\"" + WStoBlank(pairM.second.getMethodName()) + "\"";
-                std::string methodStereotype = pairM.second.getStereotype();
+            const  std::vector<methodModel>& method = pair.second.getMethod();
+            if (uniqueClassStereotypes.find(classStereotype) == uniqueClassStereotypes.end())
+                uniqueClassStereotypes[classStereotype] = 1;
+            else
+                uniqueClassStereotypes[classStereotype]++;
+            for (const auto& m : method) {
+                std::string methodName =  "\"" + WStoBlank(m.getName()) + "\"";
+                std::string methodStereotype = m.getStereotype();
                 out << className << "," << classStereotype << "," << methodName << ",";
-                out << methodStereotype << ",";
-                out << pairM.second.getStereotypeList().size() << std::endl;
+                out << methodStereotype <<  ",";
+                out << m.getStereotypeList().size() << std::endl;
 
-                for (const std::string& s : pairM.second.getStereotypeList()){
+                for (const std::string& s : m.getStereotypeList()){
                     if (methodStereotypes.find(s) != methodStereotypes.end())
                         methodStereotypes[s]++;       
                 }
@@ -396,9 +389,9 @@ void classModelCollection::outputCSV(std::string fname) {
     }
     out.close();
 
-    // Stereotype View
-    std::ofstream outU(fname+".stereotype_view.csv");
-    outU << "Unique Method Stereotype,Method Count,%" <<std::endl;
+    // Unique Method View
+    std::ofstream outU(fname+"unique_method_view.csv");
+    outU << "Unique Method Stereotype,Method Count" <<std::endl;
     int total = 0;
     for (auto& pair : uniqueMethodStereotypes){
         outU << pair.first << ",";
@@ -408,10 +401,22 @@ void classModelCollection::outputCSV(std::string fname) {
     outU << "Total" << "," << total;
     outU.close();
 
+    // Unique Class View
+    std::ofstream outV(fname+"unique_class_view.csv");
+    outV << "Unique Class Stereotype,Class Count" <<std::endl;
+    total = 0;
+    for (auto& pair : uniqueClassStereotypes){
+        outV << pair.first << ",";
+        outV << pair.second << std::endl;
+        total += pair.second;
+    }
+    outV << "Total" << "," << total;
+    outV.close();
+
     // Method View
     //
-    std::ofstream outM(fname+".method_view.csv");
-    outM << "Method Stereotype,Method Count,%" <<std::endl;
+    std::ofstream outM(fname+"method_view.csv");
+    outM << "Method Stereotype,Method Count" <<std::endl;
     total = 0;
     for (auto& pair : methodStereotypes){
         outM << pair.first << ",";
@@ -423,7 +428,8 @@ void classModelCollection::outputCSV(std::string fname) {
 
     // Class View
     //
-    std::ofstream outS(fname+".class_view.csv");
+    std::ofstream outS(fname+"class_view.csv");
+    outS << "Class Stereotype,Class Count" <<std::endl;
     total = 0;
     for (auto& pair : classStereotypes){
         outS << pair.first << ",";
@@ -435,12 +441,11 @@ void classModelCollection::outputCSV(std::string fname) {
 
     // Category view
     //
-    std::ofstream outC(fname+".category_view.csv");
-    outM << "Class Stereotype,Class Count,%" <<std::endl;
-    int getters = methodStereotypes["get"] + methodStereotypes["non-const-get"];
-    int accessors = getters + methodStereotypes["predicate"] + methodStereotypes["non-const-predicate"] +
-                    methodStereotypes["property"] + methodStereotypes["non-const-property"] +
-                    methodStereotypes["accessor"] + methodStereotypes["non-const-accessor"]; 
+    std::ofstream outC(fname+"category_view.csv");
+    int getters = methodStereotypes["get"];
+    int accessors = getters + methodStereotypes["predicate"] +
+                    methodStereotypes["property"] +
+                    methodStereotypes["accessor"];
 
     int setters = methodStereotypes["set"];     
     int commands = methodStereotypes["command"] + methodStereotypes["non-void-command"];           
@@ -456,7 +461,7 @@ void classModelCollection::outputCSV(std::string fname) {
     int degenerates = methodStereotypes["empty"] + methodStereotypes["stateless"] + methodStereotypes["wrapper"]; 
 
     total = accessors + mutators + factory + collaborators + degenerates + unclassified;
-    outC << "Stereotype Category,Method Count,%" <<std::endl;
+    outC << "Stereotype Category,Method Count" <<std::endl;
     outC << "Accessors" << "," << accessors << std::endl;
     outC << "Mutators" << "," << mutators << std::endl;
     outC << "Creational" << "," << factory << std::endl;

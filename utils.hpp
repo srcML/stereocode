@@ -7,7 +7,6 @@
  * This file is part of the Stereocode application.
  */
 
-
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
@@ -20,8 +19,6 @@
 
 extern       primitiveTypes PRIMITIVES;
 
-const        std::vector<std::string> ASSIGNMENT_OPERATOR = {"=", "+=", "-=", "*=", "/=", "%=", ">>=", "<<=", "&=", "^=", "|=", "\\?\\?=", ">>>=" };
-
 bool         isPrimitiveType      (const std::string&);
 bool         isAttribute          (std::vector<AttributeInfo>&, const std::vector<std::string>&, 
                                    const std::vector<std::string>&, const std::string&, bool, int&, int&);
@@ -31,7 +28,7 @@ std::string  removeContainers     (const std::string&);
 std::string  trimWhitespace       (const std::string&);
 std::string  Ltrim                (const std::string&);
 std::string  Rtrim                (const std::string&);
-std::string  removeNamespace      (const std::string&);
+std::string  removeNamespace      (const std::string&, bool, std::string);
 std::string  WStoBlank            (const std::string&);
 
 #endif

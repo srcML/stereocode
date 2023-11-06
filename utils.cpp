@@ -7,7 +7,6 @@
  * This file is part of the Stereocode application.
  */
 
-
 #include "utils.hpp"
 
 // Removes specifiers from type name.
@@ -87,7 +86,6 @@ std::string removeContainers(const std::string& type){
     return result;
 }
 
-
 // Checks if a type is primitive.  
 //
 bool isPrimitiveType(const std::string& type) {
@@ -97,7 +95,6 @@ bool isPrimitiveType(const std::string& type) {
         if (!PRIMITIVES.isPrimitive(token)) return false;
     return true;
 }
-
 
 // Checks if possibleAttribute is an attribute (C++) or field (C# and Java)
 //
@@ -129,8 +126,6 @@ bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::s
     return false; // Not an attribute, or local, or parameter
 }
 
-
-
 // Removes all whitespace from string
 //
 std::string trimWhitespace(const std::string& s) {
@@ -151,22 +146,22 @@ std::string Rtrim(const std::string& s) {
 }
 
 // Removes namespaces from method names
-// For example, given:
-//  namespaceA::NamespaceB::ClassName::MethodName
-//  becomes:
-//  ClassName::MethodName
 //
-std::string removeNamespace(const std::string& methodName) {
+std::string removeNamespace(const std::string& methodName, bool all, std::string lang) {
     std::string result = methodName;
-
-    // Find the last occurrence of '::' to extract the method name and its preceding parts
-    size_t lastDoubleColon = result.rfind("::");
-    if (lastDoubleColon != std::string::npos) {
-        // Find the second last occurrence of '::' to extract the class name and the remaining part
-        size_t secondLastDoubleColon = result.rfind("::", lastDoubleColon - 1);
-        if (secondLastDoubleColon != std::string::npos) {
-            result = result.substr(secondLastDoubleColon + 2);  // Skip '::'
-        } 
+    size_t last, secondLast;
+    if (lang == "C++") last = result.rfind("::");
+    else last = result.rfind(".");
+    if (last != std::string::npos) {
+        if (all){
+            if (lang == "C++") result = result.substr(last + 2);
+            else result = result.substr(last + 1);
+        }
+        else if (!all && lang == "C++"){
+            secondLast = result.rfind("::", last - 1);
+            if (secondLast != std::string::npos) 
+                result = result.substr(secondLast + 2);           
+        }
     }
     return result;
 }
