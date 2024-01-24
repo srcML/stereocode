@@ -2,36 +2,75 @@
 /**
  * @file ClassModelCollection.hpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
-
 
 #ifndef CLASSMODELCOLLECTION_HPP
 #define CLASSMODELCOLLECTION_HPP
 
 #include "ClassModel.hpp"
-#include <unordered_map>
 #include <iomanip> 
 
-class classModelCollection{
+class classModelCollection {
 public:
-                         classModelCollection   () : classCollection(), classGeneric(), freeFunction() {}
-                         classModelCollection   (srcml_archive*, std::vector<srcml_unit*>);
+                        classModelCollection        (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>, 
+                                                    std::ofstream&, std::string, bool, bool);
 
-    void                 findClassInfo          (srcml_archive*, std::vector<srcml_unit*>);
-    void                 findFreeFunction       (srcml_archive*, std::vector<srcml_unit*>);
-    void                 findInheritedAttribute ();
-    bool                 isFriendFunction       (srcml_archive*, srcml_unit*, methodModel&, std::string, int);
+    void                 findClassInfo              (srcml_archive*, std::vector<srcml_unit*>);
+    void                 findFreeFunction           (srcml_archive*, std::vector<srcml_unit*>);
+    void                 findInheritedAttribute     (classModel&);
+    
+    bool                 isFriendFunction           (methodModel&);
 
-    void                 outputWithStereotypes  (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>);
-    void                 outputReport           (std::ofstream&);
-    void                 outputCSV              (std::string);
+    void                 outputWithStereotypes      (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>);
+    void                 outputReportFile           (std::ofstream&, classModel&);
+    void                 allView                    (std::ofstream&, classModel&, bool);
+    void                 method_class_unique_views  (std::ofstream&, std::ofstream&, std::ofstream&, std::ofstream&, std::ofstream&);
 protected:
-    std::unordered_map<std::string, classModel>     classCollection;              // List of class names and their models
-    std::unordered_map<std::string, std::string>    classGeneric;                 // List of generic class names with and without <> to inheritance matching
-    std::vector<std::string>                        freeFunction;                 // List of free functions
+    std::unordered_map<std::string, classModel>     classCollection{};    // List of class names and their models
+    std::unordered_map<std::string, std::string>    classGeneric{};       // List of generic class names with and without <> for inheritance matching
+    std::vector<std::string>                        freeFunction{};       // List of free functions
+    std::unordered_map<std::string, int> classStereotypesView = {
+        {"entity", 0},
+        {"minimal-entity", 0},
+        {"data-provider", 0},
+        {"command", 0},
+        {"boundary", 0},
+        {"factory", 0},
+        {"control", 0},
+        {"pure-control", 0},
+        {"large-class", 0},
+        {"lazy-class", 0},
+        {"degenerate", 0},
+        {"data-class", 0},
+        {"small-class", 0},
+        {"unclassified", 0},
+        {"empty", 0},
+    };
+    std::unordered_map<std::string, int> methodStereotypesView = {
+        {"get", 0},
+        {"predicate", 0},
+        {"property", 0},
+        {"accessor", 0},
+        {"non-const-get", 0},
+        {"non-const-predicate", 0},
+        {"non-const-property", 0},
+        {"non-const-accessor", 0},
+        {"set", 0},
+        {"command", 0},
+        {"non-void-command", 0},
+        {"collaborator", 0},
+        {"controller", 0},
+        {"factory", 0},
+        {"empty", 0},
+        {"stateless", 0},
+        {"wrapper", 0},
+        {"unclassified", 0},
+    };
+    std::unordered_map<std::string, int> uniqueMethodStereotypesView;  
+    std::unordered_map<std::string, int> uniqueClassStereotypesView;  
 };
 
 #endif

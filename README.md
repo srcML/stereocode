@@ -35,20 +35,17 @@ It can process individual files, multiple files, or entire systems. The input is
 
 Demo: 
 ```bash
-# Process CLI11 and store the output in CLI11-C++.stereotypes.xml
-./stereocode CLI11-C++.xml
+# Process PowerShell-CS.xml and store the output in PowerShell-CS.stereotypes.xml
+./stereocode PowerShell-CS.xml
 
-# Save the output in Dapper-output.xml
-./stereocode Dapper-CS.xml -o Dapper-output.xml
+# Save the output in PowerShell-CS-output.xml
+./stereocode PowerShell-CS.xml -o PowerShell-CS-output.xml
 
 # Overwrite the input file with stereotype output 
 ./stereocode PowerShell-CS.xml -v
 
 # Generate an output PowerShell-CS.stereotypes.xml and an optional report PowerShell-CS.xml.report.txt
 ./stereocode PowerShell-CS.xml -r
-
-# Generate ONLY the report, saved as PowerShell-CS.xml.report.txt.
-./stereocode PowerShell-CS.xml -d
 ```
 
 There are a predefined set of primitive (base) types for each language.  Additional primitive type (system specific) can be supplied by the user <span style='color: lightgreen;'>**(-p --primitives option)**</span> as follows:
@@ -71,21 +68,18 @@ For more options and help:
 
 ## 📜 Stereocode Options
 
-
-
-<span style='color: lightgreen;'>**long-o, --output-file:**</span> Specify the output file name. If omitted, the default is input-fname.stereotypes.xml.
-
-<span style='color: lightgreen;'>**-v, --overwrite:**</span> Overwrite the input file with stereotype output. This option takes precedence over -o.
+<span style='color: lightgreen;'>**-o, --output-file:**</span> Specify the output file name.
 
 <span style='color: lightgreen;'>**-p, --primitives:**</span> Specify file name of user defined primitive/base types (one per line without spaces).  This is added to initial list of primitive types. 
 
-<span style='color: lightgreen;'>**-r, --report:**</span> Generate a report file named input-fname.report.txt. 
+<span style='color: lightgreen;'>**-r, --report:**</span> Generate an optional report file named *.report.txt. 
 
-<span style='color: lightgreen;'>**-d, --report-only:**</span> Generate only a report file named input-fname.report.txt. No XML output is created. This option takes precedence over -o and -v.
+<span style='color: lightgreen;'>**-v, --overwrite:**</span> Overwrite the input file with stereotype output. 
 
 <span style='color: lightgreen;'>**-c, --large-class \[int]:**</span> Define a parameter to determine the large-class stereotype. Default is 21.
 
-Note: If you're processing large input archives, consider using the --report-only option as it avoids the slow XML output generation.
+<span style='color: lightgreen;'>**-s, --stereotype-views:**</span> Output optional CSV files capturing different views of method and class stereotypes - *.view_type.csv".
+
 
 ## 📄 Output
 

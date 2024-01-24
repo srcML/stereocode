@@ -2,7 +2,7 @@
 /**
  * @file PrimitiveTypes.cpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -38,11 +38,11 @@ std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
 // After language is determined then language specific primitive
 //  types are added.
 //
-void primitiveTypes::setLanguage(const std::string& lang) {
-    if (language == lang) return;        //Same language (done)
-    language = lang;
+void primitiveTypes::setLanguage(const std::string& unitLanguage) {
+    if (this->unitLanguage == unitLanguage) return;   //Same language (done)
+    this->unitLanguage = unitLanguage;
 
-    if (language == "C++") {
+    if (this->unitLanguage == "C++") {
         ptypes = {
             "short",
             "shortint",
@@ -74,7 +74,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "ptrdiff_t"
         };
     }
-    if (language == "C#") {  
+    else if (this->unitLanguage == "C#") {  
         ptypes = {
             "bool",
             "byte",
@@ -110,7 +110,7 @@ void primitiveTypes::setLanguage(const std::string& lang) {
             "Void"
         };
     }
-    if (language == "Java") {
+    else if (this->unitLanguage == "Java") {
         ptypes = {
             "boolean",
             "byte",

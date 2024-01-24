@@ -2,7 +2,7 @@
 /**
  * @file PrimitiveTypes.hpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -12,24 +12,23 @@
 
 #include <iostream>
 #include <unordered_set>
+#include <string>
 
 class primitiveTypes {
 public:
-                   primitiveTypes () : language(), ptypes(), usertypes() {};
-
     bool           isPrimitive    (const std::string&) const;
     
     void           addPrimitive   (const std::string&);
     void           setLanguage    (const std::string&);
 
-    std::string    getLanguage    () const { return language; }
+    std::string    getLanguage    () const { return unitLanguage; }
 
     friend         std::istream& operator>>(std::istream&, primitiveTypes&);
 
 private:
-    std::string                           language;      // Language: "C++", "C#"
-    std::unordered_set<std::string>       ptypes;        // List of language primitives
-    std::unordered_set<std::string>       usertypes;     // List of user defined primitives 
+    std::string                           unitLanguage{};   // Language: "C++", "C#"
+    std::unordered_set<std::string>       ptypes{};        // List of language primitives
+    std::unordered_set<std::string>       usertypes{};     // List of user defined primitives 
 };
 
 #endif

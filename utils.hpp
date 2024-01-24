@@ -2,7 +2,7 @@
 /**
  * @file utils.hpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -13,22 +13,22 @@
 #include <algorithm>
 #include <regex>
 #include <sstream>
+#include <string_view>
 
 #include "PrimitiveTypes.hpp"
-#include "AttributeInfo.hpp"
+#include "Variable.hpp"
 
 extern       primitiveTypes PRIMITIVES;
 
-bool         isPrimitiveType      (const std::string&);
-bool         isAttribute          (std::vector<AttributeInfo>&, const std::vector<std::string>&, 
-                                   const std::vector<std::string>&, const std::string&, bool, int&, int&);
-
-std::string  removeSpecifiers     (const std::string&);
-std::string  removeContainers     (const std::string&);
-std::string  trimWhitespace       (const std::string&);
-std::string  Ltrim                (const std::string&);
-std::string  Rtrim                (const std::string&);
-std::string  removeNamespace      (const std::string&, bool, std::string);
-std::string  WStoBlank            (const std::string&);
+bool                            isPrimitiveType      (const std::string&);
+void                            removeSpecifiers     (std::string&, std::string_view);
+void                            removeContainers     (std::string&, std::string_view);
+void                            trimWhitespace       (std::string&);
+void                            Ltrim                (std::string&);
+void                            Rtrim                (std::string&);
+void                            removeNamespace      (std::string&, bool, std::string_view);
+void                            WStoBlank            (std::string&);
+void                            commaConversion      (std::string& s);
+void                            removeBetweenComma   (std::string& s);
 
 #endif

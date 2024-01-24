@@ -2,40 +2,51 @@
 /**
  * @file utils.cpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
 #include "utils.hpp"
 
+// Checks if a type is primitive.  
+//
+bool isPrimitiveType(const std::string& type) {
+    std::istringstream subType(type);
+    std::string token = "";
+    while (std::getline(subType, token, ','))
+        if (!PRIMITIVES.isPrimitive(token)) return false;
+    return true;
+}
+
+
 // Removes specifiers from type name.
 //
-std::string removeSpecifiers(const std::string& type) {
-    std::string result = type;
-
+void removeSpecifiers(std::string& type, std::string_view unitLanguage) {
     // List of specifiers (you can expand this list as needed)
-    // Some specifiers need to be escaped for both the string and the regex engine as.
+    // Some specifiers need to be escaped for both the string and the regex expression
+    //  For example, \\* escapes \* in C++ which in turn escapes * for the regex 
+    // \\[.*\\] match any square brackets [] with any single character inside (if any) . with zero or more occurrence * (including empty)
+    //   such as int[] or int[,] and so on
     std::vector<std::string> specifiers;
-    std::string lang = PRIMITIVES.getLanguage();
-    if (lang == "C++"){
+    if (unitLanguage == "C++") {
         specifiers = { "const", "volatile", "inline", "virtual", "friend", "&", "&&", "\\*",
                        "mutable", "static", "thread_local", "register", "constexpr", "explicit" };
     }
-    else if (lang == "C#"){
+    else if (unitLanguage == "C#") {
         specifiers = { "readonly", "ref", "out", "in", "unsafe", "internal", "params",
-                       "public", "private", "protected", "static", "virtual", "\\*", "volatile", "\\[.*?\\]",
+                       "public", "private", "protected", "static", "virtual", "\\*", "volatile", "\\[.*\\]",
                        "this",  "override", "abstract",  "extern", "async", "partial", "explicit", "implicit"
-                       "new", "sealed", "event", "const" };
+                       "new", "sealed", "event", "const", "\\?" };
     }
-    else if (lang == "Java"){
-        specifiers = { "public", "private", "protected", "static", "final", "transient",  "\\[.*?\\]",
-                       "volatile", "synchronized", "native", "strictfp", "abstract", "default" };
+    else if (unitLanguage == "Java") {
+        specifiers = { "public", "private", "protected", "static", "final", "transient",  "\\[.*\\]",
+                       "volatile", "synchronized", "native", "strictfp", "abstract", "default", "\\?" };
     }
 
     // Create a regex pattern of specifiers joined by the '|' (or) operator.
     // \bword\b ensures that specifiers are matched only when they appear as 
-    //   whole words (except for certain specifiers), not as part of other words.
+    //   whole words (except for certain specifiers), and not as part of other words.
     //   For example, a class called staticClass, the static in this name will be kept when 
     //   removing the specifiers from the datatypes of its instances.
     std::string pattern = "";
@@ -43,7 +54,7 @@ std::string removeSpecifiers(const std::string& type) {
         if (pattern.size() > 0) pattern += "|";
         
         // If specifier is one of the special characters (like * or & or []), match them without word boundaries.
-        if (specifier == "\\*" || specifier == "&" || specifier == "\\[.*?\\]") 
+        if (specifier == "\\*" || specifier == "&" || specifier == "\\[.*\\]" || specifier == "\\?") 
             pattern += specifier;     
         else 
             pattern += "\\b" + specifier + "\\b";     
@@ -53,125 +64,102 @@ std::string removeSpecifiers(const std::string& type) {
     std::regex regexPattern(pattern);
 
     // Use regex_replace to remove all specifiers from the input string
-    result = std::regex_replace(result, regexPattern, "");
-
-    return result;
+    type = std::regex_replace(type, regexPattern, "");
 }
 
 // Remove containers
 // For example: std::vector<std::string>, std::map<int, std::string>.
 //
-std::string removeContainers(const std::string& type){
+void removeContainers(std::string& type, std::string_view unitLanguage){
     std::string pattern= "";
-    if (PRIMITIVES.getLanguage() == "C++"){
-        pattern = "\\w+(?=::)|::|<|>|vector|list|set|map|unordered_map|array|multimap|signed|unsigned|unordered_multimap|";
-        pattern += "forward_list|stack|queue|priority_queue|deque|multiset|unordered_set|unordered_multiset";
+    // .*:: match any single character . with zero or more occurrence * (including empty)
+    //  until :: is found (e.g., abc::def::ghi.jkl::mno will match abc::def:: 
+    // first leaving ghi.jkl::mno, then ghi.jkl:: is matched leaving only mno)
+    //
+    if (unitLanguage == "C++") {
+        pattern = ".*::|<|>|vector|list|set|map|unordered_map|array|multimap|signed|unsigned|unordered_multimap|";
+        pattern += "forward_list|stack|queue|priority_queue|deque|multiset|unordered_set|unordered_multiset|pair";
     }
-    else if (PRIMITIVES.getLanguage() == "C#"){
-        pattern = "\\w+(?=\\.)|\\?|<|>|\\.|List|Dictionary|HashSet|Queue|Stack|SortedList|LinkedList|BitArray|";
+    else if (unitLanguage == "C#") {
+        pattern = ".*\\.|\\?|<|>|List|Dictionary|HashSet|Queue|Stack|SortedList|LinkedList|BitArray|";
         pattern += "KeyedCollection|SortedSet|BlockingCollection|ConcurrentQueue|";
         pattern += "ConcurrentStack|ConcurrentDictionary|ConcurrentBag|";
         pattern += "ReadOnlyCollection|ReadOnlyDictionary|Tuple|ValueTuple|NameValueCollection|";
         pattern += "StringCollection|StringDictionary|HybridDictionary|OrderedDictionary";
     }
-    else if (PRIMITIVES.getLanguage() == "Java"){
-        pattern = "\\w+(?=\\.)|<|>|\\.|List|ArrayList|LinkedList|Set|HashSet|LinkedHashSet|SortedSet|TreeSet|";
+    else if (unitLanguage == "Java") {
+        pattern = ".*\\.|<|>|List|ArrayList|LinkedList|Set|HashSet|LinkedHashSet|SortedSet|TreeSet|";
         pattern += "Map|HashMap|Hashtable|LinkedHashMap|SortedMap|TreeMap|Deque|ArrayDeque|Queue|";
         pattern += "PriorityQueue|Vector|Stack|EnumSet|EnumMap|Iterator";
     }
     pattern = "(" + pattern + ")";
     std::regex regexPattern(pattern);
 
-    std::string result = std::regex_replace(type, regexPattern, "");
-    return result;
-}
-
-// Checks if a type is primitive.  
-//
-bool isPrimitiveType(const std::string& type) {
-    std::istringstream ss(type);
-    std::string token = "";
-    while (std::getline(ss, token, ','))
-        if (!PRIMITIVES.isPrimitive(token)) return false;
-    return true;
-}
-
-// Checks if possibleAttribute is an attribute (C++) or field (C# and Java)
-//
-bool isAttribute(std::vector<AttributeInfo>& attribute, const std::vector<std::string>& parameterName,
-                 const std::vector<std::string>& localVariableName, const std::string& possibleAttribute, bool modified, int& attributeIndex, int& parameterIndex) {
-    
-    // A local variable or a parameter could overshadow an attribute, or a field, if it has the same name. 
-    for (size_t i = 0; i < parameterName.size(); ++i) { 
-        if (possibleAttribute == parameterName[i]) {
-            parameterIndex = i;
-            attributeIndex = -2; // Parameter or local is found
-            return false;
-        }
-    }
-    for (size_t i = 0; i < localVariableName.size(); ++i) { 
-        if (possibleAttribute == localVariableName[i]) {
-            attributeIndex = -2; // Parameter or local is found
-            return false;
-        }
-    }
-    for (size_t i = 0; i < attribute.size(); ++i) {
-        if (possibleAttribute == attribute[i].getName()){
-            if (modified && attribute[i].getModified()) return false;
-            if (modified) attribute[i].setModified(true);
-            attributeIndex = i;
-            return true; 
-        } 
-    }
-    return false; // Not an attribute, or local, or parameter
+    type = std::regex_replace(type, regexPattern, "");
 }
 
 // Removes all whitespace from string
 //
-std::string trimWhitespace(const std::string& s) {
-    std::string result = s;
-    result.erase(std::remove_if(result.begin(), result.end(), [](unsigned char c) { return std::isspace(c); }), result.end());
-    return result;
+void trimWhitespace(std::string& s) {
+    s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) { return std::isspace(c); }), s.end());
 }
 
 // Trim blanks of the right of string
 //
-std::string Rtrim(const std::string& s) {
-    std::string result = s;
-    size_t lastNonSpace = result.find_last_not_of(' ');
-    if (lastNonSpace != std::string::npos) {
-        return s.substr(0, lastNonSpace + 1);
-    }
-    return result;
+void Rtrim(std::string& s) {
+    size_t lastNonSpace = s.find_last_not_of(' ');
+    if (lastNonSpace != std::string::npos)
+        s = s.substr(0, lastNonSpace + 1);   
 }
 
 // Removes namespaces from method names
+// all = false (C++ only) keeps the :: for the class name
 //
-std::string removeNamespace(const std::string& methodName, bool all, std::string lang) {
-    std::string result = methodName;
+void removeNamespace(std::string& methodName, bool all, std::string_view lang) {
     size_t last, secondLast;
-    if (lang == "C++") last = result.rfind("::");
-    else last = result.rfind(".");
+    if (lang == "C++") last = methodName.rfind("::");
+    else last = methodName.rfind(".");
     if (last != std::string::npos) {
-        if (all){
-            if (lang == "C++") result = result.substr(last + 2);
-            else result = result.substr(last + 1);
+        if (all) {
+            if (lang == "C++") methodName = methodName.substr(last + 2);
+            else methodName = methodName.substr(last + 1);
         }
-        else if (!all && lang == "C++"){
-            secondLast = result.rfind("::", last - 1);
+        else if (!all && lang == "C++") {
+            secondLast = methodName.rfind("::", last - 1);
             if (secondLast != std::string::npos) 
-                result = result.substr(secondLast + 2);           
+                methodName = methodName.substr(secondLast + 2);           
         }
     }
-    return result;
 }
 
 // Converts all whitespace to blanks  ('\r' => ' ')
-std::string WStoBlank(const std::string& s) {
-    std::string result(s);
-    std::replace_if(result.begin(),
-                    result.end(),
+void WStoBlank(std::string& s) {
+    std::replace_if(s.begin(),
+                    s.end(),
                     [](char c) { return isspace(c); },
                     ' ');
-    return result;
+}
+
+// Replaces , with |;
+//
+void commaConversion(std::string& s) {
+    std::replace_if(s.begin(),
+                    s.end(),
+                    [](char c) { return c == ','; },
+                    '|');
+}
+
+// Removes all characters inside <> except for ,
+// myObject<int,double> becomes myObject<,>
+//
+void removeBetweenComma(std::string& s) {
+    size_t genericOpening = s.find("<");
+    if (genericOpening != std::string::npos) {
+        std::string name = s.substr(0, s.find("<") + 1);
+        s = s.substr(s.find("<") + 1);
+        // match any character until , is encountered or until end of string is reached
+        const std::regex pattern("([^,]*)(,|$)");
+        s = std::regex_replace(s, pattern, "$2");
+        s = name + s + ">";
+    }
 }
