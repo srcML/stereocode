@@ -43,14 +43,9 @@ else()
 endif()
 
 
-# Search (in common directories) and link the dynamic library libsrcml.
-if(WIN32)
-    target_link_libraries(stereocode PRIVATE "C:/Program Files/srcML/lib/libsrcml.lib" "C:/Program Files/srcML/lib/libsrcml_static.lib")
-else()
-    find_library(LIBSRCML_LINK NAMES libsrcml.so.1.0.0 libsrcml.so.1 libsrcml.so libsrcml.dylib)
-    target_link_libraries(stereocode PRIVATE ${LIBSRCML_LINK}) 
-endif()
-
+# Find and use libsrcml
+find_package(srcML REQUIRED)
+target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
 
 # Turn on compiler warnings.
 
