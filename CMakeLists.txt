@@ -47,7 +47,7 @@ endif()
 if(WIN32)
     target_link_libraries(stereocode PRIVATE "C:/Program Files/srcML/lib/libsrcml.lib" "C:/Program Files/srcML/lib/libsrcml_static.lib")
 else()
-    find_library(LIBSRCML_LINK NAMES libsrcml.so.1.0.0 libsrcml.so.1 libsrcml.so)   
+    find_library(LIBSRCML_LINK NAMES libsrcml.so.1.0.0 libsrcml.so.1 libsrcml.so libsrcml.dylib)
     target_link_libraries(stereocode PRIVATE ${LIBSRCML_LINK}) 
 endif()
 
