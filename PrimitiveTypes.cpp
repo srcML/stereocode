@@ -9,40 +9,40 @@
 
 #include "PrimitiveTypes.hpp"
 
-// RETVAL == true if s == (ptypes[i] or usertypes[i])
+// Checks if "type" is a primitive
 //
-bool primitiveTypes::isPrimitive(const std::string& s) const {
-    return (ptypes.find(s) != ptypes.end()) || (usertypes.find(s) != usertypes.end());
+bool primitiveTypes::isPrimitive(const std::string& type) const {
+    return (ptypes.find(type) != ptypes.end()) || (userTypes.find(type) != userTypes.end());
 }
 
-// Adds s to user specified primitives if not already present
+// Adds "type" to user-defined primitives if not already present
 //
-void primitiveTypes::addPrimitive(const std::string& s) {
-    if (!isPrimitive(s)) usertypes.insert(s);
+void primitiveTypes::addPrimitive(const std::string& type) {
+    if (!isPrimitive(type)) userTypes.insert(type);
 }
 
-// Reads a set of user defined primitive types to be added to a list
+// Reads a set of user-defined primitive types
+// File should list one type per line
 //
-// REQUIRES: in.open(fname)
-//  fname will list each type name one per line
-//  No spaces in type name if compound long int => longint
-//
-std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
+std::istream& operator>>(std::istream& in, primitiveTypes& primitives) {
     std::string name;
-    while(std::getline(in, name)) prims.addPrimitive(name);
+    while(std::getline(in, name)) {
+        trimWhitespace(name);
+        primitives.addPrimitive(name);
+    }
     return in;
 }
 
-//Initially ptypes is empty or has user defined types.
+// Specific primitives are used based on unit language
+// Generic types (e.g., T), auto (C++), and var (C# and Java) 
+//  are considered as non-primitive unless added by user
 //
-// After language is determined then language specific primitive
-//  types are added.
-//
-void primitiveTypes::setLanguage(const std::string& unitLanguage) {
-    if (this->unitLanguage == unitLanguage) return;   //Same language (done)
-    this->unitLanguage = unitLanguage;
+void primitiveTypes::setLanguage(const std::string& unitLang) {
+    if (unitLanguage == unitLang) return;
+    
+    unitLanguage = unitLang;
 
-    if (this->unitLanguage == "C++") {
+    if (unitLanguage == "C++") {
         ptypes = {
             "short",
             "shortint",
@@ -71,10 +71,11 @@ void primitiveTypes::setLanguage(const std::string& unitLanguage) {
             "char16_t",
             "char32_t",
             "bool",
-            "ptrdiff_t"
+            "ptrdiff_t",
+            "void"
         };
     }
-    else if (this->unitLanguage == "C#") {  
+    else if (unitLanguage == "C#") {  
         ptypes = {
             "bool",
             "byte",
@@ -91,7 +92,7 @@ void primitiveTypes::setLanguage(const std::string& unitLanguage) {
             "decimal",
             "string",
             "void",
-            "Boolean", // Same as bool, but used as System.Boolean
+            "Boolean",
             "Byte",
             "SByte",
             "Char",
@@ -110,7 +111,7 @@ void primitiveTypes::setLanguage(const std::string& unitLanguage) {
             "Void"
         };
     }
-    else if (this->unitLanguage == "Java") {
+    else if (unitLanguage == "Java") {
         ptypes = {
             "boolean",
             "byte",
