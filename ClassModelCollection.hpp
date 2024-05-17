@@ -15,24 +15,31 @@
 
 class classModelCollection {
 public:
-                        classModelCollection        (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>, 
-                                                    std::ofstream&, std::string, bool, bool);
+                         classModelCollection       (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>&, 
+                                                    std::ofstream&, const std::string&, bool, bool);
 
     void                 findClassInfo              (srcml_archive*, std::vector<srcml_unit*>);
     void                 findFreeFunction           (srcml_archive*, std::vector<srcml_unit*>);
     void                 findInheritedAttribute     (classModel&);
-    
-    bool                 isFriendFunction           (methodModel&);
+    void                 findInheritedMethod        (classModel&);
 
-    void                 outputWithStereotypes      (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>);
+    void                 findAttrModifiedInsideCalls  (classModel&, methodModel&);
+
+    void                 outputWithStereotypes      (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>&);
     void                 outputReportFile           (std::ofstream&, classModel&);
     void                 allView                    (std::ofstream&, classModel&, bool);
     void                 method_class_unique_views  (std::ofstream&, std::ofstream&, std::ofstream&, std::ofstream&, std::ofstream&);
-protected:
-    std::unordered_map<std::string, classModel>     classCollection{};    // List of class names and their models
-    std::unordered_map<std::string, std::string>    classGeneric{};       // List of generic class names with and without <> for inheritance matching
-    std::vector<std::string>                        freeFunction{};       // List of free functions
-    std::unordered_map<std::string, int> classStereotypesView = {
+
+    bool                 isFriendFunction            (methodModel&);
+    
+private:
+    std::unordered_map<std::string, classModel>     classCollection;    // List of class names and their models
+    std::unordered_map<std::string, std::string>    classGeneric;       // List of generic class names with and without <> for inheritance matching
+    std::vector<methodModel>                        freeFunction;       // List of free functions
+    std::unordered_map<std::string, int>            uniqueMethodStereotypesView;  
+    std::unordered_map<std::string, int>            uniqueClassStereotypesView;  
+
+    std::unordered_map<std::string, int> classStereotypes = {
         {"entity", 0},
         {"minimal-entity", 0},
         {"data-provider", 0},
@@ -49,15 +56,11 @@ protected:
         {"unclassified", 0},
         {"empty", 0},
     };
-    std::unordered_map<std::string, int> methodStereotypesView = {
+    std::unordered_map<std::string, int> methodStereotypes = {
         {"get", 0},
         {"predicate", 0},
         {"property", 0},
-        {"accessor", 0},
-        {"non-const-get", 0},
-        {"non-const-predicate", 0},
-        {"non-const-property", 0},
-        {"non-const-accessor", 0},
+        {"void-accessor", 0},
         {"set", 0},
         {"command", 0},
         {"non-void-command", 0},
@@ -69,8 +72,6 @@ protected:
         {"wrapper", 0},
         {"unclassified", 0},
     };
-    std::unordered_map<std::string, int> uniqueMethodStereotypesView;  
-    std::unordered_map<std::string, int> uniqueClassStereotypesView;  
 };
 
 #endif
