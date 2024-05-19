@@ -26,6 +26,7 @@ public:
 
     std::string              getName                             () const                { return name;                                     }
     std::string              getNameSignature                    () const                { return nameSignature;                            }
+    std::string              getParameterList                    () const                { return parameterList;                            }
     std::string              getSrcML                            () const                { return srcML;                                    }
     std::string              getReturnType                       () const                { return returnType;                               }
     std::string              getReturnTypeParsed                 () const                { return returnTypeParsed;                         }
@@ -37,8 +38,8 @@ public:
     
     int                      getNumOfAttributeModified          () const                { return numOfAttributeModified;                    }
     int                      getUnitNumber                      () const                { return unitNumber;                                }  
-    int                      getNumOfFilteredFunctionCalls      () const                { return numOfFilteredFunctionCalls;                } 
-    int                      getNumOfFilteredMethodCalls        () const                { return numOfFilteredMethodCalls;                  } 
+    int                      getNumOfExternalFunctionCalls      () const                { return numOfExternalFunctionCalls;                } 
+    int                      getNumOfExternalMethodCalls        () const                { return numOfExternalMethodCalls;                  } 
 
     bool                     IsCheckedCall                      () const                { return checkedCall;                               }    
     bool                     IsVisitedCall                      () const                { return visitedCall;                               } 
@@ -57,7 +58,7 @@ public:
     bool                     IsNonPrimitiveReturnTypeExternal   () const                { return nonPrimitiveReturnTypeExternal;            }
     bool                     IsNonPrimitiveLocalExternal        () const                { return nonPrimitiveLocalExternal;                 }  
     bool                     IsNonPrimitiveParamaterExternal    () const                { return nonPrimitiveParamaterExternal;             }  
-
+    bool                     IsConstructorDestructorUsed        () const                { return constructorDestructorUsed;                 }  
     
     void                     setStereotype                       (const std::string&);
     void                     setVisitedCall                      (bool s)               { visitedCall = s; }
@@ -82,12 +83,14 @@ public:
     void                     findAccessorMethods        ();
     void                     isEmpty                    (srcml_archive*, srcml_unit*);
     void                     isConst                    (srcml_archive*, srcml_unit*);
+    void                     isConstructorDestructor    (srcml_archive*, srcml_unit*);
 
     void                     isIgnorableCall            (std::vector<std::pair<std::string, std::string>>&);
     void                     isFunctionCall             (std::unordered_map<std::string, Variable>&);
     void                     isCallOnAttribute          (std::unordered_map<std::string, Variable>&, 
                                                          const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);
-  
+
+    
     void                     isAttributeReturned            (std::unordered_map<std::string, Variable>&);
     void                     isAttributeOrParameterModified (srcml_archive*, srcml_unit*, std::unordered_map<std::string, Variable>&);                             
     void                     isAttributeUsedInExpression    (srcml_archive*, srcml_unit*, std::unordered_map<std::string, Variable>&);
@@ -111,7 +114,7 @@ private:
     std::unordered_set<std::string>                   variablesCreatedWithNew;                // List of variables that are declared/initialized with the "new" operator
     std::vector<std::string>                          stereotype;                             // Method stereotype
     std::vector<std::pair<std::string, std::string>>  functionCall;                           // Such as a(), b(), base.a(), this.a(), super.a(). Pair is call name and call argument list
-    std::unordered_set<std::string>                   functionCallSet;
+    std::unordered_set<std::string>                   functionCallSet;                        // Needed for finding accessor methods
     std::vector<std::pair<std::string, std::string>>  methodCall;                             // Such as a.b() where 'a' is an attribute. Pair is call name and call argument list 
     std::vector<std::string>                          returnExpression;                       // List of all return expressions in a method
     bool                                              constMethod{false};                     // Is it a const method? C++ only
@@ -130,10 +133,11 @@ private:
     bool                                              newReturned{false};                     // There is at least one return that a return a "new" call
     bool                                              variableCreatedWithNewReturned{false};
     bool                                              accessorMethodCallUsed{false};
+    bool                                              constructorDestructorUsed{false};
     int                                               numOfAttributeModified{0};              // Number of modified attributes
     int                                               unitNumber{-1};                         // Unit number
-    int                                               numOfFilteredFunctionCalls{0};          // Number of function calls that are filtered (removed)
-    int                                               numOfFilteredMethodCalls{0};            // Number of method calls that are filtered (removed)
+    int                                               numOfExternalFunctionCalls{0};          // Number of function calls that are filtered (removed)
+    int                                               numOfExternalMethodCalls{0};            // Number of method calls that are filtered (removed)
 
 };
 

@@ -38,6 +38,7 @@ void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const s
     int nonPrivateAttributeOldSize = nonPrivateAttributeOrdered.size(); // Needed for partial class analysis
     findNonPrivateAttributeName(archive, unit, nonPrivateAttributeOrdered);
     findNonPrivateAttributeType(archive, unit, nonPrivateAttributeOrdered, nonPrivateAttributeOldSize);
+
     findMethod(archive, unit, classXpath, unitNumber);
 
     if (unitLanguage == "C#")
@@ -433,14 +434,14 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
     srcml_transform_free(result);
 }
 
-
 // Finds methods defined inside the class
 // Nested local functions within methods in C# are ignored 
 // Java doesn't have nested local functions
 // C++ allows defining classes inside free functions, which could make methods look like nested functions
 //
 void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
-    std::string methodClassXpath = "//src:function[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
+    std::string methodClassXpath = "//*[self::src:function or self::src:constructor or self::src:destructor]";
+    methodClassXpath += "[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
     // This is needed to make sure that methods defined in a class where the class is inside a free function are stereotyped correctly (C++ case)
     //  and not treated as a nested function
     methodClassXpath += " and not(ancestor::src:function[not(descendant::src:class | descendant::src:struct | descendant::src:interface)])";
@@ -624,6 +625,7 @@ void classModel::ComputeClassStereotype() {
     int collaborator =  methodStereotypes["collaborator"]; 
     int collaborators = controllers + collaborator;
      
+    // Constructors and destructors are not considered in the computation of class stereotypes
     int factory = methodStereotypes["factory"];
 
     int degenerates = methodStereotypes["empty"] + methodStereotypes["stateless"] + methodStereotypes["wrapper"];
@@ -714,6 +716,7 @@ void classModel::ComputeClassStereotype() {
 //Compute method stereotypes
 //
 void classModel::ComputeMethodStereotype() {
+    constructorDestructor();
     getter();
     predicate();
     property();
@@ -732,14 +735,34 @@ void classModel::ComputeMethodStereotype() {
     }
 }
 
+// Stereotype constructor copy-constructor destructor:
+//
+void classModel::constructorDestructor() {
+    for (auto& m : method) {
+        if (m.IsConstructorDestructorUsed()) {  
+            std::string parameterList = m.getParameterList();
+            std::string srcML = m.getSrcML();
+
+            if (srcML.find("<destructor>") != std::string::npos)
+                m.setStereotype("destructor"); 
+            else if (parameterList.find(name[3]) != std::string::npos) 
+                m.setStereotype("copy-constructor");
+            else 
+                m.setStereotype("constructor");
+        }
+    }
+}
+
 // Stereotype get:
 // 1] Return type is not void
 // 2] Contains at least one simple return expression that returns an attribute (e.g., return dm;)
 //
 void classModel::getter() {
     for (auto& m : method) {
-        if (m.IsAttributeReturned()) {
-            m.setStereotype("get");
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (m.IsAttributeReturned()) {
+                m.setStereotype("get");
+            }
         }
     }
 }
@@ -752,24 +775,25 @@ void classModel::getter() {
 // 
 void classModel::predicate() { 
     for (auto& m : method) {
-        bool returnType = false;
-        std::string_view returnTypeParsed = m.getReturnTypeParsed();
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool returnType = false;
+            std::string returnTypeParsed = m.getReturnTypeParsed();
 
-        if (unitLanguage == "C++")
-            returnType = (returnTypeParsed == "bool");
-        else if (unitLanguage == "C#")
-            returnType = (returnTypeParsed == "bool") || 
-                         (returnTypeParsed == "Boolean");
-        else if (unitLanguage == "Java")
-            returnType = (returnTypeParsed == "boolean");
+            if (unitLanguage == "C++")
+                returnType = (returnTypeParsed == "bool");
+            else if (unitLanguage == "C#")
+                returnType = (returnTypeParsed == "bool") || 
+                            (returnTypeParsed == "Boolean");
+            else if (unitLanguage == "Java")
+                returnType = (returnTypeParsed == "boolean");
 
-        bool hasComplexReturnExpr = m.IsAttributeNotReturned();
-        bool isAttributeUsed = m.IsAttributeUsed();
-        bool isAccessorMethodCallUsed = m.IsAccessorMethodCallUsed();
+            bool hasComplexReturnExpr = m.IsAttributeNotReturned();
+            bool isAttributeUsed = m.IsAttributeUsed();
+            bool isAccessorMethodCallUsed = m.IsAccessorMethodCallUsed();
 
-        if (returnType && hasComplexReturnExpr && (isAttributeUsed || isAccessorMethodCallUsed))
-            m.setStereotype("predicate"); 
-        
+            if (returnType && hasComplexReturnExpr && (isAttributeUsed || isAccessorMethodCallUsed))
+                m.setStereotype("predicate"); 
+        }
     }
 }
 
@@ -781,23 +805,25 @@ void classModel::predicate() {
 //    
 void classModel::property() {
     for (auto& m : method) {
-        bool returnType = false;
-        std::string_view returnTypeParsed = m.getReturnTypeParsed();
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool returnType = false;
+            std::string returnTypeParsed = m.getReturnTypeParsed();
 
-        if (unitLanguage == "C++")
-            returnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "");
-        else if (unitLanguage == "C#")
-            returnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
-                          returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "");
-        else if (unitLanguage == "Java")
-            returnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
-                          returnTypeParsed != "Void" && returnTypeParsed != "");
+            if (unitLanguage == "C++")
+                returnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "");
+            else if (unitLanguage == "C#")
+                returnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
+                            returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "");
+            else if (unitLanguage == "Java")
+                returnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
+                            returnTypeParsed != "Void" && returnTypeParsed != "");
 
-        bool isAttributeUsed = m.IsAttributeUsed();
-        bool isAccessorMethodCallUsed = m.IsAccessorMethodCallUsed();
+            bool isAttributeUsed = m.IsAttributeUsed();
+            bool isAccessorMethodCallUsed = m.IsAccessorMethodCallUsed();
 
-        if (returnType && m.IsAttributeNotReturned() && (isAttributeUsed || isAccessorMethodCallUsed)) {
-            m.setStereotype("property");
+            if (returnType && m.IsAttributeNotReturned() && (isAttributeUsed || isAccessorMethodCallUsed)) {
+                m.setStereotype("property");
+            }
         }
     }
 }
@@ -810,13 +836,15 @@ void classModel::property() {
 // 
 void classModel::voidAccessor() {
     for (auto& m : method) {
-        bool isAttributeUsed = m.IsAttributeUsed();
-        bool isAccessorMethodCallUsed = m.IsAccessorMethodCallUsed();
-        bool returnVoid = m.getReturnTypeParsed() == "void";
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool isAttributeUsed = m.IsAttributeUsed();
+            bool isAccessorMethodCallUsed = m.IsAccessorMethodCallUsed();
+            bool returnVoid = m.getReturnTypeParsed() == "void";
 
-        if (m.IsParameterRefChanged() && returnVoid && (isAttributeUsed || isAccessorMethodCallUsed)) {
-            m.setStereotype("void-accessor");       
-        } 
+            if (m.IsParameterRefChanged() && returnVoid && (isAttributeUsed || isAccessorMethodCallUsed)) {
+                m.setStereotype("void-accessor");       
+            } 
+        }
     }
 }
 
@@ -826,11 +854,13 @@ void classModel::voidAccessor() {
 //
 void classModel::setter() {
     for (auto& m : method) {
-        bool attrModified = m.getNumOfAttributeModified() == 1;
-        int funcCalls = m.getFunctionCall().size() + m.getMethodCall().size();
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool attrModified = m.getNumOfAttributeModified() == 1;
+            int funcCalls = m.getFunctionCall().size() + m.getMethodCall().size();
 
-        if (attrModified && funcCalls <= 1) 
-            m.setStereotype("set");    
+            if (attrModified && funcCalls <= 1) 
+                m.setStereotype("set"); 
+        }   
     }
 }
 
@@ -842,8 +872,9 @@ void classModel::setter() {
 //                  -	There is at least two calls on data members or
 //                      function calls to other mutating methods in class
 //          Case 3: zero data members modifed and:
-//                  -	there is at least one call on a data members 
-//                      or one function call to other mutating methods in class
+//                  -	there is at least one call on a data member
+//                      or one function call (not a constructor call) 
+//                      to other mutating methods in class
 
 //     Method is not const (C++ only)
 //     Case 1 applies when attributes are mutable and method is const (C++ only)
@@ -853,26 +884,28 @@ void classModel::setter() {
 //
 void classModel::command() {
     for (auto& m : method) {
-        int calls = m.getFunctionCall().size() + m.getMethodCall().size();
+        if (!m.IsConstructorDestructorUsed()) {  
+            int calls = m.getFunctionCall().size() + m.getMethodCall().size();
 
-        std::string_view returnTypeParsed = m.getReturnTypeParsed();
-        int attributeModified = m.getNumOfAttributeModified();
+            std::string returnTypeParsed = m.getReturnTypeParsed();
+            int attributeModified = m.getNumOfAttributeModified();
 
-        bool case1 = attributeModified == 0 && (m.getFunctionCall().size() > 0 || m.getMethodCall().size() > 0);
-        bool case2 = attributeModified == 1 && (calls > 1);
-        bool case3 = attributeModified > 1;
-        bool mutableCase = m.IsConstMethod() && case3;
+            bool case1 = attributeModified == 0 && (m.getFunctionCall().size() > 0 || m.getMethodCall().size() > 0);
+            bool case2 = attributeModified == 1 && (calls > 1);
+            bool case3 = attributeModified > 1;
+            bool mutableCase = m.IsConstMethod() && case3;
 
-        bool returnCheck = returnTypeParsed != "void" && returnTypeParsed != "Void";
+            bool returnCheck = returnTypeParsed != "void" && returnTypeParsed != "Void";
 
-        if (case1 || case2 || case3) {
-            if (!m.IsConstMethod() || mutableCase){ // Handles case of mutable attributes (C++ only)
-                if (returnCheck)
-                    m.setStereotype("non-void-command");  
-                else
-                    m.setStereotype("command");
-            }
-        } 
+            if (case1 || case2 || case3) {
+                if (!m.IsConstMethod() || mutableCase){ // Handles case of mutable attributes (C++ only)
+                    if (returnCheck)
+                        m.setStereotype("non-void-command");  
+                    else
+                        m.setStereotype("command");
+                }
+            } 
+        }
     }
 }
 
@@ -884,6 +917,7 @@ void classModel::command() {
 //
 void classModel::factory() {
     for (auto& m : method) {
+        if (!m.IsConstructorDestructorUsed()) {  
             bool     returnsObj                           = m.IsNonPrimitiveReturnType();
             bool     returnsNewCall                       = m.IsNewCallReturned();              
             bool     variableCreatedWithNewReturned       = m.IsVariableCreatedWithNewReturned(); 
@@ -892,7 +926,8 @@ void classModel::factory() {
             bool case2 = returnsObj && variableCreatedWithNewReturned;
 
             if (case1 || case2)
-                m.setStereotype("factory");           
+                m.setStereotype("factory");   
+        }        
     }
 }
 
@@ -907,33 +942,34 @@ void classModel::factory() {
 //
 void classModel::collaboratorController() {
     for (auto& m : method) {
-        if (!m.IsEmpty()){
-            bool nonPrimitiveAttributeExternal = m.IsNonPrimitiveAttributeExternal();
-            bool nonPrimitiveLocalExternal = m.IsNonPrimitiveLocalExternal();
-            bool nonPrimitiveParamaterExternal = m.IsNonPrimitiveParamaterExternal();
-            bool nonPrimitiveReturnExternal = m.IsNonPrimitiveReturnTypeExternal();
-           
-            bool isVoidPointer = false;
-            if (unitLanguage == "C++" || unitLanguage == "Java") {
-                std::string returnType = m.getReturnType();
-                trimWhitespace(returnType);
-                
-                if (returnType.find("void*") != std::string::npos )
-                    isVoidPointer = true;
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (!m.IsEmpty()){
+                bool nonPrimitiveAttributeExternal = m.IsNonPrimitiveAttributeExternal();
+                bool nonPrimitiveLocalExternal = m.IsNonPrimitiveLocalExternal();
+                bool nonPrimitiveParamaterExternal = m.IsNonPrimitiveParamaterExternal();
+                bool nonPrimitiveReturnExternal = m.IsNonPrimitiveReturnTypeExternal();
+            
+                bool isVoidPointer = false;
+                if (unitLanguage == "C++" || unitLanguage == "Java") {
+                    std::string returnType = m.getReturnType();
+                    trimWhitespace(returnType);
+                    
+                    if (returnType.find("void*") != std::string::npos )
+                        isVoidPointer = true;
+                }
+
+                bool returnCheck = nonPrimitiveReturnExternal || isVoidPointer;
+
+                bool isAttributeNotModified = m.getNumOfAttributeModified() == 0;
+                int methodCalls = m.getFunctionCall().size() + m.getMethodCall().size(); 
+                int externalCalls = m.getNumOfExternalMethodCalls() + m.getNumOfExternalFunctionCalls();
+        
+                if (isAttributeNotModified && methodCalls == 0 && externalCalls > 0)
+                    m.setStereotype("controller");   
+
+                else if (nonPrimitiveAttributeExternal || nonPrimitiveLocalExternal || nonPrimitiveParamaterExternal || returnCheck )
+                    m.setStereotype("collaborator");   
             }
-
-            bool returnCheck = nonPrimitiveReturnExternal || isVoidPointer;
-
-            bool isAttributeNotModified = m.getNumOfAttributeModified() == 0;
-            int methodCalls = m.getFunctionCall().size() + m.getMethodCall().size(); 
-            int externalCalls = m.getNumOfFilteredMethodCalls() + m.getNumOfFilteredFunctionCalls();
-       
-            if (isAttributeNotModified && methodCalls == 0 && externalCalls > 0)
-                m.setStereotype("controller");   
-
-            else if (nonPrimitiveAttributeExternal || nonPrimitiveLocalExternal || nonPrimitiveParamaterExternal || returnCheck )
-                m.setStereotype("collaborator");   
-
         }
     }
 }
@@ -946,12 +982,14 @@ void classModel::collaboratorController() {
 //
 void classModel::stateless() {
     for (auto& m : method) {
-        if (!m.IsEmpty()) {
-            bool noCalls = m.getFunctionCall().size() == 0 && m.getMethodCall().size() == 0;
-            int numOfExternalCalls = m.getNumOfFilteredMethodCalls() + m.getNumOfFilteredFunctionCalls();
-            bool externalCalls = numOfExternalCalls > 1 || numOfExternalCalls < 1;
-            if (!m.IsAttributeUsed() && noCalls && externalCalls)
-                m.setStereotype("stateless");           
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (!m.IsEmpty()) {
+                bool noCalls = m.getFunctionCall().size() == 0 && m.getMethodCall().size() == 0;
+                int numOfExternalCalls = m.getNumOfExternalMethodCalls() + m.getNumOfExternalFunctionCalls();
+                bool externalCalls = numOfExternalCalls > 1 || numOfExternalCalls < 1;
+                if (!m.IsAttributeUsed() && noCalls && externalCalls)
+                    m.setStereotype("stateless");           
+            }
         }
     }
 }
@@ -964,11 +1002,13 @@ void classModel::stateless() {
 //
 void classModel::wrapper() {
     for (auto& m : method ) {
-        if(!m.IsEmpty()){
-            bool noClassCalls = m.getFunctionCall().size() == 0 && m.getMethodCall().size() == 0;
-            int numOfExternalCalls = m.getNumOfFilteredMethodCalls() + m.getNumOfFilteredFunctionCalls();
-            if (!m.IsAttributeUsed() && noClassCalls && numOfExternalCalls == 1)
-                m.setStereotype("wrapper");         
+        if (!m.IsConstructorDestructorUsed()) {  
+            if(!m.IsEmpty()){
+                bool noClassCalls = m.getFunctionCall().size() == 0 && m.getMethodCall().size() == 0;
+                int numOfExternalCalls = m.getNumOfExternalMethodCalls() + m.getNumOfExternalFunctionCalls();
+                if (!m.IsAttributeUsed() && noClassCalls && numOfExternalCalls == 1)
+                    m.setStereotype("wrapper");         
+            }
         }
     }
 }
@@ -978,8 +1018,10 @@ void classModel::wrapper() {
 //
 void classModel::empty() {
     for (auto& m : method) {
-        if (m.IsEmpty()) 
-            m.setStereotype("empty");
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (m.IsEmpty()) 
+                m.setStereotype("empty");
+        }
     }
 }
 

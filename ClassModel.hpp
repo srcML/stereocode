@@ -34,6 +34,8 @@ public:
 
     void ComputeClassStereotype();
     void ComputeMethodStereotype();
+
+    void constructorDestructor();
     void getter();
     void setter();
     void predicate();
@@ -47,23 +49,23 @@ public:
     void wrapper();
 
     std::string                                            getStereotype                      ()               const;
-    std::vector<std::string>                               getName                            ()               const          { return name;                }
-    std::string                                            getUnitLanguage                    ()               const          { return unitLanguage;        }
-   
-    std::vector<std::string>                               getStereotypeList                  ()               const          { return stereotype;            }
-    const std::unordered_map<std::string, std::string>&    getParentClassName                 ()               const          { return parentClassName;       }
-    std::unordered_map<std::string, Variable>&             getAttribute                       ()                              { return attribute;             }
-    const std::unordered_map<std::string, Variable>&       getNonPrivateAttribute             ()                              { return nonPrivateAttribute;   }
-    std::vector<methodModel>&                              getMethod                          ()                              { return method;                }
-    std::unordered_set<std::string>&                       getInheritedMethodSignature        ()                              { return inheritedMethodSignature;  }
-    std::unordered_set<std::string>&                       getMethodSignature                 ()                              { return methodSignature;           }    
-    const std::unordered_set<std::string>&                 getFriendFunctionDecl              ()                              { return friendFunctionDecl;        }
+    std::string                                            getUnitLanguage                    ()               const          { return unitLanguage;              }
+    std::unordered_map<std::string, Variable>&             getAttribute                       ()                              { return attribute;                 }
+    std::vector<methodModel>&                              getMethod                          ()                              { return method;                    }
+
+    const std::vector<std::string>&                        getName                            ()               const          { return name;                      }
+    const std::vector<std::string>&                        getStereotypeList                  ()               const          { return stereotype;                }
+    const std::unordered_map<std::string, std::string>&    getParentClassName                 ()               const          { return parentClassName;           }
+    const std::unordered_map<std::string, Variable>&       getNonPrivateAttribute             ()               const          { return nonPrivateAttribute;       }
+    const std::unordered_set<std::string>&                 getInheritedMethodSignature        ()               const          { return inheritedMethodSignature;  }
+    const std::unordered_set<std::string>&                 getMethodSignature                 ()               const          { return methodSignature;           }    
+    const std::unordered_set<std::string>&                 getFriendFunctionDecl              ()               const          { return friendFunctionDecl;        }
     
-    bool                                                   HasInherited                       ()               const          { return inherited;           }
-    bool                                                   IsVisited                          ()               const          { return visited;             }
+    bool                                                   HasInherited                       ()               const          { return inherited;                 }
+    bool                                                   IsVisited                          ()               const          { return visited;                   }
     
-    void                                                   setInherited                       (bool flag)                     { inherited = flag;           }
-    void                                                   setVisited                         (bool flag)                     { visited = flag;             }
+    void                                                   setInherited                       (bool flag)                     { inherited = flag;                 }
+    void                                                   setVisited                         (bool flag)                     { visited = flag;                   }
 
     srcml_unit*                                            outputUnitWithStereotypes          (srcml_archive*, srcml_unit*, srcml_transform_result**, bool);
 

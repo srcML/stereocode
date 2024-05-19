@@ -13,8 +13,8 @@ extern primitiveTypes                                                           
 extern bool                                                                       STRUCT_SUPPORT;         
 extern bool                                                                       INTERFACE_SUPPORT;       
 extern std::unordered_map<int, std::unordered_map<std::string, std::string>>      xpathList;  
-extern  std::unordered_map<std::string, int>                                      methodStereotypes;
-extern  std::unordered_map<std::string, int>                                      classStereotypes;
+extern std::unordered_map<std::string, int>                                      methodStereotypes;
+extern std::unordered_map<std::string, int>                                      classStereotypes;
 
 classModelCollection::classModelCollection (srcml_archive* archive, srcml_archive* outputArchive, 
                                             std::vector<srcml_unit*>& units, std::ofstream& reportFile, 
@@ -85,6 +85,7 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     if (outputReport) 
         reportFile.open(inputFile + ".report.txt");
 
+    // Compute stereotypes
     for (auto it = classCollection.begin(); it != classCollection.end();) {
         it->second.ComputeMethodStereotype();
         it->second.ComputeClassStereotype();
@@ -220,7 +221,8 @@ void classModelCollection::findFreeFunction(srcml_archive* archive, std::vector<
     for (size_t j = 0; j < units.size(); j++){
         std::string unitLanguage = srcml_unit_get_language(units[j]); 
         if (unitLanguage == "C++") {     
-            std::string xpath = "//src:function[not(ancestor::src:class or ancestor::src:struct)]";
+            // std::string xpath = "//src:function[not(ancestor::src:class or ancestor::src:struct)]";
+            std::string xpath = "//*[self::src:function or self::src:constructor or self::src:destructor][not(ancestor::src:class or ancestor::src:struct)]";
             srcml_append_transform_xpath(archive, xpath.c_str());
             srcml_transform_result* result = nullptr;
             srcml_unit_apply_transforms(archive, units[j], &result);
@@ -556,8 +558,6 @@ void classModelCollection::outputReportFile(std::ofstream& out, classModel& c) {
     }
 }
 
-
-
 // Used to generate optional views for the distribution of method and class stereotypes
 // These views are generated in .csv files
 //
@@ -567,7 +567,8 @@ void classModelCollection::method_class_unique_views(std::ofstream& outU, std::o
 
     std::vector<std::string> method_ordered_keys = {
         "get", "predicate", "property", "void-accessor", "set", "command", "non-void-command", 
-        "collaborator", "controller", "factory", "empty", "stateless", "wrapper", "unclassified"
+        "collaborator", "controller", "constructor", "copy-constructor", "destructor", "factory", 
+        "empty", "stateless", "wrapper", "unclassified"
     };
     
     std::vector<std::string> class_ordered_keys = {
@@ -658,12 +659,12 @@ void classModelCollection::method_class_unique_views(std::ofstream& outU, std::o
 }
 
 
-// Used to generate optional (.csv) views for the distribution of method and class stereotypes
+// Count the stereotypes to generate the views
 //
 void classModelCollection::allView(std::ofstream& out, classModel& c, bool headLine) {
     if (!headLine) out << "Class Name,Class Stereotype,Method Name,Method Stereotype,Method Stereotype Count" << '\n';
     if (out.is_open()) {   
-        std::string classStereotype =  c.getStereotype(); 
+        const std::string& classStereotype =  c.getStereotype(); 
         uniqueClassStereotypesView[classStereotype]++; // for class unique View 
 
         for (const std::string& s : c.getStereotypeList()) // For class view
@@ -680,8 +681,7 @@ void classModelCollection::allView(std::ofstream& out, classModel& c, bool headL
             WStoBlank(methodName);
             methodName = "\"" + methodName + "\"";
             
-
-            std::string methodStereotype = m.getStereotype();
+            const std::string& methodStereotype = m.getStereotype();
             uniqueMethodStereotypesView[methodStereotype]++;
 
             for (const std::string& s : m.getStereotypeList())

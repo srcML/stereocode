@@ -12,19 +12,19 @@
 
 extern ignorableCalls IGNORED_CALLS;
 extern primitiveTypes PRIMITIVES;
+
 methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::string& methodXpath, 
                          const std::string& unitLang, const std::string& propertyReturnType, int unitNum) :
                          unitLanguage(unitLang),  xpath(methodXpath), unitNumber(unitNum) {
   
     srcML = srcml_unit_get_srcml(unit);
+    isConstructorDestructor(archive, unit);
+    findMethodName(archive, unit); 
+    findParameterList(archive, unit);
 
     // Method could be inside a property (C# only), so return type is collected separately
     // returnType = "" if the unitLanguage is not C#
     returnType = propertyReturnType; 
-
-    findMethodName(archive, unit); 
-    findParameterList(archive, unit);
-
     // Name signature needed for function call analysis
     std::string paramList = parameterList;
     std::string methName = name;
@@ -36,40 +36,42 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
 };
 void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attribute, 
                                  const std::string& classNamePar)  {
-    PRIMITIVES.setLanguage(unitLanguage); 
-    IGNORED_CALLS.setLanguage(unitLanguage);
-
     classNameParsed = classNamePar;
+    if (!constructorDestructorUsed) {                                
+        PRIMITIVES.setLanguage(unitLanguage); 
+        IGNORED_CALLS.setLanguage(unitLanguage);
+        
+        srcml_archive* archive = srcml_archive_create();
+        srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
+        srcml_unit* unit = srcml_archive_read_unit(archive);
 
-    srcml_archive* archive = srcml_archive_create();
-    srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
-    srcml_unit* unit = srcml_archive_read_unit(archive);
+        findMethodReturnType(archive, unit); 
+        findLocalVariableName(archive, unit);
+        findLocalVariableType(archive, unit); 
+        findParameterName(archive, unit);
+        findParameterType(archive, unit);
+        findReturnExpression(archive, unit);
+        findCallName(archive, unit);
+        findCallArgument(archive, unit);
+        findNewAssign(archive, unit);
+        isIgnorableCall(methodCall);
+        isIgnorableCall(functionCall);
+        
+        if (unitLanguage != "C++") isFunctionCall(attribute);
 
-    findMethodReturnType(archive, unit); 
-    findLocalVariableName(archive, unit);
-    findLocalVariableType(archive, unit); 
-    findParameterName(archive, unit);
-    findParameterType(archive, unit);
-    findReturnExpression(archive, unit);
-    findCallName(archive, unit);
-    findCallArgument(archive, unit);
-    findNewAssign(archive, unit);
-    isIgnorableCall(methodCall);
-    isIgnorableCall(functionCall);
+        isAttributeReturned(attribute);  
+        isAttributeUsedInExpression(archive, unit, attribute);
+        isAttributeOrParameterModified(archive, unit, attribute);
+
+        isEmpty(archive, unit);
+
+        if (unitLanguage == "C++") isConst(archive, unit);
+
+        srcml_unit_free(unit);
+        srcml_archive_close(archive);
+        srcml_archive_free(archive); 
+    }
     
-    if (unitLanguage != "C++") isFunctionCall(attribute);
-
-    isAttributeReturned(attribute);  
-    isAttributeUsedInExpression(archive, unit, attribute);
-    isAttributeOrParameterModified(archive, unit, attribute);
-
-    isEmpty(archive, unit);
-
-    if (unitLanguage == "C++") isConst(archive, unit);
-
-    srcml_unit_free(unit);
-    srcml_archive_close(archive);
-    srcml_archive_free(archive); 
 }
 
 void methodModel::findFriendData() {
@@ -91,7 +93,11 @@ void methodModel::findFriendData() {
 // Gets the method name
 //
 void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, "/src:unit/src:function/src:name");
+    if (constructorDestructorUsed)
+        srcml_append_transform_xpath(archive, "/src:unit/*[self::src:constructor or self::src:destructor]/src:name");
+    else
+        srcml_append_transform_xpath(archive, "/src:unit/src:function/src:name");
+
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -111,10 +117,15 @@ void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result);
 }
 
+
 // Gets the method name
 //
 void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, "/src:unit/src:function/src:parameter_list");
+    if (constructorDestructorUsed)
+        srcml_append_transform_xpath(archive, "/src:unit/*[self::src:constructor or self::src:destructor]/src:parameter_list");
+    else
+        srcml_append_transform_xpath(archive, "/src:unit/src:function/src:parameter_list");
+        
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -526,6 +537,20 @@ void methodModel::isConst(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result);
 }
 
+// Check if method is a constructor or a destructor
+//
+void methodModel::isConstructorDestructor(srcml_archive* archive, srcml_unit* unit) {
+    srcml_append_transform_xpath(archive, "/src:unit/*[self::src:constructor or self::src:destructor]");
+    srcml_transform_result* result = nullptr;
+    srcml_unit_apply_transforms(archive, unit, &result);
+    int n = srcml_transform_get_unit_size(result);
+
+    if (n == 1) constructorDestructorUsed = true;
+
+    srcml_clear_transforms(archive);
+    srcml_transform_free(result);
+}
+
 // In C#, non-primitive parameters are passed by value and the value is a reference to the object,
 //  this means that if you re-assign the parameters itself (e.g., a = value), then the original object won't change
 //  So, C# need to use the ref, out, *(unsafe context), or [] to pass by reference and be able to re-assign the parameters
@@ -574,6 +599,7 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
             parameterRefChanged = true;     
     }             
 }
+
 
 // Determines if a return expression returns an attribute
 //
@@ -727,7 +753,7 @@ void methodModel::isFunctionCall(std::unordered_map<std::string, Variable>& attr
                 }         
                 else {
                     it = methodCall.erase(it); // Removes static calls  
-                    ++numOfFilteredFunctionCalls;
+                    ++numOfExternalFunctionCalls;
                 }             
             }  
             else ++it;                          
@@ -745,36 +771,44 @@ void methodModel::isFunctionCall(std::unordered_map<std::string, Variable>& attr
 void methodModel::isCallOnAttribute(std::unordered_map<std::string, Variable>& attribute, 
                                    const std::unordered_set<std::string>& classMethods, 
                                    const std::unordered_set<std::string>& inheritedClassMethods) {
-    // Check on method calls
-    for (auto it = methodCall.begin(); it != methodCall.end();) {
-        if (!isAttributeUsed(attribute, it->first, false, true)) {
-            ++numOfFilteredMethodCalls;
-            it = methodCall.erase(it);                          
+    if (!constructorDestructorUsed) { 
+        // Check on method calls
+        for (auto it = methodCall.begin(); it != methodCall.end();) {
+            if (!isAttributeUsed(attribute, it->first, false, true)) {
+                ++numOfExternalMethodCalls;
+                it = methodCall.erase(it);                          
+            }
+            else ++it;
         }
-        else ++it;
-    }
 
-    // Check on function calls
-    // We need to simply check the signature 
-    for (auto it = functionCall.begin(); it != functionCall.end();) {
-        std::string funcCallArgument = it->second;
-        removeBetweenComma(funcCallArgument, false);
+        // Check on function calls
+        // We need to simply check the signature 
+        for (auto it = functionCall.begin(); it != functionCall.end();) {
+            std::string funcCallArgument = it->second;
+            removeBetweenComma(funcCallArgument, false);
 
-        std::string funcCallParsed = it->first + funcCallArgument;
-        removeNamespace(funcCallParsed, true, unitLanguage);
+            std::string funcCallParsed = it->first + funcCallArgument;
+            removeNamespace(funcCallParsed, true, unitLanguage);
 
-        trimWhitespace(funcCallParsed);           
-        if (classMethods.find(funcCallParsed) == classMethods.end() && 
-            inheritedClassMethods.find(funcCallParsed) == inheritedClassMethods.end()) {        
+            trimWhitespace(funcCallParsed);    
+            if (funcCallParsed.find(classNameParsed) == std::string::npos) { 
+                if (classMethods.find(funcCallParsed) == classMethods.end() && 
+                    inheritedClassMethods.find(funcCallParsed) == inheritedClassMethods.end()) {        
+                        it = functionCall.erase(it);
+                        ++numOfExternalFunctionCalls;
+                    }   
+                else {
+                    functionCallSet.insert(it->first); 
+                    ++it;
+                }
+            }
+            else 
+                // Skip constructor calls to the same class
+                // They are also not counted as external calls
                 it = functionCall.erase(it);
-                ++numOfFilteredFunctionCalls;
-            }   
-        else {
-            functionCallSet.insert(it->first); // Needed for finding accessor methods
-            ++it;
+            
         }
     }
-
 }
 
 // Checks if an expression uses an attribute, local, or a parameter --> call them variable
