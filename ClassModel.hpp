@@ -85,13 +85,11 @@ public:
         }            
     }
 
-    void appendInheritedMethod(const std::vector<methodModel>& meths, const std::unordered_set<std::string>& inheritedMeths) {       
-        // Check inheritedMeths first.
-        // Order matters, classes can override inherited methods
-        inheritedMethodSignature.insert(inheritedMeths.begin(), inheritedMeths.end());  
+    void appendInheritedMethod(const std::unordered_set<std::string>& parentMethodSignature, 
+                               const std::unordered_set<std::string>& parentInheritedMethodSignature) {       
 
-        for (const auto& m : meths)
-            inheritedMethodSignature.insert(m.getNameSignature());          
+        inheritedMethodSignature.insert(parentInheritedMethodSignature.begin(), parentInheritedMethodSignature.end());  
+        inheritedMethodSignature.insert(parentMethodSignature.begin(), parentMethodSignature.end());      
     }
 
     void appendInheritedPrivateAttribute() {
@@ -118,6 +116,7 @@ private:
     std::unordered_map<int, std::string>                    xpath;                          // Unique xpath for class (classes if partial) along with the unit number
     bool                                                    inherited{false};               // Did class inherit the attributes yet? (Used for inheritance)
     bool                                                    visited{false};                 // Has class been visited yet when inheriting? (Used for inheritance)    
+    int                                                     numConstructorDestructor{0};    // Number of constructor+destructor methods
 }; 
 
 #endif

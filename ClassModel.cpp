@@ -603,13 +603,15 @@ void classModel::ComputeClassStereotype() {
 
     int nonCollaborators = 0;
     for (const auto& m : method) {      
-        for (const std::string& s : m.getStereotypeList())
-            methodStereotypes[s]++;
-       
-        std::string methodStereotype = m.getStereotype();
-        if (methodStereotype.find("collaborator") == std::string::npos &&
-            methodStereotype.find("controller") == std::string::npos)
-                nonCollaborators++;
+        if (!m.IsConstructorDestructorUsed()) {
+            for (const std::string& s : m.getStereotypeList())
+                methodStereotypes[s]++;
+        
+            std::string methodStereotype = m.getStereotype();
+            if (methodStereotype.find("collaborator") == std::string::npos &&
+                methodStereotype.find("controller") == std::string::npos)
+                    nonCollaborators++;
+        }
     }
 
     int getters = methodStereotypes["get"];
@@ -625,12 +627,13 @@ void classModel::ComputeClassStereotype() {
     int collaborator =  methodStereotypes["collaborator"]; 
     int collaborators = controllers + collaborator;
      
-    // Constructors and destructors are not considered in the computation of class stereotypes
+    
     int factory = methodStereotypes["factory"];
 
     int degenerates = methodStereotypes["empty"] + methodStereotypes["stateless"] + methodStereotypes["wrapper"];
 
-    int allMethods = method.size();
+    // Constructors and destructors are not considered in the computation of class stereotypes
+    int allMethods = method.size() - numConstructorDestructor;
 
     // Entity
     if (((accessors - getters) != 0) && ((mutators - setters)  != 0) ) {
@@ -740,6 +743,7 @@ void classModel::ComputeMethodStereotype() {
 void classModel::constructorDestructor() {
     for (auto& m : method) {
         if (m.IsConstructorDestructorUsed()) {  
+            numConstructorDestructor++;
             std::string parameterList = m.getParameterList();
             std::string srcML = m.getSrcML();
 
@@ -922,7 +926,7 @@ void classModel::factory() {
             bool     returnsNewCall                       = m.IsNewCallReturned();              
             bool     variableCreatedWithNewReturned       = m.IsVariableCreatedWithNewReturned(); 
           
-            bool case1 =  returnsObj && returnsNewCall;
+            bool case1 = returnsObj && returnsNewCall;
             bool case2 = returnsObj && variableCreatedWithNewReturned;
 
             if (case1 || case2)

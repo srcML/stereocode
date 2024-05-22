@@ -25,7 +25,6 @@ int main (int argc, char const *argv[]) {
     std::string         primitivesFile;
     std::string         ignoredCallsFile;
     std::string         outputFile;
-    std::ofstream       reportFile;
     int                 error;
     bool                outputReport       = false;
     bool                overWriteInput     = false;
@@ -114,7 +113,7 @@ int main (int argc, char const *argv[]) {
 
     // Find method and class stereotypes
     if (units.size() > 0)
-        classModelCollection classObj(archive, outputArchive, units, reportFile, 
+        classModelCollection classObj(archive, outputArchive, units, 
                                       inputFile, outputReport, outputViews);
 
     if (overWriteInput){

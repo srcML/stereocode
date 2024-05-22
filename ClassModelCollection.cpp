@@ -13,13 +13,11 @@ extern primitiveTypes                                                           
 extern bool                                                                       STRUCT_SUPPORT;         
 extern bool                                                                       INTERFACE_SUPPORT;       
 extern std::unordered_map<int, std::unordered_map<std::string, std::string>>      xpathList;  
-extern std::unordered_map<std::string, int>                                      methodStereotypes;
-extern std::unordered_map<std::string, int>                                      classStereotypes;
 
 classModelCollection::classModelCollection (srcml_archive* archive, srcml_archive* outputArchive, 
-                                            std::vector<srcml_unit*>& units, std::ofstream& reportFile, 
+                                            std::vector<srcml_unit*>& units, 
                                             const std::string& inputFile, bool outputReport, bool outputViews) {  
-    // Initialize the specifiers
+    // Initialize the lists of specifiers
     createSpecifierList();
          
     // Collects class info + methods defined internally to a class
@@ -29,7 +27,9 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     findFreeFunction(archive, units); 
 
     // Finds inherited attributes for each class
+    // Creates a set of method signatures for each class (Needed for call filtering)
     for (auto& pair : classCollection) {
+        pair.second.buildMethodSignature();
         findInheritedAttribute(pair.second);
         pair.second.setInherited(true);
         for (auto& pairS : classCollection)
@@ -37,23 +37,12 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     } 
     
     // Appends the inherited private attributes (C++ only)
-    for (auto& pair : classCollection)
+    for (auto& pair : classCollection) {
+        pair.second.setInherited(false); // Resets inheritance for findInheritedMethod()
         if (pair.second.getUnitLanguage() == "C++")
             pair.second.appendInheritedPrivateAttribute();   
-
-
-    // Analyzes all methods statically (Except calls)
-    bool headLine = false;
-    for (auto it = classCollection.begin(); it != classCollection.end();++it) {
-        std::vector<methodModel>& methods = it->second.getMethod();
-        for (auto& m : methods) 
-            m.findMethodData(it->second.getAttribute(), it->second.getName()[3]);           
     }
 
-    // Resets inheritance for findInheritedMethod()
-    for (auto& pair : classCollection) 
-        pair.second.setInherited(false);
-    
     // Finds inherited methods
     for (auto& pair : classCollection) {
         findInheritedMethod(pair.second);
@@ -62,45 +51,39 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
             pairS.second.setVisited(false);
     } 
 
-    // Creates a set of method signatures for each class (Needed for call filtering)
-    for (auto& pair : classCollection) 
-        pair.second.buildMethodSignature();
-
+    // Analyze all methods for each class statically
     for (auto& pair : classCollection) {
         std::vector<methodModel>& methods = pair.second.getMethod();
-        for (auto& m : methods) {
-            m.isCallOnAttribute(pair.second.getAttribute(), pair.second.getMethodSignature(), pair.second.getInheritedMethodSignature());
-            m.findAccessorMethods();
-        }      
-    } 
+        for (auto& m : methods)
+             m.findMethodData(pair.second.getAttribute(), pair.second.getMethodSignature(), 
+                              pair.second.getInheritedMethodSignature(), pair.second.getName()[3]);
+    }
 
-    std::string InputFileNoExt = "";
-    std::ofstream out, outU, outV, outM, outS, outC;
+    // Compute method and stereotypes here
+    for (auto& pair : classCollection) {
+        pair.second.ComputeMethodStereotype();
+        pair.second.ComputeClassStereotype();
+    }
+
+    // Optionally output a .txt report file
+    if (outputReport) {
+        std::ofstream reportFile(inputFile + ".report.txt");
+        std::stringstream stringStream;
+        for (auto& pair : classCollection)
+            outputReportFile(stringStream, pair.second);
+        reportFile << stringStream.str();
+        reportFile.close();        
+    }
+
+    
     if (outputViews) {
-        InputFileNoExt = inputFile.substr(0, inputFile.size() - 4) + "_";
+        std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4) + "_";
+        std::ofstream out, outU, outV, outM, outS, outC;
         out.open(InputFileNoExt + "method_class_stereotypes.csv");
-    }
-
-    // Optionally output a report
-    if (outputReport) 
-        reportFile.open(inputFile + ".report.txt");
-
-    // Compute stereotypes
-    for (auto it = classCollection.begin(); it != classCollection.end();) {
-        it->second.ComputeMethodStereotype();
-        it->second.ComputeClassStereotype();
-
-        if (outputReport)
-            outputReportFile(reportFile, it->second);       
-        
-        if (outputViews)
-            allView(out, it->second, headLine); 
-
-        it = classCollection.erase(it);
-        if (!headLine) headLine = true;
-    }
-
-    if (outputViews) { 
+        out << "Class Name,Class Stereotype,Method Name,Method Stereotype,Method Stereotype Count" << '\n';
+        for (auto& pair : classCollection)
+            allView(out, pair.second);        
+ 
         outU.open(InputFileNoExt + "unique_method_view.csv");
         outV.open(InputFileNoExt + "unique_class_view.csv");
         outM.open(InputFileNoExt + "method_view.csv");
@@ -115,12 +98,21 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
         outC.close();
     }
 
-    // Clean up
-    if (reportFile)
-        reportFile.close();
-
-    // Generate the .xml output with stereotypes
-    outputWithStereotypes(archive, outputArchive, units);
+    // Generate the stereotyped XML archive
+    std::map<int, srcml_unit*> transformedUnits;
+    std::unordered_map<int, srcml_transform_result*> results;
+    std::vector<std::thread> threads;
+    for (size_t i = 0; i < units.size(); i++)
+        threads.push_back(std::thread(&classModelCollection::outputWithStereotypes, this, 
+                                      units[i], std::ref(transformedUnits), i,  std::ref(xpathList[i]), std::ref(results)));
+    for (std::thread& thread : threads) 
+        thread.join();
+        
+    for (const auto& pair : transformedUnits) 
+        srcml_archive_write_unit(outputArchive, pair.second); 
+    
+    for (auto& pair : results) 
+        srcml_transform_free(pair.second);   
 }
 
 // Finds classes in an archive
@@ -364,13 +356,13 @@ void classModelCollection::findInheritedMethod(classModel& c) {
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.HasInherited() && !result->second.IsVisited()) {
-                c.appendInheritedMethod(result->second.getMethod(), result->second.getInheritedMethodSignature()); 
+                c.appendInheritedMethod(result->second.getMethodSignature(), result->second.getInheritedMethodSignature()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.IsVisited()) {
                 findInheritedMethod(result->second);                     
-                c.appendInheritedMethod(result->second.getMethod(), result->second.getInheritedMethodSignature());  
+                c.appendInheritedMethod(result->second.getMethodSignature(), result->second.getInheritedMethodSignature());  
             }
         }       
         else {
@@ -379,13 +371,13 @@ void classModelCollection::findInheritedMethod(classModel& c) {
                 result = classCollection.find(parClassName);
                 if (result != classCollection.end()) {
                     if (result->second.HasInherited() && !result->second.IsVisited()) {
-                        c.appendInheritedMethod(result->second.getMethod(), result->second.getInheritedMethodSignature()); 
+                        c.appendInheritedMethod(result->second.getMethodSignature(), result->second.getInheritedMethodSignature()); 
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.IsVisited()) {
                         findInheritedMethod(result->second);                     
-                        c.appendInheritedMethod(result->second.getMethod(), result->second.getInheritedMethodSignature()); 
+                        c.appendInheritedMethod(result->second.getMethodSignature(), result->second.getInheritedMethodSignature()); 
                     }
                 }              
             }
@@ -396,12 +388,12 @@ void classModelCollection::findInheritedMethod(classModel& c) {
                     auto resultM = classCollection.find(resultG->second);
                     if (resultM != classCollection.end()) {
                         if (resultM->second.HasInherited() && !resultM->second.IsVisited()) {
-                            c.appendInheritedMethod(resultM->second.getMethod(), resultM->second.getInheritedMethodSignature());  
+                            c.appendInheritedMethod(resultM->second.getMethodSignature(), resultM->second.getInheritedMethodSignature());  
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.IsVisited()) {
                             findInheritedMethod(resultM->second);                     
-                            c.appendInheritedMethod(resultM->second.getMethod(), resultM->second.getInheritedMethodSignature());   
+                            c.appendInheritedMethod(resultM->second.getMethodSignature(), resultM->second.getInheritedMethodSignature());   
                         }
                     }
                 }
@@ -446,116 +438,27 @@ bool classModelCollection::isFriendFunction(methodModel& function) {
     return added;
 }
 
-//  Add in stereotype attribute on <class> and <function>
-//  Example: <function st:stereotype="get"> ... </function>
-//           <class st:stereotype="boundary"> ... ></class>
+
+
+// Outputs a .txt report file containing the stereotypes of all methods and classes
 //
-void classModelCollection::outputWithStereotypes(srcml_archive* archive, srcml_archive* outputArchive, 
-                                                std::vector<srcml_unit*>& units) {   
-    // std::string xsltStart = R"**(<xsl:stylesheet
-    // xmlns="http://www.srcML.org/srcML/src"
-    // xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    // xmlns:src="http://www.srcML.org/srcML/src" 
-    // xmlns:cpp="http://www.srcML.org/srcML/cpp"
-    // xmlns:st="http://www.srcML.org/srcML/stereotype"
-    // xmlns:func="http://exslt.org/functions"
-    // extension-element-prefixes="func"
-    // exclude-result-prefixes="src st cpp"
-    // version="1.0">
-    
-    // <xsl:output method="xml" version="1.0" encoding="UTF-8" standalone="yes"/>
-    // <xsl:template match="@*|node()"><xsl:copy><xsl:apply-templates select="@*|node()"/></xsl:copy></xsl:template>)**";
- 
-    // xsltStart += R"**(
-    // <func:function name="src:last_ws">
-    //     <xsl:param name="s"/>
-    //     <xsl:choose>
-    //     <xsl:when test="contains($s, '&#xa;')">
-    //         <func:result select="src:last_ws(substring-after($s, '&#xa;'))"/>
-    //     </xsl:when>
-    //     <xsl:otherwise>
-    //         <func:result select="$s"/>
-    //     </xsl:otherwise>
-    //     </xsl:choose>
-    // </func:function>)**";
-
-    // for (size_t i = 0; i < units.size(); i++){ 
-    //     bool transform = false;
-    //     std::string xsltMiddle;
-    //     for (const auto& pair : xpathList[i]) { 
-
-    //         xsltMiddle += R"**(
-    //         <xsl:template match=")**" + pair.first + R"**(">
-    //         <comment type="block">/** @stereotype )**" + pair.second + R"**( */</comment>
-    //         <xsl:text>&#xa;</xsl:text>
-    //         <xsl:value-of select="src:last_ws(preceding-sibling::text()[1])"/>
-    //         <xsl:copy><xsl:apply-templates select="@*|node()"/></xsl:copy>
-    //         </xsl:template>)**";      
-    //         if (!transform) transform = true;              
-    //     }  
-    //     if (transform){
-    //         std::string xsltEnd = R"**(</xsl:stylesheet>)**";
-    //         std::string xslt = xsltStart + xsltMiddle + xsltEnd;
-    //         srcml_append_transform_xslt_memory(archive, xslt.c_str(), xslt.size());
-            
-    //         srcml_transform_result* result = nullptr; 
-    //         srcml_unit_apply_transforms(archive, units[i], &result);  
-    //         srcml_unit* unit = srcml_transform_get_unit(result, 0);
-    //         srcml_archive_write_unit(outputArchive, unit);
-            
-    //         srcml_transform_free(result);              
-    //     }
-    //     else {
-    //         srcml_archive_write_unit(outputArchive, units[i]);  
-    //     } 
-    //     srcml_clear_transforms(archive); 
-    // }
-
-    for (size_t i = 0; i < units.size(); i++){ 
-        bool transform = false;
-        for (const auto& pair : xpathList[i]) { 
-            srcml_append_transform_xpath_attribute(archive, pair.first.c_str(), "st",
-                                    "http://www.srcML.org/srcML/stereotype",
-                                    "stereotype", pair.second.c_str());             
-            transform = true;               
-        }  
-        if (transform){
-            srcml_transform_result* result = nullptr; 
-            srcml_unit_apply_transforms(archive, units[i], &result);  
-            srcml_unit* unit = srcml_transform_get_unit(result, 0);
-            srcml_archive_write_unit(outputArchive, unit);
-            
-            srcml_transform_free(result);              
-        }
-        else {
-            srcml_archive_write_unit(outputArchive, units[i]);  
-        } 
-        srcml_clear_transforms(archive); 
-    }
-}
-
-// Outputs a report file for a class (tab separated)
-// class name || method || stereotypes
-//
-void classModelCollection::outputReportFile(std::ofstream& out, classModel& c) {
+void classModelCollection::outputReportFile(std::stringstream& stringStream, classModel& c) {
     const int WIDTH = 70;
-    const std::string line(WIDTH*2, '-');
-    if (out.is_open()) {
-        const  std::vector<methodModel>& method = c.getMethod();
-        std::_Setw setw_width = std::setw(WIDTH);
-        std::string className = c.getName()[1];
-        WStoBlank(className);
-        out << std::left << setw_width << "Class name:" << setw_width << "Class stereotype:" << '\n';
-        out << std::left << setw_width <<  className << setw_width << c.getStereotype() << "\n\n";
-        out << std::left << setw_width << "Method name:" << setw_width << "Method stereotype:" << '\n';
-        for (const auto& m : method) {
-            std::string methodName = m.getName();
-            WStoBlank(methodName);
-            out << std::left << setw_width << methodName; 
-            out << setw_width << m.getStereotype() << '\n';
-        }
-        out << line << '\n';
+    const std::string line(WIDTH * 2, '-');
+    const std::vector<methodModel>& method = c.getMethod();
+    std::_Setw setw_width = std::setw(WIDTH);
+    std::string className = c.getName()[1];
+    WStoBlank(className);
+    stringStream << std::left << setw_width << "Class name:" << setw_width << "Class stereotype:" << '\n';
+    stringStream << std::left << setw_width <<  className << setw_width << c.getStereotype() << "\n\n";
+    stringStream << std::left << setw_width << "Method name:" << setw_width << "Method stereotype:" << '\n';
+    for (const auto& m : method) {
+        std::string methodName = m.getName();
+        WStoBlank(methodName);
+        stringStream << std::left << setw_width << methodName; 
+        stringStream << setw_width << m.getStereotype() << '\n';
     }
+    stringStream << line << '\n'; 
 }
 
 // Used to generate optional views for the distribution of method and class stereotypes
@@ -659,10 +562,10 @@ void classModelCollection::method_class_unique_views(std::ofstream& outU, std::o
 }
 
 
-// Count the stereotypes to generate the views
+// Generate an all-one-view for all method and class stereotypes as a .csv file
+// Count the stereotypes to generate the other views
 //
-void classModelCollection::allView(std::ofstream& out, classModel& c, bool headLine) {
-    if (!headLine) out << "Class Name,Class Stereotype,Method Name,Method Stereotype,Method Stereotype Count" << '\n';
+void classModelCollection::allView(std::ofstream& out, classModel& c) {
     if (out.is_open()) {   
         const std::string& classStereotype =  c.getStereotype(); 
         uniqueClassStereotypesView[classStereotype]++; // for class unique View 
@@ -692,4 +595,94 @@ void classModelCollection::allView(std::ofstream& out, classModel& c, bool headL
             out << m.getStereotypeList().size() << '\n';          
         }
     }
+}
+
+//  Add in stereotype attribute on <class> and <function>
+//  Example: <function st:stereotype="get"> ... </function>
+//           <class st:stereotype="boundary"> ... ></class>
+//
+void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int, srcml_unit*>& transformedUnits,
+                                                int unitNumber, const std::unordered_map<std::string, std::string>& xpathPair,
+                                                std::unordered_map<int, srcml_transform_result*>& results) {   
+    // std::string xsltStart = R"**(<xsl:stylesheet
+    // xmlns="http://www.srcML.org/srcML/src"
+    // xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+    // xmlns:src="http://www.srcML.org/srcML/src" 
+    // xmlns:cpp="http://www.srcML.org/srcML/cpp"
+    // xmlns:st="http://www.srcML.org/srcML/stereotype"
+    // xmlns:func="http://exslt.org/functions"
+    // extension-element-prefixes="func"
+    // exclude-result-prefixes="src st cpp"
+    // version="1.0">
+    
+    // <xsl:output method="xml" version="1.0" encoding="UTF-8" standalone="yes"/>
+    // <xsl:template match="@*|node()"><xsl:copy><xsl:apply-templates select="@*|node()"/></xsl:copy></xsl:template>)**";
+ 
+    // xsltStart += R"**(
+    // <func:function name="src:last_ws">
+    //     <xsl:param name="s"/>
+    //     <xsl:choose>
+    //     <xsl:when test="contains($s, '&#xa;')">
+    //         <func:result select="src:last_ws(substring-after($s, '&#xa;'))"/>
+    //     </xsl:when>
+    //     <xsl:otherwise>
+    //         <func:result select="$s"/>
+    //     </xsl:otherwise>
+    //     </xsl:choose>
+    // </func:function>)**";
+
+    // for (size_t i = 0; i < units.size(); i++){ 
+    //     bool transform = false;
+    //     std::string xsltMiddle;
+    //     for (const auto& pair : xpathList[i]) { 
+
+    //         xsltMiddle += R"**(
+    //         <xsl:template match=")**" + pair.first + R"**(">
+    //         <comment type="block">/** @stereotype )**" + pair.second + R"**( */</comment>
+    //         <xsl:text>&#xa;</xsl:text>
+    //         <xsl:value-of select="src:last_ws(preceding-sibling::text()[1])"/>
+    //         <xsl:copy><xsl:apply-templates select="@*|node()"/></xsl:copy>
+    //         </xsl:template>)**";      
+    //         if (!transform) transform = true;              
+    //     }  
+    //     if (transform){
+    //         std::string xsltEnd = R"**(</xsl:stylesheet>)**";
+    //         std::string xslt = xsltStart + xsltMiddle + xsltEnd;
+    //         srcml_append_transform_xslt_memory(archive, xslt.c_str(), xslt.size());
+            
+    //         srcml_transform_result* result = nullptr; 
+    //         srcml_unit_apply_transforms(archive, units[i], &result);  
+    //         srcml_unit* unit = srcml_transform_get_unit(result, 0);
+    //         srcml_archive_write_unit(outputArchive, unit);
+            
+    //         srcml_transform_free(result);              
+    //     }
+    //     else {
+    //         srcml_archive_write_unit(outputArchive, units[i]);  
+    //     } 
+    //     srcml_clear_transforms(archive); 
+    // }
+
+        srcml_archive* archive = srcml_archive_create();
+    
+        bool transform = false;
+        for (auto& pair : xpathPair) { 
+            srcml_append_transform_xpath_attribute(archive, pair.first.c_str(), "st",
+                                    "http://www.srcML.org/srcML/stereotype",
+                                    "stereotype", pair.second.c_str());             
+            transform = true;               
+        }  
+        if (transform) {
+            srcml_transform_result* result = nullptr; 
+            srcml_unit_apply_transforms(archive, unit, &result);  
+            srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
+            transformedUnits.insert({unitNumber, resultUnit});
+            results.insert({unitNumber, result});            
+        }
+        else {
+            transformedUnits.insert({unitNumber, unit});
+        } 
+        srcml_clear_transforms(archive); 
+        srcml_archive_free(archive);
+    
 }

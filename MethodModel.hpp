@@ -65,7 +65,10 @@ public:
     void                     setCheckedCall                      (bool s)               { checkedCall = s; }    
 
 
-    void                     findMethodData             (std::unordered_map<std::string, Variable>&, const std::string&);
+    void                     findMethodData(std::unordered_map<std::string, Variable>&,
+                                            const std::unordered_set<std::string>&, 
+                                            const std::unordered_set<std::string>&, const std::string&);
+
 
     void                     findFriendData             ();
     void                     findFriendFunctionInfo     (srcml_archive*, srcml_unit*);

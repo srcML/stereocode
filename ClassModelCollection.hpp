@@ -11,12 +11,13 @@
 #define CLASSMODELCOLLECTION_HPP
 
 #include "ClassModel.hpp"
+#include <thread>
 #include <iomanip> 
 
 class classModelCollection {
 public:
                          classModelCollection       (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>&, 
-                                                    std::ofstream&, const std::string&, bool, bool);
+                                                    const std::string&, bool, bool);
 
     void                 findClassInfo              (srcml_archive*, std::vector<srcml_unit*>);
     void                 findFreeFunction           (srcml_archive*, std::vector<srcml_unit*>);
@@ -25,9 +26,11 @@ public:
 
     void                 findAttrModifiedInsideCalls  (classModel&, methodModel&);
 
-    void                 outputWithStereotypes      (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>&);
-    void                 outputReportFile           (std::ofstream&, classModel&);
-    void                 allView                    (std::ofstream&, classModel&, bool);
+    void                 outputWithStereotypes      (srcml_unit*, std::map<int, srcml_unit*>&,
+                                                     int, const std::unordered_map<std::string, std::string>&,  std::unordered_map<int, srcml_transform_result*>&);
+                                                     
+    void                 outputReportFile           (std::stringstream&, classModel&);
+    void                 allView                    (std::ofstream&, classModel&);
     void                 method_class_unique_views  (std::ofstream&, std::ofstream&, std::ofstream&, std::ofstream&, std::ofstream&);
 
     bool                 isFriendFunction            (methodModel&);

@@ -35,6 +35,8 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
     nameSignature = methName + paramList;
 };
 void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attribute, 
+                                 const std::unordered_set<std::string>& classMethods, 
+                                 const std::unordered_set<std::string>& inheritedClassMethods,
                                  const std::string& classNamePar)  {
     classNameParsed = classNamePar;
     if (!constructorDestructorUsed) {                                
@@ -51,6 +53,9 @@ void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attr
         findParameterName(archive, unit);
         findParameterType(archive, unit);
         findReturnExpression(archive, unit);
+
+        
+
         findCallName(archive, unit);
         findCallArgument(archive, unit);
         findNewAssign(archive, unit);
@@ -59,10 +64,14 @@ void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attr
         
         if (unitLanguage != "C++") isFunctionCall(attribute);
 
+        isCallOnAttribute(attribute, classMethods, inheritedClassMethods);
+        findAccessorMethods(); // Depends on isCallOnAttribute()
+
         isAttributeReturned(attribute);  
         isAttributeUsedInExpression(archive, unit, attribute);
         isAttributeOrParameterModified(archive, unit, attribute);
 
+        
         isEmpty(archive, unit);
 
         if (unitLanguage == "C++") isConst(archive, unit);
@@ -464,7 +473,8 @@ void methodModel::findNewAssign(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result);
 }
 
-//
+// Finds calls to methods in class that return a value
+// Constructor calls are not considered
 //
 void methodModel::findAccessorMethods() {  
     srcml_archive* archive = srcml_archive_create();
