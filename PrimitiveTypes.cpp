@@ -26,10 +26,8 @@ void primitiveTypes::addPrimitive(const std::string& type) {
 //
 std::istream& operator>>(std::istream& in, primitiveTypes& primitives) {
     std::string name;
-    while(std::getline(in, name)) {
-        trimWhitespace(name);
+    while(std::getline(in, name))
         primitives.addPrimitive(name);
-    }
     return in;
 }
 

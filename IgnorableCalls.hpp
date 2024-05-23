@@ -10,7 +10,9 @@
 #ifndef IGNORABLE_CALLS
 #define IGNORABLE_CALLS
 
-#include "utils.hpp"
+#include <string>
+#include <fstream>
+#include <unordered_set>
 
 class ignorableCalls {
 public:
@@ -22,9 +24,9 @@ public:
     friend         std::istream& operator>>(std::istream&, ignorableCalls&);
 
 private:
-    std::string                           unitLanguage{};        // Language: "C++", "C#", or "Java"
-    std::unordered_set<std::string>       ignoredCalls{};        // List of calls to ignore
-    std::unordered_set<std::string>       userIgnoredCalls{};    // List of user-defined calls to ignore 
+    std::string                           unitLanguage;        // Language
+    std::unordered_set<std::string>       ignoredCalls;        // List of calls to ignore
+    std::unordered_set<std::string>       userIgnoredCalls;    // List of user-defined calls to ignore 
 };
 
 #endif

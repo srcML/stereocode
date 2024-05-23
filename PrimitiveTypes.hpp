@@ -10,7 +10,9 @@
 #ifndef PRIMITIVETYPES_HPP
 #define PRIMITIVETYPES_HPP
 
-#include "utils.hpp"
+#include <string>
+#include <fstream>
+#include <unordered_set>
 
 class primitiveTypes {
 public:
@@ -22,7 +24,7 @@ public:
     friend         std::istream& operator>>(std::istream&, primitiveTypes&);
 
 private:
-    std::string                           unitLanguage;   // Language: "C++", "C#", or "Java"
+    std::string                           unitLanguage;   // Language
     std::unordered_set<std::string>       ptypes;         // List of language primitives
     std::unordered_set<std::string>       userTypes;      // List of user defined language primitives 
 };

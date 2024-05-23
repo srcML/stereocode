@@ -10,24 +10,22 @@
 #ifndef CLASSMODEL_HPP
 #define CLASSMODEL_HPP
 
-#include <fstream>
 #include "MethodModel.hpp"
 
 class classModel {
 public:
-         classModel                         (srcml_archive*, srcml_unit*);
+         classModel                         (srcml_archive*, srcml_unit*, const std::string&, const std::string&, int);
          
-    void findClassData                      (srcml_archive*, srcml_unit*, const std::string&, const std::string&, int);    
     void findClassName                      (srcml_archive*, srcml_unit*);
     void findStructureType                  (srcml_archive*, srcml_unit*);
     void findPartialClass                   (srcml_archive*, srcml_unit*);
     void findFriendFunctionDecl             (srcml_archive*, srcml_unit*);
     void findFriendFunctionParameterType    (srcml_archive* , srcml_unit* );
     void findParentClassName                (srcml_archive*, srcml_unit*);
-    void findAttributeName                  (srcml_archive*, srcml_unit*, std::vector<Variable>&);
-    void findAttributeType                  (srcml_archive*, srcml_unit*, std::vector<Variable>&, int);
-    void findNonPrivateAttributeName        (srcml_archive*, srcml_unit*, std::vector<Variable>&);
-    void findNonPrivateAttributeType        (srcml_archive*, srcml_unit*, std::vector<Variable>&, int);
+    void findAttributeName                  (srcml_archive*, srcml_unit*, std::vector<variable>&);
+    void findAttributeType                  (srcml_archive*, srcml_unit*, std::vector<variable>&);
+    void findNonPrivateAttributeName        (srcml_archive*, srcml_unit*, std::vector<variable>&);
+    void findNonPrivateAttributeType        (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findMethod                         (srcml_archive*, srcml_unit*, const std::string&, int);
     void findMethodInProperty               (srcml_archive*, srcml_unit*, const std::string&, int);
     
@@ -50,13 +48,13 @@ public:
 
     std::string                                            getStereotype                      ()               const;
     std::string                                            getUnitLanguage                    ()               const          { return unitLanguage;              }
-    std::unordered_map<std::string, Variable>&             getAttribute                       ()                              { return attribute;                 }
+    std::unordered_map<std::string, variable>&             getAttribute                       ()                              { return attribute;                 }
     std::vector<methodModel>&                              getMethod                          ()                              { return method;                    }
 
     const std::vector<std::string>&                        getName                            ()               const          { return name;                      }
     const std::vector<std::string>&                        getStereotypeList                  ()               const          { return stereotype;                }
     const std::unordered_map<std::string, std::string>&    getParentClassName                 ()               const          { return parentClassName;           }
-    const std::unordered_map<std::string, Variable>&       getNonPrivateAttribute             ()               const          { return nonPrivateAttribute;       }
+    const std::unordered_map<std::string, variable>&       getNonPrivateAttribute             ()               const          { return nonPrivateAttribute;       }
     const std::unordered_set<std::string>&                 getInheritedMethodSignature        ()               const          { return inheritedMethodSignature;  }
     const std::unordered_set<std::string>&                 getMethodSignature                 ()               const          { return methodSignature;           }    
     const std::unordered_set<std::string>&                 getFriendFunctionDecl              ()               const          { return friendFunctionDecl;        }
@@ -73,7 +71,7 @@ public:
         method.push_back(m); 
     }
 
-    void appendInheritedAttribute(const std::unordered_map<std::string, Variable>& inheritedNonPrivateAttribute, 
+    void appendInheritedAttribute(const std::unordered_map<std::string, variable>& inheritedNonPrivateAttribute, 
                                   const std::string& inheritanceSpecifier) { 
         if (inheritanceSpecifier == "private") // C++ Only
             // Inherit attributes as private
@@ -110,9 +108,9 @@ private:
     std::unordered_set<std::string>                         methodSignature;                // List of method signatures  
     std::unordered_set<std::string>                         inheritedMethodSignature;       // List of inherited method signatures
     std::unordered_set<std::string>                         friendFunctionDecl;             // Set of friend function signatures (C++ only)                                             
-    std::unordered_map<std::string, Variable>               attribute;                      // Map of all attributes. Key is attribute name
-    std::unordered_map<std::string, Variable>               nonPrivateAttribute;            // Non-private attributes (Only used by inheriting classes)
-    std::unordered_map<std::string, Variable>               inheritedAsPrivateAttribute;    // Attributes inherited as private (C++ only, combined with the attribute map) 
+    std::unordered_map<std::string, variable>               attribute;                      // Map of all attributes. Key is attribute name
+    std::unordered_map<std::string, variable>               nonPrivateAttribute;            // Non-private attributes (Only used by inheriting classes)
+    std::unordered_map<std::string, variable>               inheritedAsPrivateAttribute;    // Attributes inherited as private (C++ only, combined with the attribute map) 
     std::unordered_map<int, std::string>                    xpath;                          // Unique xpath for class (classes if partial) along with the unit number
     bool                                                    inherited{false};               // Did class inherit the attributes yet? (Used for inheritance)
     bool                                                    visited{false};                 // Has class been visited yet when inheriting? (Used for inheritance)    

@@ -11,16 +11,16 @@
 #define METHOD_HPP
 
 #include <srcml.h>
-#include <unordered_map>
-#include <fstream>
-#include <thread>
 #include "utils.hpp"
+#include "variable.hpp"
+#include "XPathBuilder.hpp"
+#include "IgnorableCalls.hpp"
 
 class methodModel {
 public:
     methodModel(srcml_archive*, srcml_unit*, const std::string&, const std::string&, const std::string&, int);
 
-    const std::vector<Variable>&                                         getParameterOrdered                 () const                { return parameterOrdered;     }
+    const std::vector<variable>&                                         getParameterOrdered                 () const                { return parameterOrdered;     }
     const std::vector<std::pair<std::string, std::string>>&              getFunctionCall                     () const                { return functionCall;         }
     const std::vector<std::pair<std::string, std::string>>&              getMethodCall                       () const                { return methodCall;           }
 
@@ -65,7 +65,7 @@ public:
     void                     setCheckedCall                      (bool s)               { checkedCall = s; }    
 
 
-    void                     findMethodData(std::unordered_map<std::string, Variable>&,
+    void                     findMethodData(std::unordered_map<std::string, variable>&,
                                             const std::unordered_set<std::string>&, 
                                             const std::unordered_set<std::string>&, const std::string&);
 
@@ -83,21 +83,21 @@ public:
     void                     findCallName               (srcml_archive*, srcml_unit*);
     void                     findCallArgument           (srcml_archive*, srcml_unit*);
     void                     findNewAssign              (srcml_archive*, srcml_unit*);
-    void                     findAccessorMethods        ();
+    void                     findAccessorMethods        (srcml_archive*, srcml_unit*);
     void                     isEmpty                    (srcml_archive*, srcml_unit*);
     void                     isConst                    (srcml_archive*, srcml_unit*);
     void                     isConstructorDestructor    (srcml_archive*, srcml_unit*);
 
     void                     isIgnorableCall            (std::vector<std::pair<std::string, std::string>>&);
-    void                     isFunctionCall             (std::unordered_map<std::string, Variable>&);
-    void                     isCallOnAttribute          (std::unordered_map<std::string, Variable>&, 
+    void                     isFunctionCall             (std::unordered_map<std::string, variable>&);
+    void                     isCallOnAttribute          (std::unordered_map<std::string, variable>&, 
                                                          const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);
 
     
-    void                     isAttributeReturned            (std::unordered_map<std::string, Variable>&);
-    void                     isAttributeOrParameterModified (srcml_archive*, srcml_unit*, std::unordered_map<std::string, Variable>&);                             
-    void                     isAttributeUsedInExpression    (srcml_archive*, srcml_unit*, std::unordered_map<std::string, Variable>&);
-    bool                     isAttributeUsed                (std::unordered_map<std::string, Variable>&, const std::string&, bool, bool);
+    void                     isAttributeReturned            (std::unordered_map<std::string, variable>&);
+    void                     isAttributeOrParameterModified (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&);                             
+    void                     isAttributeUsedInExpression    (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&);
+    bool                     isAttributeUsed                (std::unordered_map<std::string, variable>&, const std::string&, bool, bool);
     
     void                     isParameterRefChanged        (std::string, bool);                                               
 private:
@@ -109,10 +109,10 @@ private:
     std::string                                       unitLanguage;                           // Unit language
     std::string                                       xpath;                                  // Unique xpath
     std::string                                       srcML;                                  // Method srcML
-    std::vector<Variable>                             parameterOrdered;                       // List of all parameters (Needed in order to build the parameter map)
-    std::vector<Variable>                             localOrdered;                           // List of all local (Needed in order to build the local map)     
-    std::unordered_map<std::string, Variable>         parameter;                              // Map of all parameters. Key is parameter name
-    std::unordered_map<std::string, Variable>         local;                                  // Map of all locals. Key is local name         
+    std::vector<variable>                             parameterOrdered;                       // List of all parameters (Needed in order to build the parameter map)
+    std::vector<variable>                             localOrdered;                           // List of all local (Needed in order to build the local map)     
+    std::unordered_map<std::string, variable>         parameter;                              // Map of all parameters. Key is parameter name
+    std::unordered_map<std::string, variable>         local;                                  // Map of all locals. Key is local name         
     std::string                                       classNameParsed;                        // Class name without whitespaces, namespaces, and generic types <>
     std::unordered_set<std::string>                   variablesCreatedWithNew;                // List of variables that are declared/initialized with the "new" operator
     std::vector<std::string>                          stereotype;                             // Method stereotype

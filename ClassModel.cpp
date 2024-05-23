@@ -9,49 +9,41 @@
 
 #include "ClassModel.hpp"
 
-extern primitiveTypes                                                             PRIMITIVES;
-extern int                                                                        METHODS_PER_CLASS_THRESHOLD;
-extern std::unordered_map<int, std::unordered_map<std::string, std::string>>      xpathList;
+extern std::unordered_map
+       <int, std::unordered_map
+       <std::string, std::string>>   XPATH_LIST;   
+extern primitiveTypes                PRIMITIVES;
+extern int                           METHODS_PER_CLASS_THRESHOLD;
+extern XPathBuilder                  XPATH_TRANSFORMATION;  
 
-classModel::classModel(srcml_archive* archive, srcml_unit* unit) {
-    findClassName(archive, unit);
-}
-
-void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, 
-                               const std::string& unitLang, int unitNumber){
-    xpath[unitNumber] = classXpath;   
+classModel::classModel(srcml_archive* archive, srcml_unit* unit, const std::string& unitLang, 
+                       const std::string& classXpath, int unitNumber) {
     unitLanguage = unitLang;
-    
-    PRIMITIVES.setLanguage(unitLanguage); 
+    xpath[unitNumber] = classXpath;  
 
-    if (unitLanguage == "C++")
-        findStructureType(archive, unit);
+    findClassName(archive, unit);
 
-    findParentClassName(archive, unit);
+    if (unitLanguage == "C++") findStructureType(archive, unit);
+    findParentClassName(archive, unit); // Requires structure type for C++
     
-    std::vector<Variable> attributeOrdered{};             
-    int attributeOldSize = attribute.size(); // Needed for partial class analysis
+    std::vector<variable> attributeOrdered;             
     findAttributeName(archive, unit, attributeOrdered);
-    findAttributeType(archive, unit, attributeOrdered, attributeOldSize);
+    findAttributeType(archive, unit, attributeOrdered);
 
-    std::vector<Variable> nonPrivateAttributeOrdered{}; 
-    int nonPrivateAttributeOldSize = nonPrivateAttributeOrdered.size(); // Needed for partial class analysis
+    std::vector<variable> nonPrivateAttributeOrdered; 
+
     findNonPrivateAttributeName(archive, unit, nonPrivateAttributeOrdered);
-    findNonPrivateAttributeType(archive, unit, nonPrivateAttributeOrdered, nonPrivateAttributeOldSize);
-
+    findNonPrivateAttributeType(archive, unit, nonPrivateAttributeOrdered);
     findMethod(archive, unit, classXpath, unitNumber);
 
-    if (unitLanguage == "C#")
-        findMethodInProperty(archive, unit, classXpath, unitNumber);  
-        
-    if (unitLanguage == "C++")
-        findFriendFunctionDecl(archive, unit);     
+    if (unitLanguage == "C#") findMethodInProperty(archive, unit, classXpath, unitNumber); 
+    if (unitLanguage == "C++") findFriendFunctionDecl(archive, unit); 
 }
 
 // Finds class name
 //
 void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:name");
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
@@ -94,7 +86,7 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
 // Determines the structure type (class, interface, or struct)
 //
 void classModel::findStructureType(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/text()[1]");
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
@@ -111,8 +103,7 @@ void classModel::findStructureType(srcml_archive* archive, srcml_unit* unit) {
 // Parameter names are ignored for signature matching
 //
 void classModel::findFriendFunctionDecl(srcml_archive* archive, srcml_unit* unit) {
-    // count(ancestor::src:class | ancestor::src:struct) = 1 is union. If both are true, then result is added
-    srcml_append_transform_xpath(archive, "//src:function_decl[count(ancestor::src:class | ancestor::src:struct) = 1]//text()[not(ancestor::src:parameter) or ancestor::src:type]");
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"friend_function_decl").c_str());
 
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -152,14 +143,7 @@ void classModel::findFriendFunctionDecl(srcml_archive* archive, srcml_unit* unit
 //  and 'implements' for class-to-interface inheritance
 // 
 void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) { 
-    std::string classXpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list";
-
-    if (unitLanguage == "Java") 
-        classXpath += "/*[self::src:extends or self::src:implements]";  
-
-    classXpath += "/src:super/src:name"; 
-
-    srcml_append_transform_xpath(archive, classXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parent_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -217,19 +201,8 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
 // Finds attribute names
 // Only collect the name if there is a type
 //
-void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std::vector<Variable>& attributeOrdered) {
-    std::string classXpath = "//src:decl_stmt[not(ancestor::src:function)";
-    classXpath += "and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
-    classXpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-
-    // Auto-properties can be used to declare fields implicitly where property name = field name 
-    // We can detect an auto property with count(descendant::src:function) = 0
-    if (unitLanguage == "C#") {   
-        classXpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
-        classXpath += " and count(descendant::src:function) = 0]/src:name";
-    }
-
-    srcml_append_transform_xpath(archive, classXpath.c_str());
+void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& attributeOrdered) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"attribute_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -242,7 +215,7 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);     
         std::string attributeName = unparsed;
 
-        Variable v;
+        variable v;
 
         // Chop off [] for arrays  
         if (unitLanguage == "C++") {
@@ -266,16 +239,8 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std
 // Finds attribute types
 // Only collect the type if there is a name
 //
-void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<Variable>& attributeOrdered, int attributeOldSize) {
-    std::string classXpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
-    classXpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-
-    if (unitLanguage == "C#") {
-        classXpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
-        classXpath += " and count(descendant::src:function) = 0]/src:type";
-    }
-
-    srcml_append_transform_xpath(archive, classXpath.c_str());
+void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& attributeOrdered) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"attribute_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -283,7 +248,7 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std
     srcml_unit* resultUnit = nullptr;
     std::string prev;
 
-    for (int i = attributeOldSize; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
         
@@ -321,30 +286,8 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std
 // For Java, no access specifier = accessible by derived classes (package-private) within the
 //  same package (We will ignore this), and always public static for an interface
 //  
-void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit* unit, std::vector<Variable>& nonPrivateAttributeOrdered) {
-    std::string classXpath = "//src:decl_stmt[not(ancestor::src:function)";
-    classXpath += " and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
-
-    if (unitLanguage == "C++") {
-        classXpath += " and (ancestor::src:class and (ancestor::src:public or ancestor::src:protected))"; 
-        classXpath += " or (ancestor::src:struct and not(ancestor::src:private))]/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    }
-    else{
-        // Also ignores attributes with no specifier
-        // If struct or interface, include the attributes with no specifier
-        classXpath += "]/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-        classXpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-        classXpath += "/src:name[preceding-sibling::*[1][self::src:type]]"; 
-
-        if (unitLanguage == "C#") {
-            classXpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
-            classXpath += " and count(descendant::src:function) = 0 and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-            classXpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-            classXpath += "/src:name";
-        }
-    }
-
-    srcml_append_transform_xpath(archive, classXpath.c_str());
+void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateAttributeOrdered) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_attribute_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -357,7 +300,7 @@ void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit*
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size); 
         std::string attributeName = unparsed;
 
-        Variable v;
+        variable v;
         // Chop off [] for arrays  
         if (unitLanguage == "C++") {
             size_t start_position = attributeName.find("[");
@@ -378,33 +321,15 @@ void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit*
 
 // Finds non-private attribute types
 //
-void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<Variable>& nonPrivateAttributeOrdered, int nonPrivateAttributeOldSize) {
-    std::string classXpath = "//src:decl_stmt[not(ancestor::src:function)";
-    classXpath += " and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
-    if (unitLanguage == "C++") {
-        classXpath += " and (ancestor::src:class and (ancestor::src:public or ancestor::src:protected))"; 
-        classXpath += " or (ancestor::src:struct and not(ancestor::src:private))]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    }
-    else{
-        classXpath += "]/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-        classXpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-        classXpath += "/src:type[following-sibling::*[1][self::src:name]]";
-        if (unitLanguage == "C#") {
-            classXpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
-            classXpath += " and count(descendant::src:function) = 0 and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-            classXpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-            classXpath += "/src:type";
-        }
-    }
-
-    srcml_append_transform_xpath(archive, classXpath.c_str());
+void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateAttributeOrdered) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_attribute_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
     srcml_unit* resultUnit = nullptr;
     std::string prev;
-    for (int i = nonPrivateAttributeOldSize; i < n; ++i) {
+    for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
         char* unparsed = nullptr;
@@ -438,19 +363,12 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
 // Nested local functions within methods in C# are ignored 
 // Java doesn't have nested local functions
 // C++ allows defining classes inside free functions, which could make methods look like nested functions
-//
+// Ignore static methods in C++, C#, and Java
+// Static methods can only use static local variables
+// Static local variables are not ignored in non-static methods since they can't be used 
+//  without actually making an instance of the class since you need to call the method itself
 void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
-    std::string methodClassXpath = "//*[self::src:function or self::src:constructor or self::src:destructor]";
-    methodClassXpath += "[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
-    // This is needed to make sure that methods defined in a class where the class is inside a free function are stereotyped correctly (C++ case)
-    //  and not treated as a nested function
-    methodClassXpath += " and not(ancestor::src:function[not(descendant::src:class | descendant::src:struct | descendant::src:interface)])";
-    // Ignore static methods in C++, C#, and Java
-    // Static can only use static local variables
-    // Static local variables are not ignored in non-static methods since they can't be used 
-    //  without actually making an instance of the class since you need to call the method itself
-    methodClassXpath += " and not(./src:type/src:specifier[.='static']) and not(ancestor::src:property)]";
-    srcml_append_transform_xpath(archive, methodClassXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);    
@@ -472,7 +390,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std:
         srcml_archive_read_open_memory(methodArchive, unparsed, size);
         srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
 
-        std::string methodXpath = "(" + classXpath + methodClassXpath + ")[" + std::to_string(i + 1) + "]";
+        std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
         methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, "", unitNumber);
         
         method.push_back(m); 
@@ -489,12 +407,9 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std:
 // C# properties can't be nested in functions or in other properties,
 //  they are direct members of classes
 // Properties need to be collected separately since they hold the return type of the getters
-//
+// Ignore static properties
 void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
-    std::string propertyXpath = "//src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
-    //Ignore static properties
-    propertyXpath += " and not(./src:type/src:specifier[.='static'])]";
-    srcml_append_transform_xpath(archive, propertyXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);    
@@ -549,7 +464,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
                 srcml_archive_read_open_memory(methodArchive, methodUnparsed, methodSize);
                 srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
 
-                std::string methodXpath = "((" + classXpath + propertyXpath + ")[" + std::to_string(i + 1) + "]";
+                std::string methodXpath = "((" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"property") + ")[" + std::to_string(i + 1) + "]";
                 methodXpath += "//src:function)[" + std::to_string(j + 1) + "]";
 
                 methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, typeUnparsed, unitNumber);
@@ -576,9 +491,6 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
 }
-
-
-
 
 // Compute class stereotype
 //  Based on definition from Dragan, Collard, Maletic ICSM 2010
@@ -712,7 +624,7 @@ void classModel::ComputeClassStereotype() {
         stereotype.push_back("unclassified");
 
     for (const auto& pair : xpath) {
-        xpathList[pair.first].insert({pair.second, getStereotype()});
+        XPATH_LIST[pair.first].insert({pair.second, getStereotype()});
     }       
 }
 
@@ -734,7 +646,7 @@ void classModel::ComputeMethodStereotype() {
     for (auto& m : method) { 
         if (m.getStereotypeList().size() == 0) 
              m.setStereotype("unclassified");
-        xpathList[m.getUnitNumber()].insert({m.getXpath(), m.getStereotype()});    
+        XPATH_LIST[m.getUnitNumber()].insert({m.getXpath(), m.getStereotype()});    
     }
 }
 

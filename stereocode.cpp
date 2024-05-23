@@ -7,17 +7,20 @@
  * This file is part of the Stereocode application.
  */
 
-#include <filesystem>
-#include "CLI11.hpp"
 #include "ClassModelCollection.hpp"
+#include "CLI11.hpp"
 
-primitiveTypes                  PRIMITIVES;                         // Primitives type per language + any user supplied
-ignorableCalls                  IGNORED_CALLS;                      // Calls to ignore + any user supplied
-int                             METHODS_PER_CLASS_THRESHOLD = 21;   // Threshold for large class stereotype (from ICSM10)
-bool                            STRUCT_SUPPORT      = false;        // Enables support to identify and stereotype structs (C++ or C#)
-bool                            INTERFACE_SUPPORT   = false;        // Enables support to identify and stereotype interfaces (C# or Java)
+primitiveTypes                     PRIMITIVES;                         // Primitives type per language + any user supplied
+ignorableCalls                     IGNORED_CALLS;                      // Calls to ignore + any user supplied
+int                                METHODS_PER_CLASS_THRESHOLD = 21;   // Threshold for large class stereotype (from ICSM10)
+bool                               STRUCT_SUPPORT      = false;        // Enables support to identify and stereotype structs (C++ or C#)
+bool                               INTERFACE_SUPPORT   = false;        // Enables support to identify and stereotype interfaces (C# or Java)
 
-std::unordered_map<int, std::unordered_map<std::string, std::string>>      xpathList; // Map key = unit number. Each vector is a pair of xpath and stereotype
+std::unordered_map
+     <int, std::unordered_map
+     <std::string, std::string>>   XPATH_LIST;                         // Map key = unit number. Each vector is a pair of xpath and stereotype
+std::vector<std::string>           LANGUAGE = {"C++", "C#", "Java"};   // Supported languages
+XPathBuilder                       XPATH_TRANSFORMATION;               // List of xpath used for transformations
 
 int main (int argc, char const *argv[]) {
 
@@ -43,9 +46,7 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-r,--report",             outputReport,                "Enable output of an optional report file - .txt");
     app.add_flag  ("-w,--views",              outputViews,                 "Enable output of optional files capturing different views of method and class stereotypes - *.view.csv");
     app.add_option("-c,--large-class",        METHODS_PER_CLASS_THRESHOLD, "Method threshold for the large-class stereotype (default = 21)");
-    // Option for xslt?
-    // Debug?
-    // CSV commas? 
+
     CLI11_PARSE(app, argc, argv);
 
     // Add user-defined primitive types to initial set
@@ -112,11 +113,14 @@ int main (int argc, char const *argv[]) {
     }
 
     // Find method and class stereotypes
-    if (units.size() > 0)
+    if (units.size() > 0) {
+        XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
         classModelCollection classObj(archive, outputArchive, units, 
                                       inputFile, outputReport, outputViews);
+    }
 
-    if (overWriteInput){
+
+    if (overWriteInput) {
         std::filesystem::remove(inputFile);
         std::filesystem::rename(outputFile, inputFile);
     }

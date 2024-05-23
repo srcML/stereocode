@@ -9,10 +9,10 @@
 
 #include "utils.hpp"
 
-extern primitiveTypes PRIMITIVES; 
 std::unordered_map<std::string, std::string> specifierPattern; // Used to remove specifiers
 std::unordered_map<std::string, std::string> containerPattern; // Used to remove containers
-std::vector<std::string> lang = {"C++", "C#", "Java"};
+extern primitiveTypes                        PRIMITIVES;   
+extern std::vector<std::string>              LANGUAGE;
 
 bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive, 
                         const std::string& unitLanguage, const std::string& className) {
@@ -78,7 +78,7 @@ bool isPrimitiveType(const std::string& type) {
 void createSpecifierList() {
     std::vector<std::string> specifier;
     std::string container;
-    for (const auto& l : lang) {
+    for (const auto& l : LANGUAGE) {
         if (l == "C++") {
             // \\[.*\\] match any square brackets [] with any single character inside
             //   (if any) . with zero or more occurrence * (including empty)

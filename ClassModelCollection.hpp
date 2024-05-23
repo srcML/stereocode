@@ -10,9 +10,11 @@
 #ifndef CLASSMODELCOLLECTION_HPP
 #define CLASSMODELCOLLECTION_HPP
 
-#include "ClassModel.hpp"
 #include <thread>
 #include <iomanip> 
+#include <mutex>
+#include "ClassModel.hpp"
+
 
 class classModelCollection {
 public:
@@ -27,7 +29,8 @@ public:
     void                 findAttrModifiedInsideCalls  (classModel&, methodModel&);
 
     void                 outputWithStereotypes      (srcml_unit*, std::map<int, srcml_unit*>&,
-                                                     int, const std::unordered_map<std::string, std::string>&,  std::unordered_map<int, srcml_transform_result*>&);
+                                                     int, const std::unordered_map<std::string, std::string>&,  
+                                                     std::unordered_map<int, srcml_transform_result*>&, std::mutex&);
                                                      
     void                 outputReportFile           (std::stringstream&, classModel&);
     void                 allView                    (std::ofstream&, classModel&);

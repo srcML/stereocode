@@ -9,10 +9,12 @@
 
 #include "ClassModelCollection.hpp"
 
-extern primitiveTypes                                                             PRIMITIVES;                        
-extern bool                                                                       STRUCT_SUPPORT;         
-extern bool                                                                       INTERFACE_SUPPORT;       
-extern std::unordered_map<int, std::unordered_map<std::string, std::string>>      xpathList;  
+extern XPathBuilder                  XPATH_TRANSFORMATION;  
+extern std::unordered_map
+       <int, std::unordered_map
+       <std::string, std::string>>   XPATH_LIST;   
+extern primitiveTypes                PRIMITIVES;
+extern ignorableCalls                IGNORED_CALLS;
 
 classModelCollection::classModelCollection (srcml_archive* archive, srcml_archive* outputArchive, 
                                             std::vector<srcml_unit*>& units, 
@@ -53,7 +55,10 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
 
     // Analyze all methods for each class statically
     for (auto& pair : classCollection) {
+        PRIMITIVES.setLanguage(pair.second.getUnitLanguage()); 
+        IGNORED_CALLS.setLanguage(pair.second.getUnitLanguage());
         std::vector<methodModel>& methods = pair.second.getMethod();
+
         for (auto& m : methods)
              m.findMethodData(pair.second.getAttribute(), pair.second.getMethodSignature(), 
                               pair.second.getInheritedMethodSignature(), pair.second.getName()[3]);
@@ -102,12 +107,15 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     std::map<int, srcml_unit*> transformedUnits;
     std::unordered_map<int, srcml_transform_result*> results;
     std::vector<std::thread> threads;
+    std::mutex mu;
     for (size_t i = 0; i < units.size(); i++)
         threads.push_back(std::thread(&classModelCollection::outputWithStereotypes, this, 
-                                      units[i], std::ref(transformedUnits), i,  std::ref(xpathList[i]), std::ref(results)));
+                                      units[i], std::ref(transformedUnits), i,  std::ref(XPATH_LIST[i]), std::ref(results), std::ref(mu)));
+    
     for (std::thread& thread : threads) 
-        thread.join();
-        
+        if (thread.joinable())
+            thread.join();
+ 
     for (const auto& pair : transformedUnits) 
         srcml_archive_write_unit(outputArchive, pair.second); 
     
@@ -134,16 +142,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
     for (size_t j = 0; j < units.size(); j++) {
         std::string unitLanguage = srcml_unit_get_language(units[j]);   
         if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
-            // Static classes require all methods and data members to be static. C++ Doesn't have static classes
-            std::string xpath = "//src:*[((self::src:class and not(./src:specifier[.='static']))"; // Ignores static classes (C# and Java)
-            if (unitLanguage == "Java") xpath += " and not(child::src:super[1])"; // Ignores anonymous classes
-            if (STRUCT_SUPPORT)
-                xpath += " or self::src:struct";
-            if (INTERFACE_SUPPORT)
-                xpath += " or self::src:interface";             
-            xpath += ") and not(ancestor::src:class or ancestor::src:struct or ancestor::src:interface)]"; // Ignores nested classes
-            
-            srcml_append_transform_xpath(archive, xpath.c_str()); 
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class").c_str()); 
 
             srcml_transform_result* result = nullptr;
             srcml_unit_apply_transforms(archive, units[j], &result);
@@ -164,15 +163,14 @@ void classModelCollection::findClassInfo(srcml_archive* archive, std::vector<src
                 srcml_archive_read_open_memory(classArchive, unparsed, size);
                 srcml_unit* unit = srcml_archive_read_unit(classArchive);
 
-                classModel c(classArchive, unit);        
+                PRIMITIVES.setLanguage(unitLanguage); 
+                std::string classXpath = XPATH_TRANSFORMATION.getXpath(unitLanguage,"class") + "[" + std::to_string(i + 1) + "]";
+
+                classModel c(classArchive, unit, unitLanguage, classXpath, j);        
 
                 // Needed for inheritance in Java and C#
-                if (unitLanguage != "C++") 
-                    classGeneric.insert({c.getName()[2], c.getName()[1]}); 
-                
-                std::string classXpath = xpath + "[" + std::to_string(i + 1) + "]";
-
-                c.findClassData(classArchive, unit, classXpath, unitLanguage, j); 
+                if (unitLanguage != "C++") classGeneric.insert({c.getName()[2], c.getName()[1]}); 
+    
                 classCollection.insert({c.getName()[1], c});  
                           
                 free(unparsed);
@@ -415,7 +413,7 @@ bool classModelCollection::isFriendFunction(methodModel& function) {
 
     std::string functionSignature = function.getReturnType();
     functionSignature += function.getName() + "(";
-    const std::vector<Variable>& parameter = function.getParameterOrdered();
+    const std::vector<variable>& parameter = function.getParameterOrdered();
 
     for (size_t i = 0; i < parameter.size(); i++) {
         functionSignature += parameter[i].getType();
@@ -603,7 +601,7 @@ void classModelCollection::allView(std::ofstream& out, classModel& c) {
 //
 void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int, srcml_unit*>& transformedUnits,
                                                 int unitNumber, const std::unordered_map<std::string, std::string>& xpathPair,
-                                                std::unordered_map<int, srcml_transform_result*>& results) {   
+                                                std::unordered_map<int, srcml_transform_result*>& results, std::mutex& mu) {   
     // std::string xsltStart = R"**(<xsl:stylesheet
     // xmlns="http://www.srcML.org/srcML/src"
     // xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -666,6 +664,7 @@ void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int,
         srcml_archive* archive = srcml_archive_create();
     
         bool transform = false;
+
         for (auto& pair : xpathPair) { 
             srcml_append_transform_xpath_attribute(archive, pair.first.c_str(), "st",
                                     "http://www.srcML.org/srcML/stereotype",
@@ -674,15 +673,21 @@ void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int,
         }  
         if (transform) {
             srcml_transform_result* result = nullptr; 
-            srcml_unit_apply_transforms(archive, unit, &result);  
-            srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
-            transformedUnits.insert({unitNumber, resultUnit});
-            results.insert({unitNumber, result});            
+            srcml_unit_apply_transforms(archive, unit, &result);
+            srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);  
+            {
+                std::lock_guard<std::mutex> guard(mu);
+                transformedUnits.insert({unitNumber, resultUnit});
+                results.insert({unitNumber, result});   
+            }
         }
         else {
+            std::lock_guard<std::mutex> guard(mu);
             transformedUnits.insert({unitNumber, unit});
-        } 
+        }
+             
         srcml_clear_transforms(archive); 
         srcml_archive_free(archive);
+
     
 }

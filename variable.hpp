@@ -10,12 +10,11 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include <iostream>
-#include <string>
+#include "utils.hpp"
 
 // Used to store data members (attributes or fields), locals, and parameters
 //
-class Variable {
+class variable {
 public:
     void        setName                 (const std::string& t)         { name = t;                   }
     void        setType                 (const std::string& t)         { type = t;                   }

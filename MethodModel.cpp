@@ -8,10 +8,10 @@
  */
 
 #include "MethodModel.hpp"
-#include "IgnorableCalls.hpp"
 
-extern ignorableCalls IGNORED_CALLS;
-extern primitiveTypes PRIMITIVES;
+extern primitiveTypes    PRIMITIVES;                        
+extern ignorableCalls    IGNORED_CALLS; 
+extern XPathBuilder      XPATH_TRANSFORMATION;  
 
 methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::string& methodXpath, 
                          const std::string& unitLang, const std::string& propertyReturnType, int unitNum) :
@@ -34,15 +34,12 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
     trimWhitespace(methName);
     nameSignature = methName + paramList;
 };
-void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attribute, 
+void methodModel::findMethodData(std::unordered_map<std::string, variable>& attribute, 
                                  const std::unordered_set<std::string>& classMethods, 
                                  const std::unordered_set<std::string>& inheritedClassMethods,
                                  const std::string& classNamePar)  {
     classNameParsed = classNamePar;
     if (!constructorDestructorUsed) {                                
-        PRIMITIVES.setLanguage(unitLanguage); 
-        IGNORED_CALLS.setLanguage(unitLanguage);
-        
         srcml_archive* archive = srcml_archive_create();
         srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
         srcml_unit* unit = srcml_archive_read_unit(archive);
@@ -54,8 +51,6 @@ void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attr
         findParameterType(archive, unit);
         findReturnExpression(archive, unit);
 
-        
-
         findCallName(archive, unit);
         findCallArgument(archive, unit);
         findNewAssign(archive, unit);
@@ -65,13 +60,12 @@ void methodModel::findMethodData(std::unordered_map<std::string, Variable>& attr
         if (unitLanguage != "C++") isFunctionCall(attribute);
 
         isCallOnAttribute(attribute, classMethods, inheritedClassMethods);
-        findAccessorMethods(); // Depends on isCallOnAttribute()
+        findAccessorMethods(archive, unit); // Depends on isCallOnAttribute()
 
         isAttributeReturned(attribute);  
         isAttributeUsedInExpression(archive, unit, attribute);
         isAttributeOrParameterModified(archive, unit, attribute);
 
-        
         isEmpty(archive, unit);
 
         if (unitLanguage == "C++") isConst(archive, unit);
@@ -103,9 +97,9 @@ void methodModel::findFriendData() {
 //
 void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
     if (constructorDestructorUsed)
-        srcml_append_transform_xpath(archive, "/src:unit/*[self::src:constructor or self::src:destructor]/src:name");
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_destructor_name").c_str());
     else
-        srcml_append_transform_xpath(archive, "/src:unit/src:function/src:name");
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_name").c_str());
 
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -131,10 +125,10 @@ void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
 //
 void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
     if (constructorDestructorUsed)
-        srcml_append_transform_xpath(archive, "/src:unit/*[self::src:constructor or self::src:destructor]/src:parameter_list");
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_destructor_parameter_list").c_str());
     else
-        srcml_append_transform_xpath(archive, "/src:unit/src:function/src:parameter_list");
-        
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_parameter_list").c_str());
+   
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -163,10 +157,7 @@ void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit)
             nonPrimitiveReturnType = true;      
     }
     else {
-        // This skips the generics parameters in Java return types
-        std::string methodXpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
-
-        srcml_append_transform_xpath(archive, methodXpath.c_str());
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_return_type").c_str());
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
         int n = srcml_transform_get_unit_size(result);
@@ -191,12 +182,7 @@ void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit)
 // Collects the names of local variables
 //
 void methodModel::findLocalVariableName(srcml_archive* archive, srcml_unit* unit) {
-    std::string decl_stmt = "//src:decl_stmt[count(ancestor::src:function) = 1]";
-    std::string control = "//src:control/src:init";
-    std::string decl = "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    std::string methodXpath = decl_stmt + decl + " | " + control + decl;
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"local_variable_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -209,7 +195,7 @@ void methodModel::findLocalVariableName(srcml_archive* archive, srcml_unit* unit
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
     
         std::string localName = unparsed;
-        Variable v;
+        variable v;
 
         // Chop off [] for arrays  
         if (unitLanguage == "C++") {
@@ -231,12 +217,7 @@ void methodModel::findLocalVariableName(srcml_archive* archive, srcml_unit* unit
 // Collects the types of local variables
 //
 void methodModel::findLocalVariableType(srcml_archive* archive, srcml_unit* unit) {
-    std::string decl_stmt = "//src:decl_stmt[count(ancestor::src:function) = 1]";
-    std::string control = "//src:control/src:init";
-    std::string decl = "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    std::string methodXpath = decl_stmt + decl + " | " + control + decl;
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"local_variable_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -272,9 +253,7 @@ void methodModel::findLocalVariableType(srcml_archive* archive, srcml_unit* unit
 // Collects the names of parameters in each method
 //
 void methodModel::findParameterName(srcml_archive* archive, srcml_unit* unit) {
-    std::string methodXpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parameter_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -287,7 +266,7 @@ void methodModel::findParameterName(srcml_archive* archive, srcml_unit* unit) {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
 
         std::string parameterName = unparsed;
-        Variable v;
+        variable v;
 
         // Chop off [] for arrays
         if (unitLanguage == "C++") {  
@@ -312,9 +291,7 @@ void methodModel::findParameterName(srcml_archive* archive, srcml_unit* unit) {
 // Only collect the type if there is a name
 //
 void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
-    std::string methodXpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parameter_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -343,9 +320,7 @@ void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
 // Collects all return expressions
 //
 void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit) {
-    std::string methodXpath = "//src:return[count(ancestor::src:function) = 1]/src:expr";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"return_expression").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -374,15 +349,11 @@ void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit)
 void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {   
     std::vector<std::string> callType = {"function", "method"};
     for (const std::string& c : callType) {
-        std::string methodXpath = "//src:call[count(ancestor::src:function) = 1";
-        if (c == "function") // Constructor calls are a type of function calls 
-            methodXpath += " and not(src:name/src:operator='->') and not(src:name/src:operator='.')]";      
+        if (c == "function") 
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"function_call_name").c_str());
         else if (c == "method") 
-            methodXpath += " and src:name/src:operator='->' or src:name/src:operator='.']";
-
-        methodXpath += "/src:name[following-sibling::*[1][self::src:argument_list]]";
-
-        srcml_append_transform_xpath(archive, methodXpath.c_str());
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_call_name").c_str());
+        
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
         int n = srcml_transform_get_unit_size(result);
@@ -412,15 +383,11 @@ void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {
 void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {   
     std::vector<std::string> callType = {"function", "method"};
     for (const std::string& c : callType) {
-        std::string methodXpath = "//src:call[count(ancestor::src:function) = 1";
         if (c == "function") 
-            methodXpath += " and not(src:name/src:operator='->') and not(src:name/src:operator='.')]";      
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"function_call_type").c_str());
         else if (c == "method") 
-            methodXpath += " and src:name/src:operator='->' or src:name/src:operator='.']";
-
-        methodXpath += "/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-
-        srcml_append_transform_xpath(archive, methodXpath.c_str());
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_call_type").c_str());
+        
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
         int n = srcml_transform_get_unit_size(result);
@@ -448,10 +415,7 @@ void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {
 // Finds all variables that are declared/initialized with the "new" operator
 //
 void methodModel::findNewAssign(srcml_archive* archive, srcml_unit* unit) {  
-    std::string methodXpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
-    methodXpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"new_operator_assign").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -476,19 +440,8 @@ void methodModel::findNewAssign(srcml_archive* archive, srcml_unit* unit) {
 // Finds calls to methods in class that return a value
 // Constructor calls are not considered
 //
-void methodModel::findAccessorMethods() {  
-    srcml_archive* archive = srcml_archive_create();
-    srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
-    srcml_unit* unit = srcml_archive_read_unit(archive);
-
-    std::string methodXpath = "//src:call[preceding-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
-    methodXpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
-    methodXpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
-    methodXpath += " or self::src:operator='&=' or self::src:operator='^=' or self::src:operator='|='";
-    methodXpath += " or self::src:operator='\\?\\?=' or self::src:operator='>>>=' or self::src:operator='++'"; 
-    methodXpath += " or self::src:operator='--'] or ancestor::src:return or ancestor::src:init]/src:name[following-sibling::*[1][self::src:argument_list]]";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+void methodModel::findAccessorMethods(srcml_archive* archive, srcml_unit* unit) {  
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"accessor_method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -510,19 +463,12 @@ void methodModel::findAccessorMethods() {
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
-    srcml_unit_free(unit);
-    srcml_archive_close(archive);
-    srcml_archive_free(archive); 
 }
-
-
 
 // Determines if method is empty
 //
 void methodModel::isEmpty(srcml_archive* archive, srcml_unit* unit) {
-    std::string methodXpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"empty").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -535,8 +481,7 @@ void methodModel::isEmpty(srcml_archive* archive, srcml_unit* unit) {
 // Determines if method is const
 //
 void methodModel::isConst(srcml_archive* archive, srcml_unit* unit) {
-    std::string methodXpath = "/src:unit/src:function/src:specifier[.='const']";
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"const").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -550,7 +495,7 @@ void methodModel::isConst(srcml_archive* archive, srcml_unit* unit) {
 // Check if method is a constructor or a destructor
 //
 void methodModel::isConstructorDestructor(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, "/src:unit/*[self::src:constructor or self::src:destructor]");
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_or_destructor").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -613,7 +558,7 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
 
 // Determines if a return expression returns an attribute
 //
-void methodModel::isAttributeReturned(std::unordered_map<std::string, Variable>& attribute) {
+void methodModel::isAttributeReturned(std::unordered_map<std::string, variable>& attribute) {
     for (const std::string& expr : returnExpression) {
         if (isAttributeUsed(attribute, expr, true, false))
             // Simple return expression. 
@@ -628,11 +573,8 @@ void methodModel::isAttributeReturned(std::unordered_map<std::string, Variable>&
 
 // Determines if an attribute is used in an expression
 //
-void methodModel::isAttributeUsedInExpression(srcml_archive* archive, srcml_unit* unit, std::unordered_map<std::string, Variable>& attribute)  {
-    std::string methodXpath = "//src:expr[count(ancestor::src:function)]/src:name";
-    methodXpath += " | //src:expr[count(ancestor::src:function)]/src:call/src:name";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+void methodModel::isAttributeUsedInExpression(srcml_archive* archive, srcml_unit* unit, std::unordered_map<std::string, variable>& attribute)  {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"expression_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -658,20 +600,12 @@ void methodModel::isAttributeUsedInExpression(srcml_archive* archive, srcml_unit
 //  if a parameter that is passed by reference is changed
 //
 void methodModel::isAttributeOrParameterModified(srcml_archive* archive, srcml_unit* unit, 
-                                       std::unordered_map<std::string, Variable>& attribute) { 
+                                       std::unordered_map<std::string, variable>& attribute) { 
     int changed = 0;
     // An attribute that is changed multiple times should only be considered as 1 change
     std::unordered_set<std::string> checked; 
 
-    std::string methodXpath = "//src:expr[count(ancestor::src:function) = 1]/src:name[";
-    methodXpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
-    methodXpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
-    methodXpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
-    methodXpath += " or self::src:operator='&=' or self::src:operator='^=' or self::src:operator='|='";
-    methodXpath += " or self::src:operator='\\?\\?=' or self::src:operator='>>>=' or self::src:operator='++'"; 
-    methodXpath += " or self::src:operator='--'] or preceding-sibling::*[1][self::src:operator='++' or self::src:operator='--']]";
-
-    srcml_append_transform_xpath(archive, methodXpath.c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"expression_assignment").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     
@@ -750,7 +684,7 @@ void methodModel::isIgnorableCall(std::vector<std::pair<std::string, std::string
 //
 // Function call list should be left in the form of namespace::className::foo(), base.foo(), super.foo(), foo()
 //
-void methodModel::isFunctionCall(std::unordered_map<std::string, Variable>& attribute) {
+void methodModel::isFunctionCall(std::unordered_map<std::string, variable>& attribute) {
     for (auto it = methodCall.begin(); it != methodCall.end();) {
         size_t dotOperator = it->first.find(".");
         if (dotOperator != std::string::npos) {
@@ -778,7 +712,7 @@ void methodModel::isFunctionCall(std::unordered_map<std::string, Variable>& attr
 // Also, check if a function call is made to a method in the class, else it is removed
 // For C#, Java --> calls in the form of foo(), base.foo(), super.foo() are considered. 
 //
-void methodModel::isCallOnAttribute(std::unordered_map<std::string, Variable>& attribute, 
+void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& attribute, 
                                    const std::unordered_set<std::string>& classMethods, 
                                    const std::unordered_set<std::string>& inheritedClassMethods) {
     if (!constructorDestructorUsed) { 
@@ -829,7 +763,7 @@ void methodModel::isCallOnAttribute(std::unordered_map<std::string, Variable>& a
 // Where 'a' is a variable and Foo is either a parent class or class itself if the variable is an attribute
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 //
-bool methodModel::isAttributeUsed(std::unordered_map<std::string, Variable>& attribute, 
+bool methodModel::isAttributeUsed(std::unordered_map<std::string, variable>& attribute, 
                                        const std::string& expression, bool returnCheck, 
                                        bool parameterCheck) {
 
@@ -944,8 +878,6 @@ bool methodModel::isAttributeUsed(std::unordered_map<std::string, Variable>& att
 
     return false;  
 }
-
-
 
 void methodModel::setStereotype(const std::string& s) {
     stereotype.push_back(s);

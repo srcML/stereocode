@@ -25,10 +25,8 @@ void ignorableCalls::addIgnoredCall(const std::string& ignoredCall) {
 //
 std::istream& operator>>(std::istream& in, ignorableCalls& calls)  {
     std::string name;
-    while(std::getline(in, name)) {
-        trimWhitespace(name);
+    while(std::getline(in, name))
         calls.addIgnoredCall(name);
-    }
     return in;
 }
 

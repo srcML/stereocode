@@ -13,11 +13,11 @@
 #include <algorithm>
 #include <regex>
 #include <sstream>
+#include <iostream>
+#include <string>
 #include <string_view>
-#include <unordered_set>
 #include "PrimitiveTypes.hpp"
-#include "IgnorableCalls.hpp"
-#include "variable.hpp"
+ 
 
 bool                            isNonPrimitiveType            (const std::string& type, bool& externalNonPrimitive, 
                                                                const std::string& unitLanguage, const std::string& className);
