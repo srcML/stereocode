@@ -578,7 +578,8 @@ void methodModel::isAttributeUsedInExpression(srcml_archive* archive, srcml_unit
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
-
+    if (classNameParsed == "FilterEvaluator")
+        std::cout << "h";
     srcml_unit* resultUnit = nullptr;
 
     for (int i = 0; i < n; i++) {
@@ -760,7 +761,7 @@ void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& a
 // C++: this->a; (*this).a; Foo::a; this->a.b; (*this).a.b; Foo::a.b; a.b; a
 // Java: super.a; this.a; Foo.a; super.a.b; this.a.b; Foo.a.b; a.b; a
 // C#: base.a; this.a; Foo.a; base.a.b; this.a.b; Foo.a.b; a.b; a
-// Where 'a' is a variable and Foo is either a parent class or class itself if the variable is an attribute
+// Where 'a' is a variable and Foo is class itself if the variable is an attribute
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 //
 bool methodModel::isAttributeUsed(std::unordered_map<std::string, variable>& attribute, 
@@ -770,43 +771,42 @@ bool methodModel::isAttributeUsed(std::unordered_map<std::string, variable>& att
     std::string expr = expression; 
     trimWhitespace(expr);
 
+    // Remove brakcets. For example, a [3]
     size_t openingBracket = expr.find("["); 
     if (openingBracket != std::string::npos)
         expr = expr.substr(0, openingBracket); 
     
+    // Removing () and {} on the outside of expression
+    // Might remove } and ) for calls but that doesn't affect the analysis
     if (unitLanguage == "C++") {
-        size_t checkThis = expr.find("(*this)");
-        if (checkThis != std::string::npos) {
-            std::string thisStr = expr.substr(1, 5);
-            while (expr[0] == '{' || (expr[0] == '(' && thisStr != "(*this)")) {
-                expr.erase(0, 1);
-                thisStr = expr.substr(1, 5);
-            }
-            while (expr[expr.size() - 1] == '}' || expr[expr.size() - 1] == ')')
-                expr.erase(expr.size() - 1, 1);
+        std::string thisStr = expr.substr(1, 5);
+        while ((expr[0] == '{' || expr[0] == '(') && thisStr != "(*this)") {
+            expr.erase(0, 1);
+            thisStr = expr.substr(1, 5);
         }
+        while (expr[expr.size() - 1] == '}' || expr[expr.size() - 1] == ')')
+            expr.erase(expr.size() - 1, 1);
+        
     }
     else {
-        while (expr[0] == '(' ) 
+        while (expr[0] == '(') 
             expr.erase(0, 1);   
                
         while (expr[expr.size() - 1] == ')')
             expr.erase(expr.size() - 1, 1);
     }
 
-    // In C# the null-conditional operator is represented by ?. and it allows you to check if an object 
-    //  is null before accessing its members.
-    // For example, int? stringLength = testString?.Length; 
-    //  stringLength = length if testString is not null, otherwise stringLength becomes null
-    //  The ? used with int (or any other value type) makes it nullable, meaning it can hold either a valid integer or null
+    // In C# the null-conditional operator is represented by ? and it allows you to check if an object 
+    //  is null before accessing its members. For example, testString?.Length; 
     if (unitLanguage == "C#") {
         size_t nullConditionOperator = expr.find("?"); 
         while (nullConditionOperator != std::string::npos) {
             expr.erase(nullConditionOperator, 1); 
-            nullConditionOperator = expr.find("?"); 
+            nullConditionOperator = expr.find("?"); // For chaining
         }         
     }
 
+    // Remove pointers. For example, *a
     if (unitLanguage != "Java") {
         while (expr[0] == '*') 
             expr.erase(0, 1);   
@@ -816,20 +816,29 @@ bool methodModel::isAttributeUsed(std::unordered_map<std::string, variable>& att
     // We only care about the first two variables. For example, in a.b.c() the a.b is sufficient to 
     //  determine what "a" is
     // base and super point to the parent class (not interfaces)
+
     bool isMatched = false;
     std::smatch match;
+    std::string pattern;
     if (!returnCheck) {
-        std::string pattern = "";
         if (unitLanguage == "C++") 
             pattern = R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->]*))";
         else if (unitLanguage == "Java")
             pattern = R"(^(?:super|this|([^.]*))\.([^.]*))";
         else if (unitLanguage == "C#")
             pattern = R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->]*))";
-    
-        const std::regex regexPattern(pattern);
-        isMatched = std::regex_search(expr, match, regexPattern);
     }
+    else {
+        // $ Used to match end of line. For example, return this.a; matches but return this.a.b; doesn't
+        if (unitLanguage == "C++") 
+            pattern = R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->\(\){}]*)$)";
+        else if (unitLanguage == "Java")
+            pattern = R"(^(?:super|this|([^.]*))\.([^.\(\)]*)$)";
+        else if (unitLanguage == "C#")
+            pattern = R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->\(\)]*)$)";
+    }
+    const std::regex regexPattern(pattern);
+    isMatched = std::regex_search(expr, match, regexPattern);
 
     int count = isMatched ? 2 : 1;
     for (int i = 0; i < count; i++) {
@@ -875,7 +884,6 @@ bool methodModel::isAttributeUsed(std::unordered_map<std::string, variable>& att
         }
         
     }
-
     return false;  
 }
 

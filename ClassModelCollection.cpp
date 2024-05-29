@@ -119,7 +119,7 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     for (const auto& pair : transformedUnits) 
         srcml_archive_write_unit(outputArchive, pair.second); 
     
-    for (auto& pair : results) 
+    for (auto& pair : results)  
         srcml_transform_free(pair.second);   
 }
 
