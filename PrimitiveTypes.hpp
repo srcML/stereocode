@@ -13,20 +13,22 @@
 #include <string>
 #include <fstream>
 #include <unordered_set>
+#include <unordered_map>
+#include <vector>
+#include <iostream>
 
 class primitiveTypes {
 public:
-    bool           isPrimitive    (const std::string&) const;
-    
-    void           addPrimitive   (const std::string&);
-    void           setLanguage    (const std::string&);
+    bool                 isPrimitive             (const std::string&, const std::string&);
 
-    friend         std::istream& operator>>(std::istream&, primitiveTypes&);
+    void                 addPrimitive            (const std::string&);
+    void                 createPrimitiveList     ();
+    void                 outputPrimitives        ();
 
+    friend std::istream& operator>>              (std::istream&, primitiveTypes&);
 private:
-    std::string                           unitLanguage;   // Language
-    std::unordered_set<std::string>       ptypes;         // List of language primitives
-    std::unordered_set<std::string>       userTypes;      // List of user defined language primitives 
+    std::unordered_map<std::string, std::unordered_set<std::string>>     ptypes;         // List of primitives
+    std::unordered_set<std::string>                                      userTypes;      // List of user-defined primitives
 };
 
 #endif

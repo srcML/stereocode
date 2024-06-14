@@ -7,26 +7,27 @@
  * This file is part of the Stereocode application.
  */
 
-#ifndef IGNORABLE_CALLS
-#define IGNORABLE_CALLS
+#ifndef IGNORABLECALLS_HPP
+#define IGNORABLECALLS_HPP
 
 #include <string>
 #include <fstream>
 #include <unordered_set>
+#include <unordered_map>
+#include <vector>
+#include <iostream>
 
 class ignorableCalls {
 public:
-    bool           isCallIgnored    (const std::string&) const;
-    
-    void           addIgnoredCall   (const std::string&);
-    void           setLanguage      (const std::string&);
-
-    friend         std::istream& operator>>(std::istream&, ignorableCalls&);
+    bool                 isIgnored                (const std::string&, const std::string&);
+    void                 addCall                  (const std::string&);
+    void                 createCallList           ();
+    void                 outputCalls              ();
+    friend std::istream& operator>>               (std::istream&, ignorableCalls&);
 
 private:
-    std::string                           unitLanguage;        // Language
-    std::unordered_set<std::string>       ignoredCalls;        // List of calls to ignore
-    std::unordered_set<std::string>       userIgnoredCalls;    // List of user-defined calls to ignore 
+    std::unordered_map<std::string, std::unordered_set<std::string>>       ignoredCalls;        // List of calls to ignore
+    std::unordered_set<std::string>                                        userIgnoredCalls;    // List of user-defined calls to ignore 
 };
 
 #endif

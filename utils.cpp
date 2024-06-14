@@ -9,15 +9,16 @@
 
 #include "utils.hpp"
 
-std::unordered_map<std::string, std::string> specifierPattern; // Used to remove specifiers
-std::unordered_map<std::string, std::string> containerPattern; // Used to remove containers
+// std::unordered_map<std::string, std::string> specifierPattern; // Used to remove specifiers
+// std::unordered_map<std::string, std::string> containerPattern; // Used to remove containers
 extern primitiveTypes                        PRIMITIVES;   
 extern std::vector<std::string>              LANGUAGE;
+extern typeTokens                            TYPE_TOKENS;  
 
 bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive, 
                         const std::string& unitLanguage, const std::string& className) {
     std::string typeParsed = type;
-    removeSpecifiers(typeParsed, unitLanguage); // Can take full type as is
+
     size_t listOpen = typeParsed.find("<");
     if (listOpen != std::string::npos) {
         std::string typeLeft = typeParsed.substr(0, listOpen);
@@ -30,18 +31,17 @@ bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive,
         typeParsed = typeLeft + typeRight;
     }
 
-    bool isNonPrimitive = false; 
+    removeTypeTokens(typeParsed, unitLanguage); // Can take full type as is
     trimWhitespace(typeParsed);  // Can take full type as is
-    removeContainers(typeParsed, unitLanguage); // Can take full type as is. Needs type without spaces first.
     
+    bool isNonPrimitive = false; 
     size_t start = 0;
     size_t end = typeParsed.find(",");
     std::string subType;
     while (end != std::string::npos) {
         subType = typeParsed.substr(start, end - start);   
         removeNamespace(subType, true, unitLanguage); 
-
-        if (!isPrimitiveType(subType)) {
+        if (!isPrimitiveType(subType, unitLanguage)) {
             isNonPrimitive = true;
             if (subType.find(className) == std::string::npos)
                 externalNonPrimitive = true;
@@ -53,10 +53,9 @@ bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive,
 
     subType = typeParsed.substr(start, typeParsed.size() - start);
     removeNamespace(subType, true, unitLanguage);
-    if (!isPrimitiveType(subType)) {
+    if (!isPrimitiveType(subType, unitLanguage)) {
         isNonPrimitive = true;
-        
-        if (subType.find(className) == std::string::npos)
+        if (subType != className)
             externalNonPrimitive = true;
     }
 
@@ -65,85 +64,27 @@ bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive,
 
 // Checks if a type is primitive.  
 //
-bool isPrimitiveType(const std::string& type) {
+bool isPrimitiveType(const std::string& type, const std::string& unitLanguage) {
     std::istringstream subType(type);
     std::string token;
     while (std::getline(subType, token, ','))
-        if (!PRIMITIVES.isPrimitive(token)) return false;
+        if (!PRIMITIVES.isPrimitive(token, unitLanguage)) return false;
     return true;
 }
 
-// Creates list of specifiers
-//
-void createSpecifierList() {
-    std::vector<std::string> specifier;
-    std::string container;
-    for (const auto& l : LANGUAGE) {
-        if (l == "C++") {
-            // \\[.*\\] match any square brackets [] with any single character inside
-            //   (if any) . with zero or more occurrence * (including empty)
-            //   such as int[] or int[,] and so on
-            specifier = { "const", "volatile", "inline", "virtual", "friend", "extern", "&", "&&", "\\*", "public", "private", "protected",
-                          "mutable", "static", "thread_local", "register", "constexpr", "explicit", "signed", "unsigned" };
-
-            container =  "<|>|vector|list|set|map|unordered_map|array|multimap|unordered_multimap|::iterator|::_iterator|";
-            container += "forward_list|stack|queue|priority_queue|deque|multiset|unordered_set|unordered_multiset|pair";
-        }
-        else if (l == "C#") {
-            specifier = { "readonly", "ref", "out", "in", "unsafe", "internal", "params",
-                          "public", "private", "protected", "static", "virtual", "\\*", "volatile", "\\[.*\\]",
-                          "this",  "override", "abstract",  "extern", "async", "partial", "explicit", "implicit"
-                          "new", "sealed", "event", "const", "\\?" };
-
-            container =  "<|>|List|Dictionary|HashSet|Queue|Stack|SortedList|LinkedList|BitArray|";
-            container += "KeyedCollection|SortedSet|BlockingCollection|ConcurrentQueue|";
-            container += "ConcurrentStack|ConcurrentDictionary|ConcurrentBag|";
-            container += "ReadOnlyCollection|ReadOnlyDictionary|Tuple|ValueTuple|NameValueCollection|";
-            container += "StringCollection|StringDictionary|HybridDictionary|OrderedDictionary";
-        }
-        else if (l == "Java") {
-            specifier = { "public", "private", "protected", "static", "final", "transient",  "\\[.*\\]", "\\?", "@\\w+",
-                          "volatile", "synchronized", "native", "strictfp", "abstract", "default", "super", "extends", "\\.\\.\\." };
-
-            container =  "<|>|List|ArrayList|LinkedList|Set|HashSet|LinkedHashSet|SortedSet|TreeSet|";
-            container += "Map|HashMap|Hashtable|LinkedHashMap|SortedMap|TreeMap|Deque|ArrayDeque|Queue|";
-            container += "PriorityQueue|Vector|Stack|EnumSet|EnumMap|Iterator";
-        }
-
-        // Create a regex pattern of specifiers joined by the '|' (or) operator.
-        // \bword\b ensures that specifiers are matched only when they appear as 
-        //   whole words (except for certain specifiers), that is, words between non-word characters.
-        //   For example, a class called staticClass, the static in this name will be kept when 
-        //   removing the specifiers from the datatypes of its instances.
-        std::string pattern;
-        for (const auto& s : specifier) {
-            if (pattern.size() > 0) pattern += "|";
-            
-            // If specifier is one of the special characters (like * or & or []), match them without word boundaries.
-            if (s == "\\*" || s == "&" || s == "&&" || s == "\\[.*\\]" || s == "\\?" || s == "\\.\\.\\." || "@\\w+") 
-                pattern += s;     
-            else 
-                pattern += "\\b::" + s + "\\b";      
-        }
-        pattern = "(" + pattern + ")";
-        specifierPattern.insert({l, pattern});
-
-        containerPattern.insert({l, container});
-    }
+bool matchSubstring(const std::string& text, const std::string& substring) {
+    const std::string pattern = "\\b" + substring + "\\b"; 
+    const std::regex regexPattern(pattern);
+    std::smatch match;
+    return std::regex_search(text, match, regexPattern);
 }
+
 
 // Removes specifiers from type name
 //
-void removeSpecifiers(std::string& type, std::string unitLanguage) {
-    std::regex regexPattern(specifierPattern[unitLanguage]);
-    type = std::regex_replace(type, regexPattern, "");
-}
-
-// Remove containers from type name
-//
-void removeContainers(std::string& type, std::string unitLanguage){
-    std::regex regexPattern(containerPattern[unitLanguage]);
-    type = std::regex_replace(type, regexPattern, "");
+void removeTypeTokens(std::string& type, std::string unitLanguage) {
+    std::regex regexPattern(TYPE_TOKENS.getTypeTokens(unitLanguage));
+    type = std::regex_replace(type, regexPattern, " ");
 }
 
 // Removes all whitespace from string

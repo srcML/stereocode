@@ -14,7 +14,7 @@
 
 class classModel {
 public:
-         classModel                         (srcml_archive*, srcml_unit*, const std::string&, const std::string&, int);
+         classModel                         (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, const std::string&, int);
          
     void findClassName                      (srcml_archive*, srcml_unit*);
     void findStructureType                  (srcml_archive*, srcml_unit*);
@@ -26,12 +26,12 @@ public:
     void findAttributeType                  (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findNonPrivateAttributeName        (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findNonPrivateAttributeType        (srcml_archive*, srcml_unit*, std::vector<variable>&);
-    void findMethod                         (srcml_archive*, srcml_unit*, const std::string&, int);
-    void findMethodInProperty               (srcml_archive*, srcml_unit*, const std::string&, int);
+    void findMethod                         (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
+    void findMethodInProperty               (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
     
 
-    void ComputeClassStereotype();
-    void ComputeMethodStereotype();
+    void computeClassStereotype();
+    void computeMethodStereotype();
 
     void constructorDestructor();
     void getter();
@@ -40,23 +40,23 @@ public:
     void property();
     void voidAccessor();
     void command();
-    void collaboratorController();
+    void wrapperControllerCollaborator();
     void factory();
-    void empty();
-    void stateless();
-    void wrapper();
 
+    void incidental();
+    void stateless();
+    void empty();
+    
     std::string                                            getStereotype                      ()               const;
     std::string                                            getUnitLanguage                    ()               const          { return unitLanguage;              }
     std::unordered_map<std::string, variable>&             getAttribute                       ()                              { return attribute;                 }
-    std::vector<methodModel>&                              getMethod                          ()                              { return method;                    }
+    std::unordered_map<std::string, methodModel>&          getMethods                         ()                              { return methods;                   }
 
     const std::vector<std::string>&                        getName                            ()               const          { return name;                      }
     const std::vector<std::string>&                        getStereotypeList                  ()               const          { return stereotype;                }
     const std::unordered_map<std::string, std::string>&    getParentClassName                 ()               const          { return parentClassName;           }
-    const std::unordered_map<std::string, variable>&       getNonPrivateAttribute             ()               const          { return nonPrivateAttribute;       }
-    const std::unordered_set<std::string>&                 getInheritedMethodSignature        ()               const          { return inheritedMethodSignature;  }
-    const std::unordered_set<std::string>&                 getMethodSignature                 ()               const          { return methodSignature;           }    
+    const std::unordered_map<std::string, variable>&       getNonPrivateAndInheritedAttribute ()               const          { return nonPrivateAndInheritedAttribute;       }
+    const std::unordered_set<std::string>&                 getInheritedMethodSignature        ()               const          { return inheritedMethodSignature;  }    
     const std::unordered_set<std::string>&                 getFriendFunctionDecl              ()               const          { return friendFunctionDecl;        }
     
     bool                                                   HasInherited                       ()               const          { return inherited;                 }
@@ -68,53 +68,45 @@ public:
     srcml_unit*                                            outputUnitWithStereotypes          (srcml_archive*, srcml_unit*, srcml_transform_result**, bool);
 
     void addMethod(methodModel& m)  {
-        method.push_back(m); 
+        methods.insert({m.getNameSignature(), m}); 
     }
 
-    void appendInheritedAttribute(const std::unordered_map<std::string, variable>& inheritedNonPrivateAttribute, 
+    void inheritAttribute(const std::unordered_map<std::string, variable>& inheritedNonPrivateAttribute, 
                                   const std::string& inheritanceSpecifier) { 
         if (inheritanceSpecifier == "private") // C++ Only
             // Inherit attributes as private
-            inheritedAsPrivateAttribute.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end()); 
+            attribute.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());
         else {
             attribute.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());
-            // Needed for chaining inheritance
-            nonPrivateAttribute.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end()); 
-        }            
+            // Used to chain inheritance
+            nonPrivateAndInheritedAttribute.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());     
+        }     
     }
 
-    void appendInheritedMethod(const std::unordered_set<std::string>& parentMethodSignature, 
+    void appendInheritedMethod(const std::unordered_map<std::string, methodModel>& parentMethods, 
                                const std::unordered_set<std::string>& parentInheritedMethodSignature) {       
-
         inheritedMethodSignature.insert(parentInheritedMethodSignature.begin(), parentInheritedMethodSignature.end());  
-        inheritedMethodSignature.insert(parentMethodSignature.begin(), parentMethodSignature.end());      
+
+        for (const auto& pair : parentMethods)
+            inheritedMethodSignature.insert(pair.first);      
     }
 
-    void appendInheritedPrivateAttribute() {
-        attribute.insert(inheritedAsPrivateAttribute.begin(), inheritedAsPrivateAttribute.end());
-    }
 
-    void buildMethodSignature() {
-        for (const auto& m : method)
-            methodSignature.insert(m.getNameSignature());  
-    }
 private:
-    std::vector<std::string>                                name;                           // Original name, name without whitespaces, name without whitespaces, namespaces, and generic types in <>, same as last but without <>
-    std::unordered_map<std::string, std::string>            parentClassName;                // Key is parent class name without whitespaces and namespaces and value is specifier (public, private, or protected).
-    std::string                                             structureType;                  // Class, or struct, or an interface
-    std::string                                             unitLanguage;                   // Unit language                 
-    std::vector<std::string>                                stereotype;                     // Class stereotype
-    std::vector<methodModel>                                method;                         // List of methods
-    std::unordered_set<std::string>                         methodSignature;                // List of method signatures  
-    std::unordered_set<std::string>                         inheritedMethodSignature;       // List of inherited method signatures
-    std::unordered_set<std::string>                         friendFunctionDecl;             // Set of friend function signatures (C++ only)                                             
-    std::unordered_map<std::string, variable>               attribute;                      // Map of all attributes. Key is attribute name
-    std::unordered_map<std::string, variable>               nonPrivateAttribute;            // Non-private attributes (Only used by inheriting classes)
-    std::unordered_map<std::string, variable>               inheritedAsPrivateAttribute;    // Attributes inherited as private (C++ only, combined with the attribute map) 
-    std::unordered_map<int, std::string>                    xpath;                          // Unique xpath for class (classes if partial) along with the unit number
-    bool                                                    inherited{false};               // Did class inherit the attributes yet? (Used for inheritance)
-    bool                                                    visited{false};                 // Has class been visited yet when inheriting? (Used for inheritance)    
-    int                                                     numConstructorDestructor{0};    // Number of constructor+destructor methods
+    std::vector<std::string>                                name;                            // Original name, name without whitespaces, name without whitespaces, namespaces, and generic types in <>, same as last but without <>
+    std::unordered_map<std::string, std::string>            parentClassName;                 // Key is parent class name without whitespaces and namespaces and value is specifier (public, private, or protected).
+    std::string                                             structureType;                   // Class, or struct, or an interface
+    std::string                                             unitLanguage;                    // Unit language                 
+    std::vector<std::string>                                stereotype;                      // Class stereotype(s)
+    std::unordered_map<std::string, methodModel>            methods;                         // List of methods 
+    std::unordered_set<std::string>                         inheritedMethodSignature;        // List of inherited method signatures
+    std::unordered_set<std::string>                         friendFunctionDecl;              // Set of friend function signatures (C++ only)                                             
+    std::unordered_map<std::string, variable>               attribute;                       // Key is attribute name and value is attribute object
+    std::unordered_map<std::string, variable>               nonPrivateAndInheritedAttribute; // Non-private attributes of class + inherited attributes from all parent classes
+    std::unordered_map<int, std::string>                    xpath;                           // Unique xpath for class (classes if partial in C#) along with the unit number
+    bool                                                    inherited{false};                // Did class inherit the attributes yet? (Used for inheritance)
+    bool                                                    visited{false};                  // Has class been visited yet when inheriting? (Used for inheritance)    
+    int                                                     numConstructorDestructor{0};     // Number of constructor + destructor methods (Needed for class stereotypes)
 }; 
 
 #endif

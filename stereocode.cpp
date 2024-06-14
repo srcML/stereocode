@@ -10,45 +10,52 @@
 #include "ClassModelCollection.hpp"
 #include "CLI11.hpp"
 
-primitiveTypes                     PRIMITIVES;                         // Primitives type per language + any user supplied
-ignorableCalls                     IGNORED_CALLS;                      // Calls to ignore + any user supplied
-int                                METHODS_PER_CLASS_THRESHOLD = 21;   // Threshold for large class stereotype (from ICSM10)
-bool                               STRUCT_SUPPORT      = false;        // Enables support to identify and stereotype structs (C++ or C#)
-bool                               INTERFACE_SUPPORT   = false;        // Enables support to identify and stereotype interfaces (C# or Java)
+primitiveTypes                     PRIMITIVES;                                         // Primitives type per language + any user supplied
+ignorableCalls                     IGNORED_CALLS;                                      // Calls to ignore + any user supplied
+typeTokens                         TYPE_TOKENS;                                        // Tokens to remove from data types + any user supplied
+int                                METHODS_PER_CLASS_THRESHOLD = 21;                   // Threshold for large class stereotype (from ICSM10)
+bool                               STRUCT_SUPPORT              = false;                // Enables support to identify and stereotype structs (C++ or C#)
+bool                               INTERFACE_SUPPORT           = false;                // Enables support to identify and stereotype interfaces (C# or Java)
+bool                               IS_VERBOSE                  = false;                // Prints primitives, ignored calls, type tokens, and progress while stereotyping
 
 std::unordered_map
      <int, std::unordered_map
      <std::string, std::string>>   XPATH_LIST;                         // Map key = unit number. Each vector is a pair of xpath and stereotype
 std::vector<std::string>           LANGUAGE = {"C++", "C#", "Java"};   // Supported languages
-XPathBuilder                       XPATH_TRANSFORMATION;               // List of xpath used for transformations
+XPathBuilder                       XPATH_TRANSFORMATION;               // List of xpaths used for transformations
 
 int main (int argc, char const *argv[]) {
 
     std::string         inputFile;
     std::string         primitivesFile;
     std::string         ignoredCallsFile;
+    std::string         typeTokensFile;
     std::string         outputFile;
     int                 error;
-    bool                outputReport       = false;
+    bool                outputTxtReport    = false;
+    bool                outputCsvReport    = false;
     bool                overWriteInput     = false;
-    bool                outputViews        = false;
+    bool                reDocComment       = false;
 
     CLI::App app{"Stereocode: Determines method and class stereotypes\n"
                  "Supports C++, C#, and Java\n" };
     
+    app.add_flag  ("-v,--verbose",            IS_VERBOSE,                  "Stereotyping conversion and status information");
     app.add_option("input-archive",           inputFile,                   "File name of a srcML input archive")->required();
     app.add_option("-o,--output-file",        outputFile,                  "File name of output - srcML archive with stereotypes");
-    app.add_option("-p,--primitives",         primitivesFile,              "File name of user supplied primitive types (one per line)");
-    app.add_option("-g,--ignore-calls",       ignoredCallsFile,            "File name of user supplied calls to ignore (one per line)");
-    app.add_flag  ("-i,--interface",          INTERFACE_SUPPORT,           "Identify stereotypes for interfaces (C# and Java)"); //
-    app.add_flag  ("-s,--struct",             STRUCT_SUPPORT,              "Identify stereotypes for structs (C# and Java)"); //
-    app.add_flag  ("-v,--overwrite",          overWriteInput,              "Enable overwriting of the input with the stereotype output");
-    app.add_flag  ("-r,--report",             outputReport,                "Enable output of an optional report file - .txt");
-    app.add_flag  ("-w,--views",              outputViews,                 "Enable output of optional files capturing different views of method and class stereotypes - *.view.csv");
-    app.add_option("-c,--large-class",        METHODS_PER_CLASS_THRESHOLD, "Method threshold for the large-class stereotype (default = 21)");
+    app.add_option("-p,--primitive-file",     primitivesFile,              "File name of user supplied primitive types (one per line)");
+    app.add_option("-g,--ignore-call-file",   ignoredCallsFile,            "File name of user supplied calls to ignore (one per line)");
+    app.add_option("-t,--type-token-file",    typeTokensFile,              "File name of user supplied data type tokens to remove (one per line)");
+    app.add_flag  ("-i,--enable-interface",   INTERFACE_SUPPORT,           "Identify stereotypes for interfaces (C# and Java)");
+    app.add_flag  ("-s,--enable-struct",      STRUCT_SUPPORT,              "Identify stereotypes for structs (C# and Java)");
+    app.add_flag  ("-e,--input-overwrite",    overWriteInput,              "Overwrite input with stereotype information");
+    app.add_flag  ("-x,--txt-report",         outputTxtReport,             "Output optional TXT report file containing stereotype information");
+    app.add_flag  ("-z,--csv-report",         outputCsvReport,             "Output optional CSV report file containing stereotype information");
+    app.add_option("-c,--comment",            reDocComment,                "Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */)");
+    app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD, "Method threshold for the large-class stereotype (default = 21)");
 
     CLI11_PARSE(app, argc, argv);
-
+    
     // Add user-defined primitive types to initial set
     if (primitivesFile != "") {         
         std::ifstream in(primitivesFile);
@@ -73,15 +80,19 @@ int main (int argc, char const *argv[]) {
         in.close();
     }
 
-    // Default output file name if output file name is not specified
-    if (outputFile == "") {                                             
-        std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);     
-        outputFile = InputFileNoExt + ".stereotypes.xml";     
-    }  
+    // Add user-defined type tokens to initial set
+    if (typeTokensFile != "") {         
+        std::ifstream in(typeTokensFile);
+        if (in.is_open())
+            in >> TYPE_TOKENS;
+        else {
+            std::cerr << "Error: Type tokens file not found: " << typeTokensFile << '\n';
+            return -1;
+        }
+        in.close();
+    }
 
     srcml_archive* archive = srcml_archive_create();
-    
-
     error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
     if (error) {
         std::cerr << "Error: File not found: " << inputFile << ", error == " << error << '\n';
@@ -89,8 +100,13 @@ int main (int argc, char const *argv[]) {
         return -1;
     }
 
-    srcml_archive* outputArchive = srcml_archive_create();
+    // Default output file name if output file name is not specified
+    if (outputFile == "") {                                             
+        std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);     
+        outputFile = InputFileNoExt + ".stereotypes.xml";     
+    }  
 
+    srcml_archive* outputArchive = srcml_archive_create();
     error = srcml_archive_write_open_filename(outputArchive, outputFile.c_str());
     if (error) {
         std::cerr << "Error opening: " << outputFile << std::endl;
@@ -116,22 +132,15 @@ int main (int argc, char const *argv[]) {
     if (units.size() > 0) {
         XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
         classModelCollection classObj(archive, outputArchive, units, 
-                                      inputFile, outputReport, outputViews);
+                                      inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
     }
-
 
     if (overWriteInput) {
         std::filesystem::remove(inputFile);
         std::filesystem::rename(outputFile, inputFile);
     }
  
-    for (size_t i = 0; i < units.size(); i++)
-        srcml_unit_free(units[i]);  
 
-    srcml_archive_close(archive);
-    srcml_archive_free(archive);
-    srcml_archive_close(outputArchive);
-    srcml_archive_free(outputArchive);   
 
     return 0;
 }   
