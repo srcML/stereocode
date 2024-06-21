@@ -9,13 +9,11 @@
 
 #include "utils.hpp"
 
-// std::unordered_map<std::string, std::string> specifierPattern; // Used to remove specifiers
-// std::unordered_map<std::string, std::string> containerPattern; // Used to remove containers
 extern primitiveTypes                        PRIMITIVES;   
 extern std::vector<std::string>              LANGUAGE;
 extern typeTokens                            TYPE_TOKENS;  
 
-bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive, 
+bool isNonPrimitiveType(const std::string& type, variable& var, 
                         const std::string& unitLanguage, const std::string& className) {
     std::string typeParsed = type;
 
@@ -43,8 +41,10 @@ bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive,
         removeNamespace(subType, true, unitLanguage); 
         if (!isPrimitiveType(subType, unitLanguage)) {
             isNonPrimitive = true;
-            if (subType.find(className) == std::string::npos)
-                externalNonPrimitive = true;
+            if (subType != className)
+                var.setNonPrimitiveExternal(true);
+            else
+                var.setNonPrimitiveInternal(true);
         }
         
         start = end + 1;
@@ -56,7 +56,9 @@ bool isNonPrimitiveType(const std::string& type, bool& externalNonPrimitive,
     if (!isPrimitiveType(subType, unitLanguage)) {
         isNonPrimitive = true;
         if (subType != className)
-            externalNonPrimitive = true;
+            var.setNonPrimitiveExternal(true);
+        else
+            var.setNonPrimitiveInternal(true);
     }
 
     return isNonPrimitive;

@@ -20,7 +20,6 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
     char* typeUnparsed = nullptr;
     size_t typeSize = 0;
     srcml_unit_unparse_memory(unit, &typeUnparsed, &typeSize);
-    temp = typeUnparsed;
     free(typeUnparsed);
 
     srcML = srcml_unit_get_srcml(unit);
@@ -29,11 +28,13 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
     findMethodName(archive, unit); 
     findParameterList(archive, unit);
 
+    if (unitLanguage == "C++") isConst(archive, unit);
+
     // Method could be inside a property (C# only), so return type is collected separately
     // returnType = "" if the unitLanguage is not C#
     returnType = propertyReturnType; 
-    // Name signature needed for function call analysis
-    std::string paramList = parameterList;
+    // Name signature needed for call analysis
+    std::string paramList = parametersList;
     std::string methName = name;
     removeBetweenComma(paramList, false);
     removeNamespace(methName, true, unitLanguage);
@@ -42,7 +43,7 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
 }
 
 void methodModel::findMethodData(std::unordered_map<std::string, variable>& attribute, 
-                                 const std::unordered_map<std::string, methodModel>& classMethods, 
+                                 const std::unordered_set<std::string>& classMethods, 
                                  const std::unordered_set<std::string>& inheritedClassMethods,
                                  const std::string& classNamePar) {
     classNameParsed = classNamePar;
@@ -52,27 +53,30 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& attr
         srcml_unit* unit = srcml_archive_read_unit(archive);
 
         findMethodReturnType(archive, unit); 
-        findLocalVariableName(archive, unit);
-        findLocalVariableType(archive, unit); 
         findParameterName(archive, unit);
         findParameterType(archive, unit);
+    
+        findLocalVariableName(archive, unit);
+        findLocalVariableType(archive, unit); 
         findReturnExpression(archive, unit);
 
         findCallName(archive, unit);
         findCallArgument(archive, unit);
         findNewAssign(archive, unit);
-        isIgnorableCall(methodCall);
-        isIgnorableCall(functionCall);
 
+        isIgnorableCall(methodCalls);
+        isIgnorableCall(functionCalls);
+
+        // Must only be called after isIgnorableCall()
         isCallOnAttribute(attribute, classMethods, inheritedClassMethods);
 
-        isAttributeOrParameterReturned(attribute, false);  
-        isAttributeOrParamaterUsedInExpression(archive, unit, attribute);
-        isAttributeOrParameterModified(archive, unit, attribute);
+        // Must only be called after findNewAssign()
+        isVariableReturned(attribute, false);  
+
+        isVariableUsedInExpression(archive, unit, attribute, false);
+        isVariableModified(archive, unit, attribute, false);
 
         isEmpty(archive, unit);
-
-        if (unitLanguage == "C++") isConst(archive, unit);
 
         srcml_unit_free(unit);
         srcml_archive_close(archive);
@@ -96,14 +100,14 @@ void methodModel::findFreeFunctionData() {
         findCallName(archive, unit);
         findCallArgument(archive, unit);
         findNewAssign(archive, unit);
-        isIgnorableCall(methodCall);
-        isIgnorableCall(functionCall);
+        isIgnorableCall(methodCalls);
+        isIgnorableCall(functionCalls);
 
         isCallOnParameter();
 
-        isAttributeOrParameterReturned(parameter, true); 
-        isAttributeOrParamaterUsedInExpression(archive, unit, parameter);
-        isAttributeOrParameterModified(archive, unit, parameter);
+        isVariableReturned(parameters, true); 
+        isVariableUsedInExpression(archive, unit, parameters, true);
+        isVariableModified(archive, unit, parameters, true);
         isEmpty(archive, unit);
 
         srcml_unit_free(unit);
@@ -121,9 +125,7 @@ void methodModel::findFriendData() {
     findMethodReturnType(archive, unit); 
     findParameterName(archive, unit);
     findParameterType(archive, unit);
-    if (unitLanguage == "C++")
-        isConst(archive, unit);
-        
+    
     srcml_unit_free(unit);
     srcml_archive_close(archive);
     srcml_archive_free(archive); 
@@ -173,7 +175,7 @@ void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
         char* unparsed = nullptr;
         size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        parameterList = unparsed;
+        parametersList = unparsed;
         free(unparsed);   
     }
 
@@ -184,7 +186,7 @@ void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
 // Gets the method return type 
 //
 void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit) {
-    if (returnType == "") { // If method was a property (C#), type is found in previous steps
+    if (returnType == "") { // If method was a property (C#) or a friend function, type is found in previous steps
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_return_type").c_str());
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
@@ -198,10 +200,11 @@ void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit)
         srcml_clear_transforms(archive);
         srcml_transform_free(result);
     }
-
-    if (isNonPrimitiveType(returnType, nonPrimitiveReturnTypeExternal, unitLanguage, classNameParsed))
+    variable temp;
+    if (isNonPrimitiveType(returnType, temp, unitLanguage, classNameParsed))
         nonPrimitiveReturnType = true; 
-    
+    nonPrimitiveReturnTypeExternal = temp.getNonPrimitiveExternal();
+
     returnTypeParsed = returnType;
     removeTypeTokens(returnTypeParsed, unitLanguage);
     trimWhitespace(returnTypeParsed);   
@@ -234,7 +237,7 @@ void methodModel::findLocalVariableName(srcml_archive* archive, srcml_unit* unit
             }
         }
         v.setName(localName);
-        localOrdered.push_back(v);
+        localsOrdered.push_back(v);
         
         free(unparsed);
     }
@@ -267,10 +270,10 @@ void methodModel::findLocalVariableType(srcml_archive* archive, srcml_unit* unit
             type = unparsed;
             prev = type;
         }  
-        localOrdered[i].setType(type);
-        local.insert({localOrdered[i].getName(), localOrdered[i]});
-
-        isNonPrimitiveType(type, nonPrimitiveLocalExternal, unitLanguage, classNameParsed);
+        localsOrdered[i].setType(type);
+        isNonPrimitiveType(type, localsOrdered[i], unitLanguage, classNameParsed);
+        locals.insert({localsOrdered[i].getName(), localsOrdered[i]});
+        nonPrimitiveLocalExternal = localsOrdered[i].getNonPrimitiveExternal();
   
         free(unparsed);
     }
@@ -287,6 +290,11 @@ void methodModel::findParameterName(srcml_archive* archive, srcml_unit* unit) {
     int n = srcml_transform_get_unit_size(result);
 
     srcml_unit* resultUnit = nullptr;
+
+    // Needed for friend functions so initially they had no access to class name information
+    parametersOrdered.clear();
+    parameters.clear();
+
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         char * unparsed = nullptr;
@@ -307,7 +315,7 @@ void methodModel::findParameterName(srcml_archive* archive, srcml_unit* unit) {
         v.setName(parameterName);
         v.setPos(i);
         
-        parameterOrdered.push_back(v); 
+        parametersOrdered.push_back(v); 
         
         free(unparsed);
     }
@@ -327,7 +335,7 @@ void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
     int n = srcml_transform_get_unit_size(result);
 
     srcml_unit* resultUnit = nullptr;
-        
+
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         char * unparsed = nullptr;
@@ -335,11 +343,10 @@ void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string type = unparsed;
     
-        parameterOrdered[i].setType(type);
-        parameter.insert({parameterOrdered[i].getName(), parameterOrdered[i]});
-
-        isNonPrimitiveType(type, nonPrimitiveParamaterExternal, unitLanguage, classNameParsed);
-        
+        parametersOrdered[i].setType(type);
+        isNonPrimitiveType(type, parametersOrdered[i], unitLanguage, classNameParsed);
+        parameters.insert({parametersOrdered[i].getName(), parametersOrdered[i]});
+        nonPrimitiveParamaterExternal = parametersOrdered[i].getNonPrimitiveExternal();
         free(unparsed);
     }
 
@@ -365,10 +372,12 @@ void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit)
         std::string expr = unparsed;
         free(unparsed);
         
+        returnExpressions.push_back(expr);
+
         std::string newOperator = expr.substr(0,3);
         if (newOperator == "new") 
             newReturned = true; 
-        returnExpression.push_back(expr);
+        
     }
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -377,13 +386,15 @@ void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit)
 // Collects names of calls including function, method, and constructor calls
 //
 void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {   
-    std::vector<std::string> callType = {"function", "method"};
+    std::vector<std::string> callType = {"function", "method", "constructor"};
     for (const std::string& c : callType) {
         if (c == "function") 
             srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"function_call_name").c_str());
         else if (c == "method") 
             srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_call_name").c_str());
-        
+        else if (c == "constructor") 
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_call_name").c_str());
+
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
         int n = srcml_transform_get_unit_size(result);
@@ -400,9 +411,11 @@ void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {
             call.setName(unparsed);
             
             if (c == "function")  
-                functionCall.push_back(call);
+                functionCalls.push_back(call);
             else if (c == "method") 
-                methodCall.push_back(call); 
+                methodCalls.push_back(call); 
+            else if (c == "constructor") 
+                constructorCalls.push_back(call); 
 
             free(unparsed);                    
         }
@@ -414,12 +427,14 @@ void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {
 // Collects arguments of calls including function, method, and constructor calls
 //
 void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {   
-    std::vector<std::string> callType = {"function", "method"};
+    std::vector<std::string> callType = {"function", "method", "constructor"};
     for (const std::string& c : callType) {
         if (c == "function") 
-            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"function_call_type").c_str());
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"function_call_name").c_str());
         else if (c == "method") 
-            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_call_type").c_str());
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_call_name").c_str());
+        else if (c == "constructor") 
+            srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_call_name").c_str());
         
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
@@ -436,22 +451,20 @@ void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {
             std::string arguList = unparsed;
 
             if (c == "function")  {
-                functionCall[i].setArgumentList(arguList);
-                
+                functionCalls[i].setArgumentList(arguList);
                 removeBetweenComma(arguList, false);
-
-                std::string funcCallName = functionCall[i].getName();
-                removeNamespace(funcCallName, false, unitLanguage);
-
+                std::string funcCallName = functionCalls[i].getName();
+                removeNamespace(funcCallName, true, unitLanguage);
                 std::string funcCallParsed = funcCallName + arguList;
                 trimWhitespace(funcCallParsed);   
-
-                functionCall[i].setSignature(funcCallParsed);
+                functionCalls[i].setSignature(funcCallParsed);
             }
                 
             else if (c == "method") 
-                methodCall[i].setArgumentList(arguList); 
- 
+                methodCalls[i].setArgumentList(arguList); 
+
+            else if (c == "constructor") 
+                constructorCalls[i].setArgumentList(arguList); 
 
             free(unparsed);
 
@@ -528,7 +541,7 @@ void methodModel::isConstructorDestructor(srcml_archive* archive, srcml_unit* un
     srcml_transform_free(result);
 }
 
-// Check if method is a constructor or a destructor
+// Check if method is static
 //
 void methodModel::isStatic(srcml_archive* archive, srcml_unit* unit) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"static").c_str());
@@ -551,12 +564,12 @@ void methodModel::isStatic(srcml_archive* archive, srcml_unit* unit) {
 // No need to check for 'const' since this function is only called when there is a modification to the parameter
 //
 void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
-    std::string type = parameter[para].getType();
+    std::string type = parameters[para].getType();
     if (unitLanguage == "C++" || unitLanguage == "C#"){
         // C# could use * in unsafe contexts
         bool referencePointer = type.find("*") != std::string::npos;      
         if (unitLanguage == "C++"){
-            std::string parName = parameter[para].getName();
+            std::string parName = parameters[para].getName();
             bool reference = type.find("&") != std::string::npos;
     
             trimWhitespace(parName);
@@ -588,36 +601,33 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
         bool referenceArray = type.find("[]") != std::string::npos; 
         if (referenceArray || (nonPrimitive && propertyCheck))                
             parameterRefChanged = true;     
-    }    
-    if (parameterRefChanged)    
-        parameterRefChangedPos.insert(parameter[para].getPos());  
+    }     
 }
 
 
-// Determines if a return expression returns an attribute
+// Determines if a return expression returns a variable (parameter or an attribute)
+// Both simple returns (e.g., return variable;) and 
+//  complex returns (e.g., return variable + 5; or e.g., return 5 + 5;) are found
 //
-void methodModel::isAttributeOrParameterReturned(std::unordered_map<std::string, variable>& attributeOrParameter, bool isParamaterCheck) {
-    for (const std::string& expr : returnExpression) {
-        if (isAttributeOrParameterUsed(attributeOrParameter, expr, true, false, isParamaterCheck)){
-            // Simple return expression. 
-            // For example, 'return a;' where 'a' is an attribute
-            attributeReturned = true; 
+void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& variables, bool isParamaterCheck) {
+    for (const std::string& expr : returnExpressions) {
+        if (isParamaterCheck) {
+             if (!isVariableUsed(variables, expr, true, false, false, isParamaterCheck, false))
+                parameterNotReturned = true; // Complex return
         }
         else {
-            // Complex return expression. 
-            // For example, 'return a + value;' where 'a' is an attribute
-            if (isParamaterCheck)
-                parameterNotReturned = true;
+            if (isVariableUsed(variables, expr, true, false, false, false, false)) 
+                attributeReturned = true; // Simple return
             else
-                attributeNotReturned = true;    
+                attributeNotReturned = true; // Complex return
         }
     }
 }
 
-// Determines if an attribute is used in an expression
+// Determines if a variable (parameter or an attribute) is used in an expression
 //
-void methodModel::isAttributeOrParamaterUsedInExpression(srcml_archive* archive, srcml_unit* unit, 
-                                                         std::unordered_map<std::string, variable>& attributeOrParameter)  {
+void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit* unit, 
+                                                         std::unordered_map<std::string, variable>& variables, bool isParameterCheck)  {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"expression_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -629,9 +639,11 @@ void methodModel::isAttributeOrParamaterUsedInExpression(srcml_archive* archive,
         char *unparsed = nullptr;
         size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
+        if (isParameterCheck)
+            isVariableUsed(variables, unparsed, false, false, false, true, false);
+        else
+            isVariableUsed(variables, unparsed, false, false, false, false, false);
         
-        isAttributeOrParameterUsed(attributeOrParameter, unparsed, false, false, false);
-
         free(unparsed);
         
     }        
@@ -642,8 +654,8 @@ void methodModel::isAttributeOrParamaterUsedInExpression(srcml_archive* archive,
 // Finds if an attribute is changed or 
 //  if a parameter that is passed by reference is changed
 //
-void methodModel::isAttributeOrParameterModified(srcml_archive* archive, srcml_unit* unit, 
-                                       std::unordered_map<std::string, variable>& attributeOrParameter) { 
+void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit, 
+                                       std::unordered_map<std::string, variable>& variables, bool isParameterCheck) { 
     int changed = 0;
     // An attribute that is changed multiple times should only be considered as 1 change
     std::unordered_set<std::string> checked; 
@@ -660,22 +672,26 @@ void methodModel::isAttributeOrParameterModified(srcml_archive* archive, srcml_u
         char *unparsed = nullptr;
         size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        std::string possibleAttribute = unparsed;
+        std::string possibleVariable = unparsed;
         free(unparsed);  
 
-        if (isAttributeOrParameterUsed(attributeOrParameter, possibleAttribute, false, true, false) 
-            && checked.find(possibleAttribute) == checked.end()) {
+        if (isParameterCheck)
+            isVariableUsed(variables, possibleVariable, false, true, false, true, false);
+        else if (isVariableUsed(variables, possibleVariable, false, true, true, false, false) 
+            && checked.find(possibleVariable) == checked.end()) {
             changed++;  
-            checked.insert(possibleAttribute);
+            checked.insert(possibleVariable);
         }
     }
-    numOfAttributeModified = changed;
+
+    numOfAttributesModified = changed;
 
     srcml_clear_transforms(archive);
     srcml_transform_free(result);  
 }
 
 // Ignores calls from analysis
+// Uses of attributes within these calls are still considered
 // For example, if call to ignore is 'foo', 
 //  then some of the matched cases are foo<>() or bar::foo() or a->b.foo()
 void methodModel::isIgnorableCall(std::vector<calls>& calls) {
@@ -712,33 +728,32 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
     }
 }
 
-
-// Checks if there is a method call on an attribute
-// For example, a.foo() where a is an attribute, else it is removed
-// 
-// Also, check if a function call is made to a method in the class, else it is removed
-// For C#, Java --> calls in the form of foo(), base.foo(), super.foo(), this.base() are considered. 
+// Function calls: --> foo() bar::foo()
+//  Checks if a function call is made to a method in the class, else it is removed and considered as external function call
+//  Constructor calls are removed and considered as external function calls
 //
-// In C# or Java, a class name (only current class is considered) can be used with the dot operator to invoke static methods
-// For example, className.staticMethodName();
-// So these should be treated as function calls 
+//  So, static calls and free function calls are considered as external function calls
 //
-// this, base, and super can only be used to invoke non-static methods in the class (this) or parent class (base or super)
-// For example, this.methodName();
-// So these should be treated as function calls 
+// Method Calls: --> bar.foo() where 'bar' could be a variable or a classname or a namespace 
+//  Checks if there is a method call on an attribute
+//  For example, a.foo() where a is an attribute, else it is removed and considered as external method call
 //
-// Everything else is removed (stateless calls)
+//  In C# or Java, a class name can be used with the dot operator to invoke static methods
+//  For example, className.staticMethodName();
+//  These are removed and considered as external function calls
+//
+//  base, and super can only be used to invoke non-static methods in the current class (this) or parent class (base or super)
+//  For example, this.methodName();
+//  So these should be also treated as function calls and not method calls
 //
 void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& attribute, 
-                                   const std::unordered_map<std::string, methodModel>& classMethods, 
+                                   const std::unordered_set<std::string>& classMethods, 
                                    const std::unordered_set<std::string>& inheritedClassMethods) {    
     // Check on function calls (Should be done before checking on method calls)
-    for (auto it = functionCall.begin(); it != functionCall.end();) {
-        isAttributeUsedAsArgument(attribute, *it, true); // Checks if attribute is used as argument
-
-        if (!matchSubstring(it->getSignature(), classNameParsed) && classMethods.find(it->getSignature()) == classMethods.end() && 
-            inheritedClassMethods.find(it->getSignature()) == inheritedClassMethods.end()) {    
-            it = functionCall.erase(it);
+    for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
+        if (classMethods.find(it->getSignature()) == classMethods.end() && 
+            inheritedClassMethods.find(it->getSignature()) == inheritedClassMethods.end()) { 
+            it = functionCalls.erase(it);
             ++numOfExternalFunctionCalls;    
         }
         else ++it;
@@ -746,21 +761,29 @@ void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& a
     }  
 
     // Check on method calls 
-    for (auto it = methodCall.begin(); it != methodCall.end();) {
-        if (!isAttributeOrParameterUsed(attribute, it->getName(), false, false, false)) { // Could be a normal method call on an attribute
-            bool isFunctionCall = false;
+    for (auto it = methodCalls.begin(); it != methodCalls.end();) {
+        // Could be a normal method call on an attribute
+        bool variableUsed = false;
+        if (friendFunction)
+            variableUsed = isVariableUsed(attribute, it->getName(), false, false, false, true, false);
+        else
+            variableUsed = isVariableUsed(attribute, it->getName(), false, false, false, false, false);
+
+        if (!variableUsed) { // Checks if call is on attribute
             if (unitLanguage != "C++") {
-                isFunctionCall = matchSubstring(it->getName(), "base") || matchSubstring(it->getName(), "this") ||
-                                      matchSubstring(it->getName(), "super") || matchSubstring(it->getName(), classNameParsed);
-                if (isFunctionCall) {
-                    isAttributeUsedAsArgument(attribute, *it, false); // Checks if attribute is used as argument
-                    functionCall.push_back(*it); 
-                    it = methodCall.erase(it);
-                }
+                // These should be function calls
+                if (matchSubstring(it->getName(), "base") || matchSubstring(it->getName(), "this") ||
+                    matchSubstring(it->getName(), "super")) 
+                        functionCalls.push_back(*it); 
+                
+                else ++numOfExternalFunctionCalls;
+
+                it = methodCalls.erase(it);
+                
             }
-            if (!isFunctionCall) {
+            else {
                 ++numOfExternalMethodCalls;
-                it = methodCall.erase(it);  
+                it = methodCalls.erase(it);  
             }                  
         }
         else ++it;
@@ -769,44 +792,8 @@ void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& a
 
 
 void methodModel::isCallOnParameter() {   
-    for (auto& m : functionCall) 
-        isAttributeUsedAsArgument(parameter, m, false); 
-    for (auto& m : methodCall) {
-        isAttributeOrParameterUsed(parameter, m.getName(), false, false, false);
-        isAttributeUsedAsArgument(parameter, m, false); 
-    }
-        
-}
-
-
-// Checks if a call uses an attribute as argument.
-// For example, b(a) or b.d(a, c) where a and c are attributes
-//
-bool methodModel::isAttributeUsedAsArgument(std::unordered_map<std::string, variable>& attribute, calls& call, bool track) {
-    std::string argumentList = call.getArgumentList();
-    size_t open = argumentList.find("(");
-    size_t close = argumentList.rfind(")");
-    std::string callingObject = argumentList.substr(open + 1, close - (open + 1));
-
-    size_t start = 0, end = 0;
-    int pos = 0; // Used to track 
-    std::string possibleAttribute;
-
-    bool attributeUsedAsArg = false;
-
-    while (end != std::string::npos) {
-        end = callingObject.find(",", start);
-        possibleAttribute = callingObject.substr(start, end - start);
-        if (isAttributeOrParameterUsed(attribute, possibleAttribute, false, false, false)) {
-            if (track) call.appendAttributePosition(pos);
-            attributeUsedAsArg = true;
-        }
-
-        ++pos;      
-        start = end + 1; 
-    }
-
-    return attributeUsedAsArg;
+    for (auto& m : methodCalls)
+        isVariableUsed(parameters, m.getName(), false, false, false, true, false);   
 }
 
 // Checks if an expression uses an attribute, local, or a parameter --> call them variable
@@ -817,16 +804,14 @@ bool methodModel::isAttributeUsedAsArgument(std::unordered_map<std::string, vari
 // Where 'a' is a variable and Foo is class itself if the variable is an attribute
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 //
-bool methodModel::isAttributeOrParameterUsed(std::unordered_map<std::string, variable>& attribute, 
+bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& variables, 
                                        const std::string& expression, bool returnCheck, 
-                                       bool parameterModifiedCheck, bool isParamaterCheck) {
+                                       bool parameterModifiedCheck,  bool localModifiedCheck,
+                                       bool isParamaterCheck, bool isLocalCheck) {
     
     std::string expr = expression; 
     trimWhitespace(expr);
-
-    if (expr == "")
-        return false;                                 
-
+               
     // Remove brakcets. For example, a [3]
     size_t openingBracket = expr.find("["); 
     if (openingBracket != std::string::npos)
@@ -835,21 +820,16 @@ bool methodModel::isAttributeOrParameterUsed(std::unordered_map<std::string, var
     // Removing () and {} on the outside of expression
     // Might remove } and ) for calls but that doesn't affect the analysis
     if (unitLanguage == "C++") {
-        std::string thisStr = expr.substr(1, 5);
-        while ((expr[0] == '{' || expr[0] == '(') && thisStr != "(*this)") {
+        while (!expr.empty() && (expr.front() == '{' || expr.front() == '(')) { 
+            if (expr.size() > 6 && expr.substr(1, 5) == "(*this)")
+                break;
             expr.erase(0, 1);
-            thisStr = expr.substr(1, 5);
         }
-        while (expr[expr.size() - 1] == '}' || expr[expr.size() - 1] == ')')
-            expr.erase(expr.size() - 1, 1);
-        
+        while (!expr.empty() && (expr.back() == '}' || expr.back() == ')')) expr.pop_back();  
     }
     else {
-        while (expr[0] == '(') 
-            expr.erase(0, 1);   
-               
-        while (expr[expr.size() - 1] == ')')
-            expr.erase(expr.size() - 1, 1);
+        while (!expr.empty() && expr.front() == '(') expr.erase(0, 1);       
+        while (!expr.empty() && expr.back() == ')') expr.pop_back();       
     }
 
     // In C# the null-conditional operator is represented by ? and it allows you to check if an object 
@@ -863,10 +843,12 @@ bool methodModel::isAttributeOrParameterUsed(std::unordered_map<std::string, var
     }
 
     // Remove pointers. For example, *a
-    if (unitLanguage != "Java") {
-        while (expr[0] == '*') 
-            expr.erase(0, 1);   
-    }
+    if (unitLanguage != "Java") 
+        while (!expr.empty() && expr.front() == '*') expr.erase(0, 1);       
+    
+
+    if (expr.empty()) return false;  
+
 
     // ^ indicates that we should only match from the beginning
     // We only care about the first two variables. For example, in a.b.c() the a.b is sufficient to 
@@ -897,45 +879,60 @@ bool methodModel::isAttributeOrParameterUsed(std::unordered_map<std::string, var
     isMatched = std::regex_search(expr, match, regexPattern);
 
     int count = isMatched ? 2 : 1;
+    bool overShadow = true;
     for (int i = 0; i < count; i++) {
         if (isMatched && i == 0) {    
             if (match[1] == "") {    
-                expr = match[2]; // Case of base, super, and this  
+                expr = match[2]; // Case of base, super, and this 
+                // Needed in cases such as this.data = data where this.data is an attribute and data is a local or a parameter 
+                overShadow = false; 
             }   
             else 
-                expr = match[1]; 
+                expr = match[1]; // Perhaps variable itself (e.g., a or a.foo())
         } 
         else if (isMatched && match[1] != "") // Case of class or parent class
             expr = match[2];
 
-        // Might be a local or a parameter (Checked first in case of overshadowing)
-        if (local.find(expr) != local.end()) {
-            // Needed for factory, so only simple return expressions that return a local are needed
-            if (returnCheck) { 
-                if (variablesCreatedWithNew.find(expr) != variablesCreatedWithNew.end())
-                    variableCreatedWithNewReturned = true;
+        if (overShadow) {
+            // Checked first in case of overshadowing if variables = attributes
+            // Case of variables = locals
+            if (locals.find(expr) != locals.end()) {
+                if (localModifiedCheck && locals.at(expr).getNonPrimitive()) 
+                    nonPrimitiveLocalOrParameterChanged = true;
+                if (returnCheck) { 
+                    if (variablesCreatedWithNew.find(expr) != variablesCreatedWithNew.end())
+                        variableCreatedWithNewReturned = true;
+                }
+                if (isLocalCheck)
+                    return true;
+                else
+                    return false;
             }
-            return false;
+
+            // Case of variables = parameters
+            else if (parameters.find(expr) != parameters.end()) {
+                if (!(friendFunction && parameters.at(expr).getNonPrimitiveInternal()) || isParamaterCheck){
+                    parameterUsed = true;
+                    if (parameterModifiedCheck) {
+                        if (parameters.at(expr).getNonPrimitive()) nonPrimitiveLocalOrParameterChanged = true;
+                        isParameterRefChanged(expr, isMatched);
+                    }
+                    if (returnCheck) {        
+                        if (variablesCreatedWithNew.find(expr) != variablesCreatedWithNew.end())
+                            variableCreatedWithNewReturned = true;
+                    }
+                    if (isParamaterCheck)
+                        return true;
+                    else
+                        return false;
+                }
+            }
         }
 
-        else if (parameter.find(expr) != parameter.end()) {
-            parameterUsed = true;
-            if (parameterModifiedCheck) isParameterRefChanged(expr, isMatched);
-            if (returnCheck) {        
-                if (variablesCreatedWithNew.find(expr) != variablesCreatedWithNew.end())
-                    variableCreatedWithNewReturned = true;
-            }
-            if (isParamaterCheck)
-                return true;
-            else
-                return false;
-        }
-
-        // Might be an attribute
-        else if (attribute.find(expr) != attribute.end()) {
+        // Case of variables = attributes
+        if (variables.find(expr) != variables.end()) {
             attributeUsed = true;
-            std::string type = attribute.at(expr).getType(); 
-            isNonPrimitiveType(type, nonPrimitiveAttributeExternal, unitLanguage, classNameParsed);
+            nonPrimitiveAttributeExternal = variables.at(expr).getNonPrimitiveExternal(); 
             if (returnCheck) {
                 if (variablesCreatedWithNew.find(expr) != variablesCreatedWithNew.end())
                     variableCreatedWithNewReturned = true;
@@ -943,7 +940,7 @@ bool methodModel::isAttributeOrParameterUsed(std::unordered_map<std::string, var
             return true;                                  
         }
     }
-    if(isParamaterCheck && !returnCheck)
+    if(parameterModifiedCheck)
         globalOrStaticChanged = true;
 
     return false;  
@@ -963,19 +960,4 @@ std::string methodModel::getStereotype() const {
         Rtrim(result);
 
     return result;
-}
-
-void methodModel::getDataFromCall(methodModel& methodCalled, calls& methodCallExpression) {
-    numOfAttributeModifiedByCalls += methodCalled.getNumOfAttributeModified();
-
-    std::set<int> intersection;
-    std::set_intersection(methodCalled.parameterRefChangedPos.begin(), methodCalled.parameterRefChangedPos.end(), 
-                          methodCallExpression.getAttributePosition().begin(), methodCallExpression.getAttributePosition().end(),
-                          std::inserter(intersection, intersection.begin()));
-
-    accessorMethodCallUsed = accessorMethodCallUsed || (methodCalled.IsAttributeUsed() && methodCalled.returnExpression.size() > 0);
-
-    numOfAttributeModifiedByCalls += intersection.size();
-
-
 }

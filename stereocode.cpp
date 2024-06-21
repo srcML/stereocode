@@ -40,18 +40,18 @@ int main (int argc, char const *argv[]) {
     CLI::App app{"Stereocode: Determines method and class stereotypes\n"
                  "Supports C++, C#, and Java\n" };
     
-    app.add_flag  ("-v,--verbose",            IS_VERBOSE,                  "Stereotyping conversion and status information");
+    app.add_flag  ("-v,--verbose",            IS_VERBOSE,                  "Enable verbose output");
     app.add_option("input-archive",           inputFile,                   "File name of a srcML input archive")->required();
     app.add_option("-o,--output-file",        outputFile,                  "File name of output - srcML archive with stereotypes");
     app.add_option("-p,--primitive-file",     primitivesFile,              "File name of user supplied primitive types (one per line)");
     app.add_option("-g,--ignore-call-file",   ignoredCallsFile,            "File name of user supplied calls to ignore (one per line)");
     app.add_option("-t,--type-token-file",    typeTokensFile,              "File name of user supplied data type tokens to remove (one per line)");
-    app.add_flag  ("-i,--enable-interface",   INTERFACE_SUPPORT,           "Identify stereotypes for interfaces (C# and Java)");
-    app.add_flag  ("-s,--enable-struct",      STRUCT_SUPPORT,              "Identify stereotypes for structs (C# and Java)");
+    app.add_flag  ("-i,--interface",          INTERFACE_SUPPORT,           "Identify stereotypes for interfaces (C# and Java)");
+    app.add_flag  ("-s,--struct",             STRUCT_SUPPORT,              "Identify stereotypes for structs (C# and Java)");
     app.add_flag  ("-e,--input-overwrite",    overWriteInput,              "Overwrite input with stereotype information");
     app.add_flag  ("-x,--txt-report",         outputTxtReport,             "Output optional TXT report file containing stereotype information");
     app.add_flag  ("-z,--csv-report",         outputCsvReport,             "Output optional CSV report file containing stereotype information");
-    app.add_option("-c,--comment",            reDocComment,                "Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */)");
+    app.add_flag  ("-c,--comment",            reDocComment,                "Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */)");
     app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD, "Method threshold for the large-class stereotype (default = 21)");
 
     CLI11_PARSE(app, argc, argv);

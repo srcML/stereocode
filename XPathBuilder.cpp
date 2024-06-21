@@ -102,17 +102,23 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["return_expression"] = xpath; 
 
     // Constructor calls are a type of function calls 
-    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.')]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["function_call_name"] = xpath;  
 
-    xpath = "//src:call[src:name/src:operator='->' or src:name/src:operator='.']/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["method_call_name"] = xpath;  
 
-    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.')]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpathTable[language]["constructor_call_name"] = xpath;  
+
+    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathTable[language]["function_call_type"] = xpath;  
 
-    xpath = "//src:call[src:name/src:operator='->' or src:name/src:operator='.']/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathTable[language]["method_call_type"] = xpath; 
+
+    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpathTable[language]["constructor_call_type"] = xpath; 
 
     xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
@@ -124,10 +130,10 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
-    xpath = "//src:expr[not(ancestor::src:call)]/src:name";
+    xpath = "//src:expr/src:name";
     xpathTable[language]["expression_name"] = xpath;    
 
-    xpath = "//src:expr[not(ancestor::src:call)]/src:name[";
+    xpath = "//src:expr/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
@@ -237,20 +243,26 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["parameter_type"] = xpath; 
 
     xpath = "//src:return[count(ancestor::src:function) = 1]/src:expr";
+
     xpathTable[language]["return_expression"] = xpath; 
 
-    // Constructor calls are a type of function calls 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.')]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["function_call_name"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and src:name/src:operator='->' or src:name/src:operator='.']/src:name[following-sibling::*[1][self::src:argument_list]]";
-    xpathTable[language]["method_call_name"] = xpath;
+    xpath = "//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpathTable[language]["method_call_name"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.')]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpathTable[language]["constructor_call_name"] = xpath;  
+
+    xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathTable[language]["function_call_type"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and src:name/src:operator='->' or src:name/src:operator='.']/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathTable[language]["method_call_type"] = xpath; 
+
+    xpath = "//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpathTable[language]["constructor_call_type"] = xpath;
 
     xpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
@@ -259,10 +271,10 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
-    xpath = "//src:expr[count(ancestor::src:function) = 1 and not(ancestor::src:call)]/src:name";
+    xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name";
     xpathTable[language]["expression_name"] = xpath;    
 
-    xpath = "//src:expr[count(ancestor::src:function) = 1 and not(ancestor::src:call)]/src:name[";
+    xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
@@ -352,18 +364,23 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:return/src:expr";
     xpathTable[language]["return_expression"] = xpath; 
 
-    // Constructor calls are a type of function calls 
-    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.')]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["function_call_name"] = xpath;  
 
-    xpath = "//src:call[src:name/src:operator='->' or src:name/src:operator='.']/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["method_call_name"] = xpath;  
 
-    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.')]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpathTable[language]["constructor_call_name"] = xpath;  
+
+    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathTable[language]["function_call_type"] = xpath;  
 
-    xpath = "//src:call[src:name/src:operator='->' or src:name/src:operator='.']/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathTable[language]["method_call_type"] = xpath; 
+
+    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpathTable[language]["constructor_call_type"] = xpath;
 
     xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpath += " | //src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
@@ -372,10 +389,10 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
-    xpath = "//src:expr[not(ancestor::src:call)]/src:name";
+    xpath = "//src:expr/src:name";
     xpathTable[language]["expression_name"] = xpath;    
 
-    xpath = "//src:expr[not(ancestor::src:call)]/src:name[";
+    xpath = "//src:expr/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";

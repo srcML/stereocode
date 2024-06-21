@@ -54,11 +54,12 @@ void ignorableCalls::outputCalls() {
 //
 void ignorableCalls::createCallList() {
     for (const auto& l : LANGUAGE) {
+        // cout, cin, streams, casts are all ignored for C++
         if (l == "C++") {
             ignoredCalls.insert({l, {
-            "assert",
-            "exit",
-            "abort"
+                "assert",
+                "exit",
+                "abort"
             }});
         }
         else if (l == "C#") {  

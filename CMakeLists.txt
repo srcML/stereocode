@@ -4,6 +4,9 @@
 # Supports any version of CMake >= specified
 cmake_minimum_required(VERSION 3.17)
 
+# To allow special characters in test names
+cmake_policy(SET CMP0110 NEW)
+
 # Project information
 project(Stereocode LANGUAGES CXX)
 

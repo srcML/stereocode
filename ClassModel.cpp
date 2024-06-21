@@ -26,7 +26,8 @@ classModel::classModel(srcml_archive* archive, srcml_unit* unit, std::vector<met
     if (unitLanguage == "C++") findStructureType(archive, unit);
     findParentClassName(archive, unit); // Requires structure type for C++
     
-    std::vector<variable> attributeOrdered;             
+    std::vector<variable> attributeOrdered;
+
     findAttributeName(archive, unit, attributeOrdered);
     findAttributeType(archive, unit, attributeOrdered);
     
@@ -268,10 +269,10 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std
         }
 
         attributeOrdered[i].setType(type);  
-        attribute.insert({attributeOrdered[i].getName(), attributeOrdered[i]});
+        attributes.insert({attributeOrdered[i].getName(), attributeOrdered[i]});
         bool nonPrimitiveAttributeExternal = false;
 
-        isNonPrimitiveType(type, nonPrimitiveAttributeExternal, unitLanguage, name[3]);
+        isNonPrimitiveType(type, attributeOrdered[i], unitLanguage, name[3]);
 
         if (nonPrimitiveAttributeExternal)
             attributeOrdered[i].setNonPrimitiveExternal(true);
@@ -348,10 +349,10 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
         }
 
         nonPrivateAttributeOrdered[i].setType(type);
-        nonPrivateAndInheritedAttribute.insert({nonPrivateAttributeOrdered[i].getName(), nonPrivateAttributeOrdered[i]});
+        nonPrivateAndInheritedAttributes.insert({nonPrivateAttributeOrdered[i].getName(), nonPrivateAttributeOrdered[i]});
 
         bool nonPrimitiveAttributeExternal = false;
-        isNonPrimitiveType(type, nonPrimitiveAttributeExternal, unitLanguage, name[3]);
+        isNonPrimitiveType(type, nonPrivateAttributeOrdered[i], unitLanguage, name[3]);
 
         if (nonPrimitiveAttributeExternal)
             nonPrivateAttributeOrdered[i].setNonPrimitiveExternal(true);
@@ -387,10 +388,9 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vecto
         size_t size = 0;
         srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
         srcml_archive_write_unit(methodArchive, resultUnit);
-
         srcml_archive_close(methodArchive);
         srcml_archive_free(methodArchive);
-     
+
         methodArchive = srcml_archive_create();
         srcml_archive_read_open_memory(methodArchive, unparsed, size);
         srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
@@ -401,7 +401,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vecto
         if (m.IsStatic())
             freeFunctions.push_back(m);
         else
-            methods.insert({m.getNameSignature(), m}); 
+            methods.push_back(m); 
         
         free(unparsed);       
         srcml_unit_free(methodUnit);
@@ -431,10 +431,9 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
         size_t size = 0;
         srcml_archive_write_open_memory(propertyArchive, &unparsed, &size);
         srcml_archive_write_unit(propertyArchive, resultUnit);
-
         srcml_archive_close(propertyArchive);
         srcml_archive_free(propertyArchive);
-     
+
         propertyArchive = srcml_archive_create();
         srcml_archive_read_open_memory(propertyArchive, unparsed, size);
         srcml_unit* propertyUnit = srcml_archive_read_unit(propertyArchive);
@@ -480,7 +479,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
                 if (m.IsStatic())
                     freeFunctions.push_back(m);
                 else
-                    methods.insert({m.getNameSignature(), m}); 
+                    methods.push_back(m); 
 
                 free(methodUnparsed);       
                 srcml_unit_free(methodUnit);
@@ -527,11 +526,11 @@ void classModel::computeClassStereotype() {
 
     int nonCollaborators = 0;
     for (const auto& m : methods) {      
-        if (!m.second.IsConstructorDestructorUsed()) {
-            for (const std::string& s : m.second.getStereotypeList()) 
+        if (!m.IsConstructorDestructorUsed()) {
+            for (const std::string& s : m.getStereotypeList()) 
                 methodStereotypes[s]++;
         
-            std::string methodStereotype = m.second.getStereotype();
+            std::string methodStereotype = m.getStereotype();
             if (methodStereotype.find("collaborator") == std::string::npos &&
                 methodStereotype.find("controller") == std::string::npos && 
                 methodStereotype.find("wrapper") == std::string::npos)
@@ -557,7 +556,7 @@ void classModel::computeClassStereotype() {
     int degenerates = methodStereotypes["incidental"] + methodStereotypes["stateless"] + methodStereotypes["empty"];
 
     // Constructors and destructors are not considered in the computation of class stereotypes
-    int allMethods = methods.size() - numConstructorDestructor;
+    int allMethods = methods.size() - constructorDestructorCount;
 
     // Entity
     if (((accessors - getters) != 0) && ((mutators - setters)  != 0) ) {
@@ -579,7 +578,7 @@ void classModel::computeClassStereotype() {
 
     // Commander
     if ((mutators > 2 * accessors) && (mutators > 2 * (controllers + factory)))
-        stereotype.push_back("command");
+        stereotype.push_back("commander");
 
     // Boundary
     if ((collaborators > nonCollaborators) && (factory < 0.5 * allMethods) && (controllers < 0.33 * allMethods))
@@ -591,11 +590,11 @@ void classModel::computeClassStereotype() {
     
     // Controller
     if ((controllers + factory > 0.67 * allMethods) && ((accessors != 0) || (mutators != 0)))
-        stereotype.push_back("control");
+        stereotype.push_back("controller");
 
     // Pure Controller
     if ((controllers + factory != 0) && ((accessors + mutators + collaborator) == 0) && (controllers != 0)) 
-        stereotype.push_back("pure-control");
+        stereotype.push_back("pure-controller");
 
     // Large Class
     {
@@ -643,6 +642,7 @@ void classModel::computeClassStereotype() {
 //Compute method stereotypes
 //
 void classModel::computeMethodStereotype() {
+    // The keyword "this" by itself is ignored from analysis
     constructorDestructor();
     getter();
     predicate();
@@ -656,9 +656,9 @@ void classModel::computeMethodStereotype() {
     stateless();
     empty();
     for (auto& m : methods) { 
-        if (m.second.getStereotypeList().size() == 0) 
-             m.second.setStereotype("unclassified");
-        XPATH_LIST[m.second.getUnitNumber()].insert({m.second.getXpath(), m.second.getStereotype()});    
+        if (m.getStereotypeList().size() == 0) 
+             m.setStereotype("unclassified");
+        XPATH_LIST[m.getUnitNumber()].insert({m.getXpath(), m.getStereotype()});    
     }
 }
 
@@ -666,17 +666,17 @@ void classModel::computeMethodStereotype() {
 //
 void classModel::constructorDestructor() {
     for (auto& m : methods) {
-        if (m.second.IsConstructorDestructorUsed()) {  
-            numConstructorDestructor++;
-            std::string parameterList = m.second.getParameterList();
-            std::string srcML = m.second.getSrcML();
+        if (m.IsConstructorDestructorUsed()) {  
+            constructorDestructorCount++;
+            std::string parameterList = m.getParametersList();
+            std::string srcML = m.getSrcML();
 
             if (srcML.find("<destructor>") != std::string::npos)
-                m.second.setStereotype("destructor"); 
+                m.setStereotype("destructor"); 
             else if (parameterList.find(name[3]) != std::string::npos) 
-                m.second.setStereotype("copy-constructor");
+                m.setStereotype("copy-constructor");
             else 
-                m.second.setStereotype("constructor");
+                m.setStereotype("constructor");
         }
     }
 }
@@ -687,9 +687,9 @@ void classModel::constructorDestructor() {
 //
 void classModel::getter() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            if (m.second.IsAttributeReturned()) {
-                m.second.setStereotype("get");
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (m.IsAttributeReturned()) {
+                m.setStereotype("get");
             }
         }
     }
@@ -699,13 +699,16 @@ void classModel::getter() {
 // 1] Return type is Boolean
 // 2] Contains at least one complex return expression
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other accessor methods in class
+//     one function call to other methods in class (constructor calls are ignored)
+//
+// Constructor calls are not considered
+// Ignored calls are not considered
 // 
 void classModel::predicate() { 
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
+        if (!m.IsConstructorDestructorUsed()) {  
             bool returnType = false;
-            std::string returnTypeParsed = m.second.getReturnTypeParsed();
+            std::string returnTypeParsed = m.getReturnTypeParsed();
 
             if (unitLanguage == "C++")
                 returnType = (returnTypeParsed == "bool");
@@ -715,12 +718,12 @@ void classModel::predicate() {
             else if (unitLanguage == "Java")
                 returnType = (returnTypeParsed == "boolean");
 
-            bool hasComplexReturnExpr = m.second.IsAttributeNotReturned();
-            bool isAttributeUsed = m.second.IsAttributeUsed();
-            bool isAccessorMethodCallUsed = m.second.IsAccessorMethodCallUsed();
+            bool hasComplexReturnExpr = m.IsAttributeNotReturned();
+            bool isAttributeUsed = m.IsAttributeUsed();
+            bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
-            if (returnType && hasComplexReturnExpr && (isAttributeUsed || isAccessorMethodCallUsed))
-                m.second.setStereotype("predicate"); 
+            if (returnType && hasComplexReturnExpr && (isAttributeUsed || callsToOtherClassMethods))
+                m.setStereotype("predicate"); 
         }
     }
 }
@@ -729,28 +732,40 @@ void classModel::predicate() {
 // 1] Return type is not void or Boolean
 // 2] Contains at least one complex return statement (e.g., return a+5;)
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other accessor methods in class
-//    
+//     one function call to other methods in class (constructor calls are ignored)
+//
+// Constructor calls are not considered
+// Ignored calls are not considered
+//  
 void classModel::property() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
+        if (!m.IsConstructorDestructorUsed()) {  
             bool returnType = false;
-            std::string returnTypeParsed = m.second.getReturnTypeParsed();
+            std::string returnTypeParsed = m.getReturnTypeParsed();
+
+            bool isVoidPointer = false;
+            if (unitLanguage == "C++" || unitLanguage == "C#") {
+                std::string returnType = m.getReturnType();
+                trimWhitespace(returnType);
+                
+                if (returnType.find("void*") != std::string::npos)
+                    isVoidPointer = true;
+            }
 
             if (unitLanguage == "C++")
-                returnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "");
+                returnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "") || isVoidPointer;
             else if (unitLanguage == "C#")
                 returnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
-                            returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "");
+                            returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "") || isVoidPointer;
             else if (unitLanguage == "Java")
                 returnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
                             returnTypeParsed != "Void" && returnTypeParsed != "");
 
-            bool isAttributeUsed = m.second.IsAttributeUsed();
-            bool isAccessorMethodCallUsed = m.second.IsAccessorMethodCallUsed();
+            bool isAttributeUsed = m.IsAttributeUsed();
+            bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
-            if (returnType && m.second.IsAttributeNotReturned() && (isAttributeUsed || isAccessorMethodCallUsed)) {
-                m.second.setStereotype("property");
+            if (returnType && m.IsAttributeNotReturned() && (isAttributeUsed || callsToOtherClassMethods)) {
+                m.setStereotype("property");
             }
         }
     }
@@ -760,17 +775,31 @@ void classModel::property() {
 // 1] Return type is void 
 // 2] Contains at least one parameter that is passed by non-const reference and is assigned a value
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other accessor methods in class
-// 
+//     one function call to other methods in class (constructor calls are ignored)
+//
+// Constructor calls are not considered
+// Ignored calls are not considered
+//
 void classModel::voidAccessor() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            bool isAttributeUsed = m.second.IsAttributeUsed();
-            bool isAccessorMethodCallUsed = m.second.IsAccessorMethodCallUsed();
-            bool returnVoid = m.second.getReturnTypeParsed() == "void";
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool isAttributeUsed = m.IsAttributeUsed();
+            bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
-            if (m.second.IsParameterRefChanged() && returnVoid && (isAttributeUsed || isAccessorMethodCallUsed)) {
-                m.second.setStereotype("void-accessor");       
+            bool isVoidPointer = false;
+            if (unitLanguage == "C++" || unitLanguage == "C#") {
+                std::string returnType = m.getReturnType();
+                trimWhitespace(returnType);
+                
+                if (returnType.find("void*") != std::string::npos)
+                    isVoidPointer = true;
+            }
+
+            bool returnVoid = m.getReturnTypeParsed() == "void";
+
+            if (m.IsParameterRefChanged() && returnVoid && !isVoidPointer && 
+               (isAttributeUsed || callsToOtherClassMethods)) {
+                m.setStereotype("void-accessor");       
             } 
         }
     }
@@ -778,17 +807,19 @@ void classModel::voidAccessor() {
 
 // Stereotype set:
 // 1] Only one data member is changed
-// 2] Number of calls on data members at most 1
+// 2] Number of calls on data members or to methods in class is at most 1 (constructor calls are ignored)
+//
+// Constructor calls are not considered
+// Ignored calls are not considered
 //
 void classModel::setter() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            bool oneAttributeModified = (m.second.getNumOfAttributeModified() + m.second.getNumOfAttributeModifiedByCalls()) == 1;
-            bool noCallsOnDataMembers = m.second.getMethodCall().size() == 0;
-            std::string x = m.second.getName();
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool oneAttributeModified = m.getNumOfAttributesModified() == 1;
+            int callsToClassMethodsOrOnAttributes = m.getFunctionCalls().size() + m.getMethodCalls().size();
             
-            if (oneAttributeModified && noCallsOnDataMembers) 
-                m.second.setStereotype("set"); 
+            if (oneAttributeModified && (callsToClassMethodsOrOnAttributes <= 1)) 
+                m.setStereotype("set"); 
         }   
     }
 }
@@ -797,32 +828,51 @@ void classModel::setter() {
 //     Method has a void return type
 //     Cases:
 //          Case 1: More than one data member is modifed
-//          Case 2: One or zero data member modified and 
-//                  there is at least one call on a data member
+//          Case 2: one data member is modifed and:
+//                  -	There is at least two calls on data members or
+//                      function calls to other methods in class
+//          Case 3: zero data members modifed and:
+//                  -	there is at least one call on a data member
+//                      or one function call to other methods in clasa
 //     Method is not const (C++ only)
 //     Case 1 applies when attributes are mutable and method is const (C++ only)
+//
+//    Constructor calls are not considered
+//    Ignored calls are not considered
 //
 // stereotype non-void-command (C++ only):        
 //    Method return type is not void
 //
 void classModel::command() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            std::string returnTypeParsed = m.second.getReturnTypeParsed();
-            int attributeModified = m.second.getNumOfAttributeModified() + m.second.getNumOfAttributeModifiedByCalls();
+        if (!m.IsConstructorDestructorUsed()) {  
+            std::string returnTypeParsed = m.getReturnTypeParsed();
+            int attributeModified = m.getNumOfAttributesModified();
+            int callsToMethodsInClass = m.getFunctionCalls().size() ; 
+            int callsOnDataMembers = m.getMethodCalls().size();
 
-            bool case1 = attributeModified > 1;
-            bool case2 = (attributeModified == 1 || attributeModified == 0) && m.second.getMethodCall().size() > 0;
-            
-            bool mutableCase = m.second.IsConstMethod() && case1;
-            bool returnCheck = returnTypeParsed != "void" && returnTypeParsed != "Void";
+            bool case1 = attributeModified == 0 && (callsToMethodsInClass > 0 || callsOnDataMembers > 0);
+            bool case2 = attributeModified == 1 && ((callsOnDataMembers + callsToMethodsInClass) > 1);
+            bool case3 = attributeModified > 1;
+            bool mutableCase = m.IsConstMethod() && case3;
+ 
+            bool isVoidPointer = false;
+            if (unitLanguage == "C++" || unitLanguage == "C#") {
+                std::string returnType = m.getReturnType();
+                trimWhitespace(returnType);
+                
+                if (returnType.find("void*") != std::string::npos)
+                    isVoidPointer = true;
+            }
 
-            if (case1 || case2) {
-                if (!m.second.IsConstMethod() || mutableCase){ // Handles case of mutable attributes (C++ only)
+            bool returnCheck = returnTypeParsed != "void" && returnTypeParsed != "Void" && !isVoidPointer;
+
+            if (case1 || case2 || case3) {
+                if (!m.IsConstMethod() || mutableCase){ // Handles case of mutable attributes (C++ only)
                     if (returnCheck)
-                        m.second.setStereotype("non-void-command");  
+                        m.setStereotype("non-void-command");  
                     else
-                        m.second.setStereotype("command");
+                        m.setStereotype("command");
                 }
             } 
         }
@@ -832,21 +882,20 @@ void classModel::command() {
 // Stereotype factory
 // 1] Factories must include a non-primitive type in their return type
 //      and their return expression must be a local variable, parameter, or attribute, that 
-//      call a constructor call or
-//      has a return expression with a constructor call (e.g., new)
+//      call a constructor call or has a return expression with a constructor call (e.g., new)
+//
+// Variables created with ignored calls are considered
+// Returns that have "new" ignored calls are also considered
 //
 void classModel::factory() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            bool     returnsObj                           = m.second.IsNonPrimitiveReturnType();
-            bool     returnsNewCall                       = m.second.IsNewCallReturned();              
-            bool     variableCreatedWithNewReturned       = m.second.IsVariableCreatedWithNewReturned(); 
+        if (!m.IsConstructorDestructorUsed()) {  
+            bool     returnsObj                           = m.IsNonPrimitiveReturnType();
+            bool     returnsNewCall                       = m.IsNewCallReturned();              
+            bool     variableCreatedWithNewReturned       = m.IsVariableCreatedWithNewReturned(); 
           
-            bool case1 = returnsObj && returnsNewCall;
-            bool case2 = returnsObj && variableCreatedWithNewReturned;
-
-            if (case1 || case2)
-                m.second.setStereotype("factory");   
+            if (returnsObj && (returnsNewCall || variableCreatedWithNewReturned))
+                m.setStereotype("factory");   
         }        
     }
 }
@@ -856,30 +905,33 @@ void classModel::factory() {
 // 1] No data members are modified
 // 2] No calls to methods in class
 // 3] No calls on data members
-// 4] Has at least one free function call
+// 4] Has at least one free function call 
+// Constructor calls are not considered
 //
 // Stereotype controller:
 // 1] No data members are modified
-// 2] No calls to mutating methods in class (Only accessor methods allowed)
+// 2] No calls to methods in class
 // 3] No calls on data members
-// 3] Has at least one call to other class methods
+// 3] Has at least one call to other class methods or mutates a parameter or a local that is non-primitive
 //
 // Stereotype collaborator:
 // 1] It must use at least 1 non-primitive type (not of this class)
 // 2] Type could be a parameter, local variable, return type, or an attribute 
 //
+// Ignored calls are not considered
+//
 void classModel::wrapperControllerCollaborator() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            if (!m.second.IsEmpty()){
-                bool nonPrimitiveAttributeExternal = m.second.IsNonPrimitiveAttributeExternal();
-                bool nonPrimitiveLocalExternal = m.second.IsNonPrimitiveLocalExternal();
-                bool nonPrimitiveParamaterExternal = m.second.IsNonPrimitiveParamaterExternal();
-                bool nonPrimitiveReturnExternal = m.second.IsNonPrimitiveReturnTypeExternal();
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (!m.IsEmpty()){
+                bool nonPrimitiveAttributeExternal = m.IsNonPrimitiveAttributeExternal();
+                bool nonPrimitiveLocalExternal = m.IsNonPrimitiveLocalExternal();
+                bool nonPrimitiveParamaterExternal = m.IsNonPrimitiveParamaterExternal();
+                bool nonPrimitiveReturnExternal = m.IsNonPrimitiveReturnTypeExternal();
             
                 bool isVoidPointer = false;
-                if (unitLanguage == "C++" || unitLanguage == "Java") {
-                    std::string returnType = m.second.getReturnType();
+                if (unitLanguage == "C++" || unitLanguage == "C#") {
+                    std::string returnType = m.getReturnType();
                     trimWhitespace(returnType);
                     
                     if (returnType.find("void*") != std::string::npos )
@@ -888,20 +940,21 @@ void classModel::wrapperControllerCollaborator() {
 
                 bool returnCheck = nonPrimitiveReturnExternal || isVoidPointer;
 
-                bool noAttributeModified = m.second.getNumOfAttributeModified() == 0 && m.second.getNumOfAttributeModifiedByCalls() == 0;
-                bool noCallsToMethodsInClass = m.second.getFunctionCall().size() == 0; 
-                bool noCallsOnDataMembers = m.second.getMethodCall().size() == 0;
-                bool hasFreeFunctionCalls = m.second.getNumOfExternalFunctionCalls() > 0;
-                bool hasCallsToOtherClassMethods = m.second.getNumOfExternalMethodCalls() > 0;
+                bool noAttributeModified = m.getNumOfAttributesModified() == 0;
+                bool noCallsToMethodsInClass = m.getFunctionCalls().size() == 0; 
+                bool noCallsOnDataMembers = m.getMethodCalls().size() == 0;
+                bool hasFreeFunctionCalls = m.getNumOfExternalFunctionCalls() > 0;
+                bool hasCallsToOtherClassMethods = m.getNumOfExternalMethodCalls() > 0;
         
                 if (noAttributeModified && noCallsToMethodsInClass && noCallsOnDataMembers && !hasCallsToOtherClassMethods && hasFreeFunctionCalls)
-                    m.second.setStereotype("wrapper");
+                    m.setStereotype("wrapper");
 
-                else if (noAttributeModified && noCallsOnDataMembers && hasCallsToOtherClassMethods)
-                    m.second.setStereotype("controller");   
+                else if (noAttributeModified && noCallsToMethodsInClass && noCallsOnDataMembers &&
+                        (hasCallsToOtherClassMethods || m.IsNonPrimitiveLocalOrParameterChanged()))
+                    m.setStereotype("controller");   
 
                 else if (nonPrimitiveAttributeExternal || nonPrimitiveLocalExternal || nonPrimitiveParamaterExternal || returnCheck )
-                    m.second.setStereotype("collaborator");   
+                    m.setStereotype("collaborator");   
             }
         }
     }
@@ -910,38 +963,43 @@ void classModel::wrapperControllerCollaborator() {
 // Stereotype incidental 
 // 1] Method contains at least one non-comment statement (i.e., method is not empty)
 // 2] No data members are used or modified 
-// 3] No calls (except ignored calls)
-//
+// 3] No calls of any kind
+// Ignored calls are allowed
+// 
 void classModel::incidental() {
     for (auto& m : methods ) {
-        if (!m.second.IsConstructorDestructorUsed() && !m.second.IsEmpty()) {  
-            bool noCalls = m.second.getFunctionCall().size() == 0 && m.second.getMethodCall().size() == 0 && 
-                           m.second.getNumOfExternalMethodCalls() == 0 && m.second.getNumOfExternalFunctionCalls() == 0;
+        if (!m.IsConstructorDestructorUsed() && !m.IsEmpty()) {  
+            bool noCalls = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0 && m.getConstructorCalls().size() == 0 &&
+                           m.getNumOfExternalMethodCalls() == 0 && m.getNumOfExternalFunctionCalls() == 0;
 
-            if (!m.second.IsAttributeUsed() && noCalls)
-                m.second.setStereotype("incidental");         
+            if (!m.IsAttributeUsed() && noCalls)
+                m.setStereotype("incidental");         
             
         }
     }
 }
 
-// Stereotype stateless (Previously incidental or pure stateless)
+// Stereotype stateless
 // 1]	Method contains at least one non-comment statement (i.e., method is not empty)
 // 2]	No data members are used or modified
 // 3]	No calls to methods in class 
 // 4]   No calls on data members
-// 5]   Has at least one call to other class methods or to a free function
+// 5]   Has at least one call to other class methods (including constructor calls) or to a free function 
+// Ignored calls are not considered
 //
 void classModel::stateless() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            if (!m.second.IsEmpty()) {
-                bool noCalls = m.second.getFunctionCall().size() == 0 && m.second.getMethodCall().size() == 0;
-                bool hasFreeFunctionCalls = m.second.getNumOfExternalFunctionCalls() > 0;
-                bool hasCallsToOtherClassMethods = m.second.getNumOfExternalMethodCalls() > 0; 
 
-                if (!m.second.IsAttributeUsed() && noCalls && (hasFreeFunctionCalls || hasCallsToOtherClassMethods))
-                    m.second.setStereotype("stateless");             
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (!m.IsEmpty()) {
+                bool noCallsToClassMethodsOrOnAttributes = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0;
+                bool hasFreeFunctionCalls = m.getNumOfExternalFunctionCalls() > 0;
+                bool hasCallsToOtherClassMethods = m.getNumOfExternalMethodCalls() > 0; 
+                bool hasConstructorCalls = m.getConstructorCalls().size() > 0;
+
+                if (!m.IsAttributeUsed() && noCallsToClassMethodsOrOnAttributes &&
+                (hasFreeFunctionCalls || hasCallsToOtherClassMethods || hasConstructorCalls))
+                    m.setStereotype("stateless");             
             }
         }
     }
@@ -952,9 +1010,9 @@ void classModel::stateless() {
 //
 void classModel::empty() {
     for (auto& m : methods) {
-        if (!m.second.IsConstructorDestructorUsed()) {  
-            if (m.second.IsEmpty()) 
-                m.second.setStereotype("empty");
+        if (!m.IsConstructorDestructorUsed()) {  
+            if (m.IsEmpty()) 
+                m.setStereotype("empty");
         }
     }
 }
