@@ -20,7 +20,7 @@ This output can be used for further processing or analysis. For instance, the st
 1. Prerequisites
 - [srcml 1.1+](https://www.srcml.org/)
 - [cmake 3.17+](https://cmake.org/)
-- [C++17+]
+- C++17 or higher
 
 2. Clone or download this repository.
 
