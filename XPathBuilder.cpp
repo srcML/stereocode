@@ -127,7 +127,7 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:specifier[.='const']";
     xpathTable[language]["const"] = xpath; 
 
-    xpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
+    xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
     xpath = "//src:expr/src:name";
@@ -268,7 +268,7 @@ void XPathBuilder::generateXpath() {
     xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
     xpathTable[language]["new_operator_assign"] = xpath;  
 
-    xpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
+    xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
     xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name";
@@ -386,7 +386,7 @@ void XPathBuilder::generateXpath() {
     xpath += " | //src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
     xpathTable[language]["new_operator_assign"] = xpath; 
 
-    xpath = "/src:unit/src:function/src:block/src:block_content[*[not(self::src:comment)][1]]";
+    xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
     xpath = "//src:expr/src:name";
