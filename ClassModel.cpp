@@ -16,30 +16,42 @@ extern primitiveTypes                PRIMITIVES;
 extern int                           METHODS_PER_CLASS_THRESHOLD;
 extern XPathBuilder                  XPATH_TRANSFORMATION;  
 
-classModel::classModel(srcml_archive* archive, srcml_unit* unit, std::vector<methodModel>& freeFunctions, const std::string& unitLang, 
-                       const std::string& classXpath, int unitNumber) {
+classModel::classModel(srcml_archive* archive, srcml_unit* unit, const std::string& unitLang) {
     unitLanguage = unitLang;
-    xpath[unitNumber] = classXpath;  
+    findClassName(archive, unit);  
+}
 
-    findClassName(archive, unit);
 
-    if (unitLanguage == "C++") findStructureType(archive, unit);
+void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, std::vector<methodModel>& freeFunctions, 
+                               const std::string& classXpath, int unitNumber) {
+    if (unitLanguage != "C++") findStaticSpecifier(archive, unit);
+    
+    if (!staticClass)
+        xpath[unitNumber].push_back(classXpath);  
+
+    if (unitLanguage == "C++") findStructureType(archive, unit); // Needed for findParentClassName()
     findParentClassName(archive, unit); // Requires structure type for C++
     
     std::vector<variable> attributeOrdered;
-
+    int numOfCurrentAttributes = attributeOrdered.size();
     findAttributeName(archive, unit, attributeOrdered);
-    findAttributeType(archive, unit, attributeOrdered);
+    findAttributeType(archive, unit, attributeOrdered, numOfCurrentAttributes);
+    
+    // The "this" keyword by itself is assumed to be an "accessor" to the state of the class
+    // It is also not a non-primitive
+    variable v;
+    v.setName("this");
+    attributes.insert({v.getName(), v});
     
     std::vector<variable> nonPrivateAttributeOrdered; 
-
+    int numOfCurrentNonPrivateAttributes = nonPrivateAttributeOrdered.size();
     findNonPrivateAttributeName(archive, unit, nonPrivateAttributeOrdered);
-    findNonPrivateAttributeType(archive, unit, nonPrivateAttributeOrdered);
+    findNonPrivateAttributeType(archive, unit, nonPrivateAttributeOrdered, numOfCurrentNonPrivateAttributes);
     findMethod(archive, unit, freeFunctions, classXpath, unitNumber);
 
     if (unitLanguage == "C#") findMethodInProperty(archive, unit, freeFunctions, classXpath, unitNumber); 
-    if (unitLanguage == "C++") findFriendFunctionDecl(archive, unit); 
 }
+
 
 // Finds class name
 //
@@ -100,32 +112,19 @@ void classModel::findStructureType(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result); 
 }
 
-// Finds declarations of friend functions (C++ Only)
-// Parameter names are ignored for signature matching
+// Determines if class is static
 //
-void classModel::findFriendFunctionDecl(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"friend_function_decl").c_str());
-
+void classModel::findStaticSpecifier(srcml_archive* archive, srcml_unit* unit) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_static").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
+    staticClass = (n > 0); 
 
-    std::string decl;
-    for (int i = 0; i < n; i++) {
-        srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
-        std::string unparsed = srcml_unit_get_srcml(resultUnit);
-        if (unparsed != ";")
-            decl += srcml_unit_get_srcml(resultUnit);
-        else {
-            trimWhitespace(decl);
-            friendFunctionDecl.insert(decl);
-            decl = "";
-        }
-    }
-    
     srcml_clear_transforms(archive);
     srcml_transform_free(result); 
 }
+
 
 // Finds parent classes
 // C++ supports multiple inheritance 
@@ -212,6 +211,7 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std
     int n = srcml_transform_get_unit_size(result);
 
     srcml_unit* resultUnit = nullptr;
+
     for (int i = 0; i < n; i++) {
         resultUnit = srcml_transform_get_unit(result,i);
         char* unparsed = nullptr;
@@ -243,7 +243,7 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std
 // Finds attribute types
 // Only collect the type if there is a name
 //
-void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& attributeOrdered) {
+void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& attributeOrdered, int numOfCurrentAttributes) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"attribute_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -268,14 +268,14 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std
             prev = type;
         }
 
-        attributeOrdered[i].setType(type);  
-        attributes.insert({attributeOrdered[i].getName(), attributeOrdered[i]});
+        attributeOrdered[numOfCurrentAttributes + i].setType(type);  
+        attributes.insert({attributeOrdered[numOfCurrentAttributes + i].getName(), attributeOrdered[numOfCurrentAttributes + i]});
         bool nonPrimitiveAttributeExternal = false;
 
-        isNonPrimitiveType(type, attributeOrdered[i], unitLanguage, name[3]);
+        isNonPrimitiveType(type, attributeOrdered[numOfCurrentAttributes + i], unitLanguage, name[3]);
 
         if (nonPrimitiveAttributeExternal)
-            attributeOrdered[i].setNonPrimitiveExternal(true);
+            attributeOrdered[numOfCurrentAttributes + i].setNonPrimitiveExternal(true);
                           
         free(unparsed);
     }
@@ -325,7 +325,8 @@ void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit*
 
 // Finds non-private attribute types
 //
-void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateAttributeOrdered) {
+void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateAttributeOrdered, 
+                                             int numOfNonPrivateCurrentAttributes) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_attribute_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -348,14 +349,15 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
             prev = type;
         }
 
-        nonPrivateAttributeOrdered[i].setType(type);
-        nonPrivateAndInheritedAttributes.insert({nonPrivateAttributeOrdered[i].getName(), nonPrivateAttributeOrdered[i]});
+        nonPrivateAttributeOrdered[numOfNonPrivateCurrentAttributes + i].setType(type);
+        nonPrivateAndInheritedAttributes.insert({nonPrivateAttributeOrdered[numOfNonPrivateCurrentAttributes + i].getName(), 
+                                                nonPrivateAttributeOrdered[numOfNonPrivateCurrentAttributes + i]});
 
         bool nonPrimitiveAttributeExternal = false;
-        isNonPrimitiveType(type, nonPrivateAttributeOrdered[i], unitLanguage, name[3]);
+        isNonPrimitiveType(type, nonPrivateAttributeOrdered[numOfNonPrivateCurrentAttributes + i], unitLanguage, name[3]);
 
         if (nonPrimitiveAttributeExternal)
-            nonPrivateAttributeOrdered[i].setNonPrimitiveExternal(true);
+            nonPrivateAttributeOrdered[numOfNonPrivateCurrentAttributes + i].setNonPrimitiveExternal(true);
         
         free(unparsed);
     }
@@ -391,8 +393,12 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vecto
         srcml_archive_close(methodArchive);
         srcml_archive_free(methodArchive);
 
+        std::string methString = unparsed;
+        srcmlBackwardCompatibility(methString);
+
         methodArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(methodArchive, unparsed, size);
+        srcml_archive_read_open_memory(methodArchive, methString.c_str(), methString.size());
+        //srcml_archive_read_open_memory(methodArchive, unparsed, size);
         srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
 
         std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
@@ -422,9 +428,9 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);    
-    srcml_unit* resultUnit = nullptr;
+
     for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
+        srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
 
         srcml_archive* propertyArchive = srcml_archive_create();
         char* unparsed = nullptr;
@@ -433,9 +439,13 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
         srcml_archive_write_unit(propertyArchive, resultUnit);
         srcml_archive_close(propertyArchive);
         srcml_archive_free(propertyArchive);
+        
+        std::string propertyString = unparsed;
+        srcmlBackwardCompatibility(propertyString);
 
         propertyArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(propertyArchive, unparsed, size);
+        srcml_archive_read_open_memory(propertyArchive, propertyString.c_str(), propertyString.size());
+        //srcml_archive_read_open_memory(propertyArchive, unparsed, size);;
         srcml_unit* propertyUnit = srcml_archive_read_unit(propertyArchive);
        
         srcml_append_transform_xpath(propertyArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property_type").c_str());
@@ -448,11 +458,11 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
             size_t typeSize = 0;
             srcml_unit_unparse_memory(typeUnit, &typeUnparsed, &typeSize);
 
-            srcml_clear_transforms(propertyArchive);
             srcml_transform_free(propertyResult);
+            propertyResult = nullptr;
+            srcml_clear_transforms(propertyArchive);
 
             srcml_append_transform_xpath(propertyArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property_method").c_str());
-            propertyResult = nullptr;
             srcml_unit_apply_transforms(propertyArchive, propertyUnit, &propertyResult);
             int nMethod = srcml_transform_get_unit_size(propertyResult); 
             for (int j = 0; j < nMethod; j++) {
@@ -488,13 +498,12 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
             }
             free(typeUnparsed);
         }
-        else {
-            srcml_clear_transforms(propertyArchive);
-            srcml_transform_free(propertyResult);
-        }
+
         
         free(unparsed);       
         srcml_unit_free(propertyUnit);
+        srcml_transform_free(propertyResult);
+        srcml_clear_transforms(propertyArchive);
         srcml_archive_close(propertyArchive);
         srcml_archive_free(propertyArchive); 
     }
@@ -634,15 +643,15 @@ void classModel::computeClassStereotype() {
     if (stereotype.size() == 0) 
         stereotype.push_back("unclassified");
 
-    for (const auto& pair : xpath) {
-        XPATH_LIST[pair.first].insert({pair.second, getStereotype()});
-    }       
+    for (const auto& pair : xpath) 
+        for (const auto& classXpath : pair.second) 
+            XPATH_LIST[pair.first].insert({classXpath, getStereotype()});
+           
 }
 
 //Compute method stereotypes
 //
 void classModel::computeMethodStereotype() {
-    // The keyword "this" by itself is ignored from analysis
     constructorDestructor();
     getter();
     predicate();
@@ -668,8 +677,8 @@ void classModel::constructorDestructor() {
     for (auto& m : methods) {
         if (m.IsConstructorDestructorUsed()) {  
             constructorDestructorCount++;
-            std::string parameterList = m.getParametersList();
-            std::string srcML = m.getSrcML();
+            const std::string& parameterList = m.getParametersList();
+            const std::string& srcML = m.getSrcML();
 
             if (srcML.find("<destructor>") != std::string::npos)
                 m.setStereotype("destructor"); 
@@ -684,6 +693,7 @@ void classModel::constructorDestructor() {
 // Stereotype get:
 // 1] Return type is not void
 // 2] Contains at least one simple return expression that returns an attribute (e.g., return dm;)
+// "this" keyword by itself is not considered (e.g., return this;)
 //
 void classModel::getter() {
     for (auto& m : methods) {
@@ -699,16 +709,17 @@ void classModel::getter() {
 // 1] Return type is Boolean
 // 2] Contains at least one complex return expression
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other methods in class (constructor calls are ignored)
+//     one function call to other methods in class
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
+// "this" keyword by itself is considered
 // 
 void classModel::predicate() { 
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             bool returnType = false;
-            std::string returnTypeParsed = m.getReturnTypeParsed();
+            const std::string& returnTypeParsed = m.getReturnTypeParsed();
 
             if (unitLanguage == "C++")
                 returnType = (returnTypeParsed == "bool");
@@ -732,39 +743,38 @@ void classModel::predicate() {
 // 1] Return type is not void or Boolean
 // 2] Contains at least one complex return statement (e.g., return a+5;)
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other methods in class (constructor calls are ignored)
+//     one function call to other methods in class
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
+// "this" keyword by itself is considered
 //  
 void classModel::property() {
     for (auto& m : methods) {
-        if (!m.IsConstructorDestructorUsed()) {  
-            bool returnType = false;
-            std::string returnTypeParsed = m.getReturnTypeParsed();
+        if (!m.IsConstructorDestructorUsed() && !m.IsStrictFactory()) {  
+            bool returnNotVoidOrBool = false;
+            const std::string& returnTypeParsed = m.getReturnTypeParsed();
+
 
             bool isVoidPointer = false;
-            if (unitLanguage == "C++" || unitLanguage == "C#") {
-                std::string returnType = m.getReturnType();
-                trimWhitespace(returnType);
-                
-                if (returnType.find("void*") != std::string::npos)
+            if (unitLanguage != "Java") {  
+                if (m.getReturnType().find("void*") != std::string::npos)
                     isVoidPointer = true;
             }
 
             if (unitLanguage == "C++")
-                returnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "") || isVoidPointer;
+                returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "") || isVoidPointer;
             else if (unitLanguage == "C#")
-                returnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
+                returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
                             returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "") || isVoidPointer;
             else if (unitLanguage == "Java")
-                returnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
+                returnNotVoidOrBool = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
                             returnTypeParsed != "Void" && returnTypeParsed != "");
 
             bool isAttributeUsed = m.IsAttributeUsed();
             bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
-            if (returnType && m.IsAttributeNotReturned() && (isAttributeUsed || callsToOtherClassMethods)) {
+            if (returnNotVoidOrBool && m.IsAttributeNotReturned() && (isAttributeUsed || callsToOtherClassMethods)) {
                 m.setStereotype("property");
             }
         }
@@ -775,10 +785,11 @@ void classModel::property() {
 // 1] Return type is void 
 // 2] Contains at least one parameter that is passed by non-const reference and is assigned a value
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other methods in class (constructor calls are ignored)
+//     one function call to other methods in class 
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
+// "this" keyword by itself is considered
 //
 void classModel::voidAccessor() {
     for (auto& m : methods) {
@@ -787,11 +798,8 @@ void classModel::voidAccessor() {
             bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
             bool isVoidPointer = false;
-            if (unitLanguage == "C++" || unitLanguage == "C#") {
-                std::string returnType = m.getReturnType();
-                trimWhitespace(returnType);
-                
-                if (returnType.find("void*") != std::string::npos)
+            if (unitLanguage != "Java") {              
+                if (m.getReturnType().find("void*") != std::string::npos)
                     isVoidPointer = true;
             }
 
@@ -807,10 +815,11 @@ void classModel::voidAccessor() {
 
 // Stereotype set:
 // 1] Only one data member is changed
-// 2] Number of calls on data members or to methods in class is at most 1 (constructor calls are ignored)
+// 2] Number of calls on data members or to methods in class is at most 1
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
+// "this" keyword by itself is considered
 //
 void classModel::setter() {
     for (auto& m : methods) {
@@ -839,6 +848,7 @@ void classModel::setter() {
 //
 //    Constructor calls are not considered
 //    Ignored calls are not considered
+//    "this" keyword by itself is considered
 //
 // stereotype non-void-command (C++ only):        
 //    Method return type is not void
@@ -846,7 +856,7 @@ void classModel::setter() {
 void classModel::command() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
-            std::string returnTypeParsed = m.getReturnTypeParsed();
+            const std::string& returnTypeParsed = m.getReturnTypeParsed();
             int attributeModified = m.getNumOfAttributesModified();
             int callsToMethodsInClass = m.getFunctionCalls().size() ; 
             int callsOnDataMembers = m.getMethodCalls().size();
@@ -857,14 +867,11 @@ void classModel::command() {
             bool mutableCase = m.IsConstMethod() && case3;
  
             bool isVoidPointer = false;
-            if (unitLanguage == "C++" || unitLanguage == "C#") {
-                std::string returnType = m.getReturnType();
-                trimWhitespace(returnType);
-                
-                if (returnType.find("void*") != std::string::npos)
+            if (unitLanguage != "Java") {  
+                if (m.getReturnType().find("void*") != std::string::npos)
                     isVoidPointer = true;
             }
-
+            
             bool returnCheck = returnTypeParsed != "void" && returnTypeParsed != "Void" && !isVoidPointer;
 
             if (case1 || case2 || case3) {
@@ -886,17 +893,11 @@ void classModel::command() {
 //
 // Variables created with ignored calls are considered
 // Returns that have "new" ignored calls are also considered
+// "this" keyword by itself is not considered
 //
 void classModel::factory() {
     for (auto& m : methods) {
-        if (!m.IsConstructorDestructorUsed()) {  
-            bool     returnsObj                           = m.IsNonPrimitiveReturnType();
-            bool     returnsNewCall                       = m.IsNewCallReturned();              
-            bool     variableCreatedWithNewReturned       = m.IsVariableCreatedWithNewReturned(); 
-          
-            if (returnsObj && (returnsNewCall || variableCreatedWithNewReturned))
-                m.setStereotype("factory");   
-        }        
+        if (m.IsFactory() || m.IsStrictFactory()) m.setStereotype("factory");
     }
 }
 
@@ -919,6 +920,7 @@ void classModel::factory() {
 // 2] Type could be a parameter, local variable, return type, or an attribute 
 //
 // Ignored calls are not considered
+// "this" keyword by itself is considered only for wrapper and controller
 //
 void classModel::wrapperControllerCollaborator() {
     for (auto& m : methods) {
@@ -930,11 +932,8 @@ void classModel::wrapperControllerCollaborator() {
                 bool nonPrimitiveReturnExternal = m.IsNonPrimitiveReturnTypeExternal();
             
                 bool isVoidPointer = false;
-                if (unitLanguage == "C++" || unitLanguage == "C#") {
-                    std::string returnType = m.getReturnType();
-                    trimWhitespace(returnType);
-                    
-                    if (returnType.find("void*") != std::string::npos )
+                if (unitLanguage != "Java") {  
+                    if (m.getReturnType().find("void*") != std::string::npos )
                         isVoidPointer = true;
                 }
 
@@ -962,7 +961,7 @@ void classModel::wrapperControllerCollaborator() {
 
 // Stereotype incidental 
 // 1] Method contains at least one non-comment statement (i.e., method is not empty)
-// 2] No data members are used or modified 
+// 2] No data members are used or modified (including no use of keyword "this" by itself)
 // 3] No calls of any kind
 // Ignored calls are allowed
 // 
@@ -981,7 +980,7 @@ void classModel::incidental() {
 
 // Stereotype stateless
 // 1]	Method contains at least one non-comment statement (i.e., method is not empty)
-// 2]	No data members are used or modified
+// 2]	No data members are used or modified (including no use of keyword "this" by itself)
 // 3]	No calls to methods in class 
 // 4]   No calls on data members
 // 5]   Has at least one call to other class methods (including constructor calls) or to a free function 

@@ -1,4 +1,4 @@
-public class ExternalFunctions {
+public static class ExternalFunctions {
     public static void externalFunction() {
         System.out.println("This is an external function call.");
     }
@@ -48,7 +48,7 @@ public class MyClass {
         ExternalFunctions.externalFunction();
     }
 
-    public static MyClass createObject(int value, String strValue) {
+    public MyClass createObject(int value, String strValue) {
         return new MyClass(value, strValue);
     }
 
@@ -116,6 +116,29 @@ public class MyClass {
         this.otherDataMember = otherDataMember;
     }
 }
+
+
+
+public class C {
+    protected int dataC;
+
+    public int getDataC() {
+        return dataC;
+    }
+}
+
+public class B extends C {
+    public int getDataB() {
+        return dataC;
+    }
+}
+
+public class A extends B {
+    public int getDataA() {
+        return dataC;
+    }
+}
+
 
 public class Program {
     public static void main(String[] args) {

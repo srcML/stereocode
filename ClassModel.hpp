@@ -14,21 +14,19 @@
 
 class classModel {
 public:
-         classModel                         (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, const std::string&, int);
+         classModel                         (srcml_archive*, srcml_unit*, const std::string&);
          
     void findClassName                      (srcml_archive*, srcml_unit*);
+    void findStaticSpecifier                (srcml_archive*, srcml_unit*);
     void findStructureType                  (srcml_archive*, srcml_unit*);
-    void findPartialClass                   (srcml_archive*, srcml_unit*);
-    void findFriendFunctionDecl             (srcml_archive*, srcml_unit*);
-    void findFriendFunctionParameterType    (srcml_archive* , srcml_unit* );
     void findParentClassName                (srcml_archive*, srcml_unit*);
     void findAttributeName                  (srcml_archive*, srcml_unit*, std::vector<variable>&);
-    void findAttributeType                  (srcml_archive*, srcml_unit*, std::vector<variable>&);
+    void findAttributeType                  (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
     void findNonPrivateAttributeName        (srcml_archive*, srcml_unit*, std::vector<variable>&);
-    void findNonPrivateAttributeType        (srcml_archive*, srcml_unit*, std::vector<variable>&);
+    void findNonPrivateAttributeType        (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
     void findMethod                         (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
     void findMethodInProperty               (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
-    
+    void findClassData                      (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
 
     void computeClassStereotype();
     void computeMethodStereotype();
@@ -42,7 +40,6 @@ public:
     void command();
     void wrapperControllerCollaborator();
     void factory();
-
     void incidental();
     void stateless();
     void empty();
@@ -58,7 +55,6 @@ public:
     const std::unordered_map<std::string, variable>&       getNonPrivateAndInheritedAttribute ()               const          { return nonPrivateAndInheritedAttributes;       }
     const std::unordered_set<std::string>&                 getInheritedMethodSignatures       ()               const          { return inheritedMethodSignatures;              }    
     const std::unordered_set<std::string>&                 getMethodSignatures                ()               const          { return methodSignatures;                       }    
-    const std::unordered_set<std::string>&                 getFriendFunctionDecl              ()               const          { return friendFunctionDecl;                     }
     
     bool                                                   HasInherited                       ()               const          { return inherited;                              }
     bool                                                   IsVisited                          ()               const          { return visited;                                }
@@ -72,14 +68,10 @@ public:
 
     void inheritAttribute(const std::unordered_map<std::string, variable>& inheritedNonPrivateAttribute, 
                           const std::string& inheritanceSpecifier) { 
-        if (inheritanceSpecifier == "private") // C++ Only
-            // Inherit attributes as private
-            attributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());
-        else {
-            attributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());
+        attributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());
+        if (inheritanceSpecifier != "private") // C++ Only
             // Used to chain inheritance
-            nonPrivateAndInheritedAttributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());     
-        }     
+            nonPrivateAndInheritedAttributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());         
     }
 
     void appendInheritedMethod(const std::unordered_set<std::string>& parentMethods, 
@@ -101,11 +93,11 @@ private:
     std::vector<std::string>                                stereotype;                      // Class stereotype(s)
     std::vector<methodModel>                                methods;                         // List of methods 
     std::unordered_set<std::string>                         methodSignatures;                // List of method signatures
-    std::unordered_set<std::string>                         inheritedMethodSignatures;       // List of inherited method signatures
-    std::unordered_set<std::string>                         friendFunctionDecl;              // Set of friend function signatures (C++ only)                                             
+    std::unordered_set<std::string>                         inheritedMethodSignatures;       // List of inherited method signatures                                           
     std::unordered_map<std::string, variable>               attributes;                      // Key is attribute name and value is attribute object
     std::unordered_map<std::string, variable>               nonPrivateAndInheritedAttributes;// Non-private attributes of class + inherited attributes from all parent classes
-    std::unordered_map<int, std::string>                    xpath;                           // Unique xpath for class (classes if partial in C#) along with the unit number
+    std::unordered_map<int, std::vector<std::string>>       xpath;                           // Unique xpath for class (classes if partial in C#) along with the unit number
+    bool                                                    staticClass{false};              // Is class static?
     bool                                                    inherited{false};                // Did class inherit the attributes yet? (Used for inheritance)
     bool                                                    visited{false};                  // Has class been visited yet when inheriting? (Used for inheritance)    
     int                                                     constructorDestructorCount{0};   // Number of constructor + destructor methods (Needed for class stereotypes)

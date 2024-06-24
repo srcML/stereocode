@@ -43,8 +43,6 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
             isNonPrimitive = true;
             if (subType != className)
                 var.setNonPrimitiveExternal(true);
-            else
-                var.setNonPrimitiveInternal(true);
         }
         
         start = end + 1;
@@ -57,8 +55,6 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
         isNonPrimitive = true;
         if (subType != className)
             var.setNonPrimitiveExternal(true);
-        else
-            var.setNonPrimitiveInternal(true);
     }
 
     return isNonPrimitive;
@@ -164,5 +160,29 @@ void removeBetweenComma(std::string& s, bool isGeneric) {
         const std::regex regexPatternTwo (pattern);
         s = std::regex_replace(s, regexPatternTwo, "$2"); // $2 is used to replace the content with the second group
         s = name + s;
+    }
+}
+
+// Workaround to get Stereocode to work with srcML 1.0.0
+void srcmlBackwardCompatibility(std::string& xmlText) {
+    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor>", "><function"};
+
+    size_t pos = std::string::npos;
+    for (const auto& tag : tags) {
+        pos = xmlText.find(tag);
+        if (pos != std::string::npos) {
+            break;
+        }
+    }
+
+    if (pos != std::string::npos) { 
+        std::string beforeFunction = xmlText.substr(0, pos);
+        std::string afterFunction = xmlText.substr(pos);
+        size_t item = beforeFunction.find("item=");
+        if (item != std::string::npos) {}
+            beforeFunction = beforeFunction.substr(0, item);
+
+        beforeFunction.pop_back();
+        xmlText = beforeFunction + afterFunction;
     }
 }

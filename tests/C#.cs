@@ -117,6 +117,46 @@ public class MyClass {
     }
 }
 
+public class BaseClass
+{
+    public int BaseProperty { get; set; }
+}
+
+public partial class ExtendedClass : BaseClass
+{
+    public int ExtendedProperty { get; set; }
+}
+
+public partial class ExtendedClass
+{
+    public int CalculateSum()
+    {
+        return BaseProperty + ExtendedProperty;
+    }
+}
+
+
+public class C {
+    protected int dataC;
+
+    public int GetDataC() {
+        return dataC;
+    }
+}
+
+public class B : C {
+    public int GetDataB() {
+        return dataC;
+    }
+}
+
+public class A : B {
+    public int GetDataA() {
+        return dataC;
+    }
+}
+
+
 public class Program {
     public static void Main() {
 

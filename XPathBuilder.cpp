@@ -9,15 +9,14 @@
 
 #include "XPathBuilder.hpp"
 
-extern bool   STRUCT_SUPPORT;        
-extern bool   INTERFACE_SUPPORT;   
+extern bool   STRUCT;        
+extern bool   INTERFACE;   
 
 void XPathBuilder::generateXpath() {
     //// C++ ////
     std::string language = "C++";
     std::string xpath = "//src:*[(self::src:class";
-    if (STRUCT_SUPPORT)
-        xpath += " or self::src:struct";          
+    if (STRUCT) xpath += " or self::src:struct";          
     xpath += ") and not(ancestor::src:class or ancestor::src:struct)]"; 
     xpathTable[language]["class"] = xpath;
 
@@ -27,10 +26,7 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct]/text()[1]";
     xpathTable[language]["class_type"] = xpath;   
 
-    xpath = "//src:function_decl[count(ancestor::src:class | ancestor::src:struct) = 1]//text()[not(ancestor::src:parameter) or ancestor::src:type]";
-    xpathTable[language]["friend_function_decl"] = xpath;  
-
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super/src:name";
+    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super";
     xpathTable[language]["parent_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct) = 1]";
@@ -112,13 +108,13 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["constructor_call_name"] = xpath;  
 
     xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["function_call_type"] = xpath;  
+    xpathTable[language]["function_call_arglist"] = xpath;  
 
     xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["method_call_type"] = xpath; 
+    xpathTable[language]["method_call_arglist"] = xpath; 
 
     xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["constructor_call_type"] = xpath; 
+    xpathTable[language]["constructor_call_arglist"] = xpath; 
 
     xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
@@ -130,7 +126,7 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
-    xpath = "//src:expr/src:name";
+    xpath = "//src:expr[not(ancestor::src:call)]/src:name";
     xpathTable[language]["expression_name"] = xpath;    
 
     xpath = "//src:expr/src:name[";
@@ -146,10 +142,8 @@ void XPathBuilder::generateXpath() {
     //// C# ////
     language = "C#";
     xpath = "//src:*[(self::src:class";
-    if (STRUCT_SUPPORT)
-        xpath += " or self::src:struct";
-    if (INTERFACE_SUPPORT)
-        xpath += " or self::src:interface";             
+    if (STRUCT) xpath += " or self::src:struct";
+    if (INTERFACE) xpath += " or self::src:interface";             
     xpath += ") and not(ancestor::src:class or ancestor::src:struct or ancestor::src:interface)]"; // Ignores nested classes, struct, or interfaces
     xpathTable[language]["class"] = xpath;
 
@@ -158,6 +152,9 @@ void XPathBuilder::generateXpath() {
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/text()[1]";
     xpathTable[language]["class_type"] = xpath;   
+
+    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:specifier[.='static']";
+    xpathTable[language]["class_static"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
@@ -256,13 +253,13 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["constructor_call_name"] = xpath;  
 
     xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["function_call_type"] = xpath;  
+    xpathTable[language]["function_call_arglist"] = xpath;  
 
     xpath = "//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["method_call_type"] = xpath; 
+    xpathTable[language]["method_call_arglist"] = xpath; 
 
     xpath = "//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["constructor_call_type"] = xpath;
+    xpathTable[language]["constructor_call_arglist"] = xpath;
 
     xpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
@@ -271,7 +268,7 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
-    xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name";
+    xpath = "//src:expr[count(ancestor::src:function) = 1 and not(ancestor::src:call)]/src:name";
     xpathTable[language]["expression_name"] = xpath;    
 
     xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name[";
@@ -286,7 +283,7 @@ void XPathBuilder::generateXpath() {
     //// Java ////
     language = "Java";
     xpath = "//src:*[((self::src:class and not(child::src:super[1]))"; // Ignores anonymous classes
-    if (INTERFACE_SUPPORT)
+    if (INTERFACE)
         xpath += " or self::src:interface";             
     xpath += ") and not(ancestor::src:class or ancestor::src:interface)]"; 
 
@@ -297,6 +294,9 @@ void XPathBuilder::generateXpath() {
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface]/text()[1]";
     xpathTable[language]["class_type"] = xpath;   
+
+    xpath = "/src:unit/src:*[self::src:class or self::src:interface]/src:specifier[.='static']";
+    xpathTable[language]["class_static"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface]/src:super_list/*[self::src:extends or self::src:implements]/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
@@ -374,13 +374,13 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["constructor_call_name"] = xpath;  
 
     xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["function_call_type"] = xpath;  
+    xpathTable[language]["function_call_arglist"] = xpath;  
 
     xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["method_call_type"] = xpath; 
+    xpathTable[language]["method_call_arglist"] = xpath; 
 
     xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
-    xpathTable[language]["constructor_call_type"] = xpath;
+    xpathTable[language]["constructor_call_arglist"] = xpath;
 
     xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpath += " | //src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
@@ -389,7 +389,7 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["empty"] = xpath; 
 
-    xpath = "//src:expr/src:name";
+    xpath = "//src:expr[not(ancestor::src:call)]/src:name";
     xpathTable[language]["expression_name"] = xpath;    
 
     xpath = "//src:expr/src:name[";

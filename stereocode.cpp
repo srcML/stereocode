@@ -10,17 +10,17 @@
 #include "ClassModelCollection.hpp"
 #include "CLI11.hpp"
 
-primitiveTypes                     PRIMITIVES;                                         // Primitives type per language + any user supplied
+primitiveTypes                     PRIMITIVES;                                         // Primitive types per language + any user supplied
 ignorableCalls                     IGNORED_CALLS;                                      // Calls to ignore + any user supplied
 typeTokens                         TYPE_TOKENS;                                        // Tokens to remove from data types + any user supplied
 int                                METHODS_PER_CLASS_THRESHOLD = 21;                   // Threshold for large class stereotype (from ICSM10)
-bool                               STRUCT_SUPPORT              = false;                // Enables support to identify and stereotype structs (C++ or C#)
-bool                               INTERFACE_SUPPORT           = false;                // Enables support to identify and stereotype interfaces (C# or Java)
-bool                               IS_VERBOSE                  = false;                // Prints primitives, ignored calls, type tokens, and progress while stereotyping
+bool                               STRUCT                      = false;                // Identify and stereotype structs (C++ or C#)
+bool                               INTERFACE                   = false;                // Identify and stereotype interfaces (C# or Java)
+bool                               IS_VERBOSE                  = false;                // Prints primitives, ignored calls, and type tokens
 
 std::unordered_map
      <int, std::unordered_map
-     <std::string, std::string>>   XPATH_LIST;                         // Map key = unit number. Each vector is a pair of xpath and stereotype
+     <std::string, std::string>>   XPATH_LIST;                         // Map key = unit number. Each map value is a pair of xpath and stereotype
 std::vector<std::string>           LANGUAGE = {"C++", "C#", "Java"};   // Supported languages
 XPathBuilder                       XPATH_TRANSFORMATION;               // List of xpaths used for transformations
 
@@ -31,7 +31,6 @@ int main (int argc, char const *argv[]) {
     std::string         ignoredCallsFile;
     std::string         typeTokensFile;
     std::string         outputFile;
-    int                 error;
     bool                outputTxtReport    = false;
     bool                outputCsvReport    = false;
     bool                overWriteInput     = false;
@@ -46,8 +45,8 @@ int main (int argc, char const *argv[]) {
     app.add_option("-p,--primitive-file",     primitivesFile,              "File name of user supplied primitive types (one per line)");
     app.add_option("-g,--ignore-call-file",   ignoredCallsFile,            "File name of user supplied calls to ignore (one per line)");
     app.add_option("-t,--type-token-file",    typeTokensFile,              "File name of user supplied data type tokens to remove (one per line)");
-    app.add_flag  ("-i,--interface",          INTERFACE_SUPPORT,           "Identify stereotypes for interfaces (C# and Java)");
-    app.add_flag  ("-s,--struct",             STRUCT_SUPPORT,              "Identify stereotypes for structs (C# and Java)");
+    app.add_flag  ("-i,--interface",          INTERFACE,                   "Identify stereotypes for interfaces (C# and Java)");
+    app.add_flag  ("-s,--struct",             STRUCT,                      "Identify stereotypes for structs (C# and Java)");
     app.add_flag  ("-e,--input-overwrite",    overWriteInput,              "Overwrite input with stereotype information");
     app.add_flag  ("-x,--txt-report",         outputTxtReport,             "Output optional TXT report file containing stereotype information");
     app.add_flag  ("-z,--csv-report",         outputCsvReport,             "Output optional CSV report file containing stereotype information");
@@ -93,7 +92,7 @@ int main (int argc, char const *argv[]) {
     }
 
     srcml_archive* archive = srcml_archive_create();
-    error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
+    int error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
     if (error) {
         std::cerr << "Error: File not found: " << inputFile << ", error == " << error << '\n';
         srcml_archive_free(archive);
@@ -140,7 +139,5 @@ int main (int argc, char const *argv[]) {
         std::filesystem::rename(outputFile, inputFile);
     }
  
-
-
     return 0;
 }   

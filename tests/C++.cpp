@@ -124,6 +124,28 @@ void incrementDataMember(MyClass& obj) {
     std::cout << "Data member incremented to: " << obj.getDataMember() << std::endl;
 }
 
+class C {
+protected:
+    int dataC;
+
+public:
+    int getDataC() { return dataC; }
+};
+
+class B : public C {
+public:
+    int getDataB() { return dataC; }
+
+};
+
+class A : public B {
+public:
+    int getDataA() { return dataC; }
+};
+
+
 int main() {
 
 }
+
+

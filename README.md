@@ -32,6 +32,8 @@ cd build_path
 make
 ```
 
+Note: Stereocode is compatible with srcML v1.0, but might not work as intended in certain rare cases.
+
 ## 🚀 Usage
 
 **Stereocode**  is a command-line tool. It can process individual source files or entire systems written in **C++**, **Java**, and/or **C#**. 
