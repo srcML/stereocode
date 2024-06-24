@@ -2,114 +2,154 @@
 /**
  * @file PrimitiveTypes.cpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
 #include "PrimitiveTypes.hpp"
 
-// RETVAL == true if s == (ptypes[i] or usertypes[i])
+extern std::vector<std::string> LANGUAGE;
+
+// Checks if 'type' is a primitive
+// User-defined primitives are checked for all languages
 //
-bool primitiveTypes::isPrimitive(const std::string& s) const {
-    return (ptypes.find(s) != ptypes.end()) || (usertypes.find(s) != usertypes.end());
+bool primitiveTypes::isPrimitive(const std::string& type, const std::string& unitLanguage) {
+    return (ptypes.at(unitLanguage).find(type) != ptypes.at(unitLanguage).end() || 
+           userTypes.find(type) != userTypes.end());
 }
 
+// Reads a set of user-defined primitive types
+// File should list one type per line
+//
+std::istream& operator>>(std::istream& in, primitiveTypes& primitives) {
+    std::string utype;
+    
+    while(std::getline(in, utype))
+        primitives.addPrimitive(utype);
 
-// Adds s to user specified primitives if not already present
-//
-void primitiveTypes::addPrimitive(const std::string& s) {
-    if (!isPrimitive(s)) usertypes.insert(s);
-}
-
-
-// Reads a set of user defined primitive types to be added to a list
-//
-// REQUIRES: in.open(fname)
-//  fname will list each type name one per line
-//  No spaces in type name if compound long int => longint
-//
-//
-std::istream& operator>>(std::istream& in, primitiveTypes& prims)  {
-    std::string name;
-    while(std::getline(in, name)) prims.addPrimitive(name);
     return in;
 }
 
-// Outputs list of all primitive types defined
-// REQUIRES: out.open(fname)
-std::ostream& operator<<(std::ostream& out, const primitiveTypes& prims) {
-    for (std::string i : prims.ptypes) out << i << std::endl;
-    for (std::string i : prims.usertypes) out << i << std::endl;
-    return out;
+// Adds "userType" to user-defined primitives if not already present
+// Apply to all languages
+//
+void primitiveTypes::addPrimitive(const std::string& userType) {
+    userTypes.insert(userType);
 }
 
-
-
-
-
-//Initially ptypes is empty or has user defined types.
-//
-// After language is determined then language specific primitive
-//  types are added.
-//
-void primitiveTypes::setLanguage(const std::string& lang) {
-    if (language == lang) return;        //Same language (done)
-    if (language != "") ptypes.clear();  //Change of language
-    language = lang;
-
-    if (language == "C++") {
-        ptypes = {
-            "short",
-            "int",
-            "signed",
-            "unsigned",
-            "long",
-            "float",
-            "double",
-            "char",
-            "string",
-            "string::size_type",
-            "string::npos",
-            "std::string",
-            "std::string::size_type",
-            "std::string::npos",
-            "size_t",
-            "wchar_t",
-            "char16_t",
-            "char32_t",
-            "bool"
-        };
-    }
-    if (language == "C#") {  //NOT correct
-        ptypes = {
-            "int",
-            "short",
-            "signed",
-            "unsigned",
-            "float",
-            "long",
-            "double",
-            "char",
-            "string",
-            "bool"
-        };
-    }
-    if (language == "Java") {  //NOT correct
-        ptypes = {
-            "int",
-            "short",
-            "signed",
-            "unsigned",
-            "float",
-            "long",
-            "double",
-            "char",
-            "string",
-            "bool"
-        };
+void primitiveTypes::outputPrimitives() {
+    std::cerr<<"---Primitives---";
+    for (const auto& pair : ptypes) {
+        std::cerr<<"\n[" << pair.first << "]:" ;
+        for (const std::string& primit : pair.second) 
+            std::cerr << ' ' << primit;
     }
 
+    if (userTypes.size() > 0) {
+        std::cerr<<"\n[User-Defined]:";
+        for (const std::string& primit : userTypes) 
+            std::cerr << ' ' << primit;
+    }
+    std::cerr << "\n\n";
 }
 
-
+// Specific primitives are used based on unit language
+// Generic types (e.g., T), auto (C++), and var (C# and Java) 
+//  are considered as non-primitive unless added by user
+//
+void primitiveTypes::createPrimitiveList() {
+    for (const auto& l : LANGUAGE) {
+        if (l == "C++") {
+            ptypes.insert({l, {
+                "short",
+                "shortint",
+                "int",
+                "int8_t",
+                "int16_t",
+                "int32_t",
+                "int64_t",
+                "uint8_t",
+                "uint16_t",
+                "uint32_t",
+                "uint64_t",
+                "long",
+                "longint",
+                "longlong",
+                "longlongint",
+                "float",
+                "double",
+                "longdouble",
+                "char",
+                "byte",
+                "string",
+                "size_type",
+                "size_t",
+                "wchar_t",
+                "char16_t",
+                "char32_t",
+                "bool",
+                "ptrdiff_t",
+                "void"
+            }});
+        }
+        else if (l == "C#") {  
+            ptypes.insert({l, {
+                "bool",
+                "byte",
+                "sbyte",
+                "char",
+                "double",
+                "float",
+                "int",
+                "uint",
+                "long",
+                "ulong",
+                "short",
+                "ushort",
+                "decimal",
+                "string",
+                "void",
+                "Boolean",
+                "Byte",
+                "SByte",
+                "Char",
+                "Double",
+                "Single",
+                "Int32",
+                "UInt32",
+                "Int64",
+                "UInt64",
+                "Int16",
+                "IntPtr",
+                "UIntPtr",
+                "UInt16",
+                "Decimal",
+                "String",
+                "Void"
+            }});
+        }
+        else if (l == "Java") {
+            ptypes.insert({l, {
+                "boolean",
+                "byte",
+                "char",
+                "short",
+                "int",
+                "long",
+                "float",
+                "double",
+                "void",
+                "Byte",
+                "Character",
+                "Short",
+                "Integer",
+                "Long",
+                "Float",
+                "Double",
+                "String",
+                "Void"
+            }});
+        }
+    }
+}

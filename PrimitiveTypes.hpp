@@ -2,7 +2,7 @@
 /**
  * @file PrimitiveTypes.hpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -10,27 +10,25 @@
 #ifndef PRIMITIVETYPES_HPP
 #define PRIMITIVETYPES_HPP
 
-#include <iostream>
-#include <fstream>
 #include <string>
-#include <set>
+#include <fstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
+#include <iostream>
 
 class primitiveTypes {
 public:
-    primitiveTypes() : language("") {};
+    bool                 isPrimitive             (const std::string&, const std::string&);
 
-    bool isPrimitive(const std::string&) const;
-    void addPrimitive(const std::string&);
-    void setLanguage(const std::string&);
+    void                 addPrimitive            (const std::string&);
+    void                 createPrimitiveList     ();
+    void                 outputPrimitives        ();
 
-    friend std::ostream& operator<<(std::ostream&, const primitiveTypes&);
-    friend std::istream& operator>>(std::istream&, primitiveTypes&);
-
+    friend std::istream& operator>>              (std::istream&, primitiveTypes&);
 private:
-    std::string                 language;  //Language: "C++", "C#", "Java", "C"
-    std::set<std::string>       ptypes;    //List of language primitives
-    std::set<std::string>       usertypes;    //List of user defined primitives 
+    std::unordered_map<std::string, std::unordered_set<std::string>>     ptypes;         // List of primitives
+    std::unordered_set<std::string>                                      userTypes;      // List of user-defined primitives
 };
-
 
 #endif

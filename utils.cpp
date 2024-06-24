@@ -2,220 +2,187 @@
 /**
  * @file utils.cpp
  *
- * @copyright Copyright (C) 2021-2023 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
 #include "utils.hpp"
 
-// Does it have a .hpp file extension?
-bool isHeaderFile(const std::string& fname) {
-    for (std::string ext : HEADER_FILE_EXTENSION)
-        if (fname.find(ext) != std::string::npos) return true;
-    return false;
+extern primitiveTypes                        PRIMITIVES;   
+extern std::vector<std::string>              LANGUAGE;
+extern typeTokens                            TYPE_TOKENS;  
+
+bool isNonPrimitiveType(const std::string& type, variable& var, 
+                        const std::string& unitLanguage, const std::string& className) {
+    std::string typeParsed = type;
+
+    size_t listOpen = typeParsed.find("<");
+    if (listOpen != std::string::npos) {
+        std::string typeLeft = typeParsed.substr(0, listOpen);
+        std::string typeRight = typeParsed.substr(listOpen, typeParsed.size() - listOpen);
+        // removeNamespace() can mess up the string when there is a namespace inside <>
+        // For example: Factory <hippodraw::DataRep> --> removeNamespace() --> DataRep>
+        // This is why we need to separate them
+        //
+        removeNamespace(typeLeft, true, unitLanguage); // No generics and no comma separated list
+        typeParsed = typeLeft + typeRight;
+    }
+
+    removeTypeTokens(typeParsed, unitLanguage); // Can take full type as is
+    trimWhitespace(typeParsed);  // Can take full type as is
+    
+    bool isNonPrimitive = false; 
+    size_t start = 0;
+    size_t end = typeParsed.find(",");
+    std::string subType;
+    while (end != std::string::npos) {
+        subType = typeParsed.substr(start, end - start);   
+        removeNamespace(subType, true, unitLanguage); 
+        if (!isPrimitiveType(subType, unitLanguage)) {
+            isNonPrimitive = true;
+            if (subType != className)
+                var.setNonPrimitiveExternal(true);
+        }
+        
+        start = end + 1;
+        end = typeParsed.find(",", start);
+    }
+
+    subType = typeParsed.substr(start, typeParsed.size() - start);
+    removeNamespace(subType, true, unitLanguage);
+    if (!isPrimitiveType(subType, unitLanguage)) {
+        isNonPrimitive = true;
+        if (subType != className)
+            var.setNonPrimitiveExternal(true);
+    }
+
+    return isNonPrimitive;
 }
 
-// Checks if name is global const format
-// Example: GLOBAL_FROMAT - upper case with "_"
+// Checks if a type is primitive.  
 //
-bool isGlobalConstFormat(const std::string& name) {
-    bool result = true;
-    for (int k = 0; k < name.size(); ++k) {
-        if (!isupper(name[k]) && name[k] != '_') result = false;
-    }
-    return result;
+bool isPrimitiveType(const std::string& type, const std::string& unitLanguage) {
+    std::istringstream subType(type);
+    std::string token;
+    while (std::getline(subType, token, ','))
+        if (!PRIMITIVES.isPrimitive(token, unitLanguage)) return false;
+    return true;
+}
+
+bool matchSubstring(const std::string& text, const std::string& substring) {
+    const std::string pattern = "\\b" + substring + "\\b"; 
+    const std::regex regexPattern(pattern);
+    std::smatch match;
+    return std::regex_search(text, match, regexPattern);
 }
 
 
-// Checks if method is const
-bool checkConst(const std::string& srcml) {
-    std::string function_srcml = trimWhitespace(srcml);
-    size_t end = function_srcml.find("{");
-    std::string function_srcml_header = function_srcml.substr(0, end);
-    if (function_srcml_header.find("<specifier>const</specifier><block>") != std::string::npos) {
-        return true;
-    } else if (function_srcml_header.find("</parameter_list><specifier>const</specifier>") != std::string::npos) {
-        return true;
-    } else {
-        return false;
-    }
+// Removes specifiers from type name
+//
+void removeTypeTokens(std::string& type, std::string unitLanguage) {
+    std::regex regexPattern(TYPE_TOKENS.getTypeTokens(unitLanguage));
+    type = std::regex_replace(type, regexPattern, " ");
 }
 
-// Checks if a name could be an inheritied attribute
+// Removes all whitespace from string
 //
-// REQUIRES: parentClass.size() > 0 - the class inherits from another class
+void trimWhitespace(std::string& s) {
+    s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) { return std::isspace(c); }), s.end());
+}
+
+// Trim blanks of the right of string
 //
-// TODO: Should we check for global const?  - AxisModelLinear.cxx bool FLT_EQUAL( double x, double y ) has a global.
+void Rtrim(std::string& s) {
+    size_t lastNonSpace = s.find_last_not_of(' ');
+    if (lastNonSpace != std::string::npos)
+        s = s.substr(0, lastNonSpace + 1);   
+}
+
+// Removes namespaces from names
+// all = false keeps the last :: or .
 //
-bool isInheritedAttribute(const std::vector<std::string>& parameter_names,
-                                      const std::vector<std::string>& local_var_names,
-                                      const std::string& expr) {
-    bool is_inherited = true;
-    // checks for literal return expression
-    if (expr == "#") is_inherited = false;
-    if (expr == "true" || expr == "false" || expr == "TRUE" || expr == "FALSE") is_inherited = false;
-    // expr is a keyword that is not a attribute
-    if (expr == "this" || expr == "cout" || expr == "endl") is_inherited = false;
-
-    for (int k = 0; k < parameter_names.size(); ++k) { // expr is not inherited if it is a parameter name
-        if(expr == parameter_names[k]) is_inherited = false;
-    }
-
-    for (int k = 0; k < local_var_names.size(); ++k) { // expr is not inherited if it is a local variable
-        if (expr == local_var_names[k]) is_inherited = false;
-    }
-
-    for (int k = 0; k < expr.size(); ++k) {  // expr is not inherited if it contains an operator
-        if (expr[k] == '+' || expr[k] == '-' || expr[k] == '*' || expr[k] == '/'
-            || expr[k] == '%' || expr[k] == '(' || expr[k] == '!' || expr[k] == '&'
-            || expr[k] == '|' || expr[k] == '=' || expr[k] == '>' || expr[k] == '<'
-            || expr[k] == '.' || expr[k] == '?' || expr[k] == ':' || expr[k] == '"') {
-            is_inherited = false;
+void removeNamespace(std::string& name, bool all, std::string_view unitLanguage) {
+    size_t last, secondLast;
+    if (unitLanguage == "C++") last = name.rfind("::");
+    else last = name.rfind(".");
+    if (last != std::string::npos) {
+        if (all) {
+            if (unitLanguage == "C++") name = name.substr(last + 2);
+            else name = name.substr(last + 1);
+        }
+        else {
+            if (unitLanguage == "C++") secondLast = name.rfind("::", last - 1);
+            else secondLast = name.rfind(".", last - 1);
+            if (secondLast != std::string::npos) {
+                if (unitLanguage == "C++") name = name.substr(secondLast + 2); 
+                else name = name.substr(secondLast + 1); 
+            }                      
         }
     }
-
-    return is_inherited;
 }
 
-
-// dont count calls if
-// there is a . or -> somewhere in the name
-// or call is static and class name is the same
-//
-int countPureCalls(const std::vector<std::string>& all_calls)  {
-    int result = all_calls.size();
-    for (int i = 0; i < all_calls.size(); ++i) {
-        size_t colon = all_calls[i].find(":");
-        size_t dot   = all_calls[i].find(".");
-        size_t arrow = all_calls[i].find("->");
-        if (dot != std::string::npos || arrow != std::string::npos) {
-            --result;
-        }
-        else if (colon != std::string::npos) {
-            std::string name = all_calls[i].substr(0, colon);
-            --result;
-        }
-    }
-    return result;
-}
-
-
-//
-// Checks if a primitive type
-//  Examples: int, bool, char, double, cont int, inline int
-//            vector<int>, map<int,int>, int[], int*, int&
-bool isPrimitiveContainer(const std::string& str) {
-    std::string s = removeSpecifiers(str);
-    s = WStoBlank(s);
-    //Remove std::vector, list, map, std::vector<list<x>>  std::map<int, int>
-    size_t pos = 0;
-    while ((pos = s.find("std::vector")) != std::string::npos) s.erase(pos, 11);
-    while ((pos = s.find("std::list")) != std::string::npos) s.erase(pos, 9);
-    while ((pos = s.find("std::set")) != std::string::npos) s.erase(pos, 8);
-    while ((pos = s.find("std::map")) != std::string::npos) s.erase(pos, 8);
-    while ((pos = s.find("vector")) != std::string::npos) s.erase(pos, 6);
-    while ((pos = s.find("list")) != std::string::npos) s.erase(pos, 4);
-    while ((pos = s.find("set")) != std::string::npos) s.erase(pos, 3);
-    while ((pos = s.find("map")) != std::string::npos) s.erase(pos, 3);
-    //Replace < > , with space
-    std::replace_if(s.begin(), s.end(), [](char c) { return c == ',' || c == '<' || c == '>'; }, ' ');
-    s = multiBlanksToBlank(Rtrim(Ltrim(s))); //Make one space between each name
-    if (s.find(" ") != std::string::npos) {  //Multiple type names
-        size_t start = 0;
-        size_t end = s.find(" ");
-        while (end != std::string::npos) {
-            if (!PRIMITIVES.isPrimitive(s.substr(start, end - start))) return false;
-            start = end + 1;
-            end = s.find(" ", start);
-        }
-        return PRIMITIVES.isPrimitive(s.substr(start, end - start));
-    }
-    return PRIMITIVES.isPrimitive(s);  //One type name
-}
-
-
-
-//
-// Removes WS, specifiers, *, & from type name
-//
-std::string separateTypeName(const std::string& type) {
-    std::string result = trimWhitespace(type);
-    result = removeSpecifiers(result);
-
-    return result;
-}
-
-//
-// Removes specifiers, *, & from type name
-//
-std::string removeSpecifiers(const std::string& type) {
-    std::string result = type;
-    size_t pos = 0;
-    pos = result.find("static");
-    if (pos != std::string::npos) result.erase(pos, 6);
-    pos = result.find("mutable");
-    if (pos != std::string::npos) result.erase(pos, 7);
-    pos = result.find("inline");
-    if (pos != std::string::npos) result.erase(pos, 6);
-    pos = result.find("virtual");
-    if (pos != std::string::npos) result.erase(pos, 7);
-    pos = result.find("const");
-    if (pos != std::string::npos) result.erase(pos, 5);
-    pos = result.find("friend");
-    if (pos != std::string::npos) result.erase(pos, 6);
-    pos = result.find("*");
-    if (pos != std::string::npos) result.erase(pos, 1);
-    pos = result.find("&&");
-    if (pos != std::string::npos) result.erase(pos, 2);
-    pos = result.find("&");
-    if (pos != std::string::npos) result.erase(pos, 1);
-    pos = result.find("[]");
-    if (pos != std::string::npos) result.erase(pos, 2);
-
-    return result;
-}
-
-
-//Removes all whitespace from string (' ', /t, /n)
-std::string trimWhitespace(const std::string& s) {
-    std::string result(s);
-    result.erase(std::remove_if(result.begin(),
-                                result.end(),
-                                [](char c) { return isspace(c); } ),
-                 result.end());
-    return result;
-}
-
-//Trim blanks off the left of string
-std::string Ltrim(const std::string& s) {
-    std::string result(s);
-    while (result[0] == ' ') result.erase(0, 1);
-    return result;
-}
-
-//Trim blanks of the right of string
-std::string Rtrim(const std::string& s) {
-    std::string result(s);
-    while (result[result.size()-1] == ' ') result.erase(result.size()-1, 1);
-    return result;
-}
-
-//Normalize multiple blanks to one blank
-std::string multiBlanksToBlank(const std::string& s) {
-    std::string result(s);
-    size_t pos = 0;
-    while ((pos = result.find("  ")) != std::string::npos) result.erase(pos, 1);
-    return result;
-}
-
-// Converts all whitespace to blanks  ('\r' => ' ')
-std::string WStoBlank(const std::string& s) {
-    std::string result(s);
-    std::replace_if(result.begin(),
-                    result.end(),
+// Converts all whitespaces to blanks  ('\r' => ' ')
+void WStoBlank(std::string& s) {
+    std::replace_if(s.begin(),
+                    s.end(),
                     [](char c) { return isspace(c); },
                     ' ');
-    return result;
 }
 
+// Removes all characters inside <> or () except for comma
+// For example, myObject<int, std::pair<int, int>> becomes myObject<,>
+//  and Foo(int, std::pair<int, int>, double) becomes Foo(,,)
+//
+void removeBetweenComma(std::string& s, bool isGeneric) {
+    size_t opening;
+    if (isGeneric)
+      opening = s.find("<");
+    else
+      opening = s.find("(");
+
+    if (opening != std::string::npos) {
+        std::string name = s.substr(0, opening + 1);
+        s = s.substr(opening + 1);
+        
+        // This could be nested inside () or <> for types
+        // <[^>]*> --> starts at <, then matches everything except > and stops at > including the >
+        std::string pattern = R"(<[^>]*>)";  
+        std::regex regexPattern(pattern);
+        s = std::regex_replace(s, regexPattern, "");  
+        
+        pattern = "";
+        if (isGeneric)
+          pattern = R"(([^,]*)(,|>))";
+        else
+          pattern = R"(([^,]*)(,|\)))";
+        
+        const std::regex regexPatternTwo (pattern);
+        s = std::regex_replace(s, regexPatternTwo, "$2"); // $2 is used to replace the content with the second group
+        s = name + s;
+    }
+}
+
+// Workaround to get Stereocode to work with srcML 1.0.0
+void srcmlBackwardCompatibility(std::string& xmlText) {
+    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor>", "><function"};
+
+    size_t pos = std::string::npos;
+    for (const auto& tag : tags) {
+        pos = xmlText.find(tag);
+        if (pos != std::string::npos) {
+            break;
+        }
+    }
+
+    if (pos != std::string::npos) { 
+        std::string beforeFunction = xmlText.substr(0, pos);
+        std::string afterFunction = xmlText.substr(pos);
+        size_t item = beforeFunction.find("item=");
+        if (item != std::string::npos) {}
+            beforeFunction = beforeFunction.substr(0, item);
+
+        beforeFunction.pop_back();
+        xmlText = beforeFunction + afterFunction;
+    }
+}

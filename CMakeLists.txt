@@ -1,54 +1,62 @@
 # @file CMakeLists.txt
 # CMake files for the Stereocode project
 
-# Supports any version of CMake >= specified.
+# Supports any version of CMake >= specified
 cmake_minimum_required(VERSION 3.17)
 
-# Project information.
+# To allow special characters in test names
+cmake_policy(SET CMP0110 NEW)
+
+# Project information
 project(Stereocode LANGUAGES CXX)
 
-# C++17 standard (Not enforced).
+# Stereocode requires C++17 or higher
 set(CMAKE_CXX_STANDARD 17)
 
-# Use Debug build type if a build type is not specified
+# Use Release build type if a build type is not specified
 if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE Debug)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
-# Get a list of paths for the cpp and hpp files.
+# Get a list of paths for the cpp and hpp files
 file(GLOB STEREOCODE_SOURCE *.cpp *.hpp)
 
-# The stereocode application (target).
+# The stereocode application (target)
 add_executable(stereocode ${STEREOCODE_SOURCE})
 
-# Assumes srcml.h may be in this directory
-target_include_directories(stereocode PRIVATE /usr/local/include)
-
-# Download the CLI11 parser into directory named "external".
-set(CMAKE_EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external) # Creates folder if doesn't exists.
-file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.3.2/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp) # Name of file is needed since content of file itself are being downloaded.
+# Check if the CLI11 exists
+set(CLI11_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
+set(CMAKE_EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external)
+if(EXISTS ${CLI11_DIR})
+    # If it exists, copy the 'external' directory to the binary directory.
+    file(COPY ${CLI11_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+else()
+    # If it doesn't exist, download the file.
+    file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.4.1/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp)
+endif()
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
-# Search (in common directories) and link the dynamic library libsrcml.
-find_library(LIBSRCML_LINK NAMES libsrcml libsrcml.1 libsrcml.1.dylib libsrcml.so.1 libsrcml.so)
-target_link_directories(stereocode PRIVATE /usr/local/lib)
-target_link_libraries(stereocode ${LIBSRCML_LINK})
+# Find and use libsrcml
+find_package(srcML REQUIRED)
+target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
 
 # Turn on compiler warnings.
-add_compile_options(
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall> # Adds "-Wall" to the options if the compiler is either GNU, Clang, or AppleClang
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wextra>
-    $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-pedantic>
-    $<$<CXX_COMPILER_ID:MSVC>:/Wall>
-)
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    add_compile_options(-Wall -Wextra -Wpedantic) 
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    add_compile_options(/Wall /Wextra /Wpedantic)
+endif()
 
 enable_testing()
 file(COPY tests DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(GLOB TESTFILES ${CMAKE_CURRENT_BINARY_DIR}/tests/*.xml)
-list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|annotated.xml|runtests.cmake")
+list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|stereotypes.xml|runtests.cmake|.cpp|.cs|.java")
 foreach(TEST ${TESTFILES})
     message(STATUS "Add test case ${TEST}")
-    get_filename_component(BASENAME "${TEST}" NAME_WE)
-    # The -D option creates variables and pass them with the -P option to the runtests.cmake
-    add_test(NAME "${BASENAME}_test" COMMAND ${CMAKE_COMMAND} -DSTEREOCODE=$<TARGET_FILE:stereocode> -DTEST_FILE=${TEST} -P tests/runtests.cmake)
+    get_filename_component(DIRPART ${TEST} DIRECTORY)
+    get_filename_component(BASENAME ${TEST} NAME)
+    string(REGEX REPLACE "\\.xml$" "" BASENAME ${BASENAME})
+    set(FULL_PATH_WITHOUT_EXTENSION "${DIRPART}/${BASENAME}")
+    # The -D option creates variables and pass them with the -P option to the runtests.cmake.
+    add_test(NAME "${BASENAME}_test" COMMAND ${CMAKE_COMMAND} -DSTEREOCODE=$<TARGET_FILE:stereocode> -DTEST_FILE=${FULL_PATH_WITHOUT_EXTENSION} -P tests/runtests.cmake)
 endforeach()
