@@ -32,7 +32,7 @@ if(EXISTS ${CLI11_DIR})
     file(COPY ${CLI11_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 else()
     # If it doesn't exist, download the file.
-    file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.4.1/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp)
+    file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.4.2/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp)
 endif()
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 

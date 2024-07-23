@@ -69,7 +69,7 @@ public:
     void inheritAttribute(const std::unordered_map<std::string, variable>& inheritedNonPrivateAttribute, 
                           const std::string& inheritanceSpecifier) { 
         attributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());
-        if (inheritanceSpecifier != "private") // C++ Only
+        if (inheritanceSpecifier != "private") 
             // Used to chain inheritance
             nonPrivateAndInheritedAttributes.insert(inheritedNonPrivateAttribute.begin(), inheritedNonPrivateAttribute.end());         
     }
