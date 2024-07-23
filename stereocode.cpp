@@ -114,25 +114,14 @@ int main (int argc, char const *argv[]) {
         srcml_archive_free(outputArchive);
         return -1;
     }
-
+    
     // Register namespace for output of stereotypes 
     srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
 
-    std::vector<srcml_unit*> units;
-    srcml_unit* unit = srcml_archive_read_unit(archive);
-
-    // Read all units in an archive
-    while (unit){
-        units.push_back(unit);
-        unit = srcml_archive_read_unit(archive);
-    }
-
     // Find method and class stereotypes
-    if (units.size() > 0) {
-        XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
-        classModelCollection classObj(archive, outputArchive, units, 
-                                      inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
-    }
+    XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
+    classModelCollection classObj(archive, outputArchive, 
+                                    inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
 
     if (overWriteInput) {
         std::filesystem::remove(inputFile);

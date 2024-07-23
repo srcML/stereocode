@@ -18,11 +18,10 @@
 
 class classModelCollection {
 public:
-                         classModelCollection           (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>&, 
-                                                        const std::string&, const std::string&, bool, bool, bool);
+                         classModelCollection           (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
 
-    void                 findClassInfo                  (srcml_archive*, std::vector<srcml_unit*>);
-    void                 findFreeFunctions              (srcml_archive*, std::vector<srcml_unit*>);
+    void                 findClassInfo                  (srcml_archive*, srcml_unit*, int);
+    void                 findFreeFunctions              (srcml_archive*, srcml_unit*, int);
     void                 findInheritedAttributes        (classModel&);
     void                 findInheritedMethods           (classModel&);
 
