@@ -16,6 +16,8 @@ typeTokens                         TYPE_TOKENS;                                 
 int                                METHODS_PER_CLASS_THRESHOLD = 21;                   // Threshold for large class stereotype (from ICSM10)
 bool                               STRUCT                      = false;                // Identify and stereotype structs (C++ or C#)
 bool                               INTERFACE                   = false;                // Identify and stereotype interfaces (C# or Java)
+bool                               UNION                       = false;                // Identify and stereotype unions (C++)
+bool                               ENUM                        = false;                // Identify and stereotype enums (Java)
 bool                               IS_VERBOSE                  = false;                // Prints primitives, ignored calls, and type tokens
 
 std::unordered_map
@@ -46,6 +48,8 @@ int main (int argc, char const *argv[]) {
     app.add_option("-g,--ignore-call-file",   ignoredCallsFile,            "File name of user supplied calls to ignore (one per line)");
     app.add_option("-t,--type-token-file",    typeTokensFile,              "File name of user supplied data type tokens to remove (one per line)");
     app.add_flag  ("-i,--interface",          INTERFACE,                   "Identify stereotypes for interfaces (C# and Java)");
+    app.add_flag  ("-n,--union",              UNION,                       "Identify stereotypes for unions (C++)");
+    app.add_flag  ("-m,--enum",               ENUM,                        "Identify stereotypes for enums (Java)");
     app.add_flag  ("-s,--struct",             STRUCT,                      "Identify stereotypes for structs (C# and Java)");
     app.add_flag  ("-e,--input-overwrite",    overWriteInput,              "Overwrite input with stereotype information");
     app.add_flag  ("-x,--txt-report",         outputTxtReport,             "Output optional TXT report file containing stereotype information");

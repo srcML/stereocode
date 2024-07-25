@@ -17,16 +17,15 @@ public:
          classModel                         (srcml_archive*, srcml_unit*, const std::string&);
          
     void findClassName                      (srcml_archive*, srcml_unit*);
-    void findStaticSpecifier                (srcml_archive*, srcml_unit*);
     void findStructureType                  (srcml_archive*, srcml_unit*);
     void findParentClassName                (srcml_archive*, srcml_unit*);
     void findAttributeName                  (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findAttributeType                  (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
     void findNonPrivateAttributeName        (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findNonPrivateAttributeType        (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
-    void findMethod                         (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
-    void findMethodInProperty               (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
-    void findClassData                      (srcml_archive*, srcml_unit*, std::vector<methodModel>&, const std::string&, int);
+    void findMethod                         (srcml_archive*, srcml_unit*, const std::string&, int);
+    void findMethodInProperty               (srcml_archive*, srcml_unit*, const std::string&, int);
+    void findClassData                      (srcml_archive*, srcml_unit*, const std::string&, int);
 
     void computeClassStereotype();
     void computeMethodStereotype();
@@ -97,7 +96,6 @@ private:
     std::unordered_map<std::string, variable>               attributes;                      // Key is attribute name and value is attribute object
     std::unordered_map<std::string, variable>               nonPrivateAndInheritedAttributes;// Non-private attributes of class + inherited attributes from all parent classes
     std::unordered_map<int, std::vector<std::string>>       xpath;                           // Unique xpath for class (classes if partial in C#) along with the unit number
-    bool                                                    staticClass{false};              // Is class static?
     bool                                                    inherited{false};                // Did class inherit the attributes yet? (Used for inheritance)
     bool                                                    visited{false};                  // Has class been visited yet when inheriting? (Used for inheritance)    
     int                                                     constructorDestructorCount{0};   // Number of constructor + destructor methods (Needed for class stereotypes)

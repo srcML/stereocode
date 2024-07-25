@@ -18,6 +18,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <map>
+#include <cstddef>
 #include "PrimitiveTypes.hpp"
 #include "TypeTokens.hpp"
 #include "variable.hpp"

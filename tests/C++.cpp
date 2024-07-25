@@ -143,6 +143,77 @@ public:
     int getDataA() { return dataC; }
 };
 
+union MyUnion {
+    int intValue;
+    float floatValue;
+
+    void setIntValue(int value) {
+        intValue = value;
+    }
+
+    int getIntValue() const {
+        return intValue;
+    }
+};
+
+class Example {
+public:
+    int getIntValue() const {
+        return intValue;
+    }
+
+private:
+    union {
+        int intValue;
+    };
+};
+
+static union {
+    int intValue;
+    float floatValue;
+    char charValue;
+};
+
+class {
+    int value;
+    int getValue() {
+        return value;
+    }
+} anonymousClass;
+
+struct {
+    int value;
+    int getValue() {
+        return value;
+    }
+} anonymousStruct;
+
+class Base {
+public:
+    void display() {
+        std::cout << "Base class display function" << std::endl;
+    }
+};
+
+typedef class : public Base {
+public:
+    int value;
+    int getValue() {
+        return value;
+    }
+} TypedefClass;
+
+
+class MyStaticClass {
+public:
+    static void staticMethod() {
+        std::cout << "This is a static method." << std::endl;
+    }
+};
+
+static void staticFunction() {
+    std::cout << "This is a static free function." << std::endl;
+}
 
 int main() {
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0" language="Java" filename="Java.java"><class><specifier>public</specifier> <specifier>static</specifier> class <name>ExternalFunctions</name> <block>{
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0" language="Java" filename="Java.java"><class>class <name>ExternalFunctions</name> <block>{
     <function><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>externalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
         <expr_stmt><expr><call><name><name>System</name><operator>.</operator><name>out</name><operator>.</operator><name>println</name></name><argument_list>(<argument><expr><literal type="string">"This is an external function call."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
     </block_content>}</block></function>
@@ -9,7 +9,7 @@
     </block_content>}</block></function>
 }</block></class>
 
-<class><specifier>public</specifier> class <name>AnotherClass</name> <block>{
+<class>class <name>AnotherClass</name> <block>{
     <decl_stmt><decl><type><specifier>private</specifier> <name>int</name></type> <name>anotherDataMember</name></decl>;</decl_stmt>
 
     <constructor><specifier>public</specifier> <name>AnotherClass</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>)</parameter_list> <block>{<block_content>
@@ -21,7 +21,7 @@
     </block_content>}</block></function>
 }</block></class>
 
-<class><specifier>public</specifier> class <name>MyClass</name> <block>{
+<class>class <name>MyClass</name> <block>{
     <decl_stmt><decl><type><specifier>private</specifier> <name>int</name></type> <name>dataMember</name></decl>;</decl_stmt>
     <decl_stmt><decl><type><specifier>private</specifier> <name>String</name></type> <name>otherDataMember</name></decl>;</decl_stmt>
 
@@ -101,10 +101,6 @@
         <expr_stmt><expr><call><name><name>System</name><operator>.</operator><name>out</name><operator>.</operator><name>println</name></name><argument_list>(<argument><expr><literal type="string">"Sum of local numbers: "</literal> <operator>+</operator> <name>sum</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
     </block_content>}</block></function>
 
-    <function><type><specifier>public</specifier> <name>int</name></type> <name>getDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
-        <return>return <expr><name><name>this</name><operator>.</operator><name>dataMember</name></name></expr>;</return>
-    </block_content>}</block></function>
-
     <function><type><specifier>public</specifier> <name>void</name></type> <name>setDataMember</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>dataMember</name></decl></parameter>)</parameter_list> <block>{<block_content>
         <expr_stmt><expr><name><name>this</name><operator>.</operator><name>dataMember</name></name> <operator>=</operator> <name>dataMember</name></expr>;</expr_stmt>
     </block_content>}</block></function>
@@ -118,9 +114,7 @@
     </block_content>}</block></function>
 }</block></class>
 
-
-
-<class><specifier>public</specifier> class <name>C</name> <block>{
+<class>class <name>C</name> <block>{
     <decl_stmt><decl><type><specifier>protected</specifier> <name>int</name></type> <name>dataC</name></decl>;</decl_stmt>
 
     <function><type><specifier>public</specifier> <name>int</name></type> <name>getDataC</name><parameter_list>()</parameter_list> <block>{<block_content>
@@ -128,22 +122,54 @@
     </block_content>}</block></function>
 }</block></class>
 
-<class><specifier>public</specifier> class <name>B</name> <super_list><extends>extends <super><name>C</name></super></extends></super_list> <block>{
+<class>class <name>B</name> <super_list><extends>extends <super><name>C</name></super></extends></super_list> <block>{
     <function><type><specifier>public</specifier> <name>int</name></type> <name>getDataB</name><parameter_list>()</parameter_list> <block>{<block_content>
         <return>return <expr><name>dataC</name></expr>;</return>
     </block_content>}</block></function>
 }</block></class>
 
-<class><specifier>public</specifier> class <name>A</name> <super_list><extends>extends <super><name>B</name></super></extends></super_list> <block>{
+<class>class <name>A</name> <super_list><extends>extends <super><name>B</name></super></extends></super_list> <block>{
     <function><type><specifier>public</specifier> <name>int</name></type> <name>getDataA</name><parameter_list>()</parameter_list> <block>{<block_content>
         <return>return <expr><name>dataC</name></expr>;</return>
     </block_content>}</block></function>
 }</block></class>
 
+<enum>enum <name>Day</name> <block>{
+    <decl><name>MONDAY</name><argument_list>(<argument><expr><literal type="string">"Start of the work week"</literal></expr></argument>, <argument><expr><literal type="number">8</literal></expr></argument>)</argument_list></decl>,
+    <decl><name>TUESDAY</name><argument_list>(<argument><expr><literal type="string">"Second day of the work week"</literal></expr></argument>, <argument><expr><literal type="number">8</literal></expr></argument>)</argument_list></decl>,
+    <decl><name>WEDNESDAY</name><argument_list>(<argument><expr><literal type="string">"Midweek"</literal></expr></argument>, <argument><expr><literal type="number">8</literal></expr></argument>)</argument_list></decl>,
+    <decl><name>THURSDAY</name><argument_list>(<argument><expr><literal type="string">"Almost the weekend"</literal></expr></argument>, <argument><expr><literal type="number">8</literal></expr></argument>)</argument_list></decl>,
+    <decl><name>FRIDAY</name><argument_list>(<argument><expr><literal type="string">"End of the work week"</literal></expr></argument>, <argument><expr><literal type="number">8</literal></expr></argument>)</argument_list></decl>,
+    <decl><name>SATURDAY</name><argument_list>(<argument><expr><literal type="string">"Weekend"</literal></expr></argument>, <argument><expr><literal type="number">0</literal></expr></argument>)</argument_list></decl>,
+    <decl><name>SUNDAY</name><argument_list>(<argument><expr><literal type="string">"Weekend"</literal></expr></argument>, <argument><expr><literal type="number">0</literal></expr></argument>)</argument_list></decl>;
+
+    <decl_stmt><decl><type><specifier>private</specifier> <name>String</name></type> <name>description</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><specifier>private</specifier> <name>int</name></type> <name>workingHours</name></decl>;</decl_stmt>
+
+    <constructor><name>Day</name><parameter_list>(<parameter><decl><type><name>String</name></type> <name>description</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>workingHours</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>this</name><operator>.</operator><name>description</name></name> <operator>=</operator> <name>description</name></expr>;</expr_stmt>
+        <expr_stmt><expr><name><name>this</name><operator>.</operator><name>workingHours</name></name> <operator>=</operator> <name>workingHours</name></expr>;</expr_stmt>
+    </block_content>}</block></constructor>
+
+    <function><type><specifier>public</specifier> <name>void</name></type> <name>setDescription</name><parameter_list>(<parameter><decl><type><name>String</name></type> <name>description</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>this</name><operator>.</operator><name>description</name></name> <operator>=</operator> <name>description</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function><type><specifier>public</specifier> <name>String</name></type> <name>getDescription</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>description</name></expr>;</return>
+    </block_content>}</block></function>
+
+    <function><type><specifier>public</specifier> <name>void</name></type> <name>setWorkingHours</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>workingHours</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>this</name><operator>.</operator><name>workingHours</name></name> <operator>=</operator> <name>workingHours</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function><type><specifier>public</specifier> <name>int</name></type> <name>getWorkingHours</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>workingHours</name></expr>;</return>
+    </block_content>}</block></function>
+}</block></enum>
 
 <class><specifier>public</specifier> class <name>Program</name> <block>{
     <function><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>main</name><parameter_list>(<parameter><decl><type><name><name>String</name><index>[]</index></name></type> <name>args</name></decl></parameter>)</parameter_list> <block>{<block_content>
         
     </block_content>}</block></function>
-}</block></class>
-</unit>
+}</block></class></unit>

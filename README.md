@@ -50,6 +50,9 @@ srcml PowerShell.zip -o PowerShell.xml
 ./stereocode --help
 ```
 
+Note:</br>
+Stereocode can stereotype *free functions*. A *free function* could a static method/function, a friend function (C++), or simply a function that does not belong to a class (C++) **(This is still under development, a taxonomy will be available soon)**.
+
 ## 📜 Stereocode Options
 
 <span style='color: lightgreen;'>**-o, --output-file:**</span> File name of output - srcML archive with stereotypes.
@@ -60,9 +63,13 @@ srcml PowerShell.zip -o PowerShell.xml
 
 <span style='color: lightgreen;'>**-t, --type-token-file:**</span> File name of user supplied data type tokens to remove (one per line). 
 
-<span style='color: lightgreen;'>**-i, --enable-interface:**</span> Identify stereotypes for interfaces (C# and Java). 
+<span style='color: lightgreen;'>**-i, --interface:**</span> Identify stereotypes for interfaces (C# and Java). 
 
-<span style='color: lightgreen;'>**-s, --enable-struct:**</span> Identify stereotypes for structs (C# and Java). 
+<span style='color: lightgreen;'>**-n, --union:**</span> Identify stereotypes for unions (C++). 
+
+<span style='color: lightgreen;'>**-m, --enum:**</span> Identify stereotypes for enums (Java). 
+
+<span style='color: lightgreen;'>**-s, --struct:**</span> Identify stereotypes for structs (C# and Java). 
 
 <span style='color: lightgreen;'>**-e, --input-overwrite:**</span> Overwrite input with stereotype information. 
 
@@ -73,6 +80,7 @@ srcml PowerShell.zip -o PowerShell.xml
 <span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */). 
 
 <span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21).
+
 
 ## 📓 Developer Notes:
 

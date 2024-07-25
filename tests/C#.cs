@@ -156,6 +156,17 @@ public class A : B {
     }
 }
 
+public class MyNestedClass {
+    public void OuterMethod() {
+        void LocalFunction() {
+            Console.WriteLine("This is a local function.");
+        }
+
+        static void StaticLocalFunction() {
+            Console.WriteLine("This is a static local function.");
+        }
+    }
+}
 
 public class Program {
     public static void Main() {

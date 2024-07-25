@@ -50,7 +50,6 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     unit = srcml_archive_read_unit(archive);
     unitNumber = 0;
     while (unit){
-        // Collects free functions and methods defined externally to a class (C++ only)
         findFreeFunctions(archive, unit, unitNumber); 
         
         srcml_unit_free(unit); 
@@ -105,10 +104,16 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     if (outputTxtReport) {
         std::ofstream reportFile(InputFileNoExt + ".stereotypes.txt");
         std::stringstream stringStream;
-        for (auto& pair : classCollection)
-            outputTxtReportFile(stringStream, pair.second);
+        for (auto& pair : classCollection) 
+            outputTxtReportFile(stringStream, &pair.second);
         reportFile << stringStream.str();
-        reportFile.close();        
+        reportFile.close();         
+
+        reportFile.open(InputFileNoExt + ".free_functions_stereotypes.txt");
+        std::stringstream stringStreamFunctions;  // Declare a new stringstream
+        outputTxtReportFile(stringStreamFunctions, nullptr);
+        reportFile << stringStreamFunctions.str();
+        reportFile.close();   
     }
 
     // Optional CSV report file
@@ -117,8 +122,13 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
         out.open(InputFileNoExt + ".stereotypes.csv");
         out << "Class Name,Class Stereotype,Method Name,Method Stereotype" << '\n';
         for (auto& pair : classCollection)
-            outputCsvReportFile(out, pair.second);        
- 
+            outputCsvReportFile(out, &pair.second);        
+        out.close();
+
+        out.open(InputFileNoExt + ".stereotypes.csv");
+        out << "Free Function Name,Free Function Stereotype" << '\n';
+        for (auto& pair : classCollection)
+            outputCsvReportFile(out, &pair.second);        
         out.close();
     }
 
@@ -239,7 +249,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
             resultUnit = srcml_transform_get_unit(result, i);
             srcml_archive* classArchive = srcml_archive_create();
             char* unparsed = nullptr;
-            size_t size = 0;
+            std::size_t size = 0;
             srcml_archive_write_open_memory(classArchive, &unparsed, &size);
             srcml_archive_write_unit(classArchive, resultUnit);
             srcml_archive_close(classArchive);
@@ -254,9 +264,9 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
             
             // Needed for partial classes in C#
             if (classCollection.find(c.getName()[1]) != classCollection.end())
-                classCollection.at(c.getName()[1]).findClassData(classArchive, unitClass, freeFunctions, classXpath, unitNumber);
+                classCollection.at(c.getName()[1]).findClassData(classArchive, unitClass, classXpath, unitNumber);
             else {
-                c.findClassData(classArchive, unitClass, freeFunctions, classXpath, unitNumber);      
+                c.findClassData(classArchive, unitClass, classXpath, unitNumber);      
                 classCollection.insert({c.getName()[1], c});  
             }                 
 
@@ -298,63 +308,64 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
 //
 void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit); 
-    if (unitLanguage == "C++") {     
-        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function").c_str());
-        srcml_transform_result* result = nullptr;
-        srcml_unit_apply_transforms(archive, unit, &result);
-        int n = srcml_transform_get_unit_size(result);  
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function").c_str());
+    srcml_transform_result* result = nullptr;
+    srcml_unit_apply_transforms(archive, unit, &result);
+    int n = srcml_transform_get_unit_size(result);  
 
-        srcml_unit* resultUnit = nullptr;
-        for (int i = 0; i < n; i++) {
-            resultUnit = srcml_transform_get_unit(result, i);
-            srcml_archive* methodArchive = srcml_archive_create();
-            char* unparsed = nullptr;
-            size_t size = 0;
-            srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
-            srcml_archive_write_unit(methodArchive, resultUnit);
-            srcml_archive_close(methodArchive);
-            srcml_archive_free(methodArchive);
+    srcml_unit* resultUnit = nullptr;
+    for (int i = 0; i < n; i++) {
+        resultUnit = srcml_transform_get_unit(result, i);
+        srcml_archive* methodArchive = srcml_archive_create();
+        char* unparsed = nullptr;
+        std::size_t size = 0;
+        srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
+        srcml_archive_write_unit(methodArchive, resultUnit);
+        srcml_archive_close(methodArchive);
+        srcml_archive_free(methodArchive);
 
-            methodArchive = srcml_archive_create();
-            srcml_archive_read_open_memory(methodArchive, unparsed, size);
-            srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
-            
-            std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function") + ")[" + std::to_string(i + 1) + "]";
-            methodModel function(methodArchive, methodUnit, functionXpath, unitLanguage, "", unitNumber);
-            if (function.IsStatic())
-                freeFunctions.push_back(function);   
-            else {
-                // Removes namespaces if any
-                std::string functionName = function.getName();  
-                removeNamespace(functionName, false, "C++");
+        methodArchive = srcml_archive_create();
+        srcml_archive_read_open_memory(methodArchive, unparsed, size);
+        srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
+        
+        std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function") + ")[" + std::to_string(i + 1) + "]";
+        methodModel function(methodArchive, methodUnit, functionXpath, unitLanguage, "", unitNumber);
 
-                // Get the class name (if any). Else, it is a free function
-                size_t isClassName = functionName.find("::");
-                if (isClassName != std::string::npos) { // Class found, it is a method       
-                    std::string className = functionName.substr(0, isClassName); 
-                    auto resultS = classCollection.find(className);
-                    if (resultS != classCollection.end())      
-                        resultS->second.addMethod(function);                         
-                    else { // Case specialized template method belongs to the generic template class
-                        className = className.substr(0, className.find("<"));
-                        resultS = classCollection.find(className);
-                        if (resultS != classCollection.end()) 
-                            resultS->second.addMethod(function);                       
-                        else 
-                            freeFunctions.push_back(function);                                   
-                    }
+        if (unitLanguage == "C++"){
+            // Removes namespaces if any
+            std::string functionName = function.getName();  
+            removeNamespace(functionName, false, "C++");
+
+            // Get the class name (if any). Else, it is a free function
+            std::size_t isClassName = functionName.find("::");
+            if (isClassName != std::string::npos) { // Class found, it is a method       
+                std::string className = functionName.substr(0, isClassName); 
+                auto resultS = classCollection.find(className);
+                if (resultS != classCollection.end())      
+                    resultS->second.addMethod(function);                         
+                else { // Case specialized template method belongs to the generic template class
+                    className = className.substr(0, className.find("<"));
+                    resultS = classCollection.find(className);
+                    if (resultS != classCollection.end()) 
+                        resultS->second.addMethod(function);                       
+                    else 
+                        freeFunctions.push_back(function);  // Class wasn't found, treated as free function                                 
                 }
-                else 
-                    freeFunctions.push_back(function);   
-            }              
-            free(unparsed); 
-            srcml_unit_free(methodUnit);
-            srcml_archive_close(methodArchive);
-            srcml_archive_free(methodArchive);
+            }
+            else 
+                freeFunctions.push_back(function);  // Friend function or a static function
         }
-        srcml_transform_free(result);
-        srcml_clear_transforms(archive);            
+        else 
+            freeFunctions.push_back(function); // Static method (C# or Java)
+                        
+        free(unparsed); 
+        srcml_unit_free(methodUnit);
+        srcml_archive_close(methodArchive);
+        srcml_archive_free(methodArchive);
     }
+    srcml_transform_free(result);
+    srcml_clear_transforms(archive);            
+    
     
 }
 
@@ -669,17 +680,25 @@ void classModelCollection::outputCsvVerboseReportFile(const std::string& InputFi
 // Method Name:             Method Stereotype:
 // ...                      ...
 //
-void classModelCollection::outputTxtReportFile(std::stringstream& stringStream, classModel& c) {
+void classModelCollection::outputTxtReportFile(std::stringstream& stringStream, classModel* c) {
     const int WIDTH = 70;
     const std::string line(WIDTH * 2, '-');
-    const std::vector<methodModel>& methods = c.getMethods();
-    
     auto setw_width = std::setw(WIDTH);
-    std::string className = c.getName()[1];
-    stringStream << std::left << setw_width << "Class Name:" << setw_width << "Class Stereotype:" << '\n';
-    stringStream << std::left << setw_width <<  className << setw_width << c.getStereotype() << "\n\n";
-    stringStream << std::left << setw_width << "Method Name:" << setw_width << "Method Stereotype:" << '\n';
-    for (const auto& m : methods) {
+    std::vector<methodModel>* methods = &freeFunctions;
+
+    if (c != nullptr) {
+        const std::string& className = c->getName()[1];
+        const std::string& classStereotype = c->getStereotype();
+        stringStream << std::left << setw_width << "Class Name:" << setw_width << "Class Stereotype:" << '\n';
+        stringStream << std::left << setw_width <<  className << setw_width << classStereotype << "\n\n";
+        stringStream << std::left << setw_width << "Method Name:" << setw_width << "Method Stereotype:" << '\n';
+        methods = &c->getMethods();
+    }
+    else 
+        stringStream << std::left << setw_width << "Free Function Name:" << setw_width << "Free Function Stereotype:" << '\n';
+
+    
+    for (const auto& m : *methods) {
         std::string methodName = m.getName();
         stringStream << std::left << setw_width << methodName; 
         stringStream << setw_width << m.getStereotype() << '\n';
@@ -689,20 +708,24 @@ void classModelCollection::outputTxtReportFile(std::stringstream& stringStream, 
 
 // Optional CSV report file containing stereotype information
 //
-void classModelCollection::outputCsvReportFile(std::ofstream& out, classModel& c) {
-    const std::string& classStereotype =  c.getStereotype(); 
+void classModelCollection::outputCsvReportFile(std::ofstream& out, classModel* c) {
+    std::vector<methodModel>& methods = freeFunctions;
+    std::string classInfo;
+    if (c != nullptr) {
+        const std::string& classStereotype =  c->getStereotype(); 
+        std::string className = c->getName()[1];
+        className = "\"" + className + "\"";
+        classInfo = className + ",\"" + classStereotype + "\"";
+        methods = c->getMethods();
+    }
 
-    std::string className = c.getName()[1];
-    className = "\"" + className + "\"";
-    
-    const std::vector<methodModel>& method = c.getMethods();
-    for (const auto& m : method) {
+    for (const auto& m : methods) {
         std::string methodName = m.getName();
         methodName = "\"" + methodName + "\"";
 
         const std::string& methodStereotype = m.getStereotype();
-
-        out << className << "," << "\"" + classStereotype + "\"" << "," << methodName << ",";
+    
+         if (c != nullptr) out << classInfo << "," << methodName << ",";
         out << "\"" + methodStereotype + "\"" <<  "," << '\n';          
     }
 }

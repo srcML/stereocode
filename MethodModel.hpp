@@ -41,7 +41,6 @@ public:
     int                      getUnitNumber                      () const                { return unitNumber;                                }  
     int                      getNumOfExternalFunctionCalls      () const                { return numOfExternalFunctionCalls;                } 
     int                      getNumOfExternalMethodCalls        () const                { return numOfExternalMethodCalls;                  } 
-    bool                     IsStatic                           () const                { return staticMethod;                              } 
     bool                     IsConstMethod                      () const                { return constMethod;                               }
     bool                     IsAttributeReturned                () const                { return attributeReturned;                         }
     bool                     IsAttributeNotReturned             () const                { return attributeNotReturned;                      }
@@ -81,7 +80,6 @@ public:
     void                     findNewAssign              (srcml_archive*, srcml_unit*);
     void                     isConst                    (srcml_archive*, srcml_unit*);
     void                     isConstructorDestructor    (srcml_archive*, srcml_unit*);
-    void                     isStatic                   (srcml_archive*, srcml_unit*);
     void                     isIgnorableCall            (std::vector<calls>&);
     void                     isCallOnAttribute          (std::unordered_map<std::string, variable>&, 
                                                          const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);   
@@ -136,7 +134,6 @@ private:
     bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as class                                                
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
     bool                                              constructorDestructorUsed{false};           // Method is a constructor or a destructor
-    bool                                              staticMethod{false};                        // True if method is static
     int                                               unitNumber{-1};                             // Unit number
     int                                               numOfVariablesReturnedCreatedWithNew{0};    // Number of return expressions that return a local, parameter, or an attribute created with the "new" operator
     int                                               numOfAttributesModified{0};                 // Number of modified attributes

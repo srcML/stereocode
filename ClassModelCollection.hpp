@@ -29,8 +29,8 @@ public:
                                                          int, const std::unordered_map<std::string, std::string>&,  
                                                          std::unordered_map<int, srcml_transform_result*>&, std::mutex&);
     void                 outputAsComments               (srcml_unit*, srcml_archive*) ;                            
-    void                 outputTxtReportFile            (std::stringstream&, classModel&);
-    void                 outputCsvReportFile            (std::ofstream&, classModel&);
+    void                 outputTxtReportFile            (std::stringstream&, classModel*);
+    void                 outputCsvReportFile            (std::ofstream&, classModel*);
     void                 outputCsvVerboseReportFile     (const std::string&);
 
     bool                 isFriendFunction               (methodModel&);

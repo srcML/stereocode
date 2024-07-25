@@ -159,6 +159,17 @@
     </block_content>}</block></function>
 }</block></class>
 
+<class st:stereotype="degenerate small-class"><specifier>public</specifier> class <name>MyNestedClass</name> <block>{
+    <function st:stereotype="incidental"><type><specifier>public</specifier> <name>void</name></type> <name>OuterMethod</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <function><type><name>void</name></type> <name>LocalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+            <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"This is a local function."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        </block_content>}</block></function>
+
+        <function st:stereotype="literal"><type><specifier>static</specifier> <name>void</name></type> <name>StaticLocalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+            <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"This is a static local function."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        </block_content>}</block></function>
+    </block_content>}</block></function>
+}</block></class>
 
 <class st:stereotype="empty"><specifier>public</specifier> class <name>Program</name> <block>{
     <function st:stereotype="main"><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>Main</name><parameter_list>()</parameter_list> <block>{<block_content>

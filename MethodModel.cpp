@@ -18,7 +18,6 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
                          unitLanguage(unitLang),  xpath(methodXpath), unitNumber(unitNum) {
     srcML = srcml_unit_get_srcml(unit);
     isConstructorDestructor(archive, unit);
-    isStatic(archive, unit);
     findMethodName(archive, unit); 
     findParameterList(archive, unit);
 
@@ -135,7 +134,7 @@ void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
     if (n > 0) { 
         srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         name = unparsed;
         trimWhitespace(name);
@@ -161,7 +160,7 @@ void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
     if (n == 1) { 
         srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         parametersList = unparsed;
         free(unparsed);   
@@ -212,14 +211,14 @@ void methodModel::findLocalVariableName(srcml_archive* archive, srcml_unit* unit
     for (int i = 0; i < n; i++) {
         resultUnit = srcml_transform_get_unit(result, i);  
         char * unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
     
         std::string localName = unparsed;
 
         // Chop off [] for arrays  
         if (unitLanguage == "C++") {
-            size_t start_position = localName.find("[");
+            std::size_t start_position = localName.find("[");
             if (start_position != std::string::npos){
                 localName = localName.substr(0, start_position);
                 Rtrim(localName);
@@ -250,7 +249,7 @@ void methodModel::findLocalVariableType(srcml_archive* archive, srcml_unit* unit
         std::string type = srcml_unit_get_srcml(resultUnit);
   
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
 
         if (type == "<type ref=\"prev\"/>") {
@@ -284,14 +283,14 @@ void methodModel::findParameterName(srcml_archive* archive, srcml_unit* unit) {
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         char * unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
 
         std::string parameterName = unparsed;
 
         // Chop off [] for arrays
         if (unitLanguage == "C++") {  
-            size_t start_position = parameterName.find("[");
+            std::size_t start_position = parameterName.find("[");
             if (start_position != std::string::npos){
                 parameterName = parameterName.substr(0, start_position);
                 Rtrim(parameterName);
@@ -324,7 +323,7 @@ void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
         char * unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string type = unparsed;
     
@@ -352,7 +351,7 @@ void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit)
         resultUnit = srcml_transform_get_unit(result, i);
 
         char *unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string expr = unparsed;
         free(unparsed);
@@ -389,7 +388,7 @@ void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {
             resultUnit = srcml_transform_get_unit(result, i);
             
             char* unparsed = nullptr;
-            size_t size = 0;
+            std::size_t size = 0;
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
 
             calls call;
@@ -431,7 +430,7 @@ void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {
             callsArguments += srcml_unit_get_srcml(resultUnit);
 
             char * unparsed = nullptr;
-            size_t size = 0;
+            std::size_t size = 0;
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
             
             std::string arguList = unparsed;
@@ -474,7 +473,7 @@ void methodModel::findNewAssign(srcml_archive* archive, srcml_unit* unit) {
         resultUnit = srcml_transform_get_unit(result, i);
 
         char *unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string varName = unparsed;
         free(unparsed);
@@ -533,20 +532,6 @@ void methodModel::isConstructorDestructor(srcml_archive* archive, srcml_unit* un
     int n = srcml_transform_get_unit_size(result);
 
     if (n == 1) constructorDestructorUsed = true;
-
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);
-}
-
-// Check if method is static
-//
-void methodModel::isStatic(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"static").c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
-
-    if (n == 1) staticMethod = true;
 
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -634,7 +619,7 @@ void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit*
     for (int i = 0; i < n; i++) {
         resultUnit = srcml_transform_get_unit(result, i);
         char *unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         if (isParameterCheck)
             isVariableUsed(variables, unparsed, false, false, false, true, false);
@@ -667,7 +652,7 @@ void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit,
     for (int j = 0; j < n; ++j) {
         resultUnit = srcml_transform_get_unit(result, j);
         char *unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string possibleVariable = unparsed;
         free(unparsed);  
@@ -694,7 +679,7 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
     for (auto it = calls.begin(); it != calls.end();) {
         std::string callName = it->getName();
 
-        size_t listOpen = callName.find("<");
+        std::size_t listOpen = callName.find("<");
         if (listOpen != std::string::npos)
             callName = callName.substr(0, listOpen);
             
@@ -703,7 +688,7 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
             it = calls.erase(it);
         }
         else {
-            size_t split = callName.rfind("::");
+            std::size_t split = callName.rfind("::");
             if (split != std::string::npos)
                 callName = callName.substr(split + 2);
             else {
@@ -731,7 +716,7 @@ void methodModel::isAttributeUsedInCallArgument(srcml_archive* archive, srcml_un
         return;
 
     std::string xpathArg =  "//src:expr/src:name[ancestor::src:call[1][";
-    for (size_t i = 0; i < methodCalls.size(); ++i) {
+    for (std::size_t i = 0; i < methodCalls.size(); ++i) {
         xpathArg += "./src:name='" + methodCalls[i].getName() + "'";
         if (i != methodCalls.size() - 1) 
             xpathArg += " or ";          
@@ -739,7 +724,7 @@ void methodModel::isAttributeUsedInCallArgument(srcml_archive* archive, srcml_un
     if (methodCalls.size() != 0 && (functionCalls.size() != 0  || constructorCalls.size() != 0))
         xpathArg += " or ";
 
-    for (size_t i = 0; i < functionCalls.size(); ++i) {
+    for (std::size_t i = 0; i < functionCalls.size(); ++i) {
         xpathArg += "./src:name='" + functionCalls[i].getName() + "'";
         if (i != functionCalls.size() - 1)
             xpathArg += " or ";
@@ -748,7 +733,7 @@ void methodModel::isAttributeUsedInCallArgument(srcml_archive* archive, srcml_un
     if (functionCalls.size() != 0 && constructorCalls.size() != 0)
         xpathArg += " or ";
 
-    for (size_t i = 0; i < constructorCalls.size(); ++i) {
+    for (std::size_t i = 0; i < constructorCalls.size(); ++i) {
         xpathArg += "./src:name='" + constructorCalls[i].getName() + "'";
         if (i != constructorCalls.size() - 1)
             xpathArg += " or ";
@@ -766,7 +751,7 @@ void methodModel::isAttributeUsedInCallArgument(srcml_archive* archive, srcml_un
     for (int j = 0; j < n; ++j) {
         resultUnit = srcml_transform_get_unit(result, j);
         char *unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string possibleAttribute = unparsed;
         free(unparsed);  
@@ -860,7 +845,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     trimWhitespace(expr);
                
     // Remove brakcets. For example, a [3]
-    size_t openingBracket = expr.find("["); 
+    std::size_t openingBracket = expr.find("["); 
     if (openingBracket != std::string::npos)
         expr = expr.substr(0, openingBracket); 
     
@@ -882,7 +867,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     // In C# the null-conditional operator is represented by ? and it allows you to check if an object 
     //  is null before accessing its members. For example, testString?.Length; 
     if (unitLanguage == "C#") {
-        size_t nullConditionOperator = expr.find("?"); 
+        std::size_t nullConditionOperator = expr.find("?"); 
         while (nullConditionOperator != std::string::npos) {
             expr.erase(nullConditionOperator, 1); 
             nullConditionOperator = expr.find("?"); // For chaining
@@ -934,7 +919,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
                 // Needed in cases such as this.data = data where this.data is an attribute and data is a local or a parameter 
                 overShadow = false; 
             }   
-            else 
+            else if (!returnCheck)
                 possibleVar = match[1]; // Perhaps variable itself (e.g., a or a.foo())        
         } 
         else if (isMatched && match[1] != "") // Case of class or parent class

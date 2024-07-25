@@ -21,14 +21,8 @@ classModel::classModel(srcml_archive* archive, srcml_unit* unit, const std::stri
     findClassName(archive, unit);  
 }
 
-
-void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, std::vector<methodModel>& freeFunctions, 
-                               const std::string& classXpath, int unitNumber) {
-    if (unitLanguage != "C++") findStaticSpecifier(archive, unit);
-    
-    if (!staticClass)
-        xpath[unitNumber].push_back(classXpath);  
-
+void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
+    xpath[unitNumber].push_back(classXpath);
     if (unitLanguage == "C++") findStructureType(archive, unit); // Needed for findParentClassName()
     findParentClassName(archive, unit); // Requires structure type for C++
     
@@ -47,9 +41,9 @@ void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, std::ve
     int numOfCurrentNonPrivateAttributes = nonPrivateAttributeOrdered.size();
     findNonPrivateAttributeName(archive, unit, nonPrivateAttributeOrdered);
     findNonPrivateAttributeType(archive, unit, nonPrivateAttributeOrdered, numOfCurrentNonPrivateAttributes);
-    findMethod(archive, unit, freeFunctions, classXpath, unitNumber);
+    findMethod(archive, unit, classXpath, unitNumber);
 
-    if (unitLanguage == "C#") findMethodInProperty(archive, unit, freeFunctions, classXpath, unitNumber); 
+    if (unitLanguage == "C#") findMethodInProperty(archive, unit, classXpath, unitNumber); 
 }
 
 
@@ -62,7 +56,7 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
 
     if (srcml_transform_get_unit_size(result) == 1) {
         char *unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(srcml_transform_get_unit(result, 0), &unparsed, &size);
         
         std::string tempName = unparsed;
@@ -71,7 +65,7 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
         trimWhitespace(tempName);
         name.push_back(tempName);
         
-        size_t listOpen = tempName.find("<");
+        std::size_t listOpen = tempName.find("<");
         if (listOpen != std::string::npos) {
             std::string nameLeft = tempName.substr(0, listOpen);
             std::string nameRight = tempName.substr(listOpen, tempName.size() - listOpen);
@@ -112,20 +106,6 @@ void classModel::findStructureType(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result); 
 }
 
-// Determines if class is static
-//
-void classModel::findStaticSpecifier(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_static").c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
-    staticClass = (n > 0); 
-
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result); 
-}
-
-
 // Finds parent classes
 // C++ supports multiple inheritance 
 //  Classes and structs can inherit from each other
@@ -153,7 +133,7 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
         resultUnit = srcml_transform_get_unit(result, i);
 
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string parentName = unparsed;
 
@@ -180,7 +160,7 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
         }
         trimWhitespace(parentName);
 
-        size_t listOpen = parentName.find("<");
+        std::size_t listOpen = parentName.find("<");
         if (listOpen != std::string::npos) {
             std::string parClassNameLeft = parentName.substr(0, listOpen);
             std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
@@ -215,7 +195,7 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std
     for (int i = 0; i < n; i++) {
         resultUnit = srcml_transform_get_unit(result,i);
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);     
         std::string attributeName = unparsed;
 
@@ -223,7 +203,7 @@ void classModel::findAttributeName(srcml_archive* archive, srcml_unit* unit, std
 
         // Chop off [] for arrays  
         if (unitLanguage == "C++") {
-            size_t start_position = attributeName.find("[");
+            std::size_t start_position = attributeName.find("[");
             if (start_position != std::string::npos){
                 attributeName = attributeName.substr(0, start_position);
                 Rtrim(attributeName);
@@ -257,7 +237,7 @@ void classModel::findAttributeType(srcml_archive* archive, srcml_unit* unit, std
         std::string type = srcml_unit_get_srcml(resultUnit);
         
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
      
         if (type == "<type ref=\"prev\"/>") {
@@ -300,14 +280,14 @@ void classModel::findNonPrivateAttributeName(srcml_archive* archive, srcml_unit*
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result,i);
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size); 
         std::string attributeName = unparsed;
 
         variable v;
         // Chop off [] for arrays  
         if (unitLanguage == "C++") {
-            size_t start_position = attributeName.find("[");
+            std::size_t start_position = attributeName.find("[");
             if (start_position != std::string::npos){
                 attributeName = attributeName.substr(0, start_position);
                 Rtrim(attributeName);
@@ -338,7 +318,7 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
         resultUnit = srcml_transform_get_unit(result, i);
         std::string type = srcml_unit_get_srcml(resultUnit);
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
      
         if (type == "<type ref=\"prev\"/>") {
@@ -366,16 +346,8 @@ void classModel::findNonPrivateAttributeType(srcml_archive* archive, srcml_unit*
 }
 
 // Finds methods defined inside the class
-// Nested local functions within methods in C# are ignored 
-// Java doesn't have nested local functions
-// C++ allows defining classes inside free functions, which could make methods look like nested functions
-// Ignore static methods in C++, C#, and Java
-// Static methods can only use static local variables
-// Static local variables are not ignored in non-static methods since they can't be used 
-//  without actually making an instance of the class since you need to call the method itself
 //
-void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vector<methodModel>& freeFunctions,
-                            const std::string& classXpath, int unitNumber) {
+void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -387,7 +359,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vecto
 
         srcml_archive* methodArchive = srcml_archive_create();
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
         srcml_archive_write_unit(methodArchive, resultUnit);
         srcml_archive_close(methodArchive);
@@ -404,10 +376,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vecto
         std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
         methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, "", unitNumber);
         
-        if (m.IsStatic())
-            freeFunctions.push_back(m);
-        else
-            methods.push_back(m); 
+        methods.push_back(m); 
         
         free(unparsed);       
         srcml_unit_free(methodUnit);
@@ -418,12 +387,9 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, std::vecto
     srcml_transform_free(result);
 }
 
-// C# properties can't be nested in functions or in other properties
 // Properties need to be collected separately since they hold the return type of the getters
-// Ignore static properties
 //
-void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, std::vector<methodModel>& freeFunctions, 
-                                      const std::string& classXpath, int unitNumber) {
+void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -434,7 +400,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
 
         srcml_archive* propertyArchive = srcml_archive_create();
         char* unparsed = nullptr;
-        size_t size = 0;
+        std::size_t size = 0;
         srcml_archive_write_open_memory(propertyArchive, &unparsed, &size);
         srcml_archive_write_unit(propertyArchive, resultUnit);
         srcml_archive_close(propertyArchive);
@@ -455,7 +421,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
         if (nType > 0) {
             srcml_unit* typeUnit = srcml_transform_get_unit(propertyResult, 0);
             char* typeUnparsed = nullptr;
-            size_t typeSize = 0;
+            std::size_t typeSize = 0;
             srcml_unit_unparse_memory(typeUnit, &typeUnparsed, &typeSize);
 
             srcml_transform_free(propertyResult);
@@ -470,7 +436,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
 
                 srcml_archive* methodArchive = srcml_archive_create();
                 char* methodUnparsed = nullptr;
-                size_t methodSize = 0;
+                std::size_t methodSize = 0;
                 srcml_archive_write_open_memory(methodArchive, &methodUnparsed, &methodSize);
                 srcml_archive_write_unit(methodArchive, methodResultUnit);
 
@@ -486,10 +452,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
 
                 methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, typeUnparsed, unitNumber);
 
-                if (m.IsStatic())
-                    freeFunctions.push_back(m);
-                else
-                    methods.push_back(m); 
+                methods.push_back(m); 
 
                 free(methodUnparsed);       
                 srcml_unit_free(methodUnit);
