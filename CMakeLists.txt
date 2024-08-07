@@ -36,9 +36,38 @@ else()
 endif()
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
+# Find srcml.h
+if(WIN32)
+    set(ROOT_DIR $ENV{SystemDrive}) # Windows could be on D:/ ... etc
+    target_include_directories(stereocode PRIVATE "${ROOT_DIR}/Program Files/srcML/include")
+else()
+    target_include_directories(stereocode PRIVATE "/usr/local/include")
+endif()
+
 # Find and use libsrcml
-find_package(srcML REQUIRED)
-target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
+find_package(srcML QUIET)
+if (srcML_FOUND) # For srcML v1.1+
+    target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
+else() # For srcML v1.0
+    find_library(LIBSRCML_LINK NAMES libsrcml libsrcml.1 libsrcml.1.dylib libsrcml.so.1 libsrcml.so)
+    if (LIBSRCML_LINK)
+        target_link_libraries(stereocode ${LIBSRCML_LINK})
+    else()
+        if(WIN32)
+            target_link_directories(stereocode PRIVATE "${ROOT_DIR}/Program Files/srcML/lib")
+        else()
+            target_link_directories(stereocode PRIVATE "/usr/local/lib")
+        endif()
+    endif()
+endif()
+
+# Set RPATH to ensure the library is found at runtime
+set_target_properties(stereocode PROPERTIES
+    INSTALL_RPATH_USE_LINK_PATH TRUE
+    BUILD_WITH_INSTALL_RPATH TRUE
+    INSTALL_RPATH "@executable_path/../lib;/usr/local/lib"
+    MACOSX_RPATH TRUE
+)
 
 # Turn on compiler warnings.
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
