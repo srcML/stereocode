@@ -61,14 +61,6 @@ else() # For srcML v1.0
     endif()
 endif()
 
-# Set RPATH to ensure the library is found at runtime
-set_target_properties(stereocode PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
-    BUILD_WITH_INSTALL_RPATH TRUE
-    INSTALL_RPATH "@executable_path/../lib;/usr/local/lib"
-    MACOSX_RPATH TRUE
-)
-
 # Turn on compiler warnings.
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
     add_compile_options(-Wall -Wextra -Wpedantic) 

@@ -18,9 +18,9 @@ This output can be used for further processing or analysis. For instance, the st
 
 ## 🔧 Installation and Build
 1. Prerequisites
-- [srcml 1.1+](https://www.srcml.org/)
+- [srcml 1.1+](https://www.srcml.org/) (Client + Develop)
 - [cmake 3.17+](https://cmake.org/)
-- C++17 or higher
+- GCC, Clang, or MSCV with C++17 or higher
 
 2. Clone or download this repository.
 
@@ -32,7 +32,16 @@ cd build_path
 make
 ```
 
-Note: Stereocode is compatible with srcML v1.0, but might not work as intended in certain rare cases.
+
+Stereocode is compatible with **srcML v1.0**, but it might not work as intended in certain cases as it is supported in Stereocode using a workaround. </br>
+
+On MAC OS, if you get an error related to "dyld library not loaded", then you need to export the path of libsrcml.dylib as follows: </br> 
+```bash
+export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH 
+```
+
+Or add it to the shell configuration **.zshrc or .bash_profile** file to make it permanent.
+
 
 ## 🚀 Usage
 
