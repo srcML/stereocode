@@ -476,7 +476,8 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
 
 // Compute class stereotype
 //  Based on definition from Dragan, Collard, Maletic ICSM 2010
-//
+// Constructors and destructors are not considered in the computation of class stereotypes
+// 
 void classModel::computeClassStereotype() {
     std::unordered_map<std::string, int> methodStereotypes = {
         {"get", 0},
@@ -495,7 +496,6 @@ void classModel::computeClassStereotype() {
         {"empty", 0},
         {"unclassified", 0},
     };
-
     int nonCollaborators = 0;
     for (const auto& m : methods) {      
         if (!m.IsConstructorDestructorUsed()) {
@@ -527,7 +527,6 @@ void classModel::computeClassStereotype() {
 
     int degenerates = methodStereotypes["incidental"] + methodStereotypes["stateless"] + methodStereotypes["empty"];
 
-    // Constructors and destructors are not considered in the computation of class stereotypes
     int allMethods = methods.size() - constructorDestructorCount;
 
     // Entity

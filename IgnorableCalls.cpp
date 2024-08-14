@@ -54,7 +54,7 @@ void ignorableCalls::outputCalls() {
 //
 void ignorableCalls::createCallList() {
     for (const auto& l : LANGUAGE) {
-        // cout, cin, streams, casts are all ignored for C++
+        // cout, cin, streams, casts are all ignored (not collected) for C++ since they are not considered as <call>
         if (l == "C++") {
             ignoredCalls.insert({l, {
                 "assert",

@@ -12,13 +12,13 @@
 
 primitiveTypes                     PRIMITIVES;                                         // Primitive types per language + any user supplied
 ignorableCalls                     IGNORED_CALLS;                                      // Calls to ignore + any user supplied
-typeTokens                         TYPE_TOKENS;                                        // Tokens to remove from data types + any user supplied
+typeModifiers                      TYPE_MODIFIERS;                                     // Modifiers to remove from data types + any user supplied
 int                                METHODS_PER_CLASS_THRESHOLD = 21;                   // Threshold for large class stereotype (from ICSM10)
 bool                               STRUCT                      = false;                // Identify and stereotype structs (C++ or C#)
 bool                               INTERFACE                   = false;                // Identify and stereotype interfaces (C# or Java)
 bool                               UNION                       = false;                // Identify and stereotype unions (C++)
 bool                               ENUM                        = false;                // Identify and stereotype enums (Java)
-bool                               IS_VERBOSE                  = false;                // Prints primitives, ignored calls, and type tokens
+bool                               IS_VERBOSE                  = false;                // Prints primitives, ignored calls, and type modifiers
 
 std::unordered_map
      <int, std::unordered_map
@@ -31,7 +31,7 @@ int main (int argc, char const *argv[]) {
     std::string         inputFile;
     std::string         primitivesFile;
     std::string         ignoredCallsFile;
-    std::string         typeTokensFile;
+    std::string         typeModifiersFile;
     std::string         outputFile;
     bool                outputTxtReport    = false;
     bool                outputCsvReport    = false;
@@ -41,12 +41,12 @@ int main (int argc, char const *argv[]) {
     CLI::App app{"Stereocode: Determines method and class stereotypes\n"
                  "Supports C++, C#, and Java\n" };
     
-    app.add_flag  ("-v,--verbose",            IS_VERBOSE,                  "Enable verbose output");
     app.add_option("input-archive",           inputFile,                   "File name of a srcML input archive")->required();
     app.add_option("-o,--output-file",        outputFile,                  "File name of output - srcML archive with stereotypes");
     app.add_option("-p,--primitive-file",     primitivesFile,              "File name of user supplied primitive types (one per line)");
     app.add_option("-g,--ignore-call-file",   ignoredCallsFile,            "File name of user supplied calls to ignore (one per line)");
-    app.add_option("-t,--type-token-file",    typeTokensFile,              "File name of user supplied data type tokens to remove (one per line)");
+    app.add_option("-t,--type-modifier-file", typeModifiersFile,           "File name of user supplied data type modifiers to remove (one per line)");
+    app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD, "Method threshold for the large-class stereotype (default = 21)");
     app.add_flag  ("-i,--interface",          INTERFACE,                   "Identify stereotypes for interfaces (C# and Java)");
     app.add_flag  ("-n,--union",              UNION,                       "Identify stereotypes for unions (C++)");
     app.add_flag  ("-m,--enum",               ENUM,                        "Identify stereotypes for enums (Java)");
@@ -55,7 +55,8 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-x,--txt-report",         outputTxtReport,             "Output optional TXT report file containing stereotype information");
     app.add_flag  ("-z,--csv-report",         outputCsvReport,             "Output optional CSV report file containing stereotype information");
     app.add_flag  ("-c,--comment",            reDocComment,                "Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */)");
-    app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD, "Method threshold for the large-class stereotype (default = 21)");
+    app.add_flag  ("-v,--verbose",            IS_VERBOSE,                  "Outputs default primitives, ignored calls, type modifiers, and extra report files");
+    
 
     CLI11_PARSE(app, argc, argv);
     
@@ -84,12 +85,12 @@ int main (int argc, char const *argv[]) {
     }
 
     // Add user-defined type tokens to initial set
-    if (typeTokensFile != "") {         
-        std::ifstream in(typeTokensFile);
+    if (typeModifiersFile != "") {         
+        std::ifstream in(typeModifiersFile);
         if (in.is_open())
-            in >> TYPE_TOKENS;
+            in >> TYPE_MODIFIERS;
         else {
-            std::cerr << "Error: Type tokens file not found: " << typeTokensFile << '\n';
+            std::cerr << "Error: Type modifiers file not found: " << typeModifiersFile << '\n';
             return -1;
         }
         in.close();

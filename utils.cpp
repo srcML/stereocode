@@ -11,7 +11,7 @@
 
 extern primitiveTypes                        PRIMITIVES;   
 extern std::vector<std::string>              LANGUAGE;
-extern typeTokens                            TYPE_TOKENS;  
+extern typeModifiers                         TYPE_MODIFIERS;  
 
 bool isNonPrimitiveType(const std::string& type, variable& var, 
                         const std::string& unitLanguage, const std::string& className) {
@@ -29,7 +29,7 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
         typeParsed = typeLeft + typeRight;
     }
 
-    removeTypeTokens(typeParsed, unitLanguage); // Can take full type as is
+    removeTypeModifiers(typeParsed, unitLanguage); // Can take full type as is
     trimWhitespace(typeParsed);  // Can take full type as is
     
     bool isNonPrimitive = false; 
@@ -80,8 +80,8 @@ bool matchSubstring(const std::string& text, const std::string& substring) {
 
 // Removes specifiers from type name
 //
-void removeTypeTokens(std::string& type, std::string unitLanguage) {
-    std::regex regexPattern(TYPE_TOKENS.getTypeTokens(unitLanguage));
+void removeTypeModifiers(std::string& type, std::string unitLanguage) {
+    std::regex regexPattern(TYPE_MODIFIERS.getTypeModifiers(unitLanguage));
     type = std::regex_replace(type, regexPattern, " ");
 }
 
@@ -164,8 +164,10 @@ void removeBetweenComma(std::string& s, bool isGeneric) {
 }
 
 // Workaround to get Stereocode to work with srcML 1.0.0
+// It works by removing the item= attribute, which has an issue in srcML 1.0.0
+//
 void srcmlBackwardCompatibility(std::string& xmlText) {
-    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor>", "><function"};
+    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor", "><function"};
 
     std::size_t pos = std::string::npos;
     for (const auto& tag : tags) {

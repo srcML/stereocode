@@ -17,6 +17,7 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
                          const std::string& unitLang, const std::string& propertyReturnType, int unitNum) :
                          unitLanguage(unitLang),  xpath(methodXpath), unitNumber(unitNum) {
     srcML = srcml_unit_get_srcml(unit);
+
     isConstructorDestructor(archive, unit);
     findMethodName(archive, unit); 
     findParameterList(archive, unit);
@@ -61,9 +62,6 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& attr
         isIgnorableCall(methodCalls);
         isIgnorableCall(functionCalls);
         isIgnorableCall(constructorCalls);
-
-        // Must only be called before isCallOnAttribute()
-        isAttributeUsedInCallArgument(archive, unit, attributes);
 
         // Must only be called after isIgnorableCall()
         isCallOnAttribute(attributes, classMethods, inheritedClassMethods);
@@ -115,7 +113,6 @@ void methodModel::findFreeFunctionData() {
         srcml_archive_free(archive); 
     }
 }
-
 
 // Gets the method name
 //
@@ -193,7 +190,7 @@ void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit)
     nonPrimitiveReturnTypeExternal = temp.getNonPrimitiveExternal();
 
     returnTypeParsed = returnType;
-    removeTypeTokens(returnTypeParsed, unitLanguage);  
+    removeTypeModifiers(returnTypeParsed, unitLanguage);  
 
     trimWhitespace(returnType);
     trimWhitespace(returnTypeParsed); 
@@ -427,8 +424,6 @@ void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {
         srcml_unit* resultUnit = nullptr;
         for (int i = 0; i < n; ++i) {
             resultUnit = srcml_transform_get_unit(result, i);
-            callsArguments += srcml_unit_get_srcml(resultUnit);
-
             char * unparsed = nullptr;
             std::size_t size = 0;
             srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
@@ -445,15 +440,15 @@ void methodModel::findCallArgument(srcml_archive* archive, srcml_unit* unit) {
                 functionCalls[i].setSignature(funcCallParsed);
             }
                 
-            else if (c == "method") 
-                methodCalls[i].setArgumentList(arguList); 
-
+            else if (c == "method")  
+                methodCalls[i].setArgumentList(arguList);
+            
+                
             else if (c == "constructor") 
                 constructorCalls[i].setArgumentList(arguList); 
-
+            
+                
             free(unparsed);
-
-
         }
         srcml_clear_transforms(archive);
         srcml_transform_free(result);
@@ -610,6 +605,7 @@ void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& 
 //
 void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit* unit, 
                                                          std::unordered_map<std::string, variable>& variables, bool isParameterCheck)  {
+
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"expression_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -621,13 +617,9 @@ void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit*
         char *unparsed = nullptr;
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        if (isParameterCheck)
-            isVariableUsed(variables, unparsed, false, false, false, true, false);
-        else
-            isVariableUsed(variables, unparsed, false, false, false, false, false);
+        isVariableUsed(variables, unparsed, false, false, false, isParameterCheck, false);
         
-        free(unparsed);
-        
+        free(unparsed);  
     }        
     srcml_clear_transforms(archive);
     srcml_transform_free(result);    
@@ -656,7 +648,7 @@ void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit,
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string possibleVariable = unparsed;
         free(unparsed);  
-
+            
         if (isParameterCheck)
             isVariableUsed(variables, possibleVariable, false, true, false, true, false);
         else if (isVariableUsed(variables, possibleVariable, false, true, true, false, false) 
@@ -673,6 +665,7 @@ void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit,
 }
 
 // Ignores calls from analysis
+// Usage of attributes within these calls are not ignored
 // For example, if call to ignore is 'foo', 
 //  then some of the matched cases are foo<>() or bar::foo() or a->b.foo()
 void methodModel::isIgnorableCall(std::vector<calls>& calls) {
@@ -710,63 +703,8 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
 }
 
 
-void methodModel::isAttributeUsedInCallArgument(srcml_archive* archive, srcml_unit* unit, std::unordered_map<std::string, variable>& attributes) {
-
-    if (methodCalls.size() == 0 && functionCalls.size() == 0 && constructorCalls.size() == 0)
-        return;
-
-    std::string xpathArg =  "//src:expr/src:name[ancestor::src:call[1][";
-    for (std::size_t i = 0; i < methodCalls.size(); ++i) {
-        xpathArg += "./src:name='" + methodCalls[i].getName() + "'";
-        if (i != methodCalls.size() - 1) 
-            xpathArg += " or ";          
-    }
-    if (methodCalls.size() != 0 && (functionCalls.size() != 0  || constructorCalls.size() != 0))
-        xpathArg += " or ";
-
-    for (std::size_t i = 0; i < functionCalls.size(); ++i) {
-        xpathArg += "./src:name='" + functionCalls[i].getName() + "'";
-        if (i != functionCalls.size() - 1)
-            xpathArg += " or ";
-    }
-
-    if (functionCalls.size() != 0 && constructorCalls.size() != 0)
-        xpathArg += " or ";
-
-    for (std::size_t i = 0; i < constructorCalls.size(); ++i) {
-        xpathArg += "./src:name='" + constructorCalls[i].getName() + "'";
-        if (i != constructorCalls.size() - 1)
-            xpathArg += " or ";
-    }
-
-    xpathArg += "]]";
-
-    srcml_append_transform_xpath(archive, xpathArg.c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    
-    int n = srcml_transform_get_unit_size(result);
-
-    srcml_unit* resultUnit = nullptr;
-    for (int j = 0; j < n; ++j) {
-        resultUnit = srcml_transform_get_unit(result, j);
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        std::string possibleAttribute = unparsed;
-        free(unparsed);  
-
-        isVariableUsed(attributes, possibleAttribute, false, true, true, false, false);   
-    }
-
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);  
-}
-
-
 // Function calls: --> foo() bar::foo()
-//  Checks if a function call is made to a method in the class, else it is removed and considered as external function call
-//
+//  Checks if a function call is made to a method in the class, else it is removed and considered as an external function call
 //  So, static calls and free function calls are considered as external function calls
 //
 // Method Calls: --> bar.foo() where 'bar' could be a variable or a classname or a namespace 
@@ -840,7 +778,6 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
                                        const std::string& expression, bool returnCheck, 
                                        bool parameterModifiedCheck,  bool localModifiedCheck,
                                        bool isParamaterCheck, bool isLocalCheck) {
-    
     std::string expr = expression; 
     trimWhitespace(expr);
                
@@ -878,9 +815,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     if (unitLanguage != "Java") 
         while (!expr.empty() && expr.front() == '*') expr.erase(0, 1);       
     
-
     if (expr.empty()) return false;  
-
 
     // ^ indicates that we should only match from the beginning
     // We only care about the first two variables. For example, in a.b.c() the a.b is sufficient to 
@@ -906,6 +841,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
         else if (unitLanguage == "C#")
             pattern = R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->\(\)]*)$)";
     }
+
     const std::regex regexPattern(pattern);
     isMatched = std::regex_search(expr, match, regexPattern);
     int count = isMatched ? 2 : 1;

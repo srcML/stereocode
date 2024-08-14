@@ -83,7 +83,6 @@ public:
     void                     isIgnorableCall            (std::vector<calls>&);
     void                     isCallOnAttribute          (std::unordered_map<std::string, variable>&, 
                                                          const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);   
-    void                     isAttributeUsedInCallArgument   (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&);                              
     void                     isCallOnParameter          ();
     void                     isVariableReturned         (std::unordered_map<std::string, variable>&, bool);
     void                     isVariableModified         (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);                             
@@ -103,7 +102,6 @@ private:
     std::string                                       unitLanguage;                               // Unit language
     std::string                                       xpath;                                      // Unique xpath
     std::string                                       srcML;                                      // Method srcML
-    std::string                                       callsArguments;                             // All arguments of calls concatenated (Needed to find usage of attributes)
     std::vector<variable>                             parametersOrdered;                          // List of all parameters (Needed in order to build the parameters map)
     std::vector<variable>                             localsOrdered;                              // List of all local (Needed in order to build the locals map)     
     std::unordered_map<std::string, variable>         parameters;                                 // Map of all parameters. Key is parameter name

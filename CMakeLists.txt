@@ -36,27 +36,34 @@ else()
 endif()
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
-# Find srcml.h
-if(WIN32)
-    set(ROOT_DIR $ENV{SystemDrive}) # Windows could be on D:/ ... etc
-    target_include_directories(stereocode PRIVATE "${ROOT_DIR}/Program Files/srcML/include")
-else()
-    target_include_directories(stereocode PRIVATE "/usr/local/include")
-endif()
+# For srcML v1.1+
+# Finds and use libsrcml + srcml.h
+find_package(srcML QUIET) 
 
-# Find and use libsrcml
-find_package(srcML QUIET)
-if (srcML_FOUND) # For srcML v1.1+
+if (srcML_FOUND) 
     target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
+
 else() # For srcML v1.0
-    find_library(LIBSRCML_LINK NAMES libsrcml libsrcml.1 libsrcml.1.dylib libsrcml.so.1 libsrcml.so)
+    # Find srcml.h
+    if(WIN32)
+        set(ROOT_DIR $ENV{SystemDrive}) # Windows could be on D:/ ... etc
+        target_include_directories(stereocode PRIVATE "${ROOT_DIR}/Program Files/srcML/include")
+    else()
+        target_include_directories(stereocode PRIVATE "/usr/local/include")
+    endif()
+
+    # Search common paths
+    find_library(LIBSRCML_LINK NAMES libsrcml.dylib libsrcml.1.dylib libsrcml.so.1 libsrcml.so libsrcml.lib)
+
     if (LIBSRCML_LINK)
         target_link_libraries(stereocode ${LIBSRCML_LINK})
     else()
         if(WIN32)
-            target_link_directories(stereocode PRIVATE "${ROOT_DIR}/Program Files/srcML/lib")
+            find_library(SRCML_LIB libsrcml.lib PATHS "${ROOT_DIR}/Program Files/srcML/lib")
+            target_link_libraries(stereocode PRIVATE ${SRCML_LIB})
         else()
-            target_link_directories(stereocode PRIVATE "/usr/local/lib")
+            find_library(SRCML_LIB NAMES libsrcml.dylib libsrcml.1.dylib libsrcml.so.1 libsrcml.so PATHS "/usr/local/lib")
+            target_link_libraries(stereocode PRIVATE ${SRCML_LIB})
         endif()
     endif()
 endif()

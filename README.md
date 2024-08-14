@@ -66,11 +66,32 @@ Stereocode can stereotype *free functions*. A *free function* could a static met
 
 <span style='color: lightgreen;'>**-o, --output-file:**</span> File name of output - srcML archive with stereotypes.
 
-<span style='color: lightgreen;'>**-p, --primitive-file:**</span> File name of user supplied primitive types (one per line). 
+<span style='color: lightgreen;'>**-p, --primitive-file:**</span> File name of user supplied primitive types (one per line). </br>
+```
+Datatype_1
+Datatype_2
+...
+```
+These data types will be treated as primitive data types such as an **int**.
 
-<span style='color: lightgreen;'>**-g, --ignore-call-file:**</span> File name of user supplied calls to ignore (one per line). 
+<span style='color: lightgreen;'>**-g, --ignore-call-file:**</span> File name of user supplied calls to ignore (one per line). </br>
+```
+Call_Name_1
+Call_Name_2
+...
+```
+Do not use namespaces, parenthesis, or other special characters. Simply list the call name itself. For example, **foo**. </br>
+These calls are ignored from analysis. However, usage of attributes within these calls (as parameters) are not ignored (considered as accessors to attributes).
 
-<span style='color: lightgreen;'>**-t, --type-token-file:**</span> File name of user supplied data type tokens to remove (one per line). 
+<span style='color: lightgreen;'>**-t, --type-modifier-file:**</span> File name of user supplied data type modifiers to remove (one per line). </br>
+```
+modifier_1
+modifier_2
+...
+```
+These modifiers are removed during analysis to enhance the detection of certain elements such as primitive data types and method return types. 
+
+<span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21).
 
 <span style='color: lightgreen;'>**-i, --interface:**</span> Identify stereotypes for interfaces (C# and Java). 
 
@@ -88,8 +109,7 @@ Stereocode can stereotype *free functions*. A *free function* could a static met
 
 <span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */). 
 
-<span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21).
-
+<span style='color: lightgreen;'>**-v, --verbose:**</span> Outputs default primitives, ignored calls, type modifiers, and extra report files.
 
 ## 📓 Developer Notes:
 
