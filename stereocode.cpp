@@ -54,10 +54,9 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-e,--input-overwrite",    overWriteInput,              "Overwrite input with stereotype information");
     app.add_flag  ("-x,--txt-report",         outputTxtReport,             "Output optional TXT report file containing stereotype information");
     app.add_flag  ("-z,--csv-report",         outputCsvReport,             "Output optional CSV report file containing stereotype information");
-    app.add_flag  ("-c,--comment",            reDocComment,                "Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */)");
+    app.add_flag  ("-c,--comment",            reDocComment,                "Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)");
     app.add_flag  ("-v,--verbose",            IS_VERBOSE,                  "Outputs default primitives, ignored calls, type modifiers, and extra report files");
     
-
     CLI11_PARSE(app, argc, argv);
     
     // Add user-defined primitive types to initial set
@@ -104,7 +103,7 @@ int main (int argc, char const *argv[]) {
         return -1;
     }
 
-    // Default output file name if output file name is not specified
+    // Default output file name if output a name is not specified by the user
     if (outputFile == "") {                                             
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);     
         outputFile = InputFileNoExt + ".stereotypes.xml";     
@@ -120,10 +119,17 @@ int main (int argc, char const *argv[]) {
         return -1;
     }
     
-    // Register namespace for output of stereotypes 
+    // Register namespaces for output
     srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
-
-    // Find method and class stereotypes
+    std::size_t size = srcml_archive_get_namespace_size(archive);
+    for (std::size_t i = 0; i < size; i++) {
+        if (strcmp(srcml_archive_get_namespace_prefix(archive, i), "pos")  == 0) {
+            srcml_archive_register_namespace(outputArchive, "pos", "http://www.srcML.org/srcML/position");
+            break;
+        }
+    }
+    
+    // Find stereotypes
     XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
     classModelCollection classObj(archive, outputArchive, 
                                     inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);

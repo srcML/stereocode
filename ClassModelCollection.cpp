@@ -37,25 +37,13 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     while (unit){
         // Collects class info + methods defined internally to a class
         findClassInfo(archive, unit, unitNumber); 
+        findFreeFunctions(archive, unit, unitNumber);
 
         srcml_unit_free(unit); 
         ++unitNumber;
         unit = srcml_archive_read_unit(archive);
     }   
-
-    srcml_archive_close(archive);
-    srcml_archive_free(archive);
-    archive = srcml_archive_create();
-    srcml_archive_read_open_filename(archive, inputFile.c_str()); 
-    unit = srcml_archive_read_unit(archive);
-    unitNumber = 1; // Count starts at 1 in XPath
-    while (unit){
-        findFreeFunctions(archive, unit, unitNumber); 
-        
-        srcml_unit_free(unit); 
-        ++unitNumber;
-        unit = srcml_archive_read_unit(archive);
-    }
+    analyzeFreeFunctions();
 
     // Finds inherited attributes for each class
     for (auto& pair : classCollection) {
@@ -203,7 +191,7 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
         outputArchive = srcml_archive_create();
         srcml_archive_write_open_filename(outputArchive, temp.c_str());
         srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
-        
+
         unit = srcml_archive_read_unit(archive);
 
         // Read all units in an archive
@@ -235,7 +223,8 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
 //      myClass<T, G, ... > for a generic class
 //
 // Unlike C++, C# and Java can allow multiple classes with the same name but 
-//  different # of generic parameters to exist. For example, foo<T> and foo<T, T1> are valid
+//  different number of generic parameters to exist
+// For example, foo<T> and foo<T, T1> are valid
 //
 void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit);   
@@ -249,6 +238,8 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
         for (int i = 0; i < n; i++) {    
             resultUnit = srcml_transform_get_unit(result, i);
             srcml_archive* classArchive = srcml_archive_create();
+            srcml_archive_register_namespace(classArchive, "pos", "http://www.srcML.org/srcML/position"); // Needed for input with positions enabled
+
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(classArchive, &unparsed, &size);
@@ -259,7 +250,6 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
             classArchive = srcml_archive_create();
             srcml_archive_read_open_memory(classArchive, unparsed, size);
             srcml_unit* unitClass = srcml_archive_read_unit(classArchive);
-            
             std::string classXpath = "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage, "class") + ")[" + std::to_string(i + 1) + "]";
             classModel c(classArchive, unitClass, unitLanguage); 
 
@@ -301,12 +291,12 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
 //          template<optional>   void MyClass<int>::Foo(){} // Specialized templated method belongs to a generic templated class.
 //           If a specialized templated class is defined for <int> then the previous method won't be allowed. It must be replaced with:
 //           void MyClass<int>::Foo(){} 
-//      Method could belong to a namespace
-//          namespaceA::MyClass<int>::Foo(){}
+//      Method could be contained in a namespace
+//          namespace::MyClass<int>::Foo(){}
 //      Method could belong to a normal class
 //          MyClass::Foo(){}
-//      Function could be a free function (including friend functions and static methods)
-//          Foo(){}, externalClass::Foo(){}, namespaceA::Foo(){}, operator<<(){}
+//      Function could be a free function (including normal free functions, friend functions, static methods, methods defined for external classes)
+//          Foo(){}, namespace::Foo(){}, static Foo(){}, externalClass::Foo(){}, 
 //
 void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit); 
@@ -320,6 +310,8 @@ void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit*
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
             srcml_archive* methodArchive = srcml_archive_create();
+            srcml_archive_register_namespace(methodArchive, "pos", "http://www.srcML.org/srcML/position");
+            
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
@@ -330,37 +322,12 @@ void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit*
             methodArchive = srcml_archive_create();
             srcml_archive_read_open_memory(methodArchive, unparsed, size);
             srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
-            
+
             std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function") + ")[" + std::to_string(i + 1) + "]";
             methodModel function(methodArchive, methodUnit, functionXpath, unitLanguage, "", unitNumber);
 
-            if (unitLanguage == "C++"){
-                // Removes namespaces if any
-                std::string functionName = function.getName();  
-                removeNamespace(functionName, false, "C++");
+            freeFunctions.push_back(function);
 
-                // Get the class name (if any). Else, it is a free function
-                std::size_t isClassName = functionName.find("::");
-                if (isClassName != std::string::npos) { // Class found, it is a method       
-                    std::string className = functionName.substr(0, isClassName); 
-                    auto resultS = classCollection.find(className);
-                    if (resultS != classCollection.end())      
-                        resultS->second.addMethod(function);                         
-                    else { // Case specialized template method belongs to the generic template class
-                        className = className.substr(0, className.find("<"));
-                        resultS = classCollection.find(className);
-                        if (resultS != classCollection.end()) 
-                            resultS->second.addMethod(function);                       
-                        else 
-                            freeFunctions.push_back(function);  // Class wasn't found, treated as free function                                 
-                    }
-                }
-                else 
-                    freeFunctions.push_back(function);  // Friend function or a static function
-            }
-            else 
-                freeFunctions.push_back(function); // Static method (C# or Java)
-                            
             free(unparsed); 
             srcml_unit_free(methodUnit);
             srcml_archive_close(methodArchive);
@@ -371,6 +338,41 @@ void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit*
     
     }
 }
+
+// Analyzes free functions to determine externally defined methods
+//
+void classModelCollection::analyzeFreeFunctions() {
+    for (std::vector<methodModel>::iterator function = freeFunctions.begin(); function != freeFunctions.end();) {
+        if (function->getUnitLanguage() == "C++") {
+            // Removes namespaces if any
+            std::string functionName = function->getName();  
+            removeNamespace(functionName, false, "C++");
+
+            // Get the class name (if any). Else, it is a free function
+            std::size_t isClassName = functionName.find("::");
+            if (isClassName != std::string::npos) { // Class found, it is a method       
+                std::string className = functionName.substr(0, isClassName); 
+                auto result = classCollection.find(className);
+                if (result != classCollection.end()) {
+                    result->second.addMethod(*function);
+                    function = freeFunctions.erase(function);
+                }                          
+                else { // Case specialized template method belongs to the generic template class
+                    className = className.substr(0, className.find("<"));
+                    result = classCollection.find(className);
+                    if (result != classCollection.end())  {
+                        result->second.addMethod(*function);
+                        function = freeFunctions.erase(function);
+                    } 
+                    else ++function;                                                  
+                }
+            }
+            else ++function;
+        }
+        else ++function;
+    }
+}
+
 
 // Finds inherited attributes 
 // In C++, you can inherit from a specialized templated class or

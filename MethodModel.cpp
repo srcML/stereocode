@@ -82,7 +82,7 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& attr
 }
 
 void methodModel::findFreeFunctionData() {
-    if (!constructorDestructorUsed) {                                
+    if (!constructorDestructorUsed) {
         srcml_archive* archive = srcml_archive_create();
         srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
         srcml_unit* unit = srcml_archive_read_unit(archive);
@@ -335,6 +335,11 @@ void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result);
 }
 
+
+
+
+
+
 // Collects all return expressions
 //
 void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit) {
@@ -581,23 +586,23 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
     }     
 }
 
-
 // Determines if a return expression returns a variable (parameter or an attribute)
 // Both simple returns (e.g., return variable;) and 
 //  complex returns (e.g., return variable + 5; or e.g., return 5 + 5;) are found
 //
-void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& variables, bool isParamaterCheck) {
+void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& variables, bool isParameterCheck) {
     for (const std::string& expr : returnExpressions) {
-        if (isParamaterCheck) {
-             if (!isVariableUsed(variables, expr, true, false, false, isParamaterCheck, false))
+        if (isParameterCheck) {
+            if (!isVariableUsed(variables, nullptr, expr, true, false, false, isParameterCheck, false))
                 parameterNotReturned = true; // Complex return
         }
         else {
-            if (isVariableUsed(variables, expr, true, false, false, false, false)) 
+            if (isVariableUsed(variables, nullptr, expr, true, false, false, false, false)) 
                 attributeReturned = true; // Simple return
             else
                 attributeNotReturned = true; // Complex return
         }
+        
     }
 }
 
@@ -617,7 +622,7 @@ void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit*
         char *unparsed = nullptr;
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        isVariableUsed(variables, unparsed, false, false, false, isParameterCheck, false);
+        isVariableUsed(variables, nullptr, unparsed, false, false, false, isParameterCheck, false);
         
         free(unparsed);  
     }        
@@ -627,11 +632,10 @@ void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit*
 
 // Finds if an attribute is changed or 
 //  if a parameter that is passed by reference is changed
+// An attribute or a parameter that is changed multiple times should only be considered as 1 change
 //
 void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit, 
-                                       std::unordered_map<std::string, variable>& variables, bool isParameterCheck) { 
-    int changed = 0;
-    // An attribute that is changed multiple times should only be considered as 1 change
+                                     std::unordered_map<std::string, variable>& variables, bool isParameterCheck) { 
     std::unordered_set<std::string> checked; 
 
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"expression_assignment").c_str());
@@ -648,17 +652,18 @@ void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit,
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string possibleVariable = unparsed;
         free(unparsed);  
-            
+        
+        std::size_t oldSize = checked.size();
+
         if (isParameterCheck)
-            isVariableUsed(variables, possibleVariable, false, true, false, true, false);
-        else if (isVariableUsed(variables, possibleVariable, false, true, true, false, false) 
-            && checked.find(possibleVariable) == checked.end()) {
-            changed++;  
-            checked.insert(possibleVariable);
+            isVariableUsed(variables, nullptr, possibleVariable, false, true, false, true, false);
+        else if (isVariableUsed(variables, &checked, possibleVariable, false, true, true, false, false)) {
+            if (checked.size() > oldSize) {
+                ++numOfAttributesModified;
+                oldSize = checked.size();
+            }         
         }
     }
-
-    numOfAttributesModified = changed;
 
     srcml_clear_transforms(archive);
     srcml_transform_free(result);  
@@ -702,10 +707,9 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
     }
 }
 
-
 // Function calls: --> foo() bar::foo()
-//  Checks if a function call is made to a method in the class, else it is removed and considered as an external function call
-//  So, static calls and free function calls are considered as external function calls
+//  Checks if a function call is made to a method in the class, else it is removed and considered external 
+//  Static and free function calls are considered external calls
 //
 // Method Calls: --> bar.foo() where 'bar' could be a variable or a classname or a namespace 
 //  Checks if there is a method call on an attribute
@@ -721,7 +725,10 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
 //
 void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& attributes, 
                                    const std::unordered_set<std::string>& classMethods, 
-                                   const std::unordered_set<std::string>& inheritedClassMethods) {    
+                                   const std::unordered_set<std::string>& inheritedClassMethods) {  
+    if (name == "OperationDeletedHandler")
+        std::cout <<"g";
+
     // Check on function calls (Should be done before checking on method calls)
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
         if (classMethods.find(it->getSignature()) == classMethods.end() && 
@@ -736,15 +743,18 @@ void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& a
     // Check on method calls 
     for (auto it = methodCalls.begin(); it != methodCalls.end();) {
         // Could be a normal method call on an attribute
-        if (!isVariableUsed(attributes,it->getName(), false, false, false, false, false)) { // Checks if call is on attribute
+        if (!isVariableUsed(attributes, nullptr, it->getName(), false, false, false, false, false)) { // Checks if call is on attribute
             if (unitLanguage != "C++") {
                 // These should be function calls
-                if (matchSubstring(it->getName(), "base") || matchSubstring(it->getName(), "this") ||
-                    matchSubstring(it->getName(), "super")) 
-                        functionCalls.push_back(*it); 
+                if (unitLanguage == "C#" && (matchSubstring(it->getName(), "this") || matchSubstring(it->getName(), "base")))
+                    functionCalls.push_back(*it); 
+                else if (unitLanguage == "Java" && (matchSubstring(it->getName(), "this") || matchSubstring(it->getName(), "super")))
+                    functionCalls.push_back(*it); 
+
                 // Could be a call on a local or a parameter
-                else if (isVariableUsed(attributes, it->getName(), false, false, false, true, true)) 
+                else if (isVariableUsed(attributes, nullptr, it->getName(), false, false, false, true, true)) 
                     ++numOfExternalMethodCalls;
+                    
                 // It is a static call
                 else 
                     ++numOfExternalFunctionCalls;
@@ -762,9 +772,8 @@ void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& a
 
 void methodModel::isCallOnParameter() {   
     for (auto& m : methodCalls)
-        isVariableUsed(parameters, m.getName(), false, false, false, true, false);
+        isVariableUsed(parameters, nullptr, m.getName(), false, false, false, true, false);
 }
-
 
 // Checks if an expression uses an attribute, local, or a parameter --> call them variable
 // Possible cases: 
@@ -775,6 +784,7 @@ void methodModel::isCallOnParameter() {
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 //
 bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& variables, 
+                                       std::unordered_set<std::string>* attributesModified, 
                                        const std::string& expression, bool returnCheck, 
                                        bool parameterModifiedCheck,  bool localModifiedCheck,
                                        bool isParamaterCheck, bool isLocalCheck) {
@@ -801,13 +811,13 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
         while (!expr.empty() && expr.back() == ')') expr.pop_back();       
     }
 
-    // In C# the null-conditional operator is represented by ? and it allows you to check if an object 
-    //  is null before accessing its members. For example, testString?.Length; 
+    // In C# the null-coalescing  operator is represented by ? or ?? and it allows you to check if an object 
+    //  is null before accessing its members or using its value. For example, testString?.Length; or userInput ?? "Default Name"; 
     if (unitLanguage == "C#") {
-        std::size_t nullConditionOperator = expr.find("?"); 
-        while (nullConditionOperator != std::string::npos) {
-            expr.erase(nullConditionOperator, 1); 
-            nullConditionOperator = expr.find("?"); // For chaining
+        std::size_t nullCoalescingOperator = expr.find("?"); 
+        while (nullCoalescingOperator != std::string::npos) {
+            expr.erase(nullCoalescingOperator, 1); 
+            nullCoalescingOperator = expr.find("?"); // For chaining
         }         
     }
 
@@ -845,21 +855,31 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     const std::regex regexPattern(pattern);
     isMatched = std::regex_search(expr, match, regexPattern);
     int count = isMatched ? 2 : 1;
-    bool overShadow = true;
+    bool overShadow = true; // Needed in cases such as this.data = data where this.data is an attribute and data is a local or a parameter 
 
-    std::string possibleVar = expr; // For some reason, this fixes an issues dealing with invalid read memory 
+    std::string possibleVar = expr; // For some reason, this fixes an issues dealing with invalid read memory caused by regex_search()
     for (int i = 0; i < count; i++) {
         if (isMatched && i == 0) {    
             if (match[1] == "") {    
                 possibleVar = match[2]; // Case of base, super, and this 
-                // Needed in cases such as this.data = data where this.data is an attribute and data is a local or a parameter 
                 overShadow = false; 
             }   
+            // 
             else if (!returnCheck)
                 possibleVar = match[1]; // Perhaps variable itself (e.g., a or a.foo())        
         } 
-        else if (isMatched && match[1] != "") // Case of class or parent class
-            possibleVar = match[2];
+        // In C# or Java, a class name can be used to access static attributes only
+        // In C++, a class name can be used to access static and non-static attributes
+        // Parent class names can also be used to access attributes in the child class, but we will ignore this case for now
+        // Checking with class name also avoids problems with other classes or properties having the same names as the attributes in the current class
+        else if (isMatched && match[1] != "") {// Case of class name itself
+            std::string possibleClassName = match[1];
+            std::size_t listOpen = possibleClassName.find("<");
+            if (listOpen != std::string::npos) 
+                possibleClassName = possibleClassName.substr(0, listOpen);
+            if (classNameParsed == possibleClassName)
+                possibleVar = match[2];
+        }
 
         if (overShadow) {
             // Checked first in case of overshadowing if variables = attributes
@@ -897,6 +917,10 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
 
         // Case of variables = attributes
         if (variables.find(possibleVar) != variables.end()) {
+            if (attributesModified)
+                if (attributesModified->find(possibleVar) == attributesModified->end())
+                    attributesModified->insert(possibleVar);
+            
             attributeUsed = true;
             if (possibleVar != "this") { 
                 nonPrimitiveAttributeExternal = variables.at(possibleVar).getNonPrimitiveExternal(); 

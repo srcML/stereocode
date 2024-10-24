@@ -16,11 +16,12 @@ extern bool   ENUM;
 
 void XPathBuilder::generateXpath() {
     //// C++ ////
-    // Unions can't inherit, but can be declared anonymous (union without a name)
-    // Anonymous unions can't have methods, and their data members can be accessed directly without a dot or arrow
-    // Therefore, anonymous unions declared outside classes or structs are ignored
-    //  and data members that are defined in anonymous unions nested in classes or structs are considered
-    // Classes can be decalared without a name, but you need an instance to use their data members
+    // Unions can't inherit, but can be declared anonymous (union without a name) 
+    // Anonymous can only be declared inside a class or struct and can't have methods, 
+    //  and their data members can be accessed directly without a dot or arrow by the parent class or struct
+    // Therefore, data members that are defined inside anonymous unions are considered
+    //  and the anonymous union itself is not considered
+    // Classes can be declared without a name, but you need an instance to use their data members
     //  Therefore, these are treated as normal classes
     std::string language = "C++";
 
@@ -36,7 +37,7 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/text()[1]";
     xpathTable[language]["class_type"] = xpath;   
 
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/src:super_list/src:super";
+    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super";
     xpathTable[language]["parent_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
@@ -147,13 +148,14 @@ void XPathBuilder::generateXpath() {
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //// C# ////
-    // C# allows static classes to be declared, and these must contain only static data members and static fields
+    // C# allows static classes to be declared, and these must contain only static members
     // They are ignored and their methods are collected as free functions
+    // Nested classes, struct, or interfaces are ignored
     language = "C#";
     xpath = "//src:*[(self::src:class";
     if (STRUCT) xpath += " or self::src:struct";
     if (INTERFACE) xpath += " or self::src:interface";             
-    xpath += ") and not(src:specifier='static') and not(ancestor::src:class or ancestor::src:struct or ancestor::src:interface)]"; // Ignores nested classes, struct, or interfaces
+    xpath += ") and not(src:specifier='static') and not(ancestor::src:class or ancestor::src:struct or ancestor::src:interface)]"; 
     xpathTable[language]["class"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:name";
@@ -165,26 +167,28 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
 
+    // Auto-properties can be used to declare data members implicitly 
+    // And normal properties get or set data members (not always)
+    // Therefore, properties will be treated as data members as they can be used and called as normal data members  
+    //  where property name = data member name and where property type = data member type 
     xpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    // Auto-properties can be used to declare fields implicitly where property name = field name 
-    // We can detect an auto property with count(descendant::src:function) = 0
-    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1 and count(descendant::src:function) = 0]/src:name";
+    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:name";
     xpathTable[language]["attribute_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1 and count(descendant::src:function) = 0]/src:type";
+    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:type";
     xpathTable[language]["attribute_type"] = xpath;  
 
-    xpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     // Also ignores attributes with no specifier
     // If struct or interface, include the attributes with no specifier
+    xpath = "//src:decl_stmt[not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
     xpath += "/src:name[preceding-sibling::*[1][self::src:type]]"; 
     xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
-    xpath += " and count(descendant::src:function) = 0 and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
+    xpath += " and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]/src:name"; 
     xpathTable[language]["non_private_attribute_name"] = xpath;  
 
@@ -192,7 +196,7 @@ void XPathBuilder::generateXpath() {
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
     xpath += "/src:type[following-sibling::*[1][self::src:name]]"; 
     xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
-    xpath += " and count(descendant::src:function) = 0 and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
+    xpath += " and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]/src:type"; 
     xpathTable[language]["non_private_attribute_type"] = xpath;  
 

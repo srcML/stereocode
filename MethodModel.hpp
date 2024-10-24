@@ -89,7 +89,7 @@ public:
     void                     isVariableUsedInExpression (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);
     void                     isParameterRefChanged      (std::string, bool);      
 
-    bool                     isVariableUsed             (std::unordered_map<std::string, variable>&, const std::string&, bool, bool, bool, bool, bool);
+    bool                     isVariableUsed             (std::unordered_map<std::string, variable>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
     void                     isEmpty                    (srcml_archive*, srcml_unit*);
     void                     isFactory                  ();
                                              

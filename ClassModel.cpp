@@ -27,7 +27,7 @@ void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const s
     findParentClassName(archive, unit); // Requires structure type for C++
     
     std::vector<variable> attributeOrdered;
-    int numOfCurrentAttributes = attributeOrdered.size();
+    int numOfCurrentAttributes = attributeOrdered.size(); // Used for partial classes
     findAttributeName(archive, unit, attributeOrdered);
     findAttributeType(archive, unit, attributeOrdered, numOfCurrentAttributes);
     
@@ -166,8 +166,6 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
             std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
             removeNamespace(parClassNameLeft, true, unitLanguage); 
             parentClassName.insert({parClassNameLeft + parClassNameRight, inheritanceSpecifier});
-            removeBetweenComma(parClassNameRight, true);
-
         }
         else {
             removeNamespace(parentName, true, unitLanguage);
@@ -358,6 +356,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std:
         resultUnit = srcml_transform_get_unit(result, i);
 
         srcml_archive* methodArchive = srcml_archive_create();
+        srcml_archive_register_namespace(methodArchive, "pos", "http://www.srcML.org/srcML/position");
         char* unparsed = nullptr;
         std::size_t size = 0;
         srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
@@ -375,6 +374,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std:
 
         std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
         methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, "", unitNumber);
+        
         
         methods.push_back(m); 
         
@@ -399,6 +399,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
         srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
 
         srcml_archive* propertyArchive = srcml_archive_create();
+        srcml_archive_register_namespace(propertyArchive, "pos", "http://www.srcML.org/srcML/position");
         char* unparsed = nullptr;
         std::size_t size = 0;
         srcml_archive_write_open_memory(propertyArchive, &unparsed, &size);
@@ -413,7 +414,7 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
         srcml_archive_read_open_memory(propertyArchive, propertyString.c_str(), propertyString.size());
         //srcml_archive_read_open_memory(propertyArchive, unparsed, size);;
         srcml_unit* propertyUnit = srcml_archive_read_unit(propertyArchive);
-       
+
         srcml_append_transform_xpath(propertyArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property_type").c_str());
         srcml_transform_result* propertyResult = nullptr;
         srcml_unit_apply_transforms(propertyArchive, propertyUnit, &propertyResult);
@@ -435,11 +436,11 @@ void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, 
                 srcml_unit* methodResultUnit = srcml_transform_get_unit(propertyResult, j);
 
                 srcml_archive* methodArchive = srcml_archive_create();
+                srcml_archive_register_namespace(methodArchive, "pos", "http://www.srcML.org/srcML/position");
                 char* methodUnparsed = nullptr;
                 std::size_t methodSize = 0;
                 srcml_archive_write_open_memory(methodArchive, &methodUnparsed, &methodSize);
                 srcml_archive_write_unit(methodArchive, methodResultUnit);
-
                 srcml_archive_close(methodArchive);
                 srcml_archive_free(methodArchive);
             
@@ -950,7 +951,6 @@ void classModel::incidental() {
 //
 void classModel::stateless() {
     for (auto& m : methods) {
-
         if (!m.IsConstructorDestructorUsed()) {  
             if (!m.IsEmpty()) {
                 bool noCallsToClassMethodsOrOnAttributes = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0;

@@ -35,6 +35,7 @@ public:
 
     bool                 isFriendFunction               (methodModel&);
     void                 computeFreeFunctionsStereotypes();
+    void                 analyzeFreeFunctions();
     
 private:
     std::unordered_map<std::string, classModel>     classCollection;    // List of class names and their models

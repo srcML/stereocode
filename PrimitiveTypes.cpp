@@ -54,7 +54,7 @@ void primitiveTypes::outputPrimitives() {
     std::cerr << "\n\n";
 }
 
-// Specific primitives are used based on unit language
+// Specific primitives are used based on the language of the unit (i.e., source file)
 // Generic types (e.g., T), auto (C++), and var (C# and Java) 
 //  are considered as non-primitive unless added by user
 //
