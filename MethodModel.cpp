@@ -726,9 +726,6 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
 void methodModel::isCallOnAttribute(std::unordered_map<std::string, variable>& attributes, 
                                    const std::unordered_set<std::string>& classMethods, 
                                    const std::unordered_set<std::string>& inheritedClassMethods) {  
-    if (name == "OperationDeletedHandler")
-        std::cout <<"g";
-
     // Check on function calls (Should be done before checking on method calls)
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
         if (classMethods.find(it->getSignature()) == classMethods.end() && 

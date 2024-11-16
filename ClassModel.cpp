@@ -863,8 +863,6 @@ void classModel::factory() {
         if (m.IsFactory() || m.IsStrictFactory()) m.setStereotype("factory");
     }
 }
-
-
 // Stereotype wrapper:
 // 1] No data members are modified
 // 2] No calls to methods in class
@@ -951,6 +949,8 @@ void classModel::incidental() {
 //
 void classModel::stateless() {
     for (auto& m : methods) {
+        if (m.getName() == "InitializeWithWindow")
+            std::cout << "yes";
         if (!m.IsConstructorDestructorUsed()) {  
             if (!m.IsEmpty()) {
                 bool noCallsToClassMethodsOrOnAttributes = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0;
