@@ -32,13 +32,41 @@ if(EXISTS ${CLI11_DIR})
     file(COPY ${CLI11_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 else()
     # If it doesn't exist, download the file.
-    file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.4.1/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp)
+    file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.4.2/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp)
 endif()
 target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
 
-# Find and use libsrcml
-find_package(srcML REQUIRED)
-target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
+# For srcML v1.1+
+# Finds and use libsrcml + srcml.h
+find_package(srcML QUIET) 
+
+if (srcML_FOUND) 
+    target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
+
+else() # For srcML v1.0
+    # Find srcml.h
+    if(WIN32)
+        set(ROOT_DIR $ENV{SystemDrive}) # Windows could be on D:/ ... etc
+        target_include_directories(stereocode PRIVATE "${ROOT_DIR}/Program Files/srcML/include")
+    else()
+        target_include_directories(stereocode PRIVATE "/usr/local/include")
+    endif()
+
+    # Search common paths
+    find_library(LIBSRCML_LINK NAMES libsrcml.dylib libsrcml.1.dylib libsrcml.so.1 libsrcml.so libsrcml.lib)
+
+    if (LIBSRCML_LINK)
+        target_link_libraries(stereocode ${LIBSRCML_LINK})
+    else()
+        if(WIN32)
+            find_library(SRCML_LIB libsrcml.lib PATHS "${ROOT_DIR}/Program Files/srcML/lib")
+            target_link_libraries(stereocode PRIVATE ${SRCML_LIB})
+        else()
+            find_library(SRCML_LIB NAMES libsrcml.dylib libsrcml.1.dylib libsrcml.so.1 libsrcml.so PATHS "/usr/local/lib")
+            target_link_libraries(stereocode PRIVATE ${SRCML_LIB})
+        endif()
+    endif()
+endif()
 
 # Turn on compiler warnings.
 if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")

@@ -144,6 +144,77 @@
     <function><type><name>int</name></type> <name>getDataA</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>dataC</name></expr>;</return> </block_content>}</block></function>
 </public>}</block>;</class>
 
+<union>union <name>MyUnion</name> <block>{<public type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>intValue</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>float</name></type> <name>floatValue</name></decl>;</decl_stmt>
+
+    <function><type><name>void</name></type> <name>setIntValue</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>intValue</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function><type><name>int</name></type> <name>getIntValue</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
+        <return>return <expr><name>intValue</name></expr>;</return>
+    </block_content>}</block></function>
+</public>}</block>;</union>
+
+<class>class <name>Example</name> <block>{<private type="default">
+</private><public>public:
+    <function><type><name>int</name></type> <name>getIntValue</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
+        <return>return <expr><name>intValue</name></expr>;</return>
+    </block_content>}</block></function>
+
+</public><private>private:
+    <union>union <block>{<public type="default">
+        <decl_stmt><decl><type><name>int</name></type> <name>intValue</name></decl>;</decl_stmt>
+    </public>}</block>;</union>
+</private>}</block>;</class>
+
+<union><specifier>static</specifier> union <block>{<public type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>intValue</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>float</name></type> <name>floatValue</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>char</name></type> <name>charValue</name></decl>;</decl_stmt>
+</public>}</block>;</union>
+
+<class>class <block>{<private type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>value</name></decl>;</decl_stmt>
+    <function><type><name>int</name></type> <name>getValue</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>value</name></expr>;</return>
+    </block_content>}</block></function>
+</private>}</block> <decl><name>anonymousClass</name></decl>;</class>
+
+<struct>struct <block>{<public type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>value</name></decl>;</decl_stmt>
+    <function><type><name>int</name></type> <name>getValue</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>value</name></expr>;</return>
+    </block_content>}</block></function>
+</public>}</block> <decl><name>anonymousStruct</name></decl>;</struct>
+
+<class>class <name>Base</name> <block>{<private type="default">
+</private><public>public:
+    <function><type><name>void</name></type> <name>display</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Base class display function"</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+</public>}</block>;</class>
+
+<typedef>typedef <label><name>class</name> :</label> <expr_stmt><expr><specifier>public</specifier> <macro><name>Base</name></macro> <block>{
+<expr><specifier>public</specifier><operator>:</operator>
+    <name>int</name> <name>value</name></expr>;
+    <expr><name>int</name> <macro><name>getValue</name><argument_list>()</argument_list></macro> <block>{
+        <return>return <expr><name>value</name></expr>;</return></block></expr>
+    }</block></expr></expr_stmt></typedef>
+} TypedefClass<empty_stmt>;</empty_stmt>
+
+
+<class>class <name>MyStaticClass</name> <block>{<private type="default">
+</private><public>public:
+    <function><type><specifier>static</specifier> <name>void</name></type> <name>staticMethod</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"This is a static method."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+</public>}</block>;</class>
+
+<function><type><specifier>static</specifier> <name>void</name></type> <name>staticFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+    <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"This is a static free function."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+</block_content>}</block></function>
 
 <function><type><name>int</name></type> <name>main</name><parameter_list>()</parameter_list> <block>{<block_content>
 

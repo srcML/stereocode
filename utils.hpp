@@ -18,8 +18,9 @@
 #include <string_view>
 #include <unordered_map>
 #include <map>
+#include <cstddef>
 #include "PrimitiveTypes.hpp"
-#include "TypeTokens.hpp"
+#include "TypeModifiers.hpp"
 #include "variable.hpp"
  
 
@@ -28,7 +29,7 @@ bool                            isNonPrimitiveType            (const std::string
 bool                            isPrimitiveType               (const std::string&, const std::string& unitLanguage);
 bool                            matchSubstring                (const std::string&, const std::string&);
 void                            createSpecifierList           ();
-void                            removeTypeTokens              (std::string&, std::string);
+void                            removeTypeModifiers           (std::string&, std::string);
 void                            trimWhitespace                (std::string&);
 void                            Ltrim                         (std::string&);
 void                            Rtrim                         (std::string&);

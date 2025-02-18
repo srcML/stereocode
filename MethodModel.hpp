@@ -41,7 +41,6 @@ public:
     int                      getUnitNumber                      () const                { return unitNumber;                                }  
     int                      getNumOfExternalFunctionCalls      () const                { return numOfExternalFunctionCalls;                } 
     int                      getNumOfExternalMethodCalls        () const                { return numOfExternalMethodCalls;                  } 
-    bool                     IsStatic                           () const                { return staticMethod;                              } 
     bool                     IsConstMethod                      () const                { return constMethod;                               }
     bool                     IsAttributeReturned                () const                { return attributeReturned;                         }
     bool                     IsAttributeNotReturned             () const                { return attributeNotReturned;                      }
@@ -81,18 +80,16 @@ public:
     void                     findNewAssign              (srcml_archive*, srcml_unit*);
     void                     isConst                    (srcml_archive*, srcml_unit*);
     void                     isConstructorDestructor    (srcml_archive*, srcml_unit*);
-    void                     isStatic                   (srcml_archive*, srcml_unit*);
     void                     isIgnorableCall            (std::vector<calls>&);
     void                     isCallOnAttribute          (std::unordered_map<std::string, variable>&, 
                                                          const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);   
-    void                     isAttributeUsedInCallArgument   (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&);                              
     void                     isCallOnParameter          ();
     void                     isVariableReturned         (std::unordered_map<std::string, variable>&, bool);
     void                     isVariableModified         (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);                             
     void                     isVariableUsedInExpression (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);
     void                     isParameterRefChanged      (std::string, bool);      
 
-    bool                     isVariableUsed             (std::unordered_map<std::string, variable>&, const std::string&, bool, bool, bool, bool, bool);
+    bool                     isVariableUsed             (std::unordered_map<std::string, variable>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
     void                     isEmpty                    (srcml_archive*, srcml_unit*);
     void                     isFactory                  ();
                                              
@@ -105,7 +102,6 @@ private:
     std::string                                       unitLanguage;                               // Unit language
     std::string                                       xpath;                                      // Unique xpath
     std::string                                       srcML;                                      // Method srcML
-    std::string                                       callsArguments;                             // All arguments of calls concatenated (Needed to find usage of attributes)
     std::vector<variable>                             parametersOrdered;                          // List of all parameters (Needed in order to build the parameters map)
     std::vector<variable>                             localsOrdered;                              // List of all local (Needed in order to build the locals map)     
     std::unordered_map<std::string, variable>         parameters;                                 // Map of all parameters. Key is parameter name
@@ -136,7 +132,6 @@ private:
     bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as class                                                
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
     bool                                              constructorDestructorUsed{false};           // Method is a constructor or a destructor
-    bool                                              staticMethod{false};                        // True if method is static
     int                                               unitNumber{-1};                             // Unit number
     int                                               numOfVariablesReturnedCreatedWithNew{0};    // Number of return expressions that return a local, parameter, or an attribute created with the "new" operator
     int                                               numOfAttributesModified{0};                 // Number of modified attributes

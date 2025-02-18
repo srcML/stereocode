@@ -18,9 +18,9 @@ This output can be used for further processing or analysis. For instance, the st
 
 ## 🔧 Installation and Build
 1. Prerequisites
-- [srcml 1.1+](https://www.srcml.org/)
+- [srcml 1.1+](https://www.srcml.org/) (Client + Develop)
 - [cmake 3.17+](https://cmake.org/)
-- C++17 or higher
+- GCC, Clang, or MSCV with C++17 or higher
 
 2. Clone or download this repository.
 
@@ -32,7 +32,16 @@ cd build_path
 make
 ```
 
-Note: Stereocode is compatible with srcML v1.0, but might not work as intended in certain rare cases.
+
+Stereocode is compatible with **srcML v1.0**, but it might not work as intended in certain cases as it is supported in Stereocode using a workaround. </br>
+
+On MAC OS, if you get an error related to "dyld library not loaded", then you need to export the path of libsrcml.dylib as follows: </br> 
+```bash
+export DYLD_LIBRARY_PATH=/usr/local/lib:$DYLD_LIBRARY_PATH 
+```
+
+Or add it to the shell configuration **.zshrc or .bash_profile** file to make it permanent.
+
 
 ## 🚀 Usage
 
@@ -50,19 +59,47 @@ srcml PowerShell.zip -o PowerShell.xml
 ./stereocode --help
 ```
 
+Note:</br>
+Stereocode can stereotype *free functions*. A *free function* could a static method/function, a friend function (C++), or simply a function that does not belong to a class (C++) **(This is still under development, a taxonomy will be available soon)**.
+
 ## 📜 Stereocode Options
 
 <span style='color: lightgreen;'>**-o, --output-file:**</span> File name of output - srcML archive with stereotypes.
 
-<span style='color: lightgreen;'>**-p, --primitive-file:**</span> File name of user supplied primitive types (one per line). 
+<span style='color: lightgreen;'>**-p, --primitive-file:**</span> File name of user supplied primitive types (one per line). </br>
+```
+Datatype_1
+Datatype_2
+...
+```
+These data types will be treated as primitive data types such as an **int**.
 
-<span style='color: lightgreen;'>**-g, --ignore-call-file:**</span> File name of user supplied calls to ignore (one per line). 
+<span style='color: lightgreen;'>**-g, --ignore-call-file:**</span> File name of user supplied calls to ignore (one per line). </br>
+```
+Call_Name_1
+Call_Name_2
+...
+```
+Do not use namespaces, parenthesis, or other special characters. Simply list the call name itself. For example, **foo**. </br>
+These calls are ignored from analysis. However, usage of attributes within these calls (as parameters) are not ignored (considered as accessors to attributes).
 
-<span style='color: lightgreen;'>**-t, --type-token-file:**</span> File name of user supplied data type tokens to remove (one per line). 
+<span style='color: lightgreen;'>**-t, --type-modifier-file:**</span> File name of user supplied data type modifiers to remove (one per line). </br>
+```
+modifier_1
+modifier_2
+...
+```
+These modifiers are removed during analysis to enhance the detection of certain elements such as primitive data types and method return types. 
 
-<span style='color: lightgreen;'>**-i, --enable-interface:**</span> Identify stereotypes for interfaces (C# and Java). 
+<span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21).
 
-<span style='color: lightgreen;'>**-s, --enable-struct:**</span> Identify stereotypes for structs (C# and Java). 
+<span style='color: lightgreen;'>**-i, --interface:**</span> Identify stereotypes for interfaces (C# and Java). 
+
+<span style='color: lightgreen;'>**-n, --union:**</span> Identify stereotypes for unions (C++). 
+
+<span style='color: lightgreen;'>**-m, --enum:**</span> Identify stereotypes for enums (Java). 
+
+<span style='color: lightgreen;'>**-s, --struct:**</span> Identify stereotypes for structs (C# and Java). 
 
 <span style='color: lightgreen;'>**-e, --input-overwrite:**</span> Overwrite input with stereotype information. 
 
@@ -72,7 +109,7 @@ srcml PowerShell.zip -o PowerShell.xml
 
 <span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */). 
 
-<span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21).
+<span style='color: lightgreen;'>**-v, --verbose:**</span> Outputs default primitives, ignored calls, type modifiers, and extra report files.
 
 ## 📓 Developer Notes:
 

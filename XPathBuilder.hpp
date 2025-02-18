@@ -13,7 +13,6 @@
 #include <string>
 #include <unordered_map>
 
-
 class XPathBuilder {
 private:
     std::unordered_map<std::string, std::unordered_map<std::string, std::string>> xpathTable;
@@ -23,6 +22,5 @@ public:
 
     const std::string& getXpath      (const std::string&, const std::string&);
 };
-
 
 #endif

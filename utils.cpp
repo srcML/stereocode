@@ -11,13 +11,13 @@
 
 extern primitiveTypes                        PRIMITIVES;   
 extern std::vector<std::string>              LANGUAGE;
-extern typeTokens                            TYPE_TOKENS;  
+extern typeModifiers                         TYPE_MODIFIERS;  
 
 bool isNonPrimitiveType(const std::string& type, variable& var, 
                         const std::string& unitLanguage, const std::string& className) {
     std::string typeParsed = type;
 
-    size_t listOpen = typeParsed.find("<");
+    std::size_t listOpen = typeParsed.find("<");
     if (listOpen != std::string::npos) {
         std::string typeLeft = typeParsed.substr(0, listOpen);
         std::string typeRight = typeParsed.substr(listOpen, typeParsed.size() - listOpen);
@@ -29,12 +29,12 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
         typeParsed = typeLeft + typeRight;
     }
 
-    removeTypeTokens(typeParsed, unitLanguage); // Can take full type as is
+    removeTypeModifiers(typeParsed, unitLanguage); // Can take full type as is
     trimWhitespace(typeParsed);  // Can take full type as is
     
     bool isNonPrimitive = false; 
-    size_t start = 0;
-    size_t end = typeParsed.find(",");
+    std::size_t start = 0;
+    std::size_t end = typeParsed.find(",");
     std::string subType;
     while (end != std::string::npos) {
         subType = typeParsed.substr(start, end - start);   
@@ -80,8 +80,8 @@ bool matchSubstring(const std::string& text, const std::string& substring) {
 
 // Removes specifiers from type name
 //
-void removeTypeTokens(std::string& type, std::string unitLanguage) {
-    std::regex regexPattern(TYPE_TOKENS.getTypeTokens(unitLanguage));
+void removeTypeModifiers(std::string& type, std::string unitLanguage) {
+    std::regex regexPattern(TYPE_MODIFIERS.getTypeModifiers(unitLanguage));
     type = std::regex_replace(type, regexPattern, " ");
 }
 
@@ -94,7 +94,7 @@ void trimWhitespace(std::string& s) {
 // Trim blanks of the right of string
 //
 void Rtrim(std::string& s) {
-    size_t lastNonSpace = s.find_last_not_of(' ');
+    std::size_t lastNonSpace = s.find_last_not_of(' ');
     if (lastNonSpace != std::string::npos)
         s = s.substr(0, lastNonSpace + 1);   
 }
@@ -103,7 +103,7 @@ void Rtrim(std::string& s) {
 // all = false keeps the last :: or .
 //
 void removeNamespace(std::string& name, bool all, std::string_view unitLanguage) {
-    size_t last, secondLast;
+    std::size_t last, secondLast;
     if (unitLanguage == "C++") last = name.rfind("::");
     else last = name.rfind(".");
     if (last != std::string::npos) {
@@ -135,7 +135,7 @@ void WStoBlank(std::string& s) {
 //  and Foo(int, std::pair<int, int>, double) becomes Foo(,,)
 //
 void removeBetweenComma(std::string& s, bool isGeneric) {
-    size_t opening;
+    std::size_t opening;
     if (isGeneric)
       opening = s.find("<");
     else
@@ -164,10 +164,12 @@ void removeBetweenComma(std::string& s, bool isGeneric) {
 }
 
 // Workaround to get Stereocode to work with srcML 1.0.0
+// It works by removing the item= attribute, which has an issue in srcML 1.0.0
+//
 void srcmlBackwardCompatibility(std::string& xmlText) {
-    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor>", "><function"};
+    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor", "><function"};
 
-    size_t pos = std::string::npos;
+    std::size_t pos = std::string::npos;
     for (const auto& tag : tags) {
         pos = xmlText.find(tag);
         if (pos != std::string::npos) {
@@ -178,7 +180,7 @@ void srcmlBackwardCompatibility(std::string& xmlText) {
     if (pos != std::string::npos) { 
         std::string beforeFunction = xmlText.substr(0, pos);
         std::string afterFunction = xmlText.substr(pos);
-        size_t item = beforeFunction.find("item=");
+        std::size_t item = beforeFunction.find("item=");
         if (item != std::string::npos) {}
             beforeFunction = beforeFunction.substr(0, item);
 

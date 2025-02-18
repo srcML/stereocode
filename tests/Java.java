@@ -1,4 +1,4 @@
-public static class ExternalFunctions {
+class ExternalFunctions {
     public static void externalFunction() {
         System.out.println("This is an external function call.");
     }
@@ -8,7 +8,7 @@ public static class ExternalFunctions {
     }
 }
 
-public class AnotherClass {
+class AnotherClass {
     private int anotherDataMember;
 
     public AnotherClass(int value) {
@@ -20,7 +20,7 @@ public class AnotherClass {
     }
 }
 
-public class MyClass {
+class MyClass {
     private int dataMember;
     private String otherDataMember;
 
@@ -100,10 +100,6 @@ public class MyClass {
         System.out.println("Sum of local numbers: " + sum);
     }
 
-    public int getDataMember() {
-        return this.dataMember;
-    }
-
     public void setDataMember(int dataMember) {
         this.dataMember = dataMember;
     }
@@ -117,9 +113,7 @@ public class MyClass {
     }
 }
 
-
-
-public class C {
+class C {
     protected int dataC;
 
     public int getDataC() {
@@ -127,18 +121,51 @@ public class C {
     }
 }
 
-public class B extends C {
+class B extends C {
     public int getDataB() {
         return dataC;
     }
 }
 
-public class A extends B {
+class A extends B {
     public int getDataA() {
         return dataC;
     }
 }
 
+enum Day {
+    MONDAY("Start of the work week", 8),
+    TUESDAY("Second day of the work week", 8),
+    WEDNESDAY("Midweek", 8),
+    THURSDAY("Almost the weekend", 8),
+    FRIDAY("End of the work week", 8),
+    SATURDAY("Weekend", 0),
+    SUNDAY("Weekend", 0);
+
+    private String description;
+    private int workingHours;
+
+    Day(String description, int workingHours) {
+        this.description = description;
+        this.workingHours = workingHours;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setWorkingHours(int workingHours) {
+        this.workingHours = workingHours;
+    }
+
+    public int getWorkingHours() {
+        return workingHours;
+    }
+}
 
 public class Program {
     public static void main(String[] args) {

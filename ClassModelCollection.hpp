@@ -18,11 +18,10 @@
 
 class classModelCollection {
 public:
-                         classModelCollection           (srcml_archive*, srcml_archive*, std::vector<srcml_unit*>&, 
-                                                        const std::string&, const std::string&, bool, bool, bool);
+                         classModelCollection           (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
 
-    void                 findClassInfo                  (srcml_archive*, std::vector<srcml_unit*>);
-    void                 findFreeFunctions              (srcml_archive*, std::vector<srcml_unit*>);
+    void                 findClassInfo                  (srcml_archive*, srcml_unit*, int);
+    void                 findFreeFunctions              (srcml_archive*, srcml_unit*, int);
     void                 findInheritedAttributes        (classModel&);
     void                 findInheritedMethods           (classModel&);
 
@@ -30,12 +29,13 @@ public:
                                                          int, const std::unordered_map<std::string, std::string>&,  
                                                          std::unordered_map<int, srcml_transform_result*>&, std::mutex&);
     void                 outputAsComments               (srcml_unit*, srcml_archive*) ;                            
-    void                 outputTxtReportFile            (std::stringstream&, classModel&);
-    void                 outputCsvReportFile            (std::ofstream&, classModel&);
+    void                 outputTxtReportFile            (std::stringstream&, classModel*);
+    void                 outputCsvReportFile            (std::ofstream&, classModel*);
     void                 outputCsvVerboseReportFile     (const std::string&);
 
     bool                 isFriendFunction               (methodModel&);
     void                 computeFreeFunctionsStereotypes();
+    void                 analyzeFreeFunctions();
     
 private:
     std::unordered_map<std::string, classModel>     classCollection;    // List of class names and their models
