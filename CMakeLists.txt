@@ -4,8 +4,11 @@
 # Supports any version of CMake >= specified
 cmake_minimum_required(VERSION 3.17)
 
-# To allow special characters in test names
-cmake_policy(SET CMP0110 NEW)
+# Prevent in-source builds. However, it does not prevent CMakeFiles and CMakeCache.txt from being created (need to manually remove them)
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+    # Stop CMake immediately with an error
+    message(FATAL_ERROR "In-source builds are not allowed. Please create a separate build directory and run CMake from there.")
+endif()
 
 # Project information
 project(Stereocode LANGUAGES CXX)
@@ -19,22 +22,14 @@ if (NOT CMAKE_BUILD_TYPE)
 endif()
 
 # Get a list of paths for the cpp and hpp files
-file(GLOB STEREOCODE_SOURCE *.cpp *.hpp)
+file(GLOB STEREOCODE_SOURCE src/*.cpp src/*.hpp)
 
 # The stereocode application (target)
 add_executable(stereocode ${STEREOCODE_SOURCE})
 
-# Check if the CLI11 exists
-set(CLI11_DIR ${CMAKE_CURRENT_SOURCE_DIR}/external)
-set(CMAKE_EXTERNAL_SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/external)
-if(EXISTS ${CLI11_DIR})
-    # If it exists, copy the 'external' directory to the binary directory.
-    file(COPY ${CLI11_DIR} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-else()
-    # If it doesn't exist, download the file.
-    file(DOWNLOAD https://github.com/CLIUtils/CLI11/releases/download/v2.4.2/CLI11.hpp ${CMAKE_EXTERNAL_SOURCE_DIR}/CLI11.hpp)
-endif()
-target_include_directories(stereocode PRIVATE ${CMAKE_EXTERNAL_SOURCE_DIR})
+# Copy CLI11 to build directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/include DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(stereocode PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/include)
 
 # For srcML v1.1+
 # Finds and use libsrcml + srcml.h
@@ -42,7 +37,6 @@ find_package(srcML QUIET)
 
 if (srcML_FOUND) 
     target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
-
 else() # For srcML v1.0
     # Find srcml.h
     if(WIN32)
@@ -76,15 +70,20 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 
 enable_testing()
-file(COPY tests DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(GLOB TESTFILES ${CMAKE_CURRENT_BINARY_DIR}/tests/*.xml)
-list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|stereotypes.xml|runtests.cmake|.cpp|.cs|.java")
-foreach(TEST ${TESTFILES})
-    message(STATUS "Add test case ${TEST}")
-    get_filename_component(DIRPART ${TEST} DIRECTORY)
-    get_filename_component(BASENAME ${TEST} NAME)
-    string(REGEX REPLACE "\\.xml$" "" BASENAME ${BASENAME})
-    set(FULL_PATH_WITHOUT_EXTENSION "${DIRPART}/${BASENAME}")
-    # The -D option creates variables and pass them with the -P option to the runtests.cmake.
-    add_test(NAME "${BASENAME}_test" COMMAND ${CMAKE_COMMAND} -DSTEREOCODE=$<TARGET_FILE:stereocode> -DTEST_FILE=${FULL_PATH_WITHOUT_EXTENSION} -P tests/runtests.cmake)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(GLOB TESTFILES ${CMAKE_CURRENT_BINARY_DIR}/test/*.xml)
+list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|stereotypes.xml")
+
+foreach(TEST_FILE ${TESTFILES})
+    string(REGEX REPLACE "\\.xml$" "" TEST_FILE "${TEST_FILE}")
+    get_filename_component(BASENAME ${TEST_FILE} NAME)
+
+    add_test(
+        NAME "${BASENAME}_test"
+        COMMAND ${CMAKE_COMMAND}
+            -DSTEREOCODE=$<TARGET_FILE:stereocode>
+            -DTEST_FILE=${TEST_FILE}
+            -P ${CMAKE_CURRENT_BINARY_DIR}/test/runtests.cmake
+    )
 endforeach()
