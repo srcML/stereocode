@@ -14,7 +14,7 @@ extern std::vector<std::string>              LANGUAGE;
 extern typeModifiers                         TYPE_MODIFIERS;  
 
 bool isNonPrimitiveType(const std::string& type, variable& var, 
-                        const std::string& unitLanguage, const std::string& structureName) {
+                        const std::string& unitLanguage, const std::string& className) {
     std::string typeParsed = type;
 
     std::size_t listOpen = typeParsed.find("<");
@@ -41,7 +41,7 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
         removeNamespace(subType, true, unitLanguage); 
         if (!isPrimitiveType(subType, unitLanguage)) {
             isNonPrimitive = true;
-            if (subType != structureName)
+            if (subType != className)
                 var.setNonPrimitiveExternal(true);
         }
         
@@ -53,7 +53,7 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
     removeNamespace(subType, true, unitLanguage);
     if (!isPrimitiveType(subType, unitLanguage)) {
         isNonPrimitive = true;
-        if (subType != structureName)
+        if (subType != className)
             var.setNonPrimitiveExternal(true);
     }
 

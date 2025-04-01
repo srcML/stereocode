@@ -1,36 +1,36 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file StructureModelCollection.hpp
+ * @file ClassModelCollection.hpp
  *
  * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
-#ifndef STRUCTUREMODELCOLLECTION_HPP
-#define STRUCTUREMODELCOLLECTION_HPP
+#ifndef CLASSMODELCOLLECTION_HPP
+#define CLASSMODELCOLLECTION_HPP
 
 #include <thread>
 #include <iomanip> 
 #include <mutex>
 #include <filesystem>
-#include "StructureModel.hpp"
+#include "ClassModel.hpp"
 
-class structureModelCollection {
+class classModelCollection {
 public:
-                         structureModelCollection       (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
+                         classModelCollection       (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
 
-    void                 findStructureInfo              (srcml_archive*, srcml_unit*, int);
+    void                 findClassInfo              (srcml_archive*, srcml_unit*, int);
     void                 findFreeFunctions              (srcml_archive*, srcml_unit*, int);
-    void                 findInheritedFields            (structureModel&);
-    void                 findInheritedMethods           (structureModel&);
+    void                 findInheritedFields            (classModel&);
+    void                 findInheritedMethods           (classModel&);
 
     void                 outputWithStereotypes          (srcml_unit*, std::map<int, srcml_unit*>&,
                                                          int, const std::unordered_map<std::string, std::string>&,  
                                                          std::unordered_map<int, srcml_transform_result*>&, std::mutex&);
     void                 outputAsComments               (srcml_unit*, srcml_archive*) ;                            
-    void                 outputTxtReportFile            (std::stringstream&, structureModel*);
-    void                 outputCsvReportFile            (std::ofstream&, structureModel*);
+    void                 outputTxtReportFile            (std::stringstream&, classModel*);
+    void                 outputCsvReportFile            (std::ofstream&, classModel*);
     void                 outputCsvVerboseReportFile     (const std::string&);
 
     bool                 isFriendFunction               (methodModel&);
@@ -38,8 +38,8 @@ public:
     void                 analyzeFreeFunctions();
     
 private:
-    std::unordered_map<std::string, structureModel>     structureCollection;    // List of structure names and their models
-    std::unordered_map<std::string, std::string>        structureGenerics;      // List of generic structure names with and without <> for inheritance matching
+    std::unordered_map<std::string, classModel>     classCollection;    // List of class names and their models
+    std::unordered_map<std::string, std::string>        classGenerics;      // List of generic class names with and without <> for inheritance matching
     std::vector<methodModel>                            freeFunctions;          // List of free functions
 };
 

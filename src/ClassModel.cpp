@@ -1,37 +1,37 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file StructureModel.cpp
+ * @file ClassModel.cpp
  *
  * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
-#include "StructureModel.hpp"
+#include "ClassModel.hpp"
 
 extern std::unordered_map
        <int, std::unordered_map
        <std::string, std::string>>   XPATH_LIST;   
 extern primitiveTypes                PRIMITIVES;
-extern int                           METHODS_PER_STRUCTURE_THRESHOLD;
+extern int                           METHODS_PER_CLASS_THRESHOLD;
 extern XPathBuilder                  XPATH_TRANSFORMATION;  
 
-structureModel::structureModel(srcml_archive* archive, srcml_unit* unit, const std::string& unitLang) {
+classModel::classModel(srcml_archive* archive, srcml_unit* unit, const std::string& unitLang) {
     unitLanguage = unitLang;
-    findStructureName(archive, unit);  
+    findClassName(archive, unit);  
 }
 
-void structureModel::findStructureData(srcml_archive* archive, srcml_unit* unit, const std::string& structureXpath, int unitNumber) {
-    xpath[unitNumber].push_back(structureXpath);
-    if (unitLanguage == "C++") findStructureType(archive, unit); // Needed for findParentStructureName()
-    findParentStructureName(archive, unit); // Requires structure type for C++
+void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
+    xpath[unitNumber].push_back(classXpath);
+    if (unitLanguage == "C++") findClassType(archive, unit); // Needed for findParentClassName()
+    findParentClassName(archive, unit); // Requires class type for C++
     
     std::vector<variable> fieldOrdered;
-    int numOfCurrentFields = fieldOrdered.size(); // Used for partial structures
+    int numOfCurrentFields = fieldOrdered.size(); // Used for partial classs
     findFieldName(archive, unit, fieldOrdered);
     findFieldType(archive, unit, fieldOrdered, numOfCurrentFields);
     
-    // The "this" keyword by itself is assumed to be an "accessor" to the state of the structure
+    // The "this" keyword by itself is assumed to be an "accessor" to the state of the class
     // It is also not a non-primitive
     variable v;
     v.setName("this");
@@ -41,16 +41,16 @@ void structureModel::findStructureData(srcml_archive* archive, srcml_unit* unit,
     int numOfCurrentNonPrivateFields = nonPrivateFieldOrdered.size();
     findNonPrivateFieldName(archive, unit, nonPrivateFieldOrdered);
     findNonPrivateFieldType(archive, unit, nonPrivateFieldOrdered, numOfCurrentNonPrivateFields);
-    findMethod(archive, unit, structureXpath, unitNumber);
+    findMethod(archive, unit, classXpath, unitNumber);
 
-    if (unitLanguage == "C#") findMethodInProperty(archive, unit, structureXpath, unitNumber); 
+    if (unitLanguage == "C#") findMethodInProperty(archive, unit, classXpath, unitNumber); 
 }
 
 
-// Finds structure name
+// Finds class name
 //
-void structureModel::findStructureName(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"structure_name").c_str());
+void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
@@ -90,23 +90,23 @@ void structureModel::findStructureName(srcml_archive* archive, srcml_unit* unit)
     srcml_transform_free(result); 
 }
 
-// Determines the structure type (class, interface, or struct)
+// Determines the class type (class, interface, or struct)
 //
-void structureModel::findStructureType(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"structure_type").c_str());
+void classModel::findClassType(srcml_archive* archive, srcml_unit* unit) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
     if (srcml_transform_get_unit_size(result) == 1) {
-        structureType = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
-        trimWhitespace(structureType);
+        classType = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
+        trimWhitespace(classType);
     }
     
     srcml_clear_transforms(archive);
     srcml_transform_free(result); 
 }
 
-// Finds parent structures
+// Finds parent classs
 // C++ supports multiple inheritance 
 //  Classes and structs can inherit from each other
 //  C++ doesn't support interfaces
@@ -122,7 +122,7 @@ void structureModel::findStructureType(srcml_archive* archive, srcml_unit* unit)
 // Java uses 'extends' for class-to-class and interface-to-interface inheritance, 
 //  and 'implements' for class-to-interface inheritance
 // 
-void structureModel::findParentStructureName(srcml_archive* archive, srcml_unit* unit) { 
+void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) { 
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parent_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -152,7 +152,7 @@ void structureModel::findParentStructureName(srcml_archive* archive, srcml_unit*
                 inheritanceSpecifier = "private";
                 parentName.erase(0, inheritanceSpecifier.size());  
             }             
-            else if (structureType == "class")
+            else if (classType == "class")
                 inheritanceSpecifier = "private";
             else
                 inheritanceSpecifier = "public";         
@@ -162,14 +162,14 @@ void structureModel::findParentStructureName(srcml_archive* archive, srcml_unit*
 
         std::size_t listOpen = parentName.find("<");
         if (listOpen != std::string::npos) {
-            std::string parStructureNameLeft = parentName.substr(0, listOpen);
-            std::string parStructureNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
-            removeNamespace(parStructureNameLeft, true, unitLanguage); 
-            parentStructureName.insert({parStructureNameLeft + parStructureNameRight, inheritanceSpecifier});
+            std::string parClassNameLeft = parentName.substr(0, listOpen);
+            std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
+            removeNamespace(parClassNameLeft, true, unitLanguage); 
+            parentClassName.insert({parClassNameLeft + parClassNameRight, inheritanceSpecifier});
         }
         else {
             removeNamespace(parentName, true, unitLanguage);
-            parentStructureName.insert({parentName, inheritanceSpecifier});
+            parentClassName.insert({parentName, inheritanceSpecifier});
         }
     
         free(unparsed);      
@@ -182,7 +182,7 @@ void structureModel::findParentStructureName(srcml_archive* archive, srcml_unit*
 // Finds field names
 // Only collect the name if there is a type
 //
-void structureModel::findFieldName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& fieldOrdered) {
+void classModel::findFieldName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& fieldOrdered) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"field_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -221,7 +221,7 @@ void structureModel::findFieldName(srcml_archive* archive, srcml_unit* unit, std
 // Finds field types
 // Only collect the type if there is a name
 //
-void structureModel::findFieldType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& fieldOrdered, int numOfCurrentFields) {
+void classModel::findFieldType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& fieldOrdered, int numOfCurrentFields) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"field_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -268,7 +268,7 @@ void structureModel::findFieldType(srcml_archive* archive, srcml_unit* unit, std
 // For Java, no access specifier = accessible by derived classes (package-private) within the
 //  same package (We will ignore this), and always public static for an interface
 //  
-void structureModel::findNonPrivateFieldName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateFieldOrdered) {
+void classModel::findNonPrivateFieldName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateFieldOrdered) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_field_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -303,7 +303,7 @@ void structureModel::findNonPrivateFieldName(srcml_archive* archive, srcml_unit*
 
 // Finds non-private field types
 //
-void structureModel::findNonPrivateFieldType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateFieldOrdered, 
+void classModel::findNonPrivateFieldType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateFieldOrdered, 
                                              int numOfNonPrivateCurrentFields) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_field_type").c_str());
     srcml_transform_result* result = nullptr;
@@ -343,9 +343,9 @@ void structureModel::findNonPrivateFieldType(srcml_archive* archive, srcml_unit*
     srcml_transform_free(result);
 }
 
-// Finds methods defined inside the structure
+// Finds methods defined inside the class
 //
-void structureModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& structureXpath, int unitNumber) {
+void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -364,17 +364,17 @@ void structureModel::findMethod(srcml_archive* archive, srcml_unit* unit, const 
         srcml_archive_close(methodArchive);
         srcml_archive_free(methodArchive);
 
+        // Workaround, remove when srcML v1.1 is released
         std::string methString = unparsed;
         srcmlBackwardCompatibility(methString);
 
         methodArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(methodArchive, methString.c_str(), methString.size());
-        //srcml_archive_read_open_memory(methodArchive, unparsed, size);
+        srcml_archive_read_open_memory(methodArchive, methString.c_str(), methString.size()); // Workaround, remove when srcML v1.1 is released
+        //srcml_archive_read_open_memory(propertyArchive, unparsed, size); // Uncomment when srcML v1.1 is released
         srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
-
-        std::string methodXpath = "(" + structureXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
-        methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, "", unitNumber);
         
+        std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
+        methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, "", unitNumber);
         
         methods.push_back(m); 
         
@@ -389,7 +389,7 @@ void structureModel::findMethod(srcml_archive* archive, srcml_unit* unit, const 
 
 // Properties need to be collected separately since they hold the return type of the getters
 //
-void structureModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, const std::string& structureXpath, int unitNumber) {
+void classModel::findMethodInProperty(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -407,12 +407,13 @@ void structureModel::findMethodInProperty(srcml_archive* archive, srcml_unit* un
         srcml_archive_close(propertyArchive);
         srcml_archive_free(propertyArchive);
         
+        // Workaround, remove when srcML v1.1 is released
         std::string propertyString = unparsed;
         srcmlBackwardCompatibility(propertyString);
 
         propertyArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(propertyArchive, propertyString.c_str(), propertyString.size());
-        //srcml_archive_read_open_memory(propertyArchive, unparsed, size);;
+        srcml_archive_read_open_memory(propertyArchive, propertyString.c_str(), propertyString.size()); // Workaround, remove when srcML v1.1 is released
+        //srcml_archive_read_open_memory(propertyArchive, unparsed, size); // Uncomment when srcML v1.1 is released
         srcml_unit* propertyUnit = srcml_archive_read_unit(propertyArchive);
 
         srcml_append_transform_xpath(propertyArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property_type").c_str());
@@ -448,7 +449,7 @@ void structureModel::findMethodInProperty(srcml_archive* archive, srcml_unit* un
                 srcml_archive_read_open_memory(methodArchive, methodUnparsed, methodSize);
                 srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
 
-                std::string methodXpath = "((" + structureXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"property") + ")[" + std::to_string(i + 1) + "]";
+                std::string methodXpath = "((" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"property") + ")[" + std::to_string(i + 1) + "]";
                 methodXpath += "//src:function)[" + std::to_string(j + 1) + "]";
 
                 methodModel m = methodModel(methodArchive, methodUnit, methodXpath, unitLanguage, typeUnparsed, unitNumber);
@@ -475,11 +476,11 @@ void structureModel::findMethodInProperty(srcml_archive* archive, srcml_unit* un
     srcml_transform_free(result);
 }
 
-// Compute structure stereotype
+// Compute class stereotype
 //  Based on definition from Dragan, Collard, Maletic ICSM 2010
-// Constructors and destructors are not considered in the computation of structure stereotypes
+// Constructors and destructors are not considered in the computation of class stereotypes
 // 
-void structureModel::computeStructureStereotype() {
+void classModel::computeClassStereotype() {
     std::unordered_map<std::string, int> methodStereotypes = {
         {"get", 0},
         {"predicate", 0},
@@ -575,7 +576,7 @@ void structureModel::computeStructureStereotype() {
         if (((0.2 * allMethods < accPlusMut) && (accPlusMut < 0.67 * allMethods )) &&
             ((0.2 * allMethods < facPlusCon) && (facPlusCon < 0.67 * allMethods )) &&
             (factory != 0) && (controllers != 0) && (accessors != 0) && (mutators != 0) ) {
-                if (allMethods > METHODS_PER_STRUCTURE_THRESHOLD) { 
+                if (allMethods > METHODS_PER_CLASS_THRESHOLD) { 
                     stereotype.push_back("large-class");
             }
         }
@@ -607,14 +608,14 @@ void structureModel::computeStructureStereotype() {
         stereotype.push_back("unclassified");
 
     for (const auto& pair : xpath) 
-        for (const auto& structureXpath : pair.second) 
-            XPATH_LIST[pair.first].insert({structureXpath, getStereotype()});
+        for (const auto& classXpath : pair.second) 
+            XPATH_LIST[pair.first].insert({classXpath, getStereotype()});
            
 }
 
 //Compute method stereotypes
 //
-void structureModel::computeMethodStereotype() {
+void classModel::computeMethodStereotype() {
     constructorDestructor();
     getter();
     predicate();
@@ -636,7 +637,7 @@ void structureModel::computeMethodStereotype() {
 
 // Stereotype constructor copy-constructor destructor:
 //
-void structureModel::constructorDestructor() {
+void classModel::constructorDestructor() {
     for (auto& m : methods) {
         if (m.IsConstructorDestructorUsed()) {  
             constructorDestructorCount++;
@@ -658,7 +659,7 @@ void structureModel::constructorDestructor() {
 // 2] Contains at least one simple return expression that returns an field (e.g., return dm;)
 // "this" keyword by itself is not considered (e.g., return this;)
 //
-void structureModel::getter() {
+void classModel::getter() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             if (m.IsFieldReturned()) {
@@ -672,13 +673,13 @@ void structureModel::getter() {
 // 1] Return type is Boolean
 // 2] Contains at least one complex return expression
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other methods in structure
+//     one function call to other methods in class
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
 // "this" keyword by itself is considered
 // 
-void structureModel::predicate() { 
+void classModel::predicate() { 
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             bool returnType = false;
@@ -694,9 +695,9 @@ void structureModel::predicate() {
 
             bool hasComplexReturnExpr = m.IsFieldNotReturned();
             bool isFieldUsed = m.IsFieldUsed();
-            bool callsToOtherStructureMethods = m.getFunctionCalls().size() > 0;
+            bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
-            if (returnType && hasComplexReturnExpr && (isFieldUsed || callsToOtherStructureMethods))
+            if (returnType && hasComplexReturnExpr && (isFieldUsed || callsToOtherClassMethods))
                 m.setStereotype("predicate"); 
         }
     }
@@ -706,13 +707,13 @@ void structureModel::predicate() {
 // 1] Return type is not void or Boolean
 // 2] Contains at least one complex return statement (e.g., return a+5;)
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other methods in structure
+//     one function call to other methods in class
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
 // "this" keyword by itself is considered
 //  
-void structureModel::property() {
+void classModel::property() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed() && !m.IsStrictFactory()) {  
             bool returnNotVoidOrBool = false;
@@ -735,9 +736,9 @@ void structureModel::property() {
                             returnTypeParsed != "Void" && returnTypeParsed != "");
 
             bool isFieldUsed = m.IsFieldUsed();
-            bool callsToOtherStructureMethods = m.getFunctionCalls().size() > 0;
+            bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
-            if (returnNotVoidOrBool && m.IsFieldNotReturned() && (isFieldUsed || callsToOtherStructureMethods)) {
+            if (returnNotVoidOrBool && m.IsFieldNotReturned() && (isFieldUsed || callsToOtherClassMethods)) {
                 m.setStereotype("property");
             }
         }
@@ -748,17 +749,17 @@ void structureModel::property() {
 // 1] Return type is void 
 // 2] Contains at least one parameter that is passed by non-const reference and is assigned a value
 // 3] Uses a data member in an expression or has at least 
-//     one function call to other methods in structure 
+//     one function call to other methods in class 
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
 // "this" keyword by itself is considered
 //
-void structureModel::voidAccessor() {
+void classModel::voidAccessor() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             bool isFieldUsed = m.IsFieldUsed();
-            bool callsToOtherStructureMethods = m.getFunctionCalls().size() > 0;
+            bool callsToOtherClassMethods = m.getFunctionCalls().size() > 0;
 
             bool isVoidPointer = false;
             if (unitLanguage != "Java") {              
@@ -769,7 +770,7 @@ void structureModel::voidAccessor() {
             bool returnVoid = m.getReturnTypeParsed() == "void";
 
             if (m.IsParameterRefChanged() && returnVoid && !isVoidPointer && 
-               (isFieldUsed || callsToOtherStructureMethods)) {
+               (isFieldUsed || callsToOtherClassMethods)) {
                 m.setStereotype("void-accessor");       
             } 
         }
@@ -778,19 +779,19 @@ void structureModel::voidAccessor() {
 
 // Stereotype set:
 // 1] Only one data member is changed
-// 2] Number of calls on data members or to methods in structure is at most 1
+// 2] Number of calls on data members or to methods in class is at most 1
 //
 // Constructor calls are not considered
 // Ignored calls are not considered
 // "this" keyword by itself is considered
 //
-void structureModel::setter() {
+void classModel::setter() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             bool oneFieldModified = m.getNumOfFieldsModified() == 1;
-            int callsToStructureMethodsOrOnFields = m.getFunctionCalls().size() + m.getMethodCalls().size();
+            int callsToClassMethodsOrOnFields = m.getFunctionCalls().size() + m.getMethodCalls().size();
             
-            if (oneFieldModified && (callsToStructureMethodsOrOnFields <= 1)) 
+            if (oneFieldModified && (callsToClassMethodsOrOnFields <= 1)) 
                 m.setStereotype("set"); 
         }   
     }
@@ -802,10 +803,10 @@ void structureModel::setter() {
 //          Case 1: More than one data member is modifed
 //          Case 2: one data member is modifed and:
 //                  -	There is at least two calls on data members or
-//                      function calls to other methods in structure
+//                      function calls to other methods in class
 //          Case 3: zero data members modifed and:
 //                  -	there is at least one call on a data member
-//                      or one function call to other methods in structure
+//                      or one function call to other methods in class
 //     Method is not const (C++ only)
 //     Case 1 applies when fields are mutable and method is const (C++ only)
 //
@@ -816,16 +817,16 @@ void structureModel::setter() {
 // stereotype non-void-command (C++ only):        
 //    Method return type is not void
 //
-void structureModel::command() {
+void classModel::command() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             const std::string& returnTypeParsed = m.getReturnTypeParsed();
             int fieldModified = m.getNumOfFieldsModified();
-            int callsToMethodsInStructure = m.getFunctionCalls().size() ; 
+            int callsToMethodsInClass = m.getFunctionCalls().size() ; 
             int callsOnDataMembers = m.getMethodCalls().size();
 
-            bool case1 = fieldModified == 0 && (callsToMethodsInStructure > 0 || callsOnDataMembers > 0);
-            bool case2 = fieldModified == 1 && ((callsOnDataMembers + callsToMethodsInStructure) > 1);
+            bool case1 = fieldModified == 0 && (callsToMethodsInClass > 0 || callsOnDataMembers > 0);
+            bool case2 = fieldModified == 1 && ((callsOnDataMembers + callsToMethodsInClass) > 1);
             bool case3 = fieldModified > 1;
             bool mutableCase = m.IsConstMethod() && case3;
  
@@ -858,32 +859,32 @@ void structureModel::command() {
 // Returns that have "new" ignored calls are also considered
 // "this" keyword by itself is not considered
 //
-void structureModel::factory() {
+void classModel::factory() {
     for (auto& m : methods) {
         if (m.IsFactory() || m.IsStrictFactory()) m.setStereotype("factory");
     }
 }
 // Stereotype wrapper:
 // 1] No data members are modified
-// 2] No calls to methods in structure
+// 2] No calls to methods in class
 // 3] No calls on data members
 // 4] Has at least one free function call 
 // Constructor calls are not considered
 //
 // Stereotype controller:
 // 1] No data members are modified
-// 2] No calls to methods in structure
+// 2] No calls to methods in class
 // 3] No calls on data members
-// 3] Has at least one call to other structure methods or mutates a parameter or a local that is non-primitive
+// 3] Has at least one call to other class methods or mutates a parameter or a local that is non-primitive
 //
 // Stereotype collaborator:
-// 1] It must use at least 1 non-primitive type (not of this structure)
+// 1] It must use at least 1 non-primitive type (not of this class)
 // 2] Type could be a parameter, local variable, return type, or an field 
 //
 // Ignored calls are not considered
 // "this" keyword by itself is considered only for wrapper and controller
 //
-void structureModel::wrapperControllerCollaborator() {
+void classModel::wrapperControllerCollaborator() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             if (!m.IsEmpty()){
@@ -901,16 +902,16 @@ void structureModel::wrapperControllerCollaborator() {
                 bool returnCheck = nonPrimitiveReturnExternal || isVoidPointer;
 
                 bool noFieldModified = m.getNumOfFieldsModified() == 0;
-                bool noCallsToMethodsInStructure = m.getFunctionCalls().size() == 0; 
+                bool noCallsToMethodsInClass = m.getFunctionCalls().size() == 0; 
                 bool noCallsOnDataMembers = m.getMethodCalls().size() == 0;
                 bool hasFreeFunctionCalls = m.getNumOfExternalFunctionCalls() > 0;
-                bool hasCallsToOtherStructureMethods = m.getNumOfExternalMethodCalls() > 0;
+                bool hasCallsToOtherClassMethods = m.getNumOfExternalMethodCalls() > 0;
         
-                if (noFieldModified && noCallsToMethodsInStructure && noCallsOnDataMembers && !hasCallsToOtherStructureMethods && hasFreeFunctionCalls)
+                if (noFieldModified && noCallsToMethodsInClass && noCallsOnDataMembers && !hasCallsToOtherClassMethods && hasFreeFunctionCalls)
                     m.setStereotype("wrapper");
 
-                else if (noFieldModified && noCallsToMethodsInStructure && noCallsOnDataMembers &&
-                        (hasCallsToOtherStructureMethods || m.IsNonPrimitiveLocalOrParameterChanged()))
+                else if (noFieldModified && noCallsToMethodsInClass && noCallsOnDataMembers &&
+                        (hasCallsToOtherClassMethods || m.IsNonPrimitiveLocalOrParameterChanged()))
                     m.setStereotype("controller");   
 
                 else if (nonPrimitiveFieldExternal || nonPrimitiveLocalExternal || nonPrimitiveParamaterExternal || returnCheck )
@@ -926,7 +927,7 @@ void structureModel::wrapperControllerCollaborator() {
 // 3] No calls of any kind
 // Ignored calls are allowed
 // 
-void structureModel::incidental() {
+void classModel::incidental() {
     for (auto& m : methods ) {
         if (!m.IsConstructorDestructorUsed() && !m.IsEmpty()) {  
             bool noCalls = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0 && m.getConstructorCalls().size() == 0 &&
@@ -942,24 +943,24 @@ void structureModel::incidental() {
 // Stereotype stateless
 // 1]	Method contains at least one non-comment statement (i.e., method is not empty)
 // 2]	No data members are used or modified (including no use of keyword "this" by itself)
-// 3]	No calls to methods in structure 
+// 3]	No calls to methods in class 
 // 4]   No calls on data members
-// 5]   Has at least one call to other structure methods (including constructor calls) or to a free function 
+// 5]   Has at least one call to other class methods (including constructor calls) or to a free function 
 // Ignored calls are not considered
 //
-void structureModel::stateless() {
+void classModel::stateless() {
     for (auto& m : methods) {
         if (m.getName() == "InitializeWithWindow")
             std::cout << "yes";
         if (!m.IsConstructorDestructorUsed()) {  
             if (!m.IsEmpty()) {
-                bool noCallsToStructureMethodsOrOnFields = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0;
+                bool noCallsToClassMethodsOrOnFields = m.getFunctionCalls().size() == 0 && m.getMethodCalls().size() == 0;
                 bool hasFreeFunctionCalls = m.getNumOfExternalFunctionCalls() > 0;
-                bool hasCallsToOtherStructureMethods = m.getNumOfExternalMethodCalls() > 0; 
+                bool hasCallsToOtherClassMethods = m.getNumOfExternalMethodCalls() > 0; 
                 bool hasConstructorCalls = m.getConstructorCalls().size() > 0;
 
-                if (!m.IsFieldUsed() && noCallsToStructureMethodsOrOnFields &&
-                (hasFreeFunctionCalls || hasCallsToOtherStructureMethods || hasConstructorCalls))
+                if (!m.IsFieldUsed() && noCallsToClassMethodsOrOnFields &&
+                (hasFreeFunctionCalls || hasCallsToOtherClassMethods || hasConstructorCalls))
                     m.setStereotype("stateless");             
             }
         }
@@ -969,7 +970,7 @@ void structureModel::stateless() {
 // Stereotype empty
 // 1] Method has no statements except for comments
 //
-void structureModel::empty() {
+void classModel::empty() {
     for (auto& m : methods) {
         if (!m.IsConstructorDestructorUsed()) {  
             if (m.IsEmpty()) 
@@ -978,7 +979,7 @@ void structureModel::empty() {
     }
 }
 
-std::string structureModel::getStereotype () const {
+std::string classModel::getStereotype () const {
     std::string result;
 
     for (const std::string &value : stereotype)

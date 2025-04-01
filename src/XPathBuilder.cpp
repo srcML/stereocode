@@ -29,13 +29,13 @@ void XPathBuilder::generateXpath() {
     if (STRUCT) xpath += " or self::src:struct";        
     if (UNION) xpath += " or self::src:union[src:name]";  // Only non-anonymous unions are collected     
     xpath += ") and not(ancestor::src:class or ancestor::src:struct or ancestor::src:union)]"; 
-    xpathTable[language]["structure"] = xpath;
+    xpathTable[language]["class"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/src:name";
-    xpathTable[language]["structure_name"] = xpath;
+    xpathTable[language]["class_name"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/text()[1]";
-    xpathTable[language]["structure_type"] = xpath;   
+    xpathTable[language]["class_type"] = xpath;   
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super";
     xpathTable[language]["parent_name"] = xpath;  
@@ -153,13 +153,13 @@ void XPathBuilder::generateXpath() {
     if (STRUCT) xpath += " or self::src:struct";
     if (INTERFACE) xpath += " or self::src:interface";             
     xpath += ") and not(src:specifier='static') and not(ancestor::src:class or ancestor::src:struct or ancestor::src:interface)]"; 
-    xpathTable[language]["structure"] = xpath;
+    xpathTable[language]["class"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:name";
-    xpathTable[language]["structure_name"] = xpath;
+    xpathTable[language]["class_name"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/text()[1]";
-    xpathTable[language]["structure_type"] = xpath;   
+    xpathTable[language]["class_type"] = xpath;   
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
@@ -301,13 +301,13 @@ void XPathBuilder::generateXpath() {
     if (INTERFACE) xpath += " or self::src:interface";       
     if (ENUM) xpath += " or self::src:enum";        
     xpath += ") and not(ancestor::src:class or ancestor::src:interface or ancestor::src:enum)]"; 
-    xpathTable[language]["structure"] = xpath;
+    xpathTable[language]["class"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:name";
-    xpathTable[language]["structure_name"] = xpath;
+    xpathTable[language]["class_name"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/text()[1]";
-    xpathTable[language]["structure_type"] = xpath;   
+    xpathTable[language]["class_type"] = xpath;   
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:super_list/*[self::src:extends or self::src:implements]/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  

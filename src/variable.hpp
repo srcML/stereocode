@@ -31,7 +31,7 @@ public:
 private:
     std::string name;                         // Variable name
     std::string type;                         // Variable type
-    bool        nonPrimitiveExternal{false};  // True if variable is non-primitive and not of same type as structure it belongs to
+    bool        nonPrimitiveExternal{false};  // True if variable is non-primitive and not of same type as class it belongs to
     bool        nonPrimitive{false};          // True if variable is non-primitive
     int         pos{-1};                      // Position of variable (Starting at 0)         
 };

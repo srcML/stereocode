@@ -1,33 +1,33 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file StructureModel.hpp
+ * @file ClassModel.hpp
  *
  * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
-#ifndef STRUCTUREMODEL_HPP
-#define STRUCTUREMODEL_HPP
+#ifndef CLASSMODEL_HPP
+#define CLASSMODEL_HPP
 
 #include "MethodModel.hpp"
 
-class structureModel {
+class classModel {
 public:
-         structureModel                     (srcml_archive*, srcml_unit*, const std::string&);
+         classModel                         (srcml_archive*, srcml_unit*, const std::string&);
          
-    void findStructureName                  (srcml_archive*, srcml_unit*);
-    void findStructureType                  (srcml_archive*, srcml_unit*);
-    void findParentStructureName            (srcml_archive*, srcml_unit*);
+    void findClassName                      (srcml_archive*, srcml_unit*);
+    void findClassType                      (srcml_archive*, srcml_unit*);
+    void findParentClassName                (srcml_archive*, srcml_unit*);
     void findFieldName                      (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findFieldType                      (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
     void findNonPrivateFieldName            (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findNonPrivateFieldType            (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
     void findMethod                         (srcml_archive*, srcml_unit*, const std::string&, int);
     void findMethodInProperty               (srcml_archive*, srcml_unit*, const std::string&, int);
-    void findStructureData                  (srcml_archive*, srcml_unit*, const std::string&, int);
+    void findClassData                      (srcml_archive*, srcml_unit*, const std::string&, int);
 
-    void computeStructureStereotype();
+    void computeClassStereotype();
     void computeMethodStereotype();
 
     void constructorDestructor();
@@ -50,7 +50,7 @@ public:
 
     const std::vector<std::string>&                        getName                            ()               const          { return name;                                   }
     const std::vector<std::string>&                        getStereotypeList                  ()               const          { return stereotype;                             }
-    const std::unordered_map<std::string, std::string>&    getParentStructureName             ()               const          { return parentStructureName;                    }
+    const std::unordered_map<std::string, std::string>&    getParentClassName             ()               const          { return parentClassName;                    }
     const std::unordered_map<std::string, variable>&       getNonPrivateAndInheritedField     ()               const          { return nonPrivateAndInheritedFields;           }
     const std::unordered_set<std::string>&                 getInheritedMethodSignatures       ()               const          { return inheritedMethodSignatures;              }    
     const std::unordered_set<std::string>&                 getMethodSignatures                ()               const          { return methodSignatures;                       }    
@@ -86,19 +86,19 @@ public:
 
 private:
     std::vector<std::string>                                name;                            // Original name, name without whitespaces, name without whitespaces, namespaces, and generic types in <>, same as last but without <>
-    std::unordered_map<std::string, std::string>            parentStructureName;             // Key is parent structure name without whitespaces and namespaces and value is specifier (public, private, or protected).
-    std::string                                             structureType;                   // Class, or struct, or an interface
+    std::unordered_map<std::string, std::string>            parentClassName;             // Key is parent class name without whitespaces and namespaces and value is specifier (public, private, or protected).
+    std::string                                             classType;                   // Class, or struct, or an interface
     std::string                                             unitLanguage;                    // Unit language                 
-    std::vector<std::string>                                stereotype;                      // Structure stereotype(s)
+    std::vector<std::string>                                stereotype;                      // Class stereotype(s)
     std::vector<methodModel>                                methods;                         // List of methods 
     std::unordered_set<std::string>                         methodSignatures;                // List of method signatures
     std::unordered_set<std::string>                         inheritedMethodSignatures;       // List of inherited method signatures                                           
     std::unordered_map<std::string, variable>               fields;                          // Key is field name and value is field object
-    std::unordered_map<std::string, variable>               nonPrivateAndInheritedFields;    // Non-private fields of structure + inherited fields from all parent structures
-    std::unordered_map<int, std::vector<std::string>>       xpath;                           // Unique xpath for structure (structures if partial in C#) along with the unit number
-    bool                                                    inherited{false};                // Did structure inherit the fields yet? (Used for inheritance)
-    bool                                                    visited{false};                  // Has structure been visited yet when inheriting? (Used for inheritance)    
-    int                                                     constructorDestructorCount{0};   // Number of constructor + destructor methods (Needed for structure stereotypes)
+    std::unordered_map<std::string, variable>               nonPrivateAndInheritedFields;    // Non-private fields of class + inherited fields from all parent classs
+    std::unordered_map<int, std::vector<std::string>>       xpath;                           // Unique xpath for class (classs if partial in C#) along with the unit number
+    bool                                                    inherited{false};                // Did class inherit the fields yet? (Used for inheritance)
+    bool                                                    visited{false};                  // Has class been visited yet when inheriting? (Used for inheritance)    
+    int                                                     constructorDestructorCount{0};   // Number of constructor + destructor methods (Needed for class stereotypes)
 }; 
 
 #endif

@@ -7,13 +7,13 @@
  * This file is part of the Stereocode application.
  */
 
-#include "StructureModelCollection.hpp"
+#include "ClassModelCollection.hpp"
 #include "CLI11.hpp"
 
 primitiveTypes                     PRIMITIVES;                                             // Primitive types per language + any user supplied
 ignorableCalls                     IGNORED_CALLS;                                          // Calls to ignore + any user supplied
 typeModifiers                      TYPE_MODIFIERS;                                         // Modifiers to remove from data types + any user supplied
-int                                METHODS_PER_STRUCTURE_THRESHOLD = 21;                   // Threshold for large class stereotype (from ICSM10)
+int                                METHODS_PER_CLASS_THRESHOLD = 21;                       // Threshold for large class stereotype (from ICSM10)
 bool                               STRUCT                          = false;                // Identify and stereotype structs (C++ or C#)
 bool                               INTERFACE                       = false;                // Identify and stereotype interfaces (C# or Java)
 bool                               UNION                           = false;                // Identify and stereotype unions (C++)
@@ -46,7 +46,7 @@ int main (int argc, char const *argv[]) {
     app.add_option("-p,--primitive-file",     primitivesFile,                   "File name of user supplied primitive types (one per line)");
     app.add_option("-g,--ignore-call-file",   ignoredCallsFile,                 "File name of user supplied calls to ignore (one per line)");
     app.add_option("-t,--type-modifier-file", typeModifiersFile,                "File name of user supplied data type modifiers to remove (one per line)");
-    app.add_option("-l,--large-class",        METHODS_PER_STRUCTURE_THRESHOLD,  "Method threshold for the large-class stereotype (default = 21)");
+    app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD,      "Method threshold for the large-class stereotype (default = 21)");
     app.add_flag  ("-i,--interface",          INTERFACE,                        "Identify stereotypes for interfaces (C# and Java)");
     app.add_flag  ("-n,--union",              UNION,                            "Identify stereotypes for unions (C++)");
     app.add_flag  ("-m,--enum",               ENUM,                             "Identify stereotypes for enums (Java)");
@@ -54,7 +54,7 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-e,--input-overwrite",    overWriteInput,                   "Overwrite input with stereotype information");
     app.add_flag  ("-x,--txt-report",         outputTxtReport,                  "Output optional TXT report file containing stereotype information");
     app.add_flag  ("-z,--csv-report",         outputCsvReport,                  "Output optional CSV report file containing stereotype information");
-    app.add_flag  ("-c,--comment",            reDocComment,                     "Annotates stereotypes as a comment before method and structure definitions (/** @stereotype stereotype */)");
+    app.add_flag  ("-c,--comment",            reDocComment,                     "Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)");
     app.add_flag  ("-v,--verbose",            IS_VERBOSE,                       "Outputs default primitives, ignored calls, type modifiers, and extra report files");
     
     CLI11_PARSE(app, argc, argv);
@@ -131,7 +131,7 @@ int main (int argc, char const *argv[]) {
     
     // Find stereotypes
     XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
-    structureModelCollection structureObj(archive, outputArchive, 
+    classModelCollection classObj(archive, outputArchive, 
                                     inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
 
     if (overWriteInput) {

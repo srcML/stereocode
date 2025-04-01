@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file StructureModelCollection.cpp
+ * @file ClassModelCollection.cpp
  *
  * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
-#include "StructureModelCollection.hpp"
+#include "ClassModelCollection.hpp"
 
 extern XPathBuilder                  XPATH_TRANSFORMATION;  
 extern std::unordered_map
@@ -18,7 +18,7 @@ extern ignorableCalls                IGNORED_CALLS;
 extern typeModifiers                 TYPE_MODIFIERS;  
 extern bool                          IS_VERBOSE;
 
-structureModelCollection::structureModelCollection (srcml_archive* archive, srcml_archive* outputArchive,
+classModelCollection::classModelCollection (srcml_archive* archive, srcml_archive* outputArchive,
                                                     const std::string& inputFile, const std::string& outputFile, 
                                                     bool outputTxtReport, bool outputCsvReport, bool reDocComment) {  
     PRIMITIVES.createPrimitiveList();
@@ -35,8 +35,8 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     srcml_unit* unit = srcml_archive_read_unit(archive);
     int unitNumber = 1; // Count starts at 1 in XPath
     while (unit){
-        // Collects structure info + methods defined internally to a structure
-        findStructureInfo(archive, unit, unitNumber); 
+        // Collects class info + methods defined internally to a class
+        findClassInfo(archive, unit, unitNumber); 
         findFreeFunctions(archive, unit, unitNumber);
 
         srcml_unit_free(unit); 
@@ -45,30 +45,30 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     }   
     analyzeFreeFunctions();
 
-    // Finds inherited fields for each structure
-    for (auto& pair : structureCollection) {
+    // Finds inherited fields for each class
+    for (auto& pair : classCollection) {
         findInheritedFields(pair.second);
         pair.second.setInherited(true);
-        for (auto& pairS : structureCollection)
+        for (auto& pairS : classCollection)
             pairS.second.setVisited(false);
     } 
 
     // Resets inheritance and build signatures for findInheritedMethod()
-    for (auto& pair : structureCollection) {
+    for (auto& pair : classCollection) {
         pair.second.setInherited(false); 
         pair.second.buildMethodSignature();
     }
         
     // Finds inherited methods
-    for (auto& pair : structureCollection) {
+    for (auto& pair : classCollection) {
         findInheritedMethods(pair.second);
         pair.second.setInherited(true);
-        for (auto& pairS : structureCollection)
+        for (auto& pairS : classCollection)
             pairS.second.setVisited(false);
     } 
 
-    // Analyze all methods for each structure
-    for (auto& pair : structureCollection) {
+    // Analyze all methods for each class
+    for (auto& pair : classCollection) {
         std::vector<methodModel>& methods = pair.second.getMethods();
     
         for (auto& m : methods)
@@ -77,9 +77,9 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     }
 
     // Compute method and stereotypes here
-    for (auto& pair : structureCollection) {
+    for (auto& pair : classCollection) {
         pair.second.computeMethodStereotype();
-        pair.second.computeStructureStereotype();
+        pair.second.computeClassStereotype();
     }
 
     for (auto& f : freeFunctions) 
@@ -92,7 +92,7 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     if (outputTxtReport) {
         std::ofstream reportFile(InputFileNoExt + ".stereotypes.txt");
         std::stringstream stringStream;
-        for (auto& pair : structureCollection) 
+        for (auto& pair : classCollection) 
             outputTxtReportFile(stringStream, &pair.second);
         reportFile << stringStream.str();
         reportFile.close();         
@@ -108,8 +108,8 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     if (outputCsvReport) {
         std::ofstream out;
         out.open(InputFileNoExt + ".stereotypes.csv");
-        out << "Structure Name,Structure Stereotype,Method Name,Method Stereotype" << '\n';
-        for (auto& pair : structureCollection)
+        out << "Class Name,Class Stereotype,Method Name,Method Stereotype" << '\n';
+        for (auto& pair : classCollection)
             outputCsvReportFile(out, &pair.second);        
         out.close();
 
@@ -146,7 +146,7 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     while (unit){
         while ((threadPoolCount < nthreads) && unit) {
             units.push_back(unit);
-            threads.push_back(std::thread(&structureModelCollection::outputWithStereotypes, this, 
+            threads.push_back(std::thread(&classModelCollection::outputWithStereotypes, this, 
                                         unit, std::ref(transformedUnits), unitNumberCount,  
                                         std::ref(XPATH_LIST[unitNumberCount]), std::ref(results), std::ref(mu)));
 
@@ -210,26 +210,26 @@ structureModelCollection::structureModelCollection (srcml_archive* archive, srcm
     }
 }
 
-// Finds structures in an archive
+// Finds classs in an archive
 //
-// In C++, structure names are usually in the form of:
+// In C++, class names are usually in the form of:
 //      myClass  
 // or  
-//      myClass<type1, type2, ...> for a specialized templated structure from myClass
+//      myClass<type1, type2, ...> for a specialized templated class from myClass
 //
 // In C# and Java:
 //      myClass
 // or
-//      myClass<T, G, ... > for a generic structure
+//      myClass<T, G, ... > for a generic class
 //
 // Unlike C++, C# and Java can allow multiple classes with the same name but 
 //  different number of generic parameters to exist
 // For example, foo<T> and foo<T, T1> are valid
 //
-void structureModelCollection::findStructureInfo(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
+void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit);   
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
-        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage, "structure").c_str()); 
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage, "class").c_str()); 
 
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
@@ -237,38 +237,38 @@ void structureModelCollection::findStructureInfo(srcml_archive* archive, srcml_u
         srcml_unit* resultUnit = nullptr;
         for (int i = 0; i < n; i++) {    
             resultUnit = srcml_transform_get_unit(result, i);
-            srcml_archive* structureArchive = srcml_archive_create();
-            srcml_archive_register_namespace(structureArchive, "pos", "http://www.srcML.org/srcML/position"); // Needed for input with positions enabled
+            srcml_archive* classArchive = srcml_archive_create();
+            srcml_archive_register_namespace(classArchive, "pos", "http://www.srcML.org/srcML/position"); // Needed for input with positions enabled
 
             char* unparsed = nullptr;
             std::size_t size = 0;
-            srcml_archive_write_open_memory(structureArchive, &unparsed, &size);
-            srcml_archive_write_unit(structureArchive, resultUnit);
-            srcml_archive_close(structureArchive);
-            srcml_archive_free(structureArchive);
+            srcml_archive_write_open_memory(classArchive, &unparsed, &size);
+            srcml_archive_write_unit(classArchive, resultUnit);
+            srcml_archive_close(classArchive);
+            srcml_archive_free(classArchive);
 
-            structureArchive = srcml_archive_create();
-            srcml_archive_read_open_memory(structureArchive, unparsed, size);
-            srcml_unit* unitStructure = srcml_archive_read_unit(structureArchive);
-            std::string structureXpath = "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage, "structure") + ")[" + std::to_string(i + 1) + "]";
-            structureModel c(structureArchive, unitStructure, unitLanguage); 
+            classArchive = srcml_archive_create();
+            srcml_archive_read_open_memory(classArchive, unparsed, size);
+            srcml_unit* unitClass = srcml_archive_read_unit(classArchive);
+            std::string classXpath = "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage, "class") + ")[" + std::to_string(i + 1) + "]";
+            classModel c(classArchive, unitClass, unitLanguage); 
 
-            // Needed for partial structures in C#
-            if (structureCollection.find(c.getName()[1]) != structureCollection.end())
-                // Append the partial structure data to the existing partial structure
-                structureCollection.at(c.getName()[1]).findStructureData(structureArchive, unitStructure, structureXpath, unitNumber);
+            // Needed for partial classs in C#
+            if (classCollection.find(c.getName()[1]) != classCollection.end())
+                // Append the partial class data to the existing partial class
+                classCollection.at(c.getName()[1]).findClassData(classArchive, unitClass, classXpath, unitNumber);
             else {
-                c.findStructureData(structureArchive, unitStructure, structureXpath, unitNumber);      
-                structureCollection.insert({c.getName()[1], c});  
+                c.findClassData(classArchive, unitClass, classXpath, unitNumber);      
+                classCollection.insert({c.getName()[1], c});  
             }                 
 
             // Needed for inheritance in Java and C#
-            if (unitLanguage != "C++") structureGenerics.insert({c.getName()[2], c.getName()[1]}); 
+            if (unitLanguage != "C++") classGenerics.insert({c.getName()[2], c.getName()[1]}); 
             
             free(unparsed);
-            srcml_unit_free(unitStructure);
-            srcml_archive_close(structureArchive);
-            srcml_archive_free(structureArchive);            
+            srcml_unit_free(unitClass);
+            srcml_archive_close(classArchive);
+            srcml_archive_free(classArchive);            
         }   
         srcml_transform_free(result);
         srcml_clear_transforms(archive);   
@@ -281,11 +281,11 @@ void structureModelCollection::findStructureInfo(srcml_archive* archive, srcml_u
 //
 // Cases for functions and methods (defined externally)
 //   Cases:
-//      Method (Foo) could belong to a specialized templated structure: 
+//      Method (Foo) could belong to a specialized templated class: 
 //          template<typename T> class MyClass{}; // Generic templated class.
 //          template<optional> class MyClass<int>{}; // Specialized templated class from the generic one.
 //          void MyClass<int>::Foo(){} // Belongs to the specialized templated class. 
-//      Method could belong to the generic templated structure
+//      Method could belong to the generic templated class
 //          template<typename T> class MyClass{}; // Generic templated class.
 //          template<typename T> void MyClass<T>::Foo(){} // Generic templated method belongs to generic templated class.        
 //          template<optional>   void MyClass<int>::Foo(){} // Specialized templated method belongs to a generic templated class.
@@ -298,7 +298,7 @@ void structureModelCollection::findStructureInfo(srcml_archive* archive, srcml_u
 //      Function could be a free function (including normal free functions, friend functions, static methods, methods defined for external classes)
 //          Foo(){}, namespace::Foo(){}, static Foo(){}, externalClass::Foo(){}, 
 //
-void structureModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
+void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit); 
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function").c_str());
@@ -341,26 +341,26 @@ void structureModelCollection::findFreeFunctions(srcml_archive* archive, srcml_u
 
 // Analyzes free functions to determine externally defined methods
 //
-void structureModelCollection::analyzeFreeFunctions() {
+void classModelCollection::analyzeFreeFunctions() {
     for (std::vector<methodModel>::iterator function = freeFunctions.begin(); function != freeFunctions.end();) {
         if (function->getUnitLanguage() == "C++") {
             // Removes namespaces if any
             std::string functionName = function->getName();  
             removeNamespace(functionName, false, "C++");
 
-            // Get the structure name (if any). Else, it is a free function
-            std::size_t isStructureName = functionName.find("::");
-            if (isStructureName != std::string::npos) { // Structure found, it is a method       
-                std::string structureName = functionName.substr(0, isStructureName); 
-                auto result = structureCollection.find(structureName);
-                if (result != structureCollection.end()) {
+            // Get the class name (if any). Else, it is a free function
+            std::size_t isClassName = functionName.find("::");
+            if (isClassName != std::string::npos) { // Class found, it is a method       
+                std::string className = functionName.substr(0, isClassName); 
+                auto result = classCollection.find(className);
+                if (result != classCollection.end()) {
                     result->second.addMethod(*function);
                     function = freeFunctions.erase(function);
                 }                          
-                else { // Case specialized template method belongs to the generic template structure
-                    structureName = structureName.substr(0, structureName.find("<"));
-                    result = structureCollection.find(structureName);
-                    if (result != structureCollection.end())  {
+                else { // Case specialized template method belongs to the generic template class
+                    className = className.substr(0, className.find("<"));
+                    result = classCollection.find(className);
+                    if (result != classCollection.end())  {
                         result->second.addMethod(*function);
                         function = freeFunctions.erase(function);
                     } 
@@ -375,26 +375,26 @@ void structureModelCollection::analyzeFreeFunctions() {
 
 
 // Finds inherited fields 
-// In C++, you can inherit from a specialized templated structure or
-//  you can specialize the inheritance itself from the generic structure, or
-//  you can inherit from the generic structure itself.
+// In C++, you can inherit from a specialized templated class or
+//  you can specialize the inheritance itself from the generic class, or
+//  you can inherit from the generic class itself.
 // For example:
 //  myClass --> childClass : myClass<T> or childClass : myClass<int>
 //  specializedClass<int> --> childClass : specializedClass<int>
 //
-// In Java and C#, you can inherit from the generic structure or specialize the inheritance.
+// In Java and C#, you can inherit from the generic class or specialize the inheritance.
 // For example:
 //  myClass<T1, T2> --> childClass : myClass<T1, T2> or childClass : myClass<int, double>
 //
-void structureModelCollection::findInheritedFields(structureModel& c) {   
+void classModelCollection::findInheritedFields(classModel& c) {   
     const std::string& unitLanguage = c.getUnitLanguage();
     c.setVisited(true); 
-    const std::unordered_map<std::string, std::string>& parentStructureName =  c.getParentStructureName();
+    const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
 
-    for (const auto& pair : parentStructureName){
-        std::string parStructureName = pair.first;
-        auto result = structureCollection.find(parStructureName);
-        if (result != structureCollection.end()) {
+    for (const auto& pair : parentClassName){
+        std::string parClassName = pair.first;
+        auto result = classCollection.find(parClassName);
+        if (result != classCollection.end()) {
             if (result->second.HasInherited() && !result->second.IsVisited()) {
                 c.inheritField(result->second.getNonPrivateAndInheritedField(), pair.second); 
                 result->second.setVisited(true);
@@ -407,9 +407,9 @@ void structureModelCollection::findInheritedFields(structureModel& c) {
         }       
         else {
             if (unitLanguage == "C++") {
-                parStructureName = parStructureName.substr(0, parStructureName.find("<"));
-                result = structureCollection.find(parStructureName);
-                if (result != structureCollection.end()) {
+                parClassName = parClassName.substr(0, parClassName.find("<"));
+                result = classCollection.find(parClassName);
+                if (result != classCollection.end()) {
                     if (result->second.HasInherited() && !result->second.IsVisited()) {
                         c.inheritField(result->second.getNonPrivateAndInheritedField(), pair.second); 
                         result->second.setVisited(true);
@@ -422,11 +422,11 @@ void structureModelCollection::findInheritedFields(structureModel& c) {
                 }              
             }
             else {  
-                removeBetweenComma(parStructureName, true);
-                auto resultG = structureGenerics.find(parStructureName);
-                if (resultG != structureGenerics.end()) {
-                    auto resultM = structureCollection.find(resultG->second);
-                    if (resultM != structureCollection.end()) {
+                removeBetweenComma(parClassName, true);
+                auto resultG = classGenerics.find(parClassName);
+                if (resultG != classGenerics.end()) {
+                    auto resultM = classCollection.find(resultG->second);
+                    if (resultM != classCollection.end()) {
                         if (resultM->second.HasInherited() && !resultM->second.IsVisited()) {
                             c.inheritField(resultM->second.getNonPrivateAndInheritedField(), pair.second); 
                             resultM->second.setVisited(true);
@@ -444,15 +444,15 @@ void structureModelCollection::findInheritedFields(structureModel& c) {
 
 // Finds inherited methods
 //
-void structureModelCollection::findInheritedMethods(structureModel& c) {   
+void classModelCollection::findInheritedMethods(classModel& c) {   
     const std::string& unitLanguage = c.getUnitLanguage();
     c.setVisited(true); 
-    const std::unordered_map<std::string, std::string>& parentStructureName =  c.getParentStructureName();
+    const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
 
-    for (const auto& pair : parentStructureName){
-        std::string parStructureName = pair.first;
-        auto result = structureCollection.find(parStructureName);
-        if (result != structureCollection.end()) {
+    for (const auto& pair : parentClassName){
+        std::string parClassName = pair.first;
+        auto result = classCollection.find(parClassName);
+        if (result != classCollection.end()) {
             if (result->second.HasInherited() && !result->second.IsVisited()) {
                 c.appendInheritedMethod(result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures()); 
                 result->second.setVisited(true);
@@ -465,9 +465,9 @@ void structureModelCollection::findInheritedMethods(structureModel& c) {
         }       
         else {
             if (unitLanguage == "C++") {
-                parStructureName = parStructureName.substr(0, parStructureName.find("<"));
-                result = structureCollection.find(parStructureName);
-                if (result != structureCollection.end()) {
+                parClassName = parClassName.substr(0, parClassName.find("<"));
+                result = classCollection.find(parClassName);
+                if (result != classCollection.end()) {
                     if (result->second.HasInherited() && !result->second.IsVisited()) {
                         c.appendInheritedMethod(result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures()); 
                         result->second.setVisited(true);
@@ -480,11 +480,11 @@ void structureModelCollection::findInheritedMethods(structureModel& c) {
                 }              
             }
             else {  
-                removeBetweenComma(parStructureName, true);
-                auto resultG = structureGenerics.find(parStructureName);
-                if (resultG != structureGenerics.end()) {
-                    auto resultM = structureCollection.find(resultG->second);
-                    if (resultM != structureCollection.end()) {
+                removeBetweenComma(parClassName, true);
+                auto resultG = classGenerics.find(parClassName);
+                if (resultG != classGenerics.end()) {
+                    auto resultM = classCollection.find(resultG->second);
+                    if (resultM != classCollection.end()) {
                         if (resultM->second.HasInherited() && !resultM->second.IsVisited()) {
                             c.appendInheritedMethod(resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures());  
                             resultM->second.setVisited(true);
@@ -502,16 +502,16 @@ void structureModelCollection::findInheritedMethods(structureModel& c) {
 
 // Generates other CSV report files containing stereotype information
 // This includes method_view (e.g., get set ... etc)
-// This includes structure view (e.g., entity control ... etc)
+// This includes class view (e.g., entity control ... etc)
 // This includes unique_method_view (e.g., 'get collaborator' ... etc)
-// This includes unique_structure_view (e.g., 'entity control' ... etc)
+// This includes unique_class_view (e.g., 'entity control' ... etc)
 // This includes category_view (e.g., accessors, mutators ... etc) 
 //
-void structureModelCollection::outputCsvVerboseReportFile(const std::string& InputFileNoExt) {
+void classModelCollection::outputCsvVerboseReportFile(const std::string& InputFileNoExt) {
     std::unordered_map<std::string, int>            uniqueMethodStereotypesView;  
-    std::unordered_map<std::string, int>            uniqueStructureStereotypesView;  
+    std::unordered_map<std::string, int>            uniqueClassStereotypesView;  
 
-    std::unordered_map<std::string, int> structureStereotypes = {
+    std::unordered_map<std::string, int> classStereotypes = {
         {"entity", 0},
         {"minimal-entity", 0},
         {"data-provider", 0},
@@ -550,10 +550,10 @@ void structureModelCollection::outputCsvVerboseReportFile(const std::string& Inp
         {"unclassified", 0},
     };
 
-    for (auto& pair : structureCollection) {
-        uniqueStructureStereotypesView[pair.second.getStereotype()]++; 
+    for (auto& pair : classCollection) {
+        uniqueClassStereotypesView[pair.second.getStereotype()]++; 
         for (const std::string& s : pair.second.getStereotypeList()) 
-            structureStereotypes[s]++;   
+            classStereotypes[s]++;   
         
         const std::vector<methodModel>& method = pair.second.getMethods();     
         for (const auto& m : method) {         
@@ -566,13 +566,12 @@ void structureModelCollection::outputCsvVerboseReportFile(const std::string& Inp
 
     std::ofstream outU, outV, outM, outS, outC;
     outU.open(InputFileNoExt + ".unique_method_view.csv");
-    outV.open(InputFileNoExt + ".unique_structure_view.csv");
+    outV.open(InputFileNoExt + ".unique_class_view.csv");
     outM.open(InputFileNoExt + ".method_view.csv");
-    outS.open(InputFileNoExt + ".structure_view.csv");
+    outS.open(InputFileNoExt + ".class_view.csv");
     outC.open(InputFileNoExt + ".category_view.csv");
 
     
-
     // Needed to print stereotypes in this order
     std::vector<std::string> method_ordered_keys = {
         "get", "predicate", "property", "void-accessor", "set", "command", "non-void-command", 
@@ -580,7 +579,7 @@ void structureModelCollection::outputCsvVerboseReportFile(const std::string& Inp
         "incidental", "stateless", "empty", "unclassified"
     };
     
-    std::vector<std::string> structure_ordered_keys = {
+    std::vector<std::string> class_ordered_keys = {
         "entity", "minimal-entity", "data-provider", "commander", "boundary", "factory", 
         "controller", "pure-controller", "large-class", "lazy-class", "degenerate", "data-class", 
         "small-class", "empty", "unclassified"
@@ -598,11 +597,11 @@ void structureModelCollection::outputCsvVerboseReportFile(const std::string& Inp
         outU << "Total" << "," << total;
     }
 
-    // Unique Structure View
+    // Unique Class View
     if (outV.is_open()) {   
-        outV << "Unique Structure Stereotype,Structure Count" <<'\n';
+        outV << "Unique Class Stereotype,Class Count" <<'\n';
         total = 0;
-        for (auto& pair : uniqueStructureStereotypesView){
+        for (auto& pair : uniqueClassStereotypesView){
             outV << pair.first << ",";
             outV << pair.second << '\n';
             total += pair.second;
@@ -623,15 +622,15 @@ void structureModelCollection::outputCsvVerboseReportFile(const std::string& Inp
         outM << "Total" << "," << total;
     }
 
-    // Structure View
+    // Class View
     //
     if (outS.is_open()) {
-        outS << "Structure Stereotype,Stereotype Count" <<'\n';
+        outS << "Class Stereotype,Class Count" <<'\n';
         total = 0;
-        for (const auto& key : structure_ordered_keys) {
+        for (const auto& key : class_ordered_keys) {
             outS << key << ",";
-            outS << structureStereotypes[key] << '\n';
-            total += structureStereotypes[key];
+            outS << classStereotypes[key] << '\n';
+            total += classStereotypes[key];
         }
         outS << "Total" << "," << total;
     }
@@ -676,27 +675,27 @@ void structureModelCollection::outputCsvVerboseReportFile(const std::string& Inp
 // Optional TXT report file containing stereotype information
 // Format:
 //
-// Structure Name:              Structure Stereotype:
+// Class Name:                  Class Stereotype:
 // ...                          ...
 // Method Name:                 Method Stereotype:
 // ...                          ...
 //---------------------------------------------------------------
-// Structure Name:              Structure Stereotype:
+// Class Name:                  Class Stereotype:
 // ...                          ...
 // Method Name:                 Method Stereotype:
 // ...                          ...
 //
-void structureModelCollection::outputTxtReportFile(std::stringstream& stringStream, structureModel* c) {
+void classModelCollection::outputTxtReportFile(std::stringstream& stringStream, classModel* c) {
     const int WIDTH = 70;
     const std::string line(WIDTH * 2, '-');
     auto setw_width = std::setw(WIDTH);
     std::vector<methodModel>* methods = &freeFunctions;
 
     if (c != nullptr) {
-        const std::string& structureName = c->getName()[1];
+        const std::string& className = c->getName()[1];
         const std::string& classStereotype = c->getStereotype();
-        stringStream << std::left << setw_width << "Structure Name:" << setw_width << "Structure Stereotype:" << '\n';
-        stringStream << std::left << setw_width <<  structureName << setw_width << classStereotype << "\n\n";
+        stringStream << std::left << setw_width << "Class Name:" << setw_width << "Class Stereotype:" << '\n';
+        stringStream << std::left << setw_width <<  className << setw_width << classStereotype << "\n\n";
         stringStream << std::left << setw_width << "Method Name:" << setw_width << "Method Stereotype:" << '\n';
         methods = &c->getMethods();
     }
@@ -714,7 +713,7 @@ void structureModelCollection::outputTxtReportFile(std::stringstream& stringStre
 
 // Optional CSV report file containing stereotype information
 //
-void structureModelCollection::outputCsvReportFile(std::ofstream& out, structureModel* c) {
+void classModelCollection::outputCsvReportFile(std::ofstream& out, classModel* c) {
     std::vector<methodModel>* methods = &freeFunctions;
 
     std::string classInfo;
@@ -734,7 +733,7 @@ void structureModelCollection::outputCsvReportFile(std::ofstream& out, structure
 //  Example: <function st:stereotype="get"> ... </function>
 //           <class st:stereotype="boundary"> ... ></class>
 //
-void structureModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int, srcml_unit*>& transformedUnits,
+void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int, srcml_unit*>& transformedUnits,
                                                 int unitNumber, const std::unordered_map<std::string, std::string>& xpathPair,
                                                 std::unordered_map<int, srcml_transform_result*>& results, std::mutex& mu) {  
         srcml_archive* archive = srcml_archive_create();
@@ -768,7 +767,7 @@ void structureModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<
 // For example, /** @stereotype get */
 // last_ws is used to preserve to the whitespace that precedes each function or class
 //
-void structureModelCollection::outputAsComments(srcml_unit* unit, srcml_archive* outputArchive) {
+void classModelCollection::outputAsComments(srcml_unit* unit, srcml_archive* outputArchive) {
     std::string xslt = R"**(<xsl:stylesheet
     xmlns="http://www.srcML.org/srcML/src"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -825,7 +824,7 @@ void structureModelCollection::outputAsComments(srcml_unit* unit, srcml_archive*
 }
 
 
-void structureModelCollection::computeFreeFunctionsStereotypes() {
+void classModelCollection::computeFreeFunctionsStereotypes() {
     for (methodModel& f : freeFunctions) {
         std::string methodName = f.getName();
         // main

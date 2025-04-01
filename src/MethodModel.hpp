@@ -106,10 +106,10 @@ private:
     std::vector<variable>                             localsOrdered;                              // List of all local (Needed in order to build the locals map)     
     std::unordered_map<std::string, variable>         parameters;                                 // Map of all parameters. Key is parameter name
     std::unordered_map<std::string, variable>         locals;                                     // Map of all locals. Key is local name         
-    std::string                                       structureNameParsed;                        // Structure name without whitespaces, namespaces, and generic types <>
+    std::string                                       classNameParsed;                            // Class name without whitespaces, namespaces, and generic types <>
     std::unordered_set<std::string>                   variablesCreatedWithNew;                    // List of variables that are declared/initialized with the "new" operator
     std::vector<std::string>                          stereotype;                                 // Method stereotype
-    std::vector<calls>                                functionCalls;                              // List of function calls (e.g., foo()) to methods in structure. Constructor calls to structure are not considered
+    std::vector<calls>                                functionCalls;                              // List of function calls (e.g., foo()) to methods in class. Constructor calls to class are not considered
     std::vector<calls>                                methodCalls;                                // List of method calls (e.g., a.foo()) where 'a' is an field
     std::vector<calls>                                constructorCalls;                           // List of constructor calls
     std::vector<std::string>                          returnExpressions;                          // List of all return expressions in a method
@@ -125,11 +125,11 @@ private:
     bool                                              empty{false};                               // Is method empty? (comments not counted)
     bool                                              strictFactory{false};                       // Is method a factory?
     bool                                              factory{false};                             // Does method contain at least one return expression that returns a newly created object?
-    bool                                              nonPrimitiveFieldExternal{false};           // True if method uses at least 1 non-primitive field that is not of the same type as structure  
+    bool                                              nonPrimitiveFieldExternal{false};           // True if method uses at least 1 non-primitive field that is not of the same type as class  
     bool                                              nonPrimitiveReturnType{false};              // True if method uses a non-primitive return type
-    bool                                              nonPrimitiveReturnTypeExternal{false};      // True if method uses a non-primitive return type that is not of the same type as structure   
-    bool                                              nonPrimitiveLocalExternal{false};           // True if method uses at least 1 a non-primitive local that is not of the same type as structure   
-    bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as structure                                                
+    bool                                              nonPrimitiveReturnTypeExternal{false};      // True if method uses a non-primitive return type that is not of the same type as class   
+    bool                                              nonPrimitiveLocalExternal{false};           // True if method uses at least 1 a non-primitive local that is not of the same type as class   
+    bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as class                                                
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
     bool                                              constructorDestructorUsed{false};           // Method is a constructor or a destructor
     int                                               unitNumber{-1};                             // Unit number

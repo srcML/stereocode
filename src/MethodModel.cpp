@@ -38,10 +38,10 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
 }
 
 void methodModel::findMethodData(std::unordered_map<std::string, variable>& fields, 
-                                 const std::unordered_set<std::string>& structureMethods, 
-                                 const std::unordered_set<std::string>& inheritedstructureMethods,
-                                 const std::string& structureNamePar) {
-    structureNameParsed = structureNamePar;
+                                 const std::unordered_set<std::string>& classMethods, 
+                                 const std::unordered_set<std::string>& inheritedclassMethods,
+                                 const std::string& classNamePar) {
+    classNameParsed = classNamePar;
     if (!constructorDestructorUsed) {                                
         srcml_archive* archive = srcml_archive_create();
         srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
@@ -64,7 +64,7 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& fiel
         isIgnorableCall(constructorCalls);
 
         // Must only be called after isIgnorableCall()
-        isCallOnField(fields, structureMethods, inheritedstructureMethods);
+        isCallOnField(fields, classMethods, inheritedclassMethods);
     
         // Must only be called after findNewAssign()
         isVariableReturned(fields, false); 
@@ -185,7 +185,7 @@ void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit)
         srcml_transform_free(result);
     }
     variable temp;
-    if (isNonPrimitiveType(returnType, temp, unitLanguage, structureNameParsed))
+    if (isNonPrimitiveType(returnType, temp, unitLanguage, classNameParsed))
         nonPrimitiveReturnType = true; 
     nonPrimitiveReturnTypeExternal = temp.getNonPrimitiveExternal();
 
@@ -257,7 +257,7 @@ void methodModel::findLocalVariableType(srcml_archive* archive, srcml_unit* unit
             prev = type;
         }  
         localsOrdered[i].setType(type);
-        isNonPrimitiveType(type, localsOrdered[i], unitLanguage, structureNameParsed);
+        isNonPrimitiveType(type, localsOrdered[i], unitLanguage, classNameParsed);
         locals.insert({localsOrdered[i].getName(), localsOrdered[i]});
         nonPrimitiveLocalExternal = localsOrdered[i].getNonPrimitiveExternal();
   
@@ -325,7 +325,7 @@ void methodModel::findParameterType(srcml_archive* archive, srcml_unit* unit) {
         std::string type = unparsed;
     
         parametersOrdered[i].setType(type);
-        isNonPrimitiveType(type, parametersOrdered[i], unitLanguage, structureNameParsed);
+        isNonPrimitiveType(type, parametersOrdered[i], unitLanguage, classNameParsed);
         parameters.insert({parametersOrdered[i].getName(), parametersOrdered[i]});
         nonPrimitiveParamaterExternal = parametersOrdered[i].getNonPrimitiveExternal();
         free(unparsed);
@@ -708,28 +708,28 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
 }
 
 // Function calls: --> foo() bar::foo()
-//  Checks if a function call is made to a method in the structure, else it is removed and considered external 
+//  Checks if a function call is made to a method in the class, else it is removed and considered external 
 //  Static and free function calls are considered external calls
 //
-// Method Calls: --> bar.foo() where 'bar' could be a variable or a structure name or a namespace 
+// Method Calls: --> bar.foo() where 'bar' could be a variable or a class name or a namespace 
 //  Checks if there is a method call on an field
 //  For example, a.foo() where a is an field, else it is removed and considered as external method call
 //
-//  In C# or Java, a structure name can be used with the dot operator to invoke static methods
+//  In C# or Java, a class name can be used with the dot operator to invoke static methods
 //  For example, className.staticMethodName();
 //  These are removed and considered as external function calls
 //
-//  base, and super can only be used to invoke non-static methods in the current structure (this) or parent structure (base or super)
+//  base, and super can only be used to invoke non-static methods in the current class (this) or parent class (base or super)
 //  For example, this.methodName();
 //  So these should be also treated as function calls and not method calls
 //
 void methodModel::isCallOnField(std::unordered_map<std::string, variable>& fields, 
-                                   const std::unordered_set<std::string>& structureMethods, 
-                                   const std::unordered_set<std::string>& inheritedstructureMethods) {  
+                                   const std::unordered_set<std::string>& classMethods, 
+                                   const std::unordered_set<std::string>& inheritedclassMethods) {  
     // Check on function calls (Should be done before checking on method calls)
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
-        if (structureMethods.find(it->getSignature()) == structureMethods.end() && 
-            inheritedstructureMethods.find(it->getSignature()) == inheritedstructureMethods.end()) { 
+        if (classMethods.find(it->getSignature()) == classMethods.end() && 
+            inheritedclassMethods.find(it->getSignature()) == inheritedclassMethods.end()) { 
             it = functionCalls.erase(it);
             ++numOfExternalFunctionCalls;    
         }
@@ -777,7 +777,7 @@ void methodModel::isCallOnParameter() {
 // C++: this->a; (*this).a; Foo::a; this->a.b; (*this).a.b; Foo::a.b; a.b; a
 // Java: super.a; this.a; Foo.a; super.a.b; this.a.b; Foo.a.b; a.b; a
 // C#: base.a; this.a; Foo.a; base.a.b; this.a.b; Foo.a.b; a.b; a
-// Where 'a' is a variable and Foo is structure itself if the variable is an field
+// Where 'a' is a variable and Foo is class itself if the variable is an field
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 //
 bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& variables, 
@@ -827,7 +827,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     // ^ indicates that we should only match from the beginning
     // We only care about the first two variables. For example, in a.b.c() the a.b is sufficient to 
     //  determine what "a" is
-    // base and super point to the parent structure (not interfaces)
+    // base and super point to the parent class (not interfaces)
     bool isMatched = false;
     std::smatch match;
     std::string pattern;
@@ -865,16 +865,16 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
             else if (!returnCheck)
                 possibleVar = match[1]; // Perhaps variable itself (e.g., a or a.foo())        
         } 
-        // In C# or Java, a structure name can be used to access static fields only
-        // In C++, a structure name can be used to access static and non-static fields
-        // Parent structure names can also be used to access fields in the child structure, but we will ignore this case for now
-        // Checking with structure name also avoids problems with other structures or properties having the same names as the fields in the current structure
-        else if (isMatched && match[1] != "") {// Case of structure name itself
-            std::string possibleStructureName = match[1];
-            std::size_t listOpen = possibleStructureName.find("<");
+        // In C# or Java, a class name can be used to access static fields only
+        // In C++, a class name can be used to access static and non-static fields
+        // Parent class names can also be used to access fields in the child class, but we will ignore this case for now
+        // Checking with class name also avoids problems with other classs or properties having the same names as the fields in the current class
+        else if (isMatched && match[1] != "") {// Case of class name itself
+            std::string possibleClassName = match[1];
+            std::size_t listOpen = possibleClassName.find("<");
             if (listOpen != std::string::npos) 
-                possibleStructureName = possibleStructureName.substr(0, listOpen);
-            if (structureNameParsed == possibleStructureName)
+                possibleClassName = possibleClassName.substr(0, listOpen);
+            if (classNameParsed == possibleClassName)
                 possibleVar = match[2];
         }
 

@@ -25,7 +25,7 @@
  
 
 bool                            isNonPrimitiveType            (const std::string& type, variable&, 
-                                                               const std::string& unitLanguage, const std::string& structureName);
+                                                               const std::string& unitLanguage, const std::string& className);
 bool                            isPrimitiveType               (const std::string&, const std::string& unitLanguage);
 bool                            matchSubstring                (const std::string&, const std::string&);
 void                            createSpecifierList           ();

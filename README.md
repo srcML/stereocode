@@ -96,7 +96,7 @@ These modifiers, such as **public**, are removed during analysis to enhance the 
 
 <span style='color: lightgreen;'>**-z, --csv-report:**</span> Output optional CSV report file containing stereotype information. 
 
-<span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitetions (/** @stereotype stereotype */). 
+<span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */). 
 
 <span style='color: lightgreen;'>**-v, --verbose:**</span> Outputs default primitives, ignored calls, type modifiers, and extra report files.
 
