@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
+
+<unit xmlns:cpp="http://www.srcML.org/srcML/cpp" revision="1.0.0" language="C++" filename="C++.cpp"><cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;string&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;iostream&gt;</cpp:file></cpp:include>
+<cpp:include>#<cpp:directive>include</cpp:directive> <cpp:file>&lt;vector&gt;</cpp:file></cpp:include>
+
+<function st:stereotype="literal"><type><name>void</name></type> <name>externalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+    <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"This is an external function call."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function st:stereotype="unclassified"><type><name>void</name></type> <name>anotherExternalFunction</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name><modifier>&amp;</modifier></type> <name>str</name></decl></parameter>)</parameter_list> <block>{<block_content>
+    <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Received string: "</literal> <operator>&lt;&lt;</operator> <name>str</name> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<class st:stereotype="small-class">class <name>AnotherClass</name> <block>{<private type="default">
+</private><private>private:
+    <decl_stmt><decl><type><name>int</name></type> <name>anotherDataMember</name></decl>;</decl_stmt>
+
+</private><public>public:
+    <constructor st:stereotype="constructor"><name>AnotherClass</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>)</parameter_list> <member_init_list>: <call><name>anotherDataMember</name><argument_list>(<argument><expr><name>value</name></expr></argument>)</argument_list></call> </member_init_list><block>{<block_content/>}</block></constructor>
+
+    <function st:stereotype="unclassified"><type><name>void</name></type> <name>display</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"AnotherClass data member: "</literal> <operator>&lt;&lt;</operator> <name>anotherDataMember</name> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+</public>}</block>;</class>
+
+<class st:stereotype="unclassified">class <name>MyClass</name> <block>{<private type="default">
+</private><private>private:
+    <decl_stmt><decl><type><name>int</name></type> <name>dataMember</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>string</name></name></type> <name>otherDataMember</name></decl>;</decl_stmt>
+
+</private><public>public:
+    <constructor st:stereotype="constructor"><name>MyClass</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>, <parameter><decl><type><name><name>std</name><operator>::</operator><name>string</name></name></type> <name>strValue</name></decl></parameter>)</parameter_list> <member_init_list>: <call><name>dataMember</name><argument_list>(<argument><expr><name>value</name></expr></argument>)</argument_list></call>, <call><name>otherDataMember</name><argument_list>(<argument><expr><name>strValue</name></expr></argument>)</argument_list></call> </member_init_list><block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Constructor called with value: "</literal> <operator>&lt;&lt;</operator> <name>value</name> <operator>&lt;&lt;</operator> <literal type="string">" and strValue: "</literal> <operator>&lt;&lt;</operator> <name>strValue</name> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></constructor>
+
+    <constructor st:stereotype="copy-constructor"><name>MyClass</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>MyClass</name><modifier>&amp;</modifier></type> <name>other</name></decl></parameter>)</parameter_list> <member_init_list>: <call><name>dataMember</name><argument_list>(<argument><expr><name><name>other</name><operator>.</operator><name>dataMember</name></name></expr></argument>)</argument_list></call>, <call><name>otherDataMember</name><argument_list>(<argument><expr><name><name>other</name><operator>.</operator><name>otherDataMember</name></name></expr></argument>)</argument_list></call> </member_init_list><block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Copy constructor called."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></constructor>
+
+    <destructor st:stereotype="destructor"><name>~MyClass</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Destructor called for MyClass object."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></destructor>
+
+    <function st:stereotype="empty"><type><name>void</name></type> <name>emptyMethod</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <comment type="line">// This method intentionally left blank</comment>
+    </block_content>}</block></function>
+
+    <function st:stereotype="wrapper"><type><name>void</name></type> <name>displayNonDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name>anotherExternalFunction</name><argument_list>(<argument><expr><name>otherDataMember</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+    
+    <function st:stereotype="wrapper stateless"><type><name>void</name></type> <name>wrapExternalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name>externalFunction</name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="factory stateless"><type><name>MyClass</name><modifier>*</modifier></type> <name>createObject</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>, <parameter><decl><type><name><name>std</name><operator>::</operator><name>string</name></name></type> <name>strValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name>MyClass</name><modifier>*</modifier></type> <name>newObj</name> <init>= <expr><operator>new</operator> <call><name>MyClass</name><argument_list>(<argument><expr><name>value</name></expr></argument>, <argument><expr><name>strValue</name></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+        <return>return <expr><name>newObj</name></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="get"><type><name><name>std</name><operator>::</operator><name>string</name></name></type> <name>getNonPrimitiveDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>otherDataMember</name></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="get"><type><name>int</name></type> <name>getDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataMember</name></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="predicate"><type><name>bool</name></type> <name>isDataMemberPositive</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataMember</name> <operator>&gt;</operator> <literal type="number">0</literal></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="property"><type><name>int</name></type> <name>doubleDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataMember</name> <operator>*</operator> <literal type="number">2</literal></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="void-accessor"><type><name>void</name></type> <name>addDataMember</name><parameter_list>(<parameter><decl><type><name>int</name><modifier>&amp;</modifier></type> <name>param</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>param</name> <operator>+=</operator> <name>dataMember</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+    
+    <function st:stereotype="controller stateless"><type><name>void</name></type> <name>callOnLocalObject</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name>MyClass</name></type> <name>localObj</name><argument_list>(<argument><expr><literal type="number">5</literal></expr></argument>, <argument><expr><literal type="string">"Local"</literal></expr></argument>)</argument_list></decl>;</decl_stmt>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Local object data member: "</literal> <operator>&lt;&lt;</operator> <call><name><name>localObj</name><operator>.</operator><name>getDataMember</name></name><argument_list>()</argument_list></call> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+    
+    <function st:stereotype="controller stateless"><type><name>void</name></type> <name>callOnLocalObjectOfAnotherClass</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name>AnotherClass</name></type> <name>localObj</name><argument_list>(<argument><expr><literal type="number">5</literal></expr></argument>)</argument_list></decl>;</decl_stmt>
+        <expr_stmt><expr><call><name><name>localObj</name><operator>.</operator><name>display</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+    
+    <function st:stereotype="command"><type><name>void</name></type> <name>changeManyAttributes</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>newValue</name></decl></parameter>, <parameter><decl><type><name><name>std</name><operator>::</operator><name>string</name></name></type> <name>newStrValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name>newValue</name></expr>;</expr_stmt>
+        <expr_stmt><expr><name>otherDataMember</name> <operator>=</operator> <name>newStrValue</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+    
+    <function st:stereotype="set"><type><name>void</name></type> <name>setDataMember</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>newValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name>newValue</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="incidental"><type><name>void</name></type> <name>doLocalComputation</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>int</name></expr></argument>&gt;</argument_list></name></type> <name>numbers</name> <init>= <expr><block>{<expr><literal type="number">1</literal></expr>, <expr><literal type="number">2</literal></expr>, <expr><literal type="number">3</literal></expr>, <expr><literal type="number">4</literal></expr>, <expr><literal type="number">5</literal></expr>}</block></expr></init></decl>;</decl_stmt>
+        <decl_stmt><decl><type><name>int</name></type> <name>sum</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</decl_stmt>
+        <for>for <control>(<init><decl><type><name>int</name></type> <name>num</name> <range>: <expr><name>numbers</name></expr></range></decl></init>)</control> <block>{<block_content>
+            <expr_stmt><expr><name>sum</name> <operator>+=</operator> <name>num</name></expr>;</expr_stmt>
+        </block_content>}</block></for>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Sum of local numbers: "</literal> <operator>&lt;&lt;</operator> <name>sum</name> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <friend>friend <function_decl><type><name>int</name></type> <name>getDataMemberFriend</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>MyClass</name><modifier>&amp;</modifier></type> <name>obj</name></decl></parameter>)</parameter_list>;</function_decl></friend>
+    <friend>friend <function_decl><type><name>void</name></type> <name>incrementDataMember</name><parameter_list>(<parameter><decl><type><name>MyClass</name><modifier>&amp;</modifier></type> <name>obj</name></decl></parameter>)</parameter_list>;</function_decl></friend>
+    <friend>friend <function_decl><type><name>void</name></type> <name>setDataMemberFriend</name><parameter_list>(<parameter><decl><type><name>MyClass</name><modifier>&amp;</modifier></type> <name>obj</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>dataMember</name></decl></parameter>)</parameter_list>;</function_decl></friend>
+</public>}</block>;</class>
+
+<function st:stereotype="property"><type><name>int</name></type> <name>getDataMemberFriend</name><parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>MyClass</name><modifier>&amp;</modifier></type> <name>obj</name></decl></parameter>)</parameter_list> <block>{<block_content>
+    <return>return <expr><name><name>obj</name><operator>.</operator><name>dataMember</name></name></expr>;</return>
+</block_content>}</block></function>
+
+<function st:stereotype="wrapper"><type><name>void</name></type> <name>setDataMemberFriend</name><parameter_list>(<parameter><decl><type><name>MyClass</name><modifier>&amp;</modifier></type> <name>obj</name></decl></parameter>, <parameter><decl><type><name>int</name></type> <name>dataMember</name></decl></parameter>)</parameter_list> <block>{<block_content>
+    <expr_stmt><expr><call><name><name>obj</name><operator>.</operator><name>setDataMember</name></name><argument_list>(<argument><expr><name>dataMember</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Data member set to "</literal> <operator>&lt;&lt;</operator> <name>dataMember</name> <operator>&lt;&lt;</operator> <literal type="string">" via friend function."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function st:stereotype="command"><type><name>void</name></type> <name>incrementDataMember</name><parameter_list>(<parameter><decl><type><name>MyClass</name><modifier>&amp;</modifier></type> <name>obj</name></decl></parameter>)</parameter_list> <block>{<block_content>
+    <expr_stmt><expr><name><name>obj</name><operator>.</operator><name>dataMember</name></name><operator>++</operator></expr>;</expr_stmt>
+    <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Data member incremented to: "</literal> <operator>&lt;&lt;</operator> <call><name><name>obj</name><operator>.</operator><name>getDataMember</name></name><argument_list>()</argument_list></call> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<class st:stereotype="data-provider data-class small-class">class <name>C</name> <block>{<private type="default">
+</private><protected>protected:
+    <decl_stmt><decl><type><name>int</name></type> <name>dataC</name></decl>;</decl_stmt>
+
+</protected><public>public:
+    <function st:stereotype="get"><type><name>int</name></type> <name>getDataC</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>dataC</name></expr>;</return> </block_content>}</block></function>
+</public>}</block>;</class>
+
+<class st:stereotype="data-provider data-class small-class">class <name>B</name> <super_list>: <super><specifier>public</specifier> <name>C</name></super></super_list> <block>{<private type="default">
+</private><public>public:
+    <function st:stereotype="get"><type><name>int</name></type> <name>getDataB</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>dataC</name></expr>;</return> </block_content>}</block></function>
+
+</public>}</block>;</class>
+
+<class st:stereotype="data-provider data-class small-class">class <name>A</name> <super_list>: <super><specifier>public</specifier> <name>B</name></super></super_list> <block>{<private type="default">
+</private><public>public:
+    <function st:stereotype="get"><type><name>int</name></type> <name>getDataA</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>dataC</name></expr>;</return> </block_content>}</block></function>
+</public>}</block>;</class>
+
+<union st:stereotype="data-class small-class">union <name>MyUnion</name> <block>{<public type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>intValue</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>float</name></type> <name>floatValue</name></decl>;</decl_stmt>
+
+    <function st:stereotype="set"><type><name>void</name></type> <name>setIntValue</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>intValue</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="get"><type><name>int</name></type> <name>getIntValue</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
+        <return>return <expr><name>intValue</name></expr>;</return>
+    </block_content>}</block></function>
+</public>}</block>;</union>
+
+<class st:stereotype="data-provider data-class small-class">class <name>Example</name> <block>{<private type="default">
+</private><public>public:
+    <function st:stereotype="get"><type><name>int</name></type> <name>getIntValue</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content>
+        <return>return <expr><name>intValue</name></expr>;</return>
+    </block_content>}</block></function>
+
+</public><private>private:
+    <union>union <block>{<public type="default">
+        <decl_stmt><decl><type><name>int</name></type> <name>intValue</name></decl>;</decl_stmt>
+    </public>}</block>;</union>
+</private>}</block>;</class>
+
+<union><specifier>static</specifier> union <block>{<public type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>intValue</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>float</name></type> <name>floatValue</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><name>char</name></type> <name>charValue</name></decl>;</decl_stmt>
+</public>}</block>;</union>
+
+<class st:stereotype="data-provider data-class small-class">class <block>{<private type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>value</name></decl>;</decl_stmt>
+    <function st:stereotype="get"><type><name>int</name></type> <name>getValue</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>value</name></expr>;</return>
+    </block_content>}</block></function>
+</private>}</block> <decl><name>anonymousClass</name></decl>;</class>
+
+<struct st:stereotype="data-provider data-class small-class">struct <block>{<public type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>value</name></decl>;</decl_stmt>
+    <function st:stereotype="get"><type><name>int</name></type> <name>getValue</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>value</name></expr>;</return>
+    </block_content>}</block></function>
+</public>}</block> <decl><name>anonymousStruct</name></decl>;</struct>
+
+<class st:stereotype="degenerate small-class">class <name>Base</name> <block>{<private type="default">
+</private><public>public:
+    <function st:stereotype="incidental"><type><name>void</name></type> <name>display</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"Base class display function"</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+</public>}</block>;</class>
+
+<typedef>typedef <label><name>class</name> :</label> <expr_stmt><expr><specifier>public</specifier> <macro><name>Base</name></macro> <block>{
+<expr><specifier>public</specifier><operator>:</operator>
+    <name>int</name> <name>value</name></expr>;
+    <expr><name>int</name> <macro><name>getValue</name><argument_list>()</argument_list></macro> <block>{
+        <return>return <expr><name>value</name></expr>;</return></block></expr>
+    }</block></expr></expr_stmt></typedef>
+} TypedefClass<empty_stmt>;</empty_stmt>
+
+
+<class st:stereotype="empty">class <name>MyStaticClass</name> <block>{<private type="default">
+</private><public>public:
+    <function st:stereotype="literal"><type><specifier>static</specifier> <name>void</name></type> <name>staticMethod</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"This is a static method."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+</public>}</block>;</class>
+
+<function st:stereotype="literal"><type><specifier>static</specifier> <name>void</name></type> <name>staticFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+    <expr_stmt><expr><name><name>std</name><operator>::</operator><name>cout</name></name> <operator>&lt;&lt;</operator> <literal type="string">"This is a static free function."</literal> <operator>&lt;&lt;</operator> <name><name>std</name><operator>::</operator><name>endl</name></name></expr>;</expr_stmt>
+</block_content>}</block></function>
+
+<function st:stereotype="main"><type><name>int</name></type> <name>main</name><parameter_list>()</parameter_list> <block>{<block_content>
+
+</block_content>}</block></function>
+
+
+</unit>
+
+</unit>
