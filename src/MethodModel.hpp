@@ -21,50 +21,47 @@ class methodModel {
 public:
     methodModel(srcml_archive*, srcml_unit*, const std::string&, const std::string&, const std::string&, int);
 
-    const std::vector<variable>&    getParametersOrdered                () const                { return parametersOrdered;     }
-    const std::vector<calls>&       getFunctionCalls                    () const                { return functionCalls;         }
-    const std::vector<calls>&       getMethodCalls                      () const                { return methodCalls;           }
-    const std::vector<calls>&       getConstructorCalls                 () const                { return constructorCalls;      }
+    std::string                     getStereotype                          () const;
+    const std::vector<variable>&    getParametersOrdered                   () const                { return parametersOrdered;                    }
+    const std::vector<calls>&       getFunctionCalls                       () const                { return functionCalls;                        }
+    const std::vector<calls>&       getMethodCalls                         () const                { return methodCalls;                          }
+    const std::vector<calls>&       getConstructorCalls                    () const                { return constructorCalls;                     }
+    const std::vector<std::string>& getStereotypeList                      () const                { return stereotype;                           }
+    const std::string&              getName                                () const                { return name;                                 }
+    const std::string&              getNameSignature                       () const                { return nameSignature;                        }
+    const std::string&              getParametersList                      () const                { return parametersList;                       }
+    const std::string&              getSrcML                               () const                { return srcML;                                }
+    const std::string&              getReturnType                          () const                { return returnType;                           }
+    const std::string&              getReturnTypeParsed                    () const                { return returnTypeParsed;                     }
+    const std::string&              getXpath                               () const                { return xpath;                                } 
+    const std::string&              getUnitLanguage                        () const                { return unitLanguage;                         } 
+    int                             getNumOfFieldsModified                 () const                { return numOfFieldsModified;                  }
+    int                             getUnitNumber                          () const                { return unitNumber;                           }  
+    int                             getNumOfExternalFunctionCalls          () const                { return numOfExternalFunctionCalls;           } 
+    int                             getNumOfExternalMethodCalls            () const                { return numOfExternalMethodCalls;             } 
+    int                             getNumOfNonCommentsStatements          () const                { return numOfNonCommentsStatements;           }
     
-    const std::string&              getName                             () const                { return name;                                     }
-    const std::string&              getNameSignature                    () const                { return nameSignature;                            }
-    const std::string&              getParametersList                   () const                { return parametersList;                           }
-    const std::string&              getSrcML                            () const                { return srcML;                                    }
-    const std::string&              getReturnType                       () const                { return returnType;                               }
-    const std::string&              getReturnTypeParsed                 () const                { return returnTypeParsed;                         }
-    std::string                     getStereotype                       () const;
-    const std::vector<std::string>& getStereotypeList                   () const                { return stereotype;                               }
-    const std::string&              getXpath                            () const                { return xpath;                                    } 
-    const std::string&              getUnitLanguage                     () const                { return unitLanguage;                             } 
-    
-    int                      getNumOfFieldsModified             () const                { return numOfFieldsModified;                       }
-    int                      getUnitNumber                      () const                { return unitNumber;                                }  
-    int                      getNumOfExternalFunctionCalls      () const                { return numOfExternalFunctionCalls;                } 
-    int                      getNumOfExternalMethodCalls        () const                { return numOfExternalMethodCalls;                  } 
-    bool                     IsConstMethod                      () const                { return constMethod;                               }
-    bool                     IsFieldReturned                    () const                { return fieldReturned;                             }
-    bool                     IsFieldNotReturned                 () const                { return fieldNotReturned;                          }
-    bool                     IsParameterNotReturned             () const                { return parameterNotReturned;                      }
-    bool                     IsFieldUsed                        () const                { return fieldUsed;                                 }
-    bool                     IsParameterUsed                    () const                { return parameterUsed;                             }
-    bool                     IsEmpty                            () const                { return empty;                                     }
-    bool                     IsFactory                          () const                { return factory;                                   }
-    bool                     IsStrictFactory                    () const                { return strictFactory;                             }    
-    bool                     IsParameterRefChanged              () const                { return parameterRefChanged;                       }    
-    bool                     IsGlobalOrStaticChanged            () const                { return globalOrStaticChanged;                     }          
-    bool                     IsNonPrimitiveFieldExternal        () const                { return nonPrimitiveFieldExternal;                 }
-    bool                     IsNonPrimitiveReturnTypeExternal   () const                { return nonPrimitiveReturnTypeExternal;            }
-    bool                     IsNonPrimitiveLocalExternal        () const                { return nonPrimitiveLocalExternal;                 }  
-    bool                     IsNonPrimitiveParamaterExternal    () const                { return nonPrimitiveParamaterExternal;             }  
-    bool                     IsConstructorDestructorUsed        () const                { return constructorDestructorUsed;                 }  
-    
-    bool                     IsNonPrimitiveLocalOrParameterChanged () const             { return nonPrimitiveLocalOrParameterChanged;       }  
-    void                     setStereotype                         (const std::string&);
+    bool                            isConstMethod                          () const                { return constMethod;                          }
+    bool                            isFieldReturned                        () const                { return fieldReturned;                        }
+    bool                            isComplexReturn                        () const                { return complexReturn;                        }
+    bool                            isParameterNotReturned                 () const                { return parameterNotReturned;                 }
+    bool                            isFieldUsed                            () const                { return fieldUsed;                            }
+    bool                            isParameterUsed                        () const                { return parameterUsed;                        } 
+    bool                            isParameterRefModified                 () const                { return parameterRefModified;                 }    
+    bool                            isNewReturned                          () const                { return newReturned;                          }
+    bool                            isGlobalOrStaticModified               () const                { return globalOrStaticModified;               }          
+    bool                            isNonPrimitiveFieldExternal            () const                { return nonPrimitiveFieldExternal;            }
+    bool                            isNonPrimitiveReturnTypeExternal       () const                { return nonPrimitiveReturnTypeExternal;       }
+    bool                            isNonPrimitiveLocalExternal            () const                { return nonPrimitiveLocalExternal;            }  
+    bool                            isNonPrimitiveParamaterExternal        () const                { return nonPrimitiveParamaterExternal;        }
+    bool                            isNonPrimitiveReturnType               () const                { return nonPrimitiveReturnType;               }    
+    bool                            isConstructorOrDestructor              () const                { return constructorOrDestructor;              }  
+    bool                            isFieldsCreatedAndReturnedWithNew      () const                { return fieldsCreatedAndReturnedWithNew;      }  
+    bool                            isNonPrimitiveLocalOrParameterModified () const                { return nonPrimitiveLocalOrParameterModified; }  
+    bool                            isVariableUsed                         (std::unordered_map<std::string, variable>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
+ 
 
-    void                     findMethodData                        (std::unordered_map<std::string, variable>&,
-                                                                   const std::unordered_set<std::string>&, 
-                                                                   const std::unordered_set<std::string>&, const std::string&);
-
+    void                     findMethodData             (std::unordered_map<std::string, variable>&, const std::unordered_set<std::string>&, const std::unordered_set<std::string>&, const std::string&);
     void                     findCommonData             ();
     void                     findFreeFunctionData       ();
     void                     findMethodName             (srcml_archive*, srcml_unit*);
@@ -78,20 +75,18 @@ public:
     void                     findCallName               (srcml_archive*, srcml_unit*);
     void                     findCallArgument           (srcml_archive*, srcml_unit*);
     void                     findNewAssign              (srcml_archive*, srcml_unit*);
-    void                     isConst                    (srcml_archive*, srcml_unit*);
-    void                     isConstructorDestructor    (srcml_archive*, srcml_unit*);
-    void                     isIgnorableCall            (std::vector<calls>&);
-    void                     isCallOnField              (std::unordered_map<std::string, variable>&, 
-                                                         const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);   
-    void                     isCallOnParameter          ();
-    void                     isVariableReturned         (std::unordered_map<std::string, variable>&, bool);
-    void                     isVariableModified         (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);                             
-    void                     isVariableUsedInExpression (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);
-    void                     isParameterRefChanged      (std::string, bool);      
+    void                     findConst                  (srcml_archive*, srcml_unit*);
+    void                     findConstructorOrDestructor(srcml_archive*, srcml_unit*);
+    void                     findIgnorableCalls         (std::vector<calls>&);
+    void                     findCallsOnField           (std::unordered_map<std::string, variable>&, const std::unordered_set<std::string>&, const std::unordered_set<std::string>&);   
+    void                     findCallsOnParameters      ();
+    void                     findReturnedVariables      (std::unordered_map<std::string, variable>&, bool);
+    void                     findModifiedVariables      (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);                             
+    void                     findVariablesInExpressions (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);
+    void                     findNonCommentsStatements  (srcml_archive*, srcml_unit*);
+    void                     findModifiedRefParameter   (std::string, bool);      
 
-    bool                     isVariableUsed             (std::unordered_map<std::string, variable>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
-    void                     isEmpty                    (srcml_archive*, srcml_unit*);
-    void                     isFactory                  ();
+    void                     setStereotype              (const std::string& s) { stereotype.push_back(s);}
                                              
 private:
     std::string                                       name;                                       // Name without namespaces
@@ -109,35 +104,32 @@ private:
     std::string                                       classNameParsed;                            // Class name without whitespaces, namespaces, and generic types <>
     std::unordered_set<std::string>                   variablesCreatedWithNew;                    // List of variables that are declared/initialized with the "new" operator
     std::vector<std::string>                          stereotype;                                 // Method stereotype
-    std::vector<calls>                                functionCalls;                              // List of function calls (e.g., foo()) to methods in class. Constructor calls to class are not considered
+    std::vector<calls>                                functionCalls;                              // List of function calls (e.g., foo()) to methods in class
     std::vector<calls>                                methodCalls;                                // List of method calls (e.g., a.foo()) where 'a' is an field
     std::vector<calls>                                constructorCalls;                           // List of constructor calls
     std::vector<std::string>                          returnExpressions;                          // List of all return expressions in a method
     bool                                              constMethod{false};                         // Is it a const method? C++ only
     bool                                              fieldReturned{false};                       // Does it contains at least 1 simple return that returns an field? (e.g., return a; where 'a' is an field)
-    bool                                              fieldNotReturned{false};                    // Does it contains at least 1 return that is not a simple return?
+    bool                                              complexReturn{false};                       // Does it contains at least 1 return that is not a simple return?
     bool                                              parameterNotReturned{false};                // Does it contains at least 1 return that doesn't return a simple parameter?
-    bool                                              parameterRefChanged{false};                 // Does it change any parameter(s) passed by reference?
-    bool                                              nonPrimitiveLocalOrParameterChanged{false}; // Does it change any local(s) or parameter(s)
-    bool                                              globalOrStaticChanged{false};               // Does it change any global or static?
+    bool                                              parameterRefModified{false};                 // Does it change any parameter(s) passed by reference?
+    bool                                              nonPrimitiveLocalOrParameterModified{false}; // Does it change any local(s) or parameter(s)
+    bool                                              globalOrStaticModified{false};               // Does it change any global or static?
     bool                                              parameterUsed{false};                       // Does it use any parameters in an expression?
     bool                                              fieldUsed{false};                           // Does it use any field in an expression?
-    bool                                              empty{false};                               // Is method empty? (comments not counted)
-    bool                                              strictFactory{false};                       // Is method a factory?
-    bool                                              factory{false};                             // Does method contain at least one return expression that returns a newly created object?
     bool                                              nonPrimitiveFieldExternal{false};           // True if method uses at least 1 non-primitive field that is not of the same type as class  
     bool                                              nonPrimitiveReturnType{false};              // True if method uses a non-primitive return type
     bool                                              nonPrimitiveReturnTypeExternal{false};      // True if method uses a non-primitive return type that is not of the same type as class   
     bool                                              nonPrimitiveLocalExternal{false};           // True if method uses at least 1 a non-primitive local that is not of the same type as class   
     bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as class                                                
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
-    bool                                              constructorDestructorUsed{false};           // Method is a constructor or a destructor
+    bool                                              constructorOrDestructor{false};             // Method is a constructor or a destructor
+    bool                                              fieldsCreatedAndReturnedWithNew;            // Number of return expressions that return a local, parameter, or an field created with the "new" operator
     int                                               unitNumber{-1};                             // Unit number
-    int                                               numOfVariablesReturnedCreatedWithNew{0};    // Number of return expressions that return a local, parameter, or an field created with the "new" operator
     int                                               numOfFieldsModified{0};                     // Number of modified fields
     int                                               numOfExternalFunctionCalls{0};              // Number of function calls that are filtered (removed)
     int                                               numOfExternalMethodCalls{0};                // Number of method calls that are filtered (removed)
-
+    int                                               numOfNonCommentsStatements{0};              // Number of non-comment statements
 };
 
 #endif

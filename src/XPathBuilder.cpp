@@ -15,19 +15,13 @@ extern bool   UNION;
 extern bool   ENUM;
 
 void XPathBuilder::generateXpath() {
-    //// C++ ////
-    // Unions cannot inherit, but can be declared anonymous (union without a name) 
-    // Anonymous unions can only be declared inside a class, struct, or a namespace and cannot have methods 
-    //  and their field are accessed directly as part of the enclosing scope
-    //  so, field that are defined inside anonymous unions are considered and the anonymous union itself is not considered
-    //  also, anonymous unions that are defined in a namespace are not considered because their field are basically globals
-    // Classes can be declared without a name (anonymous classes) require you to simultaneously create an instance of it during its definition
-    //  so, these are treated as normal classes
+    /////////////////////
+    //////// C++ ////////
+    /////////////////////
     std::string language = "C++";
-
     std::string xpath = "//src:*[(self::src:class";
     if (STRUCT) xpath += " or self::src:struct";        
-    if (UNION) xpath += " or self::src:union[src:name]";  // Only non-anonymous unions are collected     
+    if (UNION) xpath += " or self::src:union[src:name]";       
     xpath += ") and not(ancestor::src:class or ancestor::src:struct or ancestor::src:union)]"; 
     xpathTable[language]["class"] = xpath;
 
@@ -40,12 +34,10 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super";
     xpathTable[language]["parent_name"] = xpath;  
 
-    // This does not count unions without a name, so their fields will be collected even if nested without a class or a struct
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
     xpathTable[language]["field_name"] = xpath;  
 
-    // Static fields are ignored and treated as globals
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpathTable[language]["field_type"] = xpath;  
@@ -102,7 +94,6 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:return/src:expr";
     xpathTable[language]["return_expression"] = xpath; 
 
-    // Constructor calls are a type of function calls 
     xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["function_call_name"] = xpath;  
 
@@ -129,7 +120,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["const"] = xpath; 
 
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
-    xpathTable[language]["empty"] = xpath; 
+    xpathTable[language]["non_comment_statements"] = xpath; 
 
     xpath = "//src:expr/src:name";
     xpathTable[language]["expression_name"] = xpath;    
@@ -143,11 +134,11 @@ void XPathBuilder::generateXpath() {
     xpath += " or self::src:operator='--'] or preceding-sibling::*[1][self::src:operator='++' or self::src:operator='--']]";
     xpathTable[language]["expression_assignment"] = xpath;    
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //// C# ////
-    // C# allows static classes to be declared, and these must contain only static members
-    // They are ignored and their methods are collected as free functions
-    // Nested classes, struct, or interfaces are ignored
+
+
+    /////////////////////
+    //////// C# /////////
+    /////////////////////
     language = "C#";
     xpath = "//src:*[(self::src:class";
     if (STRUCT) xpath += " or self::src:struct";
@@ -164,27 +155,21 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
 
-    // Auto-properties can be used to declare data members implicitly 
-    // And normal properties get or set data members (not always)
-    // Therefore, properties will be treated as data members as they can be used and called as normal data members  
-    //  where property name = data member name and where property type = data member type 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:name";
+    xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:name";
     xpathTable[language]["field_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:type";
+    xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:type";
     xpathTable[language]["field_type"] = xpath;  
 
-    // Also ignores fields with no specifier
-    // If struct or interface, include the fields with no specifier
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
     xpath += "/src:name[preceding-sibling::*[1][self::src:type]]"; 
-    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
+    xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
     xpath += " and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]/src:name"; 
     xpathTable[language]["non_private_field_name"] = xpath;  
@@ -193,18 +178,16 @@ void XPathBuilder::generateXpath() {
     xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
     xpath += "/src:type[following-sibling::*[1][self::src:name]]"; 
-    xpath += " | //src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
+    xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
     xpath += " and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
     xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]/src:type"; 
     xpathTable[language]["non_private_field_type"] = xpath;  
 
-    // Nested local functions within methods in C# are ignored 
     xpath = "//*[(self::src:function or self::src:constructor or self::src:destructor)";
     xpath += " and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
     xpath += " and not(src:type/src:specifier='static') and not(ancestor::src:function) and not(ancestor::src:property)]";
     xpathTable[language]["method"] = xpath; 
 
-    // C# properties can't be nested in methods or in other properties, so no need to check
     xpath = "//src:property[count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1 and not(src:type/src:specifier='static')]";
     xpathTable[language]["property"] = xpath; 
 
@@ -276,7 +259,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["new_operator_assign"] = xpath;  
 
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
-    xpathTable[language]["empty"] = xpath; 
+    xpathTable[language]["non_comment_statements"] = xpath; 
 
     xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name";
     xpathTable[language]["expression_name"] = xpath;    
@@ -289,15 +272,17 @@ void XPathBuilder::generateXpath() {
     xpath += " or self::src:operator='\\?\\?=' or self::src:operator='>>>=' or self::src:operator='++'"; 
     xpath += " or self::src:operator='--'] or preceding-sibling::*[1][self::src:operator='++' or self::src:operator='--']]";
     xpathTable[language]["expression_assignment"] = xpath;  
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    //// Java ////
-    // enums in Java can contain methods and fields
-    // enums They are implicitly static
-    // Java allows static classes, but these can only be nested within other classes, interfaces, or enums
-    // Static classes in java can contain non-static fields or methods
-    // They are ignored (since they are nested) and their methods (only if static) are collected as free functions
+
+
+
+
+
+
+    /////////////////////
+    /////// Java ////////
+    /////////////////////
     language = "Java";
-    xpath = "//src:*[((self::src:class and not(child::src:super[1]))"; // Ignores anonymous classes (classes without names and are nested as instances)
+    xpath = "//src:*[((self::src:class and not(child::src:super[1]))";
     if (INTERFACE) xpath += " or self::src:interface";       
     if (ENUM) xpath += " or self::src:enum";        
     xpath += ") and not(ancestor::src:class or ancestor::src:interface or ancestor::src:enum)]"; 
@@ -354,7 +339,6 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:parameter_list";
     xpathTable[language]["method_parameter_list"] = xpath; 
     
-    // This skips the generics parameters in Java return types
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
     xpathTable[language]["method_return_type"] = xpath; 
 
@@ -398,7 +382,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["new_operator_assign"] = xpath; 
 
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
-    xpathTable[language]["empty"] = xpath; 
+    xpathTable[language]["non_comment_statements"] = xpath; 
 
     xpath = "//src:expr/src:name";
     xpathTable[language]["expression_name"] = xpath;    

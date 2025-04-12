@@ -15,12 +15,13 @@
 #include <mutex>
 #include <filesystem>
 #include "ClassModel.hpp"
+#include "stereotypes.hpp"
 
 class classModelCollection {
 public:
-                         classModelCollection       (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
+                         classModelCollection           (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
 
-    void                 findClassInfo              (srcml_archive*, srcml_unit*, int);
+    void                 findClassInfo                  (srcml_archive*, srcml_unit*, int);
     void                 findFreeFunctions              (srcml_archive*, srcml_unit*, int);
     void                 findInheritedFields            (classModel&);
     void                 findInheritedMethods           (classModel&);
@@ -34,13 +35,12 @@ public:
     void                 outputCsvVerboseReportFile     (const std::string&);
 
     bool                 isFriendFunction               (methodModel&);
-    void                 computeFreeFunctionsStereotypes();
     void                 analyzeFreeFunctions();
     
 private:
-    std::unordered_map<std::string, classModel>     classCollection;    // List of class names and their models
+    std::unordered_map<std::string, classModel>         classCollection;    // List of class names and their models
     std::unordered_map<std::string, std::string>        classGenerics;      // List of generic class names with and without <> for inheritance matching
-    std::vector<methodModel>                            freeFunctions;          // List of free functions
+    std::vector<methodModel>                            freeFunctions;      // List of free functions
 };
 
 #endif

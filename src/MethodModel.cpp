@@ -18,11 +18,11 @@ methodModel::methodModel(srcml_archive* archive, srcml_unit* unit, const std::st
                          unitLanguage(unitLang),  xpath(methodXpath), unitNumber(unitNum) {
     srcML = srcml_unit_get_srcml(unit);
 
-    isConstructorDestructor(archive, unit);
+    findConstructorOrDestructor(archive, unit);
     findMethodName(archive, unit); 
     findParameterList(archive, unit);
 
-    if (unitLanguage == "C++") isConst(archive, unit);
+    if (unitLanguage == "C++") findConst(archive, unit);
 
     // Method could be inside a property (C# only), so return type is collected separately
     // returnType = "" if the unitLanguage is not C#
@@ -42,7 +42,7 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& fiel
                                  const std::unordered_set<std::string>& inheritedclassMethods,
                                  const std::string& classNamePar) {
     classNameParsed = classNamePar;
-    if (!constructorDestructorUsed) {                                
+    if (!constructorOrDestructor) {                                
         srcml_archive* archive = srcml_archive_create();
         srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
         srcml_unit* unit = srcml_archive_read_unit(archive);
@@ -59,21 +59,20 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& fiel
         findCallArgument(archive, unit);
         findNewAssign(archive, unit);
 
-        isIgnorableCall(methodCalls);
-        isIgnorableCall(functionCalls);
-        isIgnorableCall(constructorCalls);
+        findIgnorableCalls(methodCalls);
+        findIgnorableCalls(functionCalls);
+        findIgnorableCalls(constructorCalls);
 
         // Must only be called after isIgnorableCall()
-        isCallOnField(fields, classMethods, inheritedclassMethods);
+        findCallsOnField(fields, classMethods, inheritedclassMethods);
     
         // Must only be called after findNewAssign()
-        isVariableReturned(fields, false); 
+        findReturnedVariables(fields, false); 
 
-        isVariableUsedInExpression(archive, unit, fields, false);
-        isVariableModified(archive, unit, fields, false);
+        findVariablesInExpressions(archive, unit, fields, false);
+        findModifiedVariables(archive, unit, fields, false);
 
-        isEmpty(archive, unit);
-        isFactory();
+        findNonCommentsStatements(archive, unit);
 
         srcml_unit_free(unit);
         srcml_archive_close(archive);
@@ -82,7 +81,7 @@ void methodModel::findMethodData(std::unordered_map<std::string, variable>& fiel
 }
 
 void methodModel::findFreeFunctionData() {
-    if (!constructorDestructorUsed) {
+    if (!constructorOrDestructor) {
         srcml_archive* archive = srcml_archive_create();
         srcml_archive_read_open_memory(archive, srcML.c_str(), srcML.size());
         srcml_unit* unit = srcml_archive_read_unit(archive);
@@ -98,15 +97,15 @@ void methodModel::findFreeFunctionData() {
         findCallArgument(archive, unit);
         findNewAssign(archive, unit);
 
-        isIgnorableCall(methodCalls);
-        isIgnorableCall(functionCalls);
+        findIgnorableCalls(methodCalls);
+        findIgnorableCalls(functionCalls);
 
-        isCallOnParameter();
+        findCallsOnParameters();
 
-        isVariableReturned(parameters, true); 
-        isVariableUsedInExpression(archive, unit, parameters, true);
-        isVariableModified(archive, unit, parameters, true);
-        isEmpty(archive, unit);
+        findReturnedVariables(parameters, true); 
+        findVariablesInExpressions(archive, unit, parameters, true);
+        findModifiedVariables(archive, unit, parameters, true);
+        findNonCommentsStatements(archive, unit);
 
         srcml_unit_free(unit);
         srcml_archive_close(archive);
@@ -117,7 +116,7 @@ void methodModel::findFreeFunctionData() {
 // Gets the method name
 //
 void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
-    if (constructorDestructorUsed)
+    if (constructorOrDestructor)
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_destructor_name").c_str());
     else
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_name").c_str());
@@ -145,7 +144,7 @@ void methodModel::findMethodName(srcml_archive* archive, srcml_unit* unit) {
 // Gets the method parameter list
 //
 void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
-    if (constructorDestructorUsed)
+    if (constructorOrDestructor)
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_destructor_parameter_list").c_str());
     else
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_parameter_list").c_str());
@@ -168,7 +167,8 @@ void methodModel::findParameterList(srcml_archive* archive, srcml_unit* unit) {
 }
 
 // Gets the method return type 
-//
+// Java:
+//  The + tor returnType skips the generics parameters in Java return types
 void methodModel::findMethodReturnType(srcml_archive* archive, srcml_unit* unit) {
     if (returnType == "") { // If method was a property (C#), type is found in previous steps
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_return_type").c_str());
@@ -370,7 +370,8 @@ void methodModel::findReturnExpression(srcml_archive* archive, srcml_unit* unit)
 }
 
 // Collects names of calls including function, method, and constructor calls
-//
+// C++:
+//  Constructor calls are a type of function calls (collected separately)
 void methodModel::findCallName(srcml_archive* archive, srcml_unit* unit) {   
     std::vector<std::string> callType = {"function", "method", "constructor"};
     for (const std::string& c : callType) {
@@ -487,31 +488,23 @@ void methodModel::findNewAssign(srcml_archive* archive, srcml_unit* unit) {
 
 // Determines if method is empty
 //
-void methodModel::isEmpty(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"empty").c_str());
+void methodModel::findNonCommentsStatements(srcml_archive* archive, srcml_unit* unit) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_comment_statements").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
-    empty = (n==0); 
+    numOfNonCommentsStatements = n; 
 
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
 }
 
-void methodModel::isFactory() {
-    if (!constructorDestructorUsed) {
-        if (nonPrimitiveReturnType && (newReturned || numOfVariablesReturnedCreatedWithNew > 0)) {
-            factory = true;
-            if (numOfVariablesReturnedCreatedWithNew == (int)(returnExpressions.size()))
-                strictFactory = true;
-        }  
-    }        
-}
+
 
 
 // Determines if method is const
 //
-void methodModel::isConst(srcml_archive* archive, srcml_unit* unit) {
+void methodModel::findConst(srcml_archive* archive, srcml_unit* unit) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"const").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -525,13 +518,13 @@ void methodModel::isConst(srcml_archive* archive, srcml_unit* unit) {
 
 // Check if method is a constructor or a destructor
 //
-void methodModel::isConstructorDestructor(srcml_archive* archive, srcml_unit* unit) {
+void methodModel::findConstructorOrDestructor(srcml_archive* archive, srcml_unit* unit) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_or_destructor").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) constructorDestructorUsed = true;
+    if (n == 1) constructorOrDestructor = true;
 
     srcml_clear_transforms(archive);
     srcml_transform_free(result);
@@ -545,7 +538,7 @@ void methodModel::isConstructorDestructor(srcml_archive* archive, srcml_unit* un
 // C++ can use *, [], or & to pass by reference
 // No need to check for 'const' since this function is only called when there is a modification to the parameter
 //
-void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
+void methodModel::findModifiedRefParameter(std::string para, bool propertyCheck) {
     std::string type = parameters[para].getType();
     if (unitLanguage == "C++" || unitLanguage == "C#"){
         // C# could use * in unsafe contexts
@@ -557,7 +550,7 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
             trimWhitespace(parName);
             bool referenceArray = parName.find("[]") != std::string::npos; 
             if (reference || referencePointer || referenceArray)                    
-                parameterRefChanged = true;   
+            parameterRefModified = true;   
         }
         else if (unitLanguage == "C#"){
             bool nonPrimitive = !isPrimitiveType(type, unitLanguage);
@@ -567,12 +560,12 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
             trimWhitespace(type);
             bool referenceArray = type.find("[]") != std::string::npos; 
             if (referenceOut || referenceArray || referencePointer)                  
-                parameterRefChanged = true;     
+            parameterRefModified = true;     
             else if (nonPrimitive && propertyCheck) {
                 // For C# and Java, only check if a parameter's property is modified
                 // For example, parameter.b = value --> check
                 // parameter = value --> don't check
-                parameterRefChanged = true;
+                parameterRefModified = true;
             
             }
         }       
@@ -582,7 +575,7 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
         trimWhitespace(type);
         bool referenceArray = type.find("[]") != std::string::npos; 
         if (referenceArray || (nonPrimitive && propertyCheck))                
-            parameterRefChanged = true;     
+        parameterRefModified = true;     
     }     
 }
 
@@ -590,7 +583,7 @@ void methodModel::isParameterRefChanged(std::string para, bool propertyCheck) {
 // Both simple returns (e.g., return variable;) and 
 //  complex returns (e.g., return variable + 5; or e.g., return 5 + 5;) are found
 //
-void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& variables, bool isParameterCheck) {
+void methodModel::findReturnedVariables(std::unordered_map<std::string, variable>& variables, bool isParameterCheck) {
     for (const std::string& expr : returnExpressions) {
         if (isParameterCheck) {
             if (!isVariableUsed(variables, nullptr, expr, true, false, false, isParameterCheck, false))
@@ -600,7 +593,7 @@ void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& 
             if (isVariableUsed(variables, nullptr, expr, true, false, false, false, false)) 
                 fieldReturned = true; // Simple return
             else
-                fieldNotReturned = true; // Complex return
+                complexReturn = true; // Complex return
         }
         
     }
@@ -608,7 +601,7 @@ void methodModel::isVariableReturned(std::unordered_map<std::string, variable>& 
 
 // Determines if a variable (parameter or an field) is used in an expression
 //
-void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit* unit, 
+void methodModel::findVariablesInExpressions(srcml_archive* archive, srcml_unit* unit, 
                                                          std::unordered_map<std::string, variable>& variables, bool isParameterCheck)  {
 
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"expression_name").c_str());
@@ -634,7 +627,7 @@ void methodModel::isVariableUsedInExpression(srcml_archive* archive, srcml_unit*
 //  if a parameter that is passed by reference is changed
 // An field or a parameter that is changed multiple times should only be considered as 1 change
 //
-void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit, 
+void methodModel::findModifiedVariables(srcml_archive* archive, srcml_unit* unit, 
                                      std::unordered_map<std::string, variable>& variables, bool isParameterCheck) { 
     std::unordered_set<std::string> checked; 
 
@@ -654,7 +647,8 @@ void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit,
         free(unparsed);  
         
         std::size_t oldSize = checked.size();
-
+        if (name == "ReportError")
+            std::cout <<"g";
         if (isParameterCheck)
             isVariableUsed(variables, nullptr, possibleVariable, false, true, false, true, false);
         else if (isVariableUsed(variables, &checked, possibleVariable, false, true, true, false, false)) {
@@ -673,7 +667,8 @@ void methodModel::isVariableModified(srcml_archive* archive, srcml_unit* unit,
 // Usage of fields within these calls are not ignored
 // For example, if call to ignore is 'foo', 
 //  then some of the matched cases are foo<>() or bar::foo() or a->b.foo()
-void methodModel::isIgnorableCall(std::vector<calls>& calls) {
+//
+void methodModel::findIgnorableCalls(std::vector<calls>& calls) {
     for (auto it = calls.begin(); it != calls.end();) {
         std::string callName = it->getName();
 
@@ -723,7 +718,7 @@ void methodModel::isIgnorableCall(std::vector<calls>& calls) {
 //  For example, this.methodName();
 //  So these should be also treated as function calls and not method calls
 //
-void methodModel::isCallOnField(std::unordered_map<std::string, variable>& fields, 
+void methodModel::findCallsOnField(std::unordered_map<std::string, variable>& fields, 
                                    const std::unordered_set<std::string>& classMethods, 
                                    const std::unordered_set<std::string>& inheritedclassMethods) {  
     // Check on function calls (Should be done before checking on method calls)
@@ -767,7 +762,7 @@ void methodModel::isCallOnField(std::unordered_map<std::string, variable>& field
     }
 }
 
-void methodModel::isCallOnParameter() {   
+void methodModel::findCallsOnParameters() {   
     for (auto& m : methodCalls)
         isVariableUsed(parameters, nullptr, m.getName(), false, false, false, true, false);
 }
@@ -883,32 +878,28 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
             // Case of variables = locals
             if (locals.find(possibleVar) != locals.end()) {
                 if (localModifiedCheck && locals.at(possibleVar).getNonPrimitive()) 
-                    nonPrimitiveLocalOrParameterChanged = true;
+                    nonPrimitiveLocalOrParameterModified = true;
                 if (returnCheck) { 
                     if (variablesCreatedWithNew.find(possibleVar) != variablesCreatedWithNew.end())
-                        ++numOfVariablesReturnedCreatedWithNew;
+                        if (!fieldsCreatedAndReturnedWithNew) fieldsCreatedAndReturnedWithNew = true;
                 }
-                if (isLocalCheck)
-                    return true;
-                else
-                    return false;
+                if (isLocalCheck) return true;
+                else return false;
             }
 
             // Case of variables = parameters
             else if (parameters.find(possibleVar) != parameters.end()) {
                 parameterUsed = true;
                 if (parameterModifiedCheck) {
-                    if (parameters.at(possibleVar).getNonPrimitive()) nonPrimitiveLocalOrParameterChanged = true;
-                    isParameterRefChanged(possibleVar, isMatched);
+                    if (parameters.at(possibleVar).getNonPrimitive()) nonPrimitiveLocalOrParameterModified = true;
+                    findModifiedRefParameter(possibleVar, isMatched);
                 }
                 if (returnCheck) {        
                     if (variablesCreatedWithNew.find(possibleVar) != variablesCreatedWithNew.end())
-                        ++numOfVariablesReturnedCreatedWithNew;
+                        if (!fieldsCreatedAndReturnedWithNew) fieldsCreatedAndReturnedWithNew = true;
                 }
-                if (isParamaterCheck)
-                    return true;
-                else
-                    return false;      
+                if (isParamaterCheck) return true;
+                else return false;      
             }
         }
 
@@ -924,7 +915,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
                 if (returnCheck) {
                     fieldReturned = true; // Simple return     
                     if (variablesCreatedWithNew.find(possibleVar) != variablesCreatedWithNew.end())
-                        ++numOfVariablesReturnedCreatedWithNew;
+                        if (!fieldsCreatedAndReturnedWithNew) fieldsCreatedAndReturnedWithNew = true;
                 }
             }
             return true;                                  
@@ -932,14 +923,12 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     }
 
     if(parameterModifiedCheck)
-        globalOrStaticChanged = true;
+        globalOrStaticModified = true;
 
     return false;  
 }
 
-void methodModel::setStereotype(const std::string& s) {
-    stereotype.push_back(s);
-}
+
 
 std::string methodModel::getStereotype() const {
     std::string result;

@@ -70,13 +70,16 @@ bool isPrimitiveType(const std::string& type, const std::string& unitLanguage) {
     return true;
 }
 
+// This function checks whether a given substring appears in the text as a whole word
+// A word boundary is comes before or after any of these characters [A-Z, a-z, _]
+// For example, "hello, there" there is a word boundary before 'h' and after 'o'
+//
 bool matchSubstring(const std::string& text, const std::string& substring) {
     const std::string pattern = "\\b" + substring + "\\b"; 
     const std::regex regexPattern(pattern);
     std::smatch match;
     return std::regex_search(text, match, regexPattern);
 }
-
 
 // Removes specifiers from type name
 //
@@ -120,14 +123,6 @@ void removeNamespace(std::string& name, bool all, std::string_view unitLanguage)
             }                      
         }
     }
-}
-
-// Converts all whitespaces to blanks  ('\r' => ' ')
-void WStoBlank(std::string& s) {
-    std::replace_if(s.begin(),
-                    s.end(),
-                    [](char c) { return isspace(c); },
-                    ' ');
 }
 
 // Removes all characters inside <> or () except for comma

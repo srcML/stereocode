@@ -10,15 +10,16 @@
 #include "ClassModelCollection.hpp"
 #include "CLI11.hpp"
 
-primitiveTypes                     PRIMITIVES;                                             // Primitive types per language + any user supplied
-ignorableCalls                     IGNORED_CALLS;                                          // Calls to ignore + any user supplied
-typeModifiers                      TYPE_MODIFIERS;                                         // Modifiers to remove from data types + any user supplied
-int                                METHODS_PER_CLASS_THRESHOLD = 21;                       // Threshold for large class stereotype (from ICSM10)
-bool                               STRUCT                          = false;                // Identify and stereotype structs (C++ or C#)
-bool                               INTERFACE                       = false;                // Identify and stereotype interfaces (C# or Java)
-bool                               UNION                           = false;                // Identify and stereotype unions (C++)
-bool                               ENUM                            = false;                // Identify and stereotype enums (Java)
-bool                               IS_VERBOSE                      = false;                // Prints primitives, ignored calls, and type modifiers
+primitiveTypes                     PRIMITIVES;
+ignorableCalls                     IGNORED_CALLS;
+typeModifiers                      TYPE_MODIFIERS;
+int                                METHODS_PER_CLASS_THRESHOLD = 21;
+bool                               FREE_FUNCTION                   = false;
+bool                               STRUCT                          = false;
+bool                               INTERFACE                       = false;
+bool                               UNION                           = false;
+bool                               ENUM                            = false;
+bool                               IS_VERBOSE                      = false;
 
 std::unordered_map
      <int, std::unordered_map
@@ -47,6 +48,7 @@ int main (int argc, char const *argv[]) {
     app.add_option("-g,--ignore-call-file",   ignoredCallsFile,                 "File name of user supplied calls to ignore (one per line)");
     app.add_option("-t,--type-modifier-file", typeModifiersFile,                "File name of user supplied data type modifiers to remove (one per line)");
     app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD,      "Method threshold for the large-class stereotype (default = 21)");
+    app.add_flag  ("-f,--free-function",      FREE_FUNCTION,                    "Identify stereotypes for free functions (C++, C#, and Java)");
     app.add_flag  ("-i,--interface",          INTERFACE,                        "Identify stereotypes for interfaces (C# and Java)");
     app.add_flag  ("-n,--union",              UNION,                            "Identify stereotypes for unions (C++)");
     app.add_flag  ("-m,--enum",               ENUM,                             "Identify stereotypes for enums (Java)");

@@ -4,7 +4,8 @@
 ## 💡 **What does it do?**
 **Stereocode** classifies **methods** and **classes** based on their **stereotypes** for **C++**, **Java**, and/or **C#** systems.
 
-> Class and method stereotypes are defined in three papers presented at the **IEEE International Conference on Software Maintenance (ICSM)** in 2006, 2009, and 2010 by Dragan, Collard, and Maletic.
+In addition, Stereocode stereotypes **free functions** as well as other structures (e.g., struct)
+- Please refer to the Wiki for detailed information on stereotypes
 
 **Stereocode**  takes a srcML archive as input, performs static analysis, and annotates each function and class tag in the XML input with an attribute indicating the detected stereotype. For example:
 
@@ -13,12 +14,9 @@
 <function st:stereotype="get"> ... </function>
 ```
 
-This output can be used for further processing or analysis. For instance, the stereotype information can be embedded as documentation in the source code (using comments, **Doxygen**, **Javadoc**, etc.).
-
-
 ## 🔧 Installation and Build
 1. Prerequisites
-- [srcML 1.0+](https://www.srcml.org/) (Only Develop is needed for Linux)
+- [srcML 1.0+](https://www.srcml.org/) (Develop version for Linux)
 - [cmake 3.17+](https://cmake.org/)
 - GCC, Clang, or MSCV with C++17 or higher
 
@@ -36,8 +34,9 @@ make
 
 **Stereocode**  is a command-line tool. It can process individual source files or whole systems. 
 
-Demo: 
 ```bash
+Demo: 
+
 # This line converts the PowerShell system to the srcML format
 srcml PowerShell.zip -o PowerShell.xml
 
@@ -47,9 +46,6 @@ srcml PowerShell.zip -o PowerShell.xml
 # For more options and help:
 ./stereocode --help
 ```
-
-Note:</br>
-Stereocode can stereotype *free functions*. A *free function* could be a static method/function, a friend function (C++), or simply a function that does not belong to a structure (e.g., class) (C++).
 
 ## 📜 Stereocode Options
 
@@ -82,6 +78,8 @@ These modifiers, such as **public**, are removed during analysis to enhance the 
 
 <span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21).
 
+<span style='color: lightgreen;'>**-f, --free-function:**</span> Identify stereotypes for free functions (C++, C#, and Java). 
+
 <span style='color: lightgreen;'>**-i, --interface:**</span> Identify stereotypes for interfaces (C# and Java). 
 
 <span style='color: lightgreen;'>**-n, --union:**</span> Identify stereotypes for unions (C++). 
@@ -99,15 +97,3 @@ These modifiers, such as **public**, are removed during analysis to enhance the 
 <span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */). 
 
 <span style='color: lightgreen;'>**-v, --verbose:**</span> Outputs default primitives, ignored calls, type modifiers, and extra report files.
-
-## 📓 Developer Notes:
-
-The initial version of this code base was developed by Doleh and documented in his MS Thesis December 2021 at Kent State University. Later, Al-Ramadan updated Stereocode by adding support for additional programming languages (i.e., C# and Java), enabling the stereotyping of complete systems, and incorporating deep static analysis. This work was also documented in MS Thesis May 2024 at Kent State University. Previously, a prototype of **Stereocode** was developed by Collard and Dragan for Dragan's dissertation in December 2010 at KSU. This prototype was further extended for DySDoc 2018 by Decker and Collard. 
-
-Developers of stereocode 1.0:
-- Ali Al-Ramadan - Kent State University
-- Michael L. Collard - University of Akron
-- Michael Decker - Bowling Green State University
-- Zane Doleh - Kent State University
-- Jonathan I. Maletic - Kent State University
-- Nick Weber - Kent State University
