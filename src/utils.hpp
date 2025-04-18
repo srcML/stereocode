@@ -24,16 +24,18 @@
 #include "variable.hpp"
  
 
-bool                            isNonPrimitiveType            (const std::string& type, variable&, 
+void                            checkNonPrimitiveType         (const std::string& type, variable&, 
                                                                const std::string& unitLanguage, const std::string& className);
 bool                            isPrimitiveType               (const std::string&, const std::string& unitLanguage);
-bool                            matchSubstring                (const std::string&, const std::string&);
+bool                            matchSubstringAtBeginning     (const std::string&, const std::string&);
 void                            createSpecifierList           ();
 void                            removeTypeModifiers           (std::string&, std::string);
+void                            removeBracketSuffix           (std::string&);
+void                            removeLeadingAsterisks        (std::string&);
 void                            trimWhitespace                (std::string&);
 void                            Ltrim                         (std::string&);
 void                            Rtrim                         (std::string&);
-void                            removeNamespace               (std::string&, bool, std::string_view);
+void                            removeNamespace               (std::string&, std::string_view, bool);
 void                            removeBetweenComma            (std::string& s, bool);
 void                            srcmlBackwardCompatibility    (std::string&);
 

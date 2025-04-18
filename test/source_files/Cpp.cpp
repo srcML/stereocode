@@ -6,33 +6,34 @@ void externalFunction() {
     std::cout << "This is an external function call." << std::endl;
 }
 
-void anotherExternalFunction(const std::string& str) {
-    std::cout << "Received string: " << str << std::endl;
+void anotherExternalFunction(int dataMember) {
+    std::cout << "Received Data Member: " << dataMember << std::endl;
 }
 
 class AnotherClass {
 private:
-    int anotherDataMember;
+    int dataMember;
 
 public:
-    AnotherClass(int value) : anotherDataMember(value) {}
+    AnotherClass(int value) : dataMember(value) {}
 
     void display() {
-        std::cout << "AnotherClass data member: " << anotherDataMember << std::endl;
+        std::cout << "AnotherClass data member: " << dataMember << std::endl;
     }
 };
 
 class MyClass {
 private:
     int dataMember;
-    std::string otherDataMember;
+    int* pointerDataMember;
+    int** pointerToPointerDataMember;
 
 public:
-    MyClass(int value, std::string strValue) : dataMember(value), otherDataMember(strValue) {
+    MyClass(int value, std::string strValue) : dataMember(value) {
         std::cout << "Constructor called with value: " << value << " and strValue: " << strValue << std::endl;
     }
 
-    MyClass(const MyClass& other) : dataMember(other.dataMember), otherDataMember(other.otherDataMember) {
+    MyClass(const MyClass& other) : dataMember(other.dataMember) {
         std::cout << "Copy constructor called." << std::endl;
     }
 
@@ -44,25 +45,33 @@ public:
         // This method intentionally left blank
     }
 
-    void displayNonDataMember() {
-        anotherExternalFunction(otherDataMember);
-    }
-    
     void wrapExternalFunction() {
         externalFunction();
     }
 
+    void displayNonDataMember() {
+        anotherExternalFunction(dataMember);
+    }
+    
     MyClass* createObject(int value, std::string strValue) {
         MyClass* newObj = new MyClass(value, strValue);
         return newObj;
     }
 
-    std::string getNonPrimitiveDataMember() {
-        return otherDataMember;
-    }
-
     int getDataMember() {
         return dataMember;
+    }
+
+    int* getPointerDataMember() {
+        return pointerDataMember;
+    }
+
+    int getValueOfPointerDataMember() {
+        return *pointerDataMember;
+    }
+
+    int getValueOfPointerToPointerDataMember() {
+        return **pointerToPointerDataMember;
     }
 
     bool isDataMemberPositive() {
@@ -87,9 +96,8 @@ public:
         localObj.display();
     }
     
-    void changeManyAttributes(int newValue, std::string newStrValue) {
+    void changeManyAttributes(int newValue) {
         dataMember = newValue;
-        otherDataMember = newStrValue;
     }
     
     void setDataMember(int newValue) {

@@ -26,15 +26,28 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
 
         for (auto& m : methods) {
             // Common operations
-            const std::string& returnTypeParsed  = m.getReturnTypeParsed();
-            int   fieldsModified                 = m.getNumOfFieldsModified();
-            int   callsOnDataMembers             = m.getMethodCalls().size();
-            int   callsOnClassMethods            = m.getFunctionCalls().size();
-            int   callsOnFreeFunctions           = m.getNumOfExternalFunctionCalls();
-            int   callsToOtherClassMethods       = m.getNumOfExternalMethodCalls();
-            bool  isFieldUsed                    = m.isFieldUsed();
-            bool  isVoidPointer                  = false;
-            bool  isEmpty                        = m.getNumOfNonCommentsStatements() == 0;
+            const std::string& returnTypeParsed             = m.getReturnTypeParsed();
+            int   dataMembersModifiedCount                  = m.getDataMembersModifiedCount();
+            int   callsOnDataMembersCount                   = m.getMethodCalls().size();
+            int   callsOnClassMethodsCount                  = m.getFunctionCalls().size();
+            int   newConstructorCallsCount                  = m.getNewConstructorCalls().size();
+            int   callsOnFreeFunctionsCount                 = m.getExternalFunctionCallsCount();
+            int   callsToOtherClassMethods                  = m.getExternalMethodCallsCount();
+            int   NumOfNonCommentStatements                 = m.getNonCommentStatementsCount();
+            bool  isDataMemberUsed                          = m.isDataMemberUsed();
+            bool  isMethodConst                             = m.isMethodConst();
+            bool  isVoidPointer                             = false;
+            bool  isVariableCreatedAndReturnedWithNew       = m.isVariableCreatedAndReturnedWithNew();
+            bool  isNonPrimitiveReturnType                  = m.isNonPrimitiveReturnType();
+            bool  isNewReturned                             = m.isNewReturned();
+            bool  isParameterRefModified                    = m.isParameterRefModified();
+            bool  hasSimpleReturn                           = m.hasSimpleReturn();   
+            bool  hasComplexReturn                          = m.hasComplexReturn(); 
+            bool  isNonPrimitiveLocalOrParameterModified    = m.isNonPrimitiveLocalOrParameterModified();
+            bool  isNonPrimitiveDataMemberExternal          = m.isNonPrimitiveDataMemberExternal();
+            bool  isNonPrimitiveLocalExternal               = m.isNonPrimitiveLocalExternal();
+            bool  isNonPrimitiveParamaterExternal           = m.isNonPrimitiveParamaterExternal();
+            bool  isNonPrimitiveReturnTypeExternal          = m.isNonPrimitiveReturnTypeExternal();
 
             // Covers the case of void with * or more
             if (classUnitLanguage != "Java") if (m.getReturnType().find("void*") != std::string::npos) isVoidPointer = true;
@@ -44,7 +57,7 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
             if (m.isConstructorOrDestructor()) {  
                 ++constructorDestructorCount;
 
-                const std::string& parameterList = m.getParametersList();
+                const std::string& parameterList = m.getParameterList();
                 const std::string& srcML         = m.getSrcML();
     
                 if      (srcML.find("<destructor>") != std::string::npos      ) m.setStereotype ("destructor"      ); 
@@ -55,18 +68,19 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
             //
             // 1] Method has no statements except for comments
             //
-            else if (isEmpty) m.setStereotype("empty");
+            else if (NumOfNonCommentStatements == 0) m.setStereotype("empty");
             else {
                 // get
                 //
                 // 1] Return type is not void
-                // 2] Contains at least one simple return expression that returns a data member (e.g., return dm;)
+                // 2] Contains at least one simple return expression that 
+                //     returns a data member (e.g., return dm;) or the value to a data member (e.g., return *dm; or return **dm; ... etc)
+                //    The data member 'dm' can be of any data type (e.g., primitive, non-primitive, pointer, reference, etc)
                 //
-                // "this" keyword by itself is not considered (e.g., return this;)
+                // Returning "this" by itself is not a getter (e.g., return this;) 
+                //  as it points to the current object rather than a data member
                 //
-                // A data member, as of now, is either field (C++, C#, Java) or property (C#)
-                //
-                if (m.isFieldReturned()) m.setStereotype("get"); 
+                if (hasSimpleReturn) m.setStereotype("get"); 
                     
                 
                 // predicate
@@ -74,11 +88,10 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 1] Return type is Boolean
                 // 2] Contains at least one complex return expression
                 // 3] Uses a data member in an expression or has at least 
-                //     one function call to other methods in class
+                //     one function call (except constructor calls) to other methods in class
                 //
-                // Constructor calls are not considered
-                // Ignored calls are not considered
-                // "this" keyword by itself is considered
+                // Returning "this" by itself is not a predicate (e.g., return this;) 
+                //  as it points to the current object rather than a bool value found using data members
                 // 
                 bool  returnType = false;
 
@@ -86,7 +99,8 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 else if (classUnitLanguage == "C#")   returnType = (returnTypeParsed == "bool") || (returnTypeParsed == "Boolean");
                 else if (classUnitLanguage == "Java") returnType = (returnTypeParsed == "boolean");
 
-                if (returnType && m.isComplexReturn() && (isFieldUsed || (callsOnClassMethods > 0))) m.setStereotype("predicate"); 
+                if (returnType && hasComplexReturn && (isDataMemberUsed || (callsOnClassMethodsCount > 0))) 
+                    m.setStereotype("predicate"); 
             
                 
                 // property
@@ -94,11 +108,10 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 1] Return type is not void or Boolean
                 // 2] Contains at least one complex return statement (e.g., return a+5;)
                 // 3] Uses a data member in an expression or has at least 
-                //     one function call to other methods in class
+                //     one function call (except constructor calls) to other methods in class
                 //
-                // Constructor calls are not considered
-                // Ignored calls are not considered
-                // "this" keyword by itself is considered
+                // Returning "this" by itself is not a property (e.g., return this;) 
+                //  as it points to the current object rather than a non-bool value found using data members
                 //  
                 bool returnNotVoidOrBool = false;
 
@@ -110,7 +123,8 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 else if (classUnitLanguage == "Java") returnNotVoidOrBool = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
                                                                             returnTypeParsed != "Void" && returnTypeParsed != "");
 
-                if (returnNotVoidOrBool && m.isComplexReturn() && (isFieldUsed || (callsOnClassMethods > 0))) m.setStereotype("property");
+                if (returnNotVoidOrBool && hasComplexReturn && (isDataMemberUsed || (callsOnClassMethodsCount > 0))) 
+                    m.setStereotype("property");
                 
             
                 // void-accessor
@@ -118,56 +132,56 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 1] Return type is void 
                 // 2] Contains at least one parameter that is passed by non-const reference and is assigned a value
                 // 3] Uses a data member in an expression or has at least 
-                //     one function call to other methods in class 
+                //     one function call (except constructor calls) to other methods in class 
                 //
-                // Constructor calls are not considered
-                // Ignored calls are not considered
-                // "this" keyword by itself is considered
+                // The "this" keyword by itself is considered (e.g., p = this or p = *this) 
+                //  as an accessor to the state of the object where 'p' is passed by reference
                 //
-                if (m.isParameterRefChanged() && (returnTypeParsed == "void") && !isVoidPointer && 
-                (isFieldUsed || (callsOnClassMethods > 0))) m.setStereotype("void-accessor");       
+                if (isParameterRefModified && (returnTypeParsed == "void") && !isVoidPointer && (isDataMemberUsed || (callsOnClassMethodsCount > 0))) 
+                    m.setStereotype("void-accessor");       
                 
 
                 // set
                 //
-                // 1] Only one data member is changed
-                // 2] No calls on data members or to methods in class
+                // 1] Only one data member is changed or there is a single call on a data member
+                // 2] No calls to methods in class
                 //
-                // Constructor calls are not considered
-                // Ignored calls are not considered
-                // "this" keyword by itself is considered
-                //                
-                if ((fieldsModified == 1) && ((callsOnClassMethods + callsOnDataMembers) == 0)) 
+                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
+                //       
+                if (callsOnClassMethodsCount == 0 && 
+                   ((dataMembersModifiedCount == 1 && callsOnDataMembersCount == 0) || 
+                    (dataMembersModifiedCount == 0 && callsOnDataMembersCount == 1)))
                     m.setStereotype("set"); 
                 
 
                 // command
                 //
                 // Method has a void return type
-                // Method is not const or const but has mutable fields (C++ only)
+                // Method is not const or const but has mutable data members (C++ only)
                 // Cases:
                 //   Case 1: More than one data member is modifed
                 //           
-                //   Case 2: one or zero data member is modifed and
+                //   Case 2: one data member is modifed and
                 //            there is at least one call on a data member or
-                //            at least one function call to other methods in class
-                //     
+                //            at least one function call to other methods (except constructor calls) in class
+                //   Case 3: zero data members are modifed and
+                //            there is at least two calls on data member or
+                //            at least one function call to other methods (except constructor calls) in class  
                 //
-                // Constructor calls are not considered
-                // Ignored calls are not considered
-                // "this" keyword by itself is considered
+                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
                 //
                 // non-void-command    
-                //  Method return type is not void
+                //   Method return type is not void
                 //             
-                bool case1       = fieldsModified > 1;
-                bool case2       = (fieldsModified == 0 || fieldsModified == 1) && (callsOnClassMethods > 0 || callsOnDataMembers > 0);
+                bool case1       = dataMembersModifiedCount > 1;
+                bool case2       = (dataMembersModifiedCount == 1) && ((callsOnClassMethodsCount + callsOnDataMembersCount) > 0);
+                bool case3       = (dataMembersModifiedCount == 0) && ((callsOnDataMembersCount > 1) || (callsOnClassMethodsCount > 0));
                 
-                bool isMutable = m.isConstMethod() && case1;
+                bool isMutable = isMethodConst && case1;
                 bool isNonVoidReturn = returnTypeParsed != "void" && returnTypeParsed != "Void" && !isVoidPointer;
 
-                if (case1 || case2) {
-                    if (!m.isConstMethod() || isMutable){ // Handles case of mutable fields in C++
+                if (case1 || case2 || case3) {
+                    if (!isMethodConst || isMutable){ // Handles case of mutable data members in C++
                         if (isNonVoidReturn) m.setStereotype("non-void-command");  
                         else m.setStereotype("command");
                     }
@@ -177,14 +191,11 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // factory
                 //
                 // 1] Factories must include a non-primitive type in their return type
-                //      and their return expression must be a local variable, parameter, or field, that 
+                //      and their return expression must be a local variable, parameter, or data member, that 
                 //      call a constructor call or has a return expression with a constructor call (e.g., new)
                 //
-                // Variables created with ignored calls are considered
-                // Returns that have "new" ignored calls are also considered
-                // "this" keyword by itself is not considered
-                //         
-                if (m.isNonPrimitiveReturnType() && (m.isNewReturned() || m.isFieldsCreatedAndReturnedWithNew())) 
+                //
+                if (isNonPrimitiveReturnType && (isNewReturned || isVariableCreatedAndReturnedWithNew))
                     m.setStereotype("factory"); 
                          
                 
@@ -194,7 +205,7 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 2] No calls to methods in class
                 // 3] No calls on data members
                 // 4] Has at least one free function call 
-                // Constructor calls are not considered
+                // Constructor calls using the 'new' operator are not considered 
                 //
                 // controller
                 //
@@ -206,38 +217,35 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // collaborator
                 //
                 // 1] It must use at least 1 non-primitive type (not of this class)
-                // 2] Type could be a parameter, local variable, return type, or an field 
+                // 2] Type could be a parameter, local variable, return type, or an data member
                 //
-                // Ignored calls are not considered
-                // "this" keyword by itself is considered only for wrapper and controller
                 //
-                if ((fieldsModified == 0) && (callsOnClassMethods == 0) && (callsOnDataMembers == 0) 
-                    && (callsToOtherClassMethods == 0) && (callsOnFreeFunctions > 0)) m.setStereotype("wrapper");
+                if ((dataMembersModifiedCount == 0) && (callsOnClassMethodsCount == 0) && (callsOnDataMembersCount == 0) 
+                    && (callsToOtherClassMethods == 0) && (callsOnFreeFunctionsCount > 0)) 
+                    m.setStereotype("wrapper");
 
-                else if ((fieldsModified == 0) && (callsOnClassMethods == 0) && (callsOnDataMembers == 0) &&
-                        ((callsToOtherClassMethods > 0) || m.isNonPrimitiveLocalOrParameterChanged()))
-                        m.setStereotype("controller");   
+                else if ((dataMembersModifiedCount == 0) && (callsOnClassMethodsCount == 0) && (callsOnDataMembersCount == 0) &&
+                    ((callsToOtherClassMethods > 0) || isNonPrimitiveLocalOrParameterModified))
+                    m.setStereotype("controller");   
 
-                else if (m.isNonPrimitiveFieldExternal() || m.isNonPrimitiveLocalExternal() || 
-                         m.isNonPrimitiveParamaterExternal() || (m.isNonPrimitiveReturnTypeExternal() || isVoidPointer))
-                        m.setStereotype("collaborator");   
-            
+                else if (isNonPrimitiveDataMemberExternal || isNonPrimitiveLocalExternal || 
+                    isNonPrimitiveParamaterExternal || (isNonPrimitiveReturnTypeExternal || isVoidPointer))
+                    m.setStereotype("collaborator"); 
+
 
                 // incidental 
                 //
                 // 1] Method contains at least one non-comment statement (i.e., method is not empty)
                 // 2] No data members are used or modified (including no use of keyword "this" by itself)
                 // 3] No calls of any kind
-                // Ignored calls are allowed
                 // 
-                bool noCalls = callsOnClassMethods == 0 && callsOnDataMembers == 0 && 
-                            m.getConstructorCalls().size() == 0 && callsToOtherClassMethods == 0 && 
-                            callsOnFreeFunctions == 0;
+                bool noCalls = callsOnClassMethodsCount == 0 && callsOnDataMembersCount == 0 && 
+                               newConstructorCallsCount == 0 && callsToOtherClassMethods == 0 && callsOnFreeFunctionsCount == 0;
 
-                if (!isFieldUsed & noCalls) m.setStereotype("incidental");          
+                if (!isDataMemberUsed & noCalls) 
+                    m.setStereotype("incidental");          
             
                     
-
                 // stateless
                 //
                 // 1]	Method contains at least one non-comment statement (i.e., method is not empty)
@@ -245,11 +253,10 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 3]	No calls to methods in class 
                 // 4]   No calls on data members
                 // 5]   Has at least one call to other class methods (including constructor calls) or to a free function 
-                // Ignored calls are not considered
                 //
-                if (!isFieldUsed && callsOnClassMethods == 0 && callsOnDataMembers == 0 &&
-                ((callsOnFreeFunctions > 0) || (callsToOtherClassMethods > 0) || m.getConstructorCalls().size() > 0))
-                    m.setStereotype("stateless");             
+                if (!isDataMemberUsed && callsOnClassMethodsCount == 0 && callsOnDataMembersCount == 0 &&
+                   ((callsOnFreeFunctionsCount > 0) || (callsToOtherClassMethods > 0) || (newConstructorCallsCount > 0)))
+                   m.setStereotype("stateless");             
                 
             }
             
@@ -428,18 +435,22 @@ void stereotypes::computeClassStereotypes(std::unordered_map<std::string, classM
     }  
 }
 
-void stereotypes::computeFreeFunctionsStereotypes  (std::vector<methodModel>& freeFunctions) {
+void stereotypes::computeFreeFunctionsStereotypes(std::vector<methodModel>& freeFunctions) {
     for (methodModel& f : freeFunctions) {
         // Common operations
-        const std::string& methodName       = f.getName();
-        const std::string& returnTypeParsed = f.getReturnTypeParsed(); 
-        const std::string& unitLanguage     = f.getUnitLanguage();
-        bool isGlobalOrStaticChanged        = f.isComplexReturn();
-        bool hasComplexReturnExpr           = f.isParameterNotReturned();
-        bool isParamaterUsed                = f.isParameterUsed();
-        bool isParameterModified            = f.isParameterRefChanged();
-        bool hasCalls                       = (f.getFunctionCalls().size() + f.getMethodCalls().size()) > 0;
-        bool isEmpty                        = f.getNumOfNonCommentsStatements() == 0;
+        const std::string& methodName                               = f.getName();
+        const std::string& returnTypeParsed                         = f.getReturnTypeParsed(); 
+        const std::string& unitLanguage                             = f.getUnitLanguage();
+        int                nonNewConstructorCallsCount              = f.getMethodCalls().size() + f.getFunctionCalls().size();
+        int                nonCommentStatementsCount                = f.getNonCommentStatementsCount();
+        bool               isVariableCreatedAndReturnedWithNew      = f.isVariableCreatedAndReturnedWithNew();
+        bool               hasParameterComplexReturn                = f.hasParameterComplexReturn();
+        bool               isParamaterUsed                          = f.isParameterUsed();
+        bool               isParameterRefModified                   = f.isParameterRefModified();
+        bool               isNonPrimitiveReturnType                 = f.isNonPrimitiveReturnType();
+        bool               isNewReturned                            = f.isNewReturned();
+        bool               isGlobalOrStaticVariableModified         = f.isGlobalOrStaticVariableModified();
+
 
         // main
         //
@@ -452,72 +463,73 @@ void stereotypes::computeFreeFunctionsStereotypes  (std::vector<methodModel>& fr
         //
         // Has no statements
         //
-        else if (isEmpty) f.setStereotype("empty");
+        else if (nonCommentStatementsCount == 0) f.setStereotype("empty");
                 
-
+        
         else {
             // predicate
             //
             // Returns a bool derived from the parameters
             //
-            
+            bool                              boolReturnType = false;
+            if      (unitLanguage == "C++")   boolReturnType = (returnTypeParsed == "bool");
+            else if (unitLanguage == "C#")    boolReturnType = (returnTypeParsed == "bool") ||  (returnTypeParsed == "Boolean");
+            else if (unitLanguage == "Java")  boolReturnType = (returnTypeParsed == "boolean");
 
-            bool                              returnType = false;
-            if      (unitLanguage == "C++")   returnType = (returnTypeParsed == "bool");
-            else if (unitLanguage == "C#")    returnType = (returnTypeParsed == "bool") ||  (returnTypeParsed == "Boolean");
-            else if (unitLanguage == "Java")  returnType = (returnTypeParsed == "boolean");
-
-            if (returnType && hasComplexReturnExpr && isParamaterUsed)
-                f.setStereotype("predicate"); 
+            if (boolReturnType && hasParameterComplexReturn && isParamaterUsed) f.setStereotype("predicate"); 
 
 
             // property
             //
             // Returns a non-bool derived from the parameters
             //
-            returnType = false;
-            if      (unitLanguage == "C++")  returnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "");
-            else if (unitLanguage == "C#")   returnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
-                                                           returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "");
-            else if (unitLanguage == "Java") returnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
-                                                           returnTypeParsed != "Void" && returnTypeParsed != "");
+            // The returnTypeParsed != "" is used to handle the case of a function that has no return type
+            //
+            bool nonBoolOrVoidReturnType = false;
+            if      (unitLanguage == "C++")  nonBoolOrVoidReturnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "");
+            else if (unitLanguage == "C#")   nonBoolOrVoidReturnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
+                                                                        returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "");
+            else if (unitLanguage == "Java") nonBoolOrVoidReturnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
+                                                                        returnTypeParsed != "Void" && returnTypeParsed != "");
 
-            if (returnType && hasComplexReturnExpr && isParamaterUsed)f.setStereotype("property"); 
+            if (nonBoolOrVoidReturnType && hasParameterComplexReturn && isParamaterUsed) f.setStereotype("property"); 
             
-
-            // factory
-            //
-            // Creates and returns a new locally created object
-            //
-            if (f.isNonPrimitiveReturnType() && f.isFieldsCreatedAndReturnedWithNew()) f.setStereotype("factory");   
-
 
             // global-command
             //
             // Modifies a global or a static variable
             //
-            if (isGlobalOrStaticChanged)f.setStereotype("global-command");
+            if (isGlobalOrStaticVariableModified) f.setStereotype("global-command");
             
 
             // command
             //
             // Modifies a parameter passed by reference
             //
-            if (isParameterModified && !isGlobalOrStaticChanged) f.setStereotype("command");
+            if (isParameterRefModified) f.setStereotype("command");
 
 
+            // factory
+            //
+            // Creates and returns a 'new' locally created object
+            // Constructor calls that are not using the 'new' operator are not considered 
+            //
+            if (isNonPrimitiveReturnType && (isNewReturned || isVariableCreatedAndReturnedWithNew)) f.setStereotype("factory");
+
+            
             // literal
             //
-            // Does not read or change parameters. No calls to other class methods or to free functions
+            // Does not read or change parameters
             //
-            if (!isParamaterUsed && !hasCalls) f.setStereotype("literal");
+            if (!isParamaterUsed) f.setStereotype("literal");
 
 
             // wrapper
             //
-            // Does not read or change parameters. Has at least one call to other class methods or to a free function   
+            // Does not change parameters passed by reference. Has at least one call to other class methods or to a free function  
+            // Constructor calls using the 'new' operator are not considered
             //
-            if (!isParameterModified && hasCalls)f.setStereotype("wrapper");
+            if (!isParameterRefModified && (nonNewConstructorCallsCount > 0)) f.setStereotype("wrapper");
 
 
             if (f.getStereotype() == "") f.setStereotype("unclassified");

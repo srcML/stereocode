@@ -36,21 +36,11 @@ void XPathBuilder::generateXpath() {
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpathTable[language]["field_name"] = xpath;  
+    xpathTable[language]["data_member_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathTable[language]["field_type"] = xpath;  
-
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1";
-    xpath += " and (ancestor::src:class and (ancestor::src:public or ancestor::src:protected))"; 
-    xpath += " or (ancestor::src:struct and not(ancestor::src:private))]/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpathTable[language]["non_private_field_name"] = xpath;  
-
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1";
-    xpath += " and (ancestor::src:class and (ancestor::src:public or ancestor::src:protected))"; 
-    xpath += " or (ancestor::src:struct and not(ancestor::src:private))]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathTable[language]["non_private_field_type"] = xpath;  
+    xpathTable[language]["data_member_type"] = xpath;  
 
     xpath = "//*[(self::src:function or self::src:constructor or self::src:destructor)";
     xpath += " and not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union) = 1]";
@@ -60,7 +50,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["method_name"] = xpath; 
+    xpathTable[language]["name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor or self::src:destructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -158,30 +148,12 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
     xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:name";
-    xpathTable[language]["field_name"] = xpath;  
+    xpathTable[language]["data_member_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:type";
-    xpathTable[language]["field_type"] = xpath;  
-
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
-    xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-    xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-    xpath += "/src:name[preceding-sibling::*[1][self::src:type]]"; 
-    xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
-    xpath += " and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-    xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]/src:name"; 
-    xpathTable[language]["non_private_field_name"] = xpath;  
-
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
-    xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-    xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-    xpath += "/src:type[following-sibling::*[1][self::src:name]]"; 
-    xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1"; 
-    xpath += " and (ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-    xpath += " or ((ancestor::src:struct or ancestor::src:interface) and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]/src:type"; 
-    xpathTable[language]["non_private_field_type"] = xpath;  
+    xpathTable[language]["data_member_type"] = xpath;  
 
     xpath = "//*[(self::src:function or self::src:constructor or self::src:destructor)";
     xpath += " and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
@@ -197,11 +169,11 @@ void XPathBuilder::generateXpath() {
     xpath = "//src:function[not(ancestor::src:function)]";
     xpathTable[language]["property_method"] = xpath; 
 
-    xpath = "//*[(self::src:function or self::src:constructor) and src:type/src:specifier='static']";
+    xpath = "//src:function[(src:type/src:specifier='static' or ancestor::src:property[1]/src:type/src:specifier='static')]";
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["method_name"] = xpath; 
+    xpathTable[language]["name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor or self::src:destructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -275,9 +247,6 @@ void XPathBuilder::generateXpath() {
 
 
 
-
-
-
     /////////////////////
     /////// Java ////////
     /////////////////////
@@ -299,33 +268,21 @@ void XPathBuilder::generateXpath() {
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpathTable[language]["field_name"] = xpath;  
+    xpathTable[language]["data_member_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathTable[language]["field_type"] = xpath;  
-
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
-    xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-    xpath += " or (ancestor::src:interface and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-    xpath += "/src:name[preceding-sibling::*[1][self::src:type]]"; 
-    xpathTable[language]["non_private_field_name"] = xpath; 
-
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
-    xpath += "/src:decl[(ancestor::src:class and src:type/src:specifier[not(.='private')])"; 
-    xpath += " or (ancestor::src:interface and src:type/src:specifier[not(.='private')] or not(src:type/src:specifier))]"; 
-    xpath += "/src:type[following-sibling::*[1][self::src:name]]"; 
-    xpathTable[language]["non_private_field_type"] = xpath; 
+    xpathTable[language]["data_member_type"] = xpath;  
 
     xpath = "//*[(self::src:function or self::src:constructor)";
     xpath += " and not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
     xpathTable[language]["method"] = xpath; 
 
-    xpath = "//*[self::src:function and src:type/src:specifier='static']";
+    xpath = "//src:function[src:type/src:specifier='static']";
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["method_name"] = xpath; 
+    xpathTable[language]["name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 

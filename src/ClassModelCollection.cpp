@@ -19,7 +19,7 @@ extern typeModifiers                 TYPE_MODIFIERS;
 extern bool                          IS_VERBOSE;
 extern bool                          FREE_FUNCTION;
 
-classModelCollection::classModelCollection (srcml_archive* archive, srcml_archive* outputArchive,
+classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive* outputArchive,
                                                     const std::string& inputFile, const std::string& outputFile, 
                                                     bool outputTxtReport, bool outputCsvReport, bool reDocComment) {  
     PRIMITIVES.createPrimitiveList();
@@ -32,7 +32,7 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
         TYPE_MODIFIERS.outputModifiers();
     }
         
-    // Read all units
+    // Analyze one unit at a time
     srcml_unit* unit = srcml_archive_read_unit(archive);
     int unitNumber = 1; // Count starts at 1 in XPath
     while (unit){
@@ -42,18 +42,20 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
         srcml_unit_free(unit); 
         ++unitNumber;
         unit = srcml_archive_read_unit(archive);
-    }   
+    }
+
+    // Performed after the collection of all classes and free functions
     analyzeFreeFunctions();
 
     // Finds inherited data members
     for (auto& pair : classCollection) {
-        findInheritedFields(pair.second);
+        findInheritedDataMembers(pair.second);
         pair.second.setInherited(true);
         for (auto& pairS : classCollection)
             pairS.second.setVisited(false);
     } 
 
-    // Resets inheritance and builds signatures for findInheritedMethod()
+    // Resets inheritance and build signatures for findInheritedMethods()
     for (auto& pair : classCollection) {
         pair.second.setInherited(false); 
         pair.second.buildMethodSignature();
@@ -71,14 +73,15 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
     for (auto& pair : classCollection) {
         std::vector<methodModel>& methods = pair.second.getMethods();
         for (auto& m : methods)
-             m.findMethodData(pair.second.getField(), pair.second.getMethodSignatures(), 
-                              pair.second.getInheritedMethodSignatures(), pair.second.getName()[3]);                         
+             m.findData(pair.second.getDataMembers(), pair.second.getMethodSignatures(), pair.second.getName()[3]);                         
     }
 
     // Compute stereotypes here
     stereotypes stereotypesObj;
-    stereotypesObj.computeMethodStereotypes       (classCollection);
-    stereotypesObj.computeClassStereotypes        (classCollection);
+    stereotypesObj.computeMethodStereotypes (classCollection);
+    stereotypesObj.computeClassStereotypes  (classCollection);
+
+    // Analyze and compute stereotypes for free functions
     if (FREE_FUNCTION) {
         for (auto& f : freeFunctions) f.findFreeFunctionData();
         stereotypesObj.computeFreeFunctionsStereotypes(freeFunctions);
@@ -220,9 +223,9 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
 // C++:
 //  Unions can be declared anonymous (union without a name) 
 //  Anonymous unions can only be declared inside a class, struct, or a namespace and cannot have methods 
-//   and their field are accessed directly as part of the enclosing scope
-//   so, field that are defined inside anonymous unions are considered and the anonymous union itself is not considered
-//   also, anonymous unions that are defined in a namespace are not considered because their field are basically globals
+//   and their data members are accessed directly as part of the enclosing scope
+//   so, data members that are defined inside anonymous unions are considered and the anonymous union itself is not considered
+//   also, anonymous unions that are defined in a namespace are not considered because their data members are basically globals
 //  Classes can be declared without a name (anonymous classes) require you to simultaneously create an instance of it during its definition
 //   so, these are treated as normal classes
 // C#:
@@ -230,9 +233,9 @@ classModelCollection::classModelCollection (srcml_archive* archive, srcml_archiv
 //   They are ignored and their methods are collected as free functions
 //  Nested classes, struct, or interfaces are ignored
 // Java:
-//  enums in Java can contain methods and fields
+//  enums in Java can contain methods and data members
 //  Static classes are allowed, but these can only be nested within other classes, interfaces, or enums
-//   Static classes in java can contain non-static fields or methods
+//   Static classes in java can contain non-static data members or methods
 //   They are ignored (since they are nested) and their methods (only if static) are collected as free functions
 //  Anonymous classes (classes without names and are nested as instances) are ignored
 void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
@@ -265,9 +268,9 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
             // Needed for partial classs in C#
             if (classCollection.find(c.getName()[1]) != classCollection.end())
                 // Append the partial class data to the existing partial class
-                classCollection.at(c.getName()[1]).findClassData(classArchive, unitClass, classXpath, unitNumber);
+                classCollection.at(c.getName()[1]).findData(classArchive, unitClass, classXpath, unitNumber);
             else {
-                c.findClassData(classArchive, unitClass, classXpath, unitNumber);      
+                c.findData(classArchive, unitClass, classXpath, unitNumber);      
                 classCollection.insert({c.getName()[1], c});  
             }                 
 
@@ -355,7 +358,7 @@ void classModelCollection::analyzeFreeFunctions() {
         if (function->getUnitLanguage() == "C++") {
             // Removes namespaces if any
             std::string functionName = function->getName();  
-            removeNamespace(functionName, false, "C++");
+            removeNamespace(functionName, "C++", false);
 
             // Get the class name (if any). Else, it is a free function
             std::size_t isClassName = functionName.find("::");
@@ -383,7 +386,7 @@ void classModelCollection::analyzeFreeFunctions() {
 }
 
 
-// Finds inherited fields 
+// Finds inherited data members 
 // In C++, you can inherit from a specialized templated class or
 //  you can specialize the inheritance itself from the generic class, or
 //  you can inherit from the generic class itself.
@@ -395,7 +398,7 @@ void classModelCollection::analyzeFreeFunctions() {
 // For example:
 //  myClass<T1, T2> --> childClass : myClass<T1, T2> or childClass : myClass<int, double>
 //
-void classModelCollection::findInheritedFields(classModel& c) {   
+void classModelCollection::findInheritedDataMembers(classModel& c) {
     const std::string& unitLanguage = c.getUnitLanguage();
     c.setVisited(true); 
     const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
@@ -405,13 +408,13 @@ void classModelCollection::findInheritedFields(classModel& c) {
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.isInherited() && !result->second.isVisited()) {
-                c.inheritField(result->second.getNonPrivateInheritedField(), pair.second); 
+                c.appendInheritedDataMembers(result->second.getDataMembers()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.isVisited()) {
-                findInheritedFields(result->second);                     
-                c.inheritField(result->second.getNonPrivateInheritedField(), pair.second);  
+                findInheritedDataMembers(result->second);
+                c.appendInheritedDataMembers(result->second.getDataMembers());
             }
         }       
         else {
@@ -420,13 +423,13 @@ void classModelCollection::findInheritedFields(classModel& c) {
                 result = classCollection.find(parClassName);
                 if (result != classCollection.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
-                        c.inheritField(result->second.getNonPrivateInheritedField(), pair.second); 
+                        c.appendInheritedDataMembers(result->second.getDataMembers());
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.isVisited()) {
-                        findInheritedFields(result->second);                     
-                        c.inheritField(result->second.getNonPrivateInheritedField(), pair.second);  
+                        findInheritedDataMembers(result->second);
+                        c.appendInheritedDataMembers(result->second.getDataMembers());
                     }
                 }              
             }
@@ -437,12 +440,12 @@ void classModelCollection::findInheritedFields(classModel& c) {
                     auto resultM = classCollection.find(resultG->second);
                     if (resultM != classCollection.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            c.inheritField(resultM->second.getNonPrivateInheritedField(), pair.second); 
+                            c.appendInheritedDataMembers(resultM->second.getDataMembers());
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.isVisited()) {
-                            findInheritedFields(resultM->second);                     
-                            c.inheritField(resultM->second.getNonPrivateInheritedField(), pair.second);  
+                            findInheritedDataMembers(resultM->second);
+                            c.appendInheritedDataMembers(resultM->second.getDataMembers());
                         }
                     }
                 }
@@ -463,13 +466,13 @@ void classModelCollection::findInheritedMethods(classModel& c) {
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.isInherited() && !result->second.isVisited()) {
-                c.appendInheritedMethod(result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures()); 
+                c.appendInheritedMethod(result->second.getMethodSignatures()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedMethods(result->second);                     
-                c.appendInheritedMethod(result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures());  
+                c.appendInheritedMethod(result->second.getMethodSignatures());  
             }
         }       
         else {
@@ -478,13 +481,13 @@ void classModelCollection::findInheritedMethods(classModel& c) {
                 result = classCollection.find(parClassName);
                 if (result != classCollection.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
-                        c.appendInheritedMethod(result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures()); 
+                        c.appendInheritedMethod(result->second.getMethodSignatures()); 
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedMethods(result->second);                     
-                        c.appendInheritedMethod(result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures()); 
+                        c.appendInheritedMethod(result->second.getMethodSignatures()); 
                     }
                 }              
             }
@@ -495,12 +498,12 @@ void classModelCollection::findInheritedMethods(classModel& c) {
                     auto resultM = classCollection.find(resultG->second);
                     if (resultM != classCollection.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            c.appendInheritedMethod(resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures());  
+                            c.appendInheritedMethod(resultM->second.getMethodSignatures());  
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedMethods(resultM->second);                     
-                            c.appendInheritedMethod(resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures());   
+                            c.appendInheritedMethod(resultM->second.getMethodSignatures());   
                         }
                     }
                 }
@@ -738,7 +741,7 @@ void classModelCollection::outputCsvReportFile(std::ofstream& out, classModel* c
     }
 }
 
-//  Add in stereotype field on <class> and <function>
+//  Add in stereotypes on <class> and <function>
 //  Example: <function st:stereotype="get"> ... </function>
 //           <class st:stereotype="boundary"> ... ></class>
 //

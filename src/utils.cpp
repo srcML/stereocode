@@ -10,39 +10,36 @@
 #include "utils.hpp"
 
 extern primitiveTypes                        PRIMITIVES;   
-extern std::vector<std::string>              LANGUAGE;
 extern typeModifiers                         TYPE_MODIFIERS;  
 
-bool isNonPrimitiveType(const std::string& type, variable& var, 
-                        const std::string& unitLanguage, const std::string& className) {
+void checkNonPrimitiveType(const std::string& type, variable& var, 
+                           const std::string& unitLanguage, 
+                           const std::string& className) {
     std::string typeParsed = type;
 
     std::size_t listOpen = typeParsed.find("<");
     if (listOpen != std::string::npos) {
-        std::string typeLeft = typeParsed.substr(0, listOpen);
+        std::string typeLeft  = typeParsed.substr(0, listOpen);
         std::string typeRight = typeParsed.substr(listOpen, typeParsed.size() - listOpen);
         // removeNamespace() can mess up the string when there is a namespace inside <>
         // For example: Factory <hippodraw::DataRep> --> removeNamespace() --> DataRep>
         // This is why we need to separate them
-        //
-        removeNamespace(typeLeft, true, unitLanguage); // No generics and no comma separated list
+        removeNamespace(typeLeft, unitLanguage, true); // No generics and no comma separated list
         typeParsed = typeLeft + typeRight;
     }
 
     removeTypeModifiers(typeParsed, unitLanguage); // Can take full type as is
     trimWhitespace(typeParsed);  // Can take full type as is
-    
-    bool isNonPrimitive = false; 
+     
     std::size_t start = 0;
     std::size_t end = typeParsed.find(",");
     std::string subType;
     while (end != std::string::npos) {
         subType = typeParsed.substr(start, end - start);   
-        removeNamespace(subType, true, unitLanguage); 
+        removeNamespace(subType, unitLanguage, true); 
         if (!isPrimitiveType(subType, unitLanguage)) {
-            isNonPrimitive = true;
-            if (subType != className)
-                var.setNonPrimitiveExternal(true);
+            var.setNonPrimitive(true);
+            if (subType != className && !className.empty()) var.setNonPrimitiveExternal(true);
         }
         
         start = end + 1;
@@ -50,14 +47,11 @@ bool isNonPrimitiveType(const std::string& type, variable& var,
     }
 
     subType = typeParsed.substr(start, typeParsed.size() - start);
-    removeNamespace(subType, true, unitLanguage);
+    removeNamespace(subType, unitLanguage, true);
     if (!isPrimitiveType(subType, unitLanguage)) {
-        isNonPrimitive = true;
-        if (subType != className)
-            var.setNonPrimitiveExternal(true);
+        var.setNonPrimitive(true);
+        if (subType != className && !className.empty()) var.setNonPrimitiveExternal(true);
     }
-
-    return isNonPrimitive;
 }
 
 // Checks if a type is primitive.  
@@ -70,12 +64,15 @@ bool isPrimitiveType(const std::string& type, const std::string& unitLanguage) {
     return true;
 }
 
-// This function checks whether a given substring appears in the text as a whole word
-// A word boundary is comes before or after any of these characters [A-Z, a-z, _]
-// For example, "hello, there" there is a word boundary before 'h' and after 'o'
+// This function checks whether a given 'substring' appears in the beginning of 'text' as a whole word
+// For example:
+//   text = "hello, there" and substring = "hello" will match
+//   text = "hello, there" and substring = "there" will not match
+//   text = "hellothere" and substring = "hello" will not match
+// A word boundary character is a character that is not from these [A-Z, a-z, 0-9,  _]
 //
-bool matchSubstring(const std::string& text, const std::string& substring) {
-    const std::string pattern = "\\b" + substring + "\\b"; 
+bool matchSubstringAtBeginning(const std::string& text, const std::string& substring) {
+    const std::string pattern = "^\\b" + substring + "\\b";
     const std::regex regexPattern(pattern);
     std::smatch match;
     return std::regex_search(text, match, regexPattern);
@@ -86,6 +83,23 @@ bool matchSubstring(const std::string& text, const std::string& substring) {
 void removeTypeModifiers(std::string& type, std::string unitLanguage) {
     std::regex regexPattern(TYPE_MODIFIERS.getTypeModifiers(unitLanguage));
     type = std::regex_replace(type, regexPattern, " ");
+}
+
+// Function that removes everything starting at '[' and then trims right whitespace
+//
+void removeBracketSuffix(std::string& text) {
+    std::size_t startPosition = text.find("[");
+    if (startPosition != std::string::npos) {
+        text = text.substr(0, startPosition);
+        Rtrim(text);
+    }
+}
+
+// Function that removes the leading asterisks
+//
+void removeLeadingAsterisks(std::string& text) {
+    while (!text.empty() && text.front() == '*') 
+        text.erase(0, 1);   
 }
 
 // Removes all whitespace from string
@@ -102,15 +116,15 @@ void Rtrim(std::string& s) {
         s = s.substr(0, lastNonSpace + 1);   
 }
 
-// Removes namespaces from names
-// all = false keeps the last :: or .
+// Removes namespaces by finding the last :: or . and removing everything after it
+// if 'removeAll = false', then it keeps the last :: or .
 //
-void removeNamespace(std::string& name, bool all, std::string_view unitLanguage) {
+void removeNamespace(std::string& name, std::string_view unitLanguage, bool removeAll) {
     std::size_t last, secondLast;
     if (unitLanguage == "C++") last = name.rfind("::");
     else last = name.rfind(".");
     if (last != std::string::npos) {
-        if (all) {
+        if (removeAll) {
             if (unitLanguage == "C++") name = name.substr(last + 2);
             else name = name.substr(last + 1);
         }
@@ -131,10 +145,8 @@ void removeNamespace(std::string& name, bool all, std::string_view unitLanguage)
 //
 void removeBetweenComma(std::string& s, bool isGeneric) {
     std::size_t opening;
-    if (isGeneric)
-      opening = s.find("<");
-    else
-      opening = s.find("(");
+    if (isGeneric) opening = s.find("<");
+    else opening = s.find("(");
 
     if (opening != std::string::npos) {
         std::string name = s.substr(0, opening + 1);

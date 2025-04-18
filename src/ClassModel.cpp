@@ -13,29 +13,28 @@ extern XPathBuilder                  XPATH_TRANSFORMATION;
 
 classModel::classModel(srcml_archive* archive, srcml_unit* unit, const std::string& unitLang) {
     unitLanguage = unitLang;
-    findClassName(archive, unit);  
+    findName(archive, unit);  
 }
 
-void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
+void classModel::findData(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     xpath[unitNumber].push_back(classXpath);
-    if (unitLanguage == "C++") findClassType(archive, unit); // Needed for findParentClassName()
-    findParentClassName(archive, unit); // Requires class type for C++
+    if (unitLanguage == "C++") findType(archive, unit); // Needed for findParentClassName()
+    findParentName(archive, unit); // Requires class type for C++
     
-    std::vector<variable> fieldOrdered;
-    int numOfCurrentFields = fieldOrdered.size(); // Used for partial classs
-    findFieldName(archive, unit, fieldOrdered);
-    findFieldType(archive, unit, fieldOrdered, numOfCurrentFields);
+    std::vector<variable> dataMembersOrdered;
+    int numOfCurrentDataMembers = dataMembersOrdered.size(); // Used for partial classs
+    findDataMemberName(archive, unit, dataMembersOrdered);
+    findDataMemberType(archive, unit, dataMembersOrdered, numOfCurrentDataMembers);
     
-    // The "this" keyword by itself is assumed to be an "accessor" to the state of the class
-    // It is also not a non-primitive
+    // The "this" keyword functions in most cases as "accessor" to the state of the class
+    // Therefore, it is added to the list of data members with the non-primitive type set to true since it always
+    //   refers to the class itself, which is a non-primitive type
+    // However, it is not a non-primitive of external type, so that is left as false
     variable v;
     v.setName("this");
-    fields.insert({v.getName(), v});
+    v.setNonPrimitive(true);
+    dataMembers.insert({v.getName(), v});
     
-    std::vector<variable> nonPrivateFieldOrdered; 
-    int numOfCurrentNonPrivateFields = nonPrivateFieldOrdered.size();
-    findNonPrivateFieldName(archive, unit, nonPrivateFieldOrdered);
-    findNonPrivateFieldType(archive, unit, nonPrivateFieldOrdered, numOfCurrentNonPrivateFields);
     findMethod(archive, unit, classXpath, unitNumber);
 
     if (unitLanguage == "C#") findMethodInProperty(archive, unit, classXpath, unitNumber); 
@@ -44,7 +43,7 @@ void classModel::findClassData(srcml_archive* archive, srcml_unit* unit, const s
 
 // Finds class name
 //
-void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
+void classModel::findName(srcml_archive* archive, srcml_unit* unit) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -65,12 +64,12 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
             std::string nameLeft = tempName.substr(0, listOpen);
             std::string nameRight = tempName.substr(listOpen, tempName.size() - listOpen);
             removeBetweenComma(nameRight, true);
-            removeNamespace(nameLeft, true, unitLanguage);
+            removeNamespace(nameLeft, unitLanguage, true);
             name.push_back(nameLeft + nameRight);
             name.push_back(nameLeft);
         }
         else {
-            removeNamespace(tempName, true, unitLanguage);
+            removeNamespace(tempName, unitLanguage, true);
             name.push_back(tempName);
             name.push_back(tempName); // Not a duplicate
         }
@@ -87,14 +86,14 @@ void classModel::findClassName(srcml_archive* archive, srcml_unit* unit) {
 
 // Determines the class type (class, interface, or struct)
 //
-void classModel::findClassType(srcml_archive* archive, srcml_unit* unit) {
+void classModel::findType(srcml_archive* archive, srcml_unit* unit) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
 
     if (srcml_transform_get_unit_size(result) == 1) {
-        classType = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
-        trimWhitespace(classType);
+        type = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
+        trimWhitespace(type);
     }
     
     srcml_clear_transforms(archive);
@@ -120,7 +119,7 @@ void classModel::findClassType(srcml_archive* archive, srcml_unit* unit) {
 //  Java interfaces can't inherit from classes
 //  Uses 'extends' for class-to-class and interface-to-interface inheritance and 'implements' for class-to-interface inheritance
 // 
-void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) { 
+void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) { 
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parent_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
@@ -150,7 +149,7 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
                 inheritanceSpecifier = "private";
                 parentName.erase(0, inheritanceSpecifier.size());  
             }             
-            else if (classType == "class")
+            else if (type == "class")
                 inheritanceSpecifier = "private";
             else
                 inheritanceSpecifier = "public";         
@@ -162,12 +161,12 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
         if (listOpen != std::string::npos) {
             std::string parClassNameLeft = parentName.substr(0, listOpen);
             std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
-            removeNamespace(parClassNameLeft, true, unitLanguage); 
-            parentClassName.insert({parClassNameLeft + parClassNameRight, inheritanceSpecifier});
+            removeNamespace(parClassNameLeft, unitLanguage, true); 
+            parentNames.insert({parClassNameLeft + parClassNameRight, inheritanceSpecifier});
         }
         else {
-            removeNamespace(parentName, true, unitLanguage);
-            parentClassName.insert({parentName, inheritanceSpecifier});
+            removeNamespace(parentName, unitLanguage, true);
+            parentNames.insert({parentName, inheritanceSpecifier});
         }
     
         free(unparsed);      
@@ -177,18 +176,18 @@ void classModel::findParentClassName(srcml_archive* archive, srcml_unit* unit) {
     srcml_transform_free(result); 
 }
 
-// Finds field names
+// Finds data members names
 // Only collect the name if there is a type
 // C++:
-//  This does not count unions without a name, so their fields will be collected even if nested without a class or a struct
-//  Static fields are ignored and treated as globals
+//  This does not count unions without a name, so their data members will be collected even if nested without a class or a struct
+//  Static data members  are ignored and treated as globals
 // C#:
 //  Auto-properties can be used to declare data members implicitly 
 //   and regular properties are used to get or set data members (most of the time)
 //  Therefore, both types of properties will be treated as data members as they can be used and called as normal data members  
 //   where property name = data member name and where property type = data member type 
-void classModel::findFieldName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& fieldOrdered) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"field_name").c_str());
+void classModel::findDataMemberName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& dataMembersOrdered) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"data_member_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -200,22 +199,17 @@ void classModel::findFieldName(srcml_archive* archive, srcml_unit* unit, std::ve
         char* unparsed = nullptr;
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);     
-        std::string fieldName = unparsed;
+        std::string dataMemberName = unparsed;
 
         variable v;
 
         // Chop off [] for arrays  
-        if (unitLanguage == "C++") {
-            std::size_t start_position = fieldName.find("[");
-            if (start_position != std::string::npos){
-                fieldName = fieldName.substr(0, start_position);
-                Rtrim(fieldName);
-            }
-        }
+        if (unitLanguage == "C++")
+            removeBracketSuffix(dataMemberName);
+        
+        v.setName(dataMemberName);
 
-        v.setName(fieldName);
-
-        fieldOrdered.push_back(v); 
+        dataMembersOrdered.push_back(v); 
         free(unparsed);
 
     }
@@ -223,11 +217,11 @@ void classModel::findFieldName(srcml_archive* archive, srcml_unit* unit, std::ve
     srcml_transform_free(result);
 }
 
-// Finds field types
+// Finds data members types
 // Only collect the type if there is a name
 //
-void classModel::findFieldType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& fieldOrdered, int numOfCurrentFields) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"field_type").c_str());
+void classModel::findDataMemberType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& dataMembersOrdered, int numOfCurrentDataMembers) {
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"data_member_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -251,97 +245,15 @@ void classModel::findFieldType(srcml_archive* archive, srcml_unit* unit, std::ve
             prev = type;
         }
 
-        fieldOrdered[numOfCurrentFields + i].setType(type);  
-        fields.insert({fieldOrdered[numOfCurrentFields + i].getName(), fieldOrdered[numOfCurrentFields + i]});
-        bool nonPrimitiveFieldExternal = false;
+        dataMembersOrdered[numOfCurrentDataMembers + i].setType(type);  
+        dataMembers.insert({dataMembersOrdered[numOfCurrentDataMembers + i].getName(), dataMembersOrdered[numOfCurrentDataMembers + i]});
+        bool nonPrimitiveDataMemberExternal = false;
 
-        isNonPrimitiveType(type, fieldOrdered[numOfCurrentFields + i], unitLanguage, name[3]);
+        checkNonPrimitiveType(type, dataMembersOrdered[numOfCurrentDataMembers + i], unitLanguage, name[3]);
 
-        if (nonPrimitiveFieldExternal)
-            fieldOrdered[numOfCurrentFields + i].setNonPrimitiveExternal(true);
+        if (nonPrimitiveDataMemberExternal)
+            dataMembersOrdered[numOfCurrentDataMembers + i].setNonPrimitiveExternal(true);
                           
-        free(unparsed);
-    }
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);
-}
-
-// Finds non-private field names
-// For C++, no access specifier = private for a class and public for a struct 
-// For C#, no access specifier = private for a class and public for a struct
-//  Interfaces can't have fields, only properties, which are always public even if no specifier is used
-// For Java, no access specifier = accessible by derived classes within the
-//  same package (package-private, case ignored for now) and always public static for an interface even if no specifier is used
-//
-void classModel::findNonPrivateFieldName(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateFieldOrdered) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_field_name").c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
-
-    srcml_unit* resultUnit = nullptr;
-    for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result,i);
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size); 
-        std::string fieldName = unparsed;
-
-        variable v;
-        // Chop off [] for arrays  
-        if (unitLanguage == "C++") {
-            std::size_t start_position = fieldName.find("[");
-            if (start_position != std::string::npos){
-                fieldName = fieldName.substr(0, start_position);
-                Rtrim(fieldName);
-            }
-        }
-        
-        v.setName(fieldName);
-
-        nonPrivateFieldOrdered.push_back(v); 
-        free(unparsed);
-    }
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result);
-}
-
-// Finds non-private field types
-//
-void classModel::findNonPrivateFieldType(srcml_archive* archive, srcml_unit* unit, std::vector<variable>& nonPrivateFieldOrdered, 
-                                             int numOfNonPrivateCurrentFields) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"non_private_field_type").c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-    int n = srcml_transform_get_unit_size(result);
-
-    srcml_unit* resultUnit = nullptr;
-    std::string prev;
-    for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        std::string type = srcml_unit_get_srcml(resultUnit);
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-     
-        if (type == "<type ref=\"prev\"/>") {
-            type = prev;
-        }
-        else {  
-            type = unparsed;
-            prev = type;
-        }
-
-        nonPrivateFieldOrdered[numOfNonPrivateCurrentFields + i].setType(type);
-        nonPrivateInheritedFields.insert({nonPrivateFieldOrdered[numOfNonPrivateCurrentFields + i].getName(), 
-                                                nonPrivateFieldOrdered[numOfNonPrivateCurrentFields + i]});
-
-        bool nonPrimitiveFieldExternal = false;
-        isNonPrimitiveType(type, nonPrivateFieldOrdered[numOfNonPrivateCurrentFields + i], unitLanguage, name[3]);
-
-        if (nonPrimitiveFieldExternal)
-            nonPrivateFieldOrdered[numOfNonPrivateCurrentFields + i].setNonPrimitiveExternal(true);
-        
         free(unparsed);
     }
     srcml_clear_transforms(archive);
@@ -350,7 +262,7 @@ void classModel::findNonPrivateFieldType(srcml_archive* archive, srcml_unit* uni
 
 // Finds methods defined inside the class
 // C#:
-//  Nested local functions within methods in C# are ignored 
+//   Nested local functions within methods in C# are ignored 
 void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;

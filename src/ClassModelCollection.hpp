@@ -23,7 +23,7 @@ public:
 
     void                 findClassInfo                  (srcml_archive*, srcml_unit*, int);
     void                 findFreeFunctions              (srcml_archive*, srcml_unit*, int);
-    void                 findInheritedFields            (classModel&);
+    void                 findInheritedDataMembers       (classModel&);
     void                 findInheritedMethods           (classModel&);
 
     void                 outputWithStereotypes          (srcml_unit*, std::map<int, srcml_unit*>&,
@@ -39,7 +39,7 @@ public:
     
 private:
     std::unordered_map<std::string, classModel>         classCollection;    // List of class names and their models
-    std::unordered_map<std::string, std::string>        classGenerics;      // List of generic class names with and without <> for inheritance matching
+    std::unordered_map<std::string, std::string>        classGenerics;      // List of class names with and without generic parameter lists <> for inheritance matching
     std::vector<methodModel>                            freeFunctions;      // List of free functions
 };
 
