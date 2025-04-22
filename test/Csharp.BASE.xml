@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
+
+<unit revision="1.0.0" language="C#" filename="C#.cs"><using>using <name>System</name>;</using>
+
+<class><specifier>public</specifier> <specifier>static</specifier> class <name>ExternalFunctions</name> <block>{
+    <function st:stereotype="literal"><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>ExternalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"This is an external function call."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="unclassified"><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>AnotherExternalFunction</name><parameter_list>(<parameter><decl><type><name>string</name></type> <name>str</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"Received string: "</literal> <operator>+</operator> <name>str</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+}</block></class>
+
+<class st:stereotype="small-class"><specifier>public</specifier> class <name>AnotherClass</name> <block>{
+    <decl_stmt><decl><type><specifier>private</specifier> <name>int</name></type> <name>anotherDataMember</name></decl>;</decl_stmt>
+
+    <constructor st:stereotype="constructor"><specifier>public</specifier> <name>AnotherClass</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>anotherDataMember</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt>
+    </block_content>}</block></constructor>
+
+    <function st:stereotype="unclassified"><type><specifier>public</specifier> <name>void</name></type> <name>Display</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"AnotherClass data member: "</literal> <operator>+</operator> <name>anotherDataMember</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+}</block></class>
+
+<class st:stereotype="unclassified"><specifier>public</specifier> class <name>MyClass</name> <block>{
+    <decl_stmt><decl><type><specifier>private</specifier> <name>int</name></type> <name>dataMember</name></decl>;</decl_stmt>
+    <decl_stmt><decl><type><specifier>private</specifier> <name>string</name></type> <name>otherDataMember</name></decl>;</decl_stmt>
+
+    <constructor st:stereotype="constructor"><specifier>public</specifier> <name>MyClass</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>strValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt>
+        <expr_stmt><expr><name>otherDataMember</name> <operator>=</operator> <name>strValue</name></expr>;</expr_stmt>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"Constructor called with value: "</literal> <operator>+</operator> <name>value</name> <operator>+</operator> <literal type="string">" and strValue: "</literal> <operator>+</operator> <name>strValue</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></constructor>
+
+    <constructor st:stereotype="copy-constructor"><specifier>public</specifier> <name>MyClass</name><parameter_list>(<parameter><decl><type><name>MyClass</name></type> <name>other</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name><name>other</name><operator>.</operator><name>dataMember</name></name></expr>;</expr_stmt>
+        <expr_stmt><expr><name>otherDataMember</name> <operator>=</operator> <name><name>other</name><operator>.</operator><name>otherDataMember</name></name></expr>;</expr_stmt>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"Copy constructor called."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></constructor>
+
+    <destructor st:stereotype="destructor"><name>~MyClass</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"Destructor called for MyClass object."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></destructor>
+
+    <function st:stereotype="empty"><type><specifier>public</specifier> <name>void</name></type> <name>EmptyMethod</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <comment type="line">// This method intentionally left blank</comment>
+    </block_content>}</block></function>
+
+    <function st:stereotype="wrapper"><type><specifier>public</specifier> <name>void</name></type> <name>DisplayNonDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name><name>ExternalFunctions</name><operator>.</operator><name>AnotherExternalFunction</name></name><argument_list>(<argument><expr><name>otherDataMember</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="wrapper stateless"><type><specifier>public</specifier> <name>void</name></type> <name>WrapExternalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><call><name><name>ExternalFunctions</name><operator>.</operator><name>ExternalFunction</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="factory stateless"><type><specifier>public</specifier> <name>MyClass</name></type> <name>CreateObject</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>value</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>strValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <return>return <expr><operator>new</operator> <call><name>MyClass</name><argument_list>(<argument><expr><name>value</name></expr></argument>, <argument><expr><name>strValue</name></expr></argument>)</argument_list></call></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="get"><type><specifier>public</specifier> <name>string</name></type> <name>GetNonPrimitiveDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>otherDataMember</name></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="get"><type><specifier>public</specifier> <name>int</name></type> <name>GetDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataMember</name></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="predicate"><type><specifier>public</specifier> <name>bool</name></type> <name>IsDataMemberPositive</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataMember</name> <operator>&gt;</operator> <literal type="number">0</literal></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="property"><type><specifier>public</specifier> <name>int</name></type> <name>DoubleDataMember</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataMember</name> <operator>*</operator> <literal type="number">2</literal></expr>;</return>
+    </block_content>}</block></function>
+
+    <function st:stereotype="void-accessor"><type><specifier>public</specifier> <name>void</name></type> <name>AddDataMember</name><parameter_list>(<parameter><decl><type><modifier>ref</modifier> <name>int</name></type> <name>param</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>param</name> <operator>+=</operator> <name>dataMember</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="controller stateless"><type><specifier>public</specifier> <name>void</name></type> <name>CallOnLocalObject</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name>var</name></type> <name>localObj</name> <init>= <expr><operator>new</operator> <call><name>MyClass</name><argument_list>(<argument><expr><literal type="number">5</literal></expr></argument>, <argument><expr><literal type="string">"test"</literal></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+        <expr_stmt><expr><call><name><name>localObj</name><operator>.</operator><name>GetDataMember</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="controller stateless"><type><specifier>public</specifier> <name>void</name></type> <name>CallOnLocalObjectOfAnotherClass</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name>var</name></type> <name>localObj</name> <init>= <expr><operator>new</operator> <call><name>AnotherClass</name><argument_list>(<argument><expr><literal type="number">5</literal></expr></argument>)</argument_list></call></expr></init></decl>;</decl_stmt>
+        <expr_stmt><expr><call><name><name>localObj</name><operator>.</operator><name>Display</name></name><argument_list>()</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="command"><type><specifier>public</specifier> <name>void</name></type> <name>ChangeManyAttributes</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>newValue</name></decl></parameter>, <parameter><decl><type><name>string</name></type> <name>newStrValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name>newValue</name></expr>;</expr_stmt>
+        <expr_stmt><expr><name>otherDataMember</name> <operator>=</operator> <name>newStrValue</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="set"><type><specifier>public</specifier> <name>void</name></type> <name>ChangeAttribute</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>newValue</name></decl></parameter>)</parameter_list> <block>{<block_content>
+        <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name>newValue</name></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <function st:stereotype="collaborator incidental"><type><specifier>public</specifier> <name>void</name></type> <name>DoLocalComputation</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <decl_stmt><decl><type><name>var</name></type> <name>numbers</name> <init>= <expr><operator>new</operator> <name><name>int</name><index>[]</index></name> <block>{<expr><literal type="number">1</literal></expr>, <expr><literal type="number">2</literal></expr>, <expr><literal type="number">3</literal></expr>, <expr><literal type="number">4</literal></expr>, <expr><literal type="number">5</literal></expr>}</block></expr></init></decl>;</decl_stmt>
+        <decl_stmt><decl><type><name>int</name></type> <name>sum</name> <init>= <expr><literal type="number">0</literal></expr></init></decl>;</decl_stmt>
+        <foreach>foreach <control>(<init><decl><type><name>var</name></type> <name>num</name> <range>in <expr><name>numbers</name></expr></range></decl></init>)</control> <block>{<block_content>
+            <expr_stmt><expr><name>sum</name> <operator>+=</operator> <name>num</name></expr>;</expr_stmt>
+        </block_content>}</block></foreach>
+        <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"Sum of local numbers: "</literal> <operator>+</operator> <name>sum</name></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+    </block_content>}</block></function>
+
+    <property><type><specifier>public</specifier> <name>int</name></type> <name>DataMember</name> <block>{
+        <function st:stereotype="get"><name>get</name> <block>{<block_content> <return>return <expr><name>dataMember</name></expr>;</return> </block_content>}</block></function>
+        <function st:stereotype="set"><name>set</name> <block>{<block_content> <expr_stmt><expr><name>dataMember</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt> </block_content>}</block></function>
+    }</block></property>
+ 
+    <property><type><specifier>public</specifier> <name>string</name></type> <name>OtherDataMember</name> <block>{
+        <function st:stereotype="get"><name>get</name> <block>{<block_content> <return>return <expr><name><name>this</name><operator>.</operator><name>otherDataMember</name></name></expr>;</return> </block_content>}</block></function>
+        <function st:stereotype="set"><name>set</name> <block>{<block_content> <expr_stmt><expr><name>otherDataMember</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt> </block_content>}</block></function>
+    }</block></property>
+}</block></class>
+
+<class st:stereotype="empty"><specifier>public</specifier> class <name>BaseClass</name>
+<block>{
+    <property><type><specifier>public</specifier> <name>int</name></type> <name>BaseProperty</name> <block>{ <function_decl><name>get</name>;</function_decl> <function_decl><name>set</name>;</function_decl> }</block></property>
+}</block></class>
+
+<class st:stereotype="data-provider small-class"><specifier>public</specifier> <specifier>partial</specifier> class <name>ExtendedClass</name> <super_list>: <super><name>BaseClass</name></super></super_list>
+<block>{
+    <property><type><specifier>public</specifier> <name>int</name></type> <name>ExtendedProperty</name> <block>{ <function_decl><name>get</name>;</function_decl> <function_decl><name>set</name>;</function_decl> }</block></property>
+}</block></class>
+
+<class st:stereotype="data-provider small-class"><specifier>public</specifier> <specifier>partial</specifier> class <name>ExtendedClass</name>
+<block>{
+    <function st:stereotype="property"><type><specifier>public</specifier> <name>int</name></type> <name>CalculateSum</name><parameter_list>()</parameter_list>
+    <block>{<block_content>
+        <return>return <expr><name>BaseProperty</name> <operator>+</operator> <name>ExtendedProperty</name></expr>;</return>
+    </block_content>}</block></function>
+}</block></class>
+
+
+<class st:stereotype="data-provider data-class small-class"><specifier>public</specifier> class <name>C</name> <block>{
+    <decl_stmt><decl><type><specifier>protected</specifier> <name>int</name></type> <name>dataC</name></decl>;</decl_stmt>
+
+    <function st:stereotype="get"><type><specifier>public</specifier> <name>int</name></type> <name>GetDataC</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataC</name></expr>;</return>
+    </block_content>}</block></function>
+}</block></class>
+
+<class st:stereotype="data-provider data-class small-class"><specifier>public</specifier> class <name>B</name> <super_list>: <super><name>C</name></super></super_list> <block>{
+    <function st:stereotype="get"><type><specifier>public</specifier> <name>int</name></type> <name>GetDataB</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataC</name></expr>;</return>
+    </block_content>}</block></function>
+}</block></class>
+
+<class st:stereotype="data-provider data-class small-class"><specifier>public</specifier> class <name>A</name> <super_list>: <super><name>B</name></super></super_list> <block>{
+    <function st:stereotype="get"><type><specifier>public</specifier> <name>int</name></type> <name>GetDataA</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <return>return <expr><name>dataC</name></expr>;</return>
+    </block_content>}</block></function>
+}</block></class>
+
+<class st:stereotype="degenerate small-class"><specifier>public</specifier> class <name>MyNestedClass</name> <block>{
+    <function st:stereotype="incidental"><type><specifier>public</specifier> <name>void</name></type> <name>OuterMethod</name><parameter_list>()</parameter_list> <block>{<block_content>
+        <function><type><name>void</name></type> <name>LocalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+            <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"This is a local function."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        </block_content>}</block></function>
+
+        <function st:stereotype="literal"><type><specifier>static</specifier> <name>void</name></type> <name>StaticLocalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>
+            <expr_stmt><expr><call><name><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><literal type="string">"This is a static local function."</literal></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+        </block_content>}</block></function>
+    </block_content>}</block></function>
+}</block></class>
+
+<class st:stereotype="empty"><specifier>public</specifier> class <name>Program</name> <block>{
+    <function st:stereotype="main"><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>Main</name><parameter_list>()</parameter_list> <block>{<block_content>
+
+    </block_content>}</block></function>
+}</block></class>
+</unit>
+
+</unit>
