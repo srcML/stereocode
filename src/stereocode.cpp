@@ -12,7 +12,7 @@
 
 primitiveTypes                     PRIMITIVES;
 ignorableCalls                     IGNORED_CALLS;
-typeModifiers                      TYPE_MODIFIERS;
+typeSpecifiers                     TYPE_SPECIFIERS;
 int                                METHODS_PER_CLASS_THRESHOLD = 21;
 bool                               FREE_FUNCTION                   = false;
 bool                               STRUCT                          = false;
@@ -24,7 +24,7 @@ bool                               IS_VERBOSE                      = false;
 std::unordered_map
      <int, std::unordered_map
      <std::string, std::string>>   XPATH_LIST;                         // Map key = unit number. Each map value is a pair of xpath and stereotype
-std::vector<std::string>           LANGUAGE = {"C++", "C#", "Java"};   // Supported languages
+std::vector<std::string>           LANGUAGE = {"C++", "C#", "Java"};   // Supported languages. C++ includes C as a subset.
 XPathBuilder                       XPATH_TRANSFORMATION;               // List of xpaths used for transformations
 
 int main (int argc, char const *argv[]) {
@@ -32,7 +32,7 @@ int main (int argc, char const *argv[]) {
     std::string         inputFile;
     std::string         primitivesFile;
     std::string         ignoredCallsFile;
-    std::string         typeModifiersFile;
+    std::string         typeSpecifiersFile;
     std::string         outputFile;
     bool                outputTxtReport    = false;
     bool                outputCsvReport    = false;
@@ -40,24 +40,24 @@ int main (int argc, char const *argv[]) {
     bool                reDocComment       = false;
 
     CLI::App app{"Stereocode: Determines method and class stereotypes\n"
-                 "Supports C++, C#, and Java\n" };
+                 "Supports C, C++, C#, and Java\n" };
     
-    app.add_option("input-archive",           inputFile,                        "File name of a srcML input archive")->required();
-    app.add_option("-o,--output-file",        outputFile,                       "File name of output - srcML archive with stereotypes");
-    app.add_option("-p,--primitive-file",     primitivesFile,                   "File name of user supplied primitive types (one per line)");
-    app.add_option("-g,--ignore-call-file",   ignoredCallsFile,                 "File name of user supplied calls to ignore (one per line)");
-    app.add_option("-t,--type-modifier-file", typeModifiersFile,                "File name of user supplied data type modifiers to remove (one per line)");
-    app.add_option("-l,--large-class",        METHODS_PER_CLASS_THRESHOLD,      "Method threshold for the large-class stereotype (default = 21)");
-    app.add_flag  ("-f,--free-function",      FREE_FUNCTION,                    "Identify stereotypes for free functions (C++, C#, and Java)");
-    app.add_flag  ("-i,--interface",          INTERFACE,                        "Identify stereotypes for interfaces (C# and Java)");
-    app.add_flag  ("-n,--union",              UNION,                            "Identify stereotypes for unions (C++)");
-    app.add_flag  ("-m,--enum",               ENUM,                             "Identify stereotypes for enums (Java)");
-    app.add_flag  ("-s,--struct",             STRUCT,                           "Identify stereotypes for structs (C# and Java)");
-    app.add_flag  ("-e,--input-overwrite",    overWriteInput,                   "Overwrite input with stereotype information");
-    app.add_flag  ("-x,--txt-report",         outputTxtReport,                  "Output optional TXT report file containing stereotype information");
-    app.add_flag  ("-z,--csv-report",         outputCsvReport,                  "Output optional CSV report file containing stereotype information");
-    app.add_flag  ("-c,--comment",            reDocComment,                     "Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)");
-    app.add_flag  ("-v,--verbose",            IS_VERBOSE,                       "Outputs default primitives, ignored calls, type modifiers, and extra report files");
+    app.add_option("input-archive",            inputFile,                        "File name of srcML input archive")->required();
+    app.add_option("-o,--output-file",         outputFile,                       "File name of srcML output archive with stereotypes");
+    app.add_option("-p,--primitive-file",      primitivesFile,                   "File name of user supplied primitive types (one per line)");
+    app.add_option("-g,--ignore-call-file",    ignoredCallsFile,                 "File name of user supplied calls to ignore (one per line)");
+    app.add_option("-t,--type-specifier-file", typeSpecifiersFile,               "File name of user supplied type specifiers to remove (one per line)");
+    app.add_option("-l,--large-class",         METHODS_PER_CLASS_THRESHOLD,      "Method threshold for the large-class stereotype (default = 21)");
+    app.add_flag  ("-f,--free-function",       FREE_FUNCTION,                    "Identify stereotypes for free functions (C, C++, C#, and Java)");
+    app.add_flag  ("-i,--interface",           INTERFACE,                        "Identify stereotypes for interfaces (C# and Java)");
+    app.add_flag  ("-n,--union",               UNION,                            "Identify stereotypes for unions (C++)");
+    app.add_flag  ("-m,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
+    app.add_flag  ("-s,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
+    app.add_flag  ("-e,--input-overwrite",     overWriteInput,                   "Overwrite input with stereotypes");
+    app.add_flag  ("-x,--txt-report",          outputTxtReport,                  "Output optional .txt report file containing stereotypes");
+    app.add_flag  ("-z,--csv-report",          outputCsvReport,                  "Output optional .csv report file containing stereotypes");
+    app.add_flag  ("-c,--comment",             reDocComment,                     "Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)");
+    app.add_flag  ("-v,--verbose",             IS_VERBOSE,                       "Verbose output: default primitives, ignored calls, type specifiers, and extra .csv report files");
     
     CLI11_PARSE(app, argc, argv);
     
@@ -86,12 +86,12 @@ int main (int argc, char const *argv[]) {
     }
 
     // Add user-defined type tokens to initial set
-    if (!typeModifiersFile.empty()) {         
-        std::ifstream in(typeModifiersFile);
+    if (!typeSpecifiersFile.empty()) {         
+        std::ifstream in(typeSpecifiersFile);
         if (in.is_open())
-            in >> TYPE_MODIFIERS;
+            in >> TYPE_SPECIFIERS;
         else {
-            std::cerr << "Error: Type modifiers file not found: " << typeModifiersFile << '\n';
+            std::cerr << "Error: Type specifiers file not found: " << typeSpecifiersFile << '\n';
             return -1;
         }
         in.close();

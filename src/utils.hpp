@@ -20,7 +20,7 @@
 #include <map>
 #include <cstddef>
 #include "PrimitiveTypes.hpp"
-#include "TypeModifiers.hpp"
+#include "TypeSpecifiers.hpp"
 #include "variable.hpp"
  
 
@@ -29,7 +29,7 @@ void                            checkNonPrimitiveType         (const std::string
 bool                            isPrimitiveType               (const std::string&, const std::string& unitLanguage);
 bool                            matchSubstringAtBeginning     (const std::string&, const std::string&);
 void                            createSpecifierList           ();
-void                            removeTypeModifiers           (std::string&, std::string);
+void                            removeTypeSpecifiers          (std::string&, std::string);
 void                            removeBracketSuffix           (std::string&);
 void                            removeLeadingAsterisks        (std::string&);
 void                            trimWhitespace                (std::string&);

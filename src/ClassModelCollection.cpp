@@ -15,7 +15,7 @@ extern std::unordered_map
        <std::string, std::string>>   XPATH_LIST;   
 extern primitiveTypes                PRIMITIVES;
 extern ignorableCalls                IGNORED_CALLS;
-extern typeModifiers                 TYPE_MODIFIERS;  
+extern typeSpecifiers                TYPE_SPECIFIERS;  
 extern bool                          IS_VERBOSE;
 extern bool                          FREE_FUNCTION;
 
@@ -24,12 +24,12 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
                                                     bool outputTxtReport, bool outputCsvReport, bool reDocComment) {  
     PRIMITIVES.createPrimitiveList();
     IGNORED_CALLS.createCallList();
-    TYPE_MODIFIERS.createModifierList();
+    TYPE_SPECIFIERS.createSpecifierList();
 
     if (IS_VERBOSE) {
         PRIMITIVES.outputPrimitives();
         IGNORED_CALLS.outputCalls();
-        TYPE_MODIFIERS.outputModifiers();
+        TYPE_SPECIFIERS.outputSpecifiers();
     }
         
     // Analyze one unit at a time
@@ -49,6 +49,9 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
 
     // Finds inherited data members
     for (auto& pair : classCollection) {
+        if (pair.second.getName()[1] == "LexerStylerArray") {
+            std::cout << "LexerStylerArray" << std::endl;
+        }
         findInheritedDataMembers(pair.second);
         pair.second.setInherited(true);
         for (auto& pairS : classCollection)
@@ -357,6 +360,9 @@ void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit*
 //
 void classModelCollection::analyzeFreeFunctions() {
     for (std::vector<methodModel>::iterator function = freeFunctions.begin(); function != freeFunctions.end();) {
+        if (function->getName() == "LexerStylerArray::addLexerStyler") {
+            std::cout << "addLexerStyler" << std::endl;
+        }
         if (function->getUnitLanguage() == "C++") {
             // Removes namespaces if any
             std::string functionName = function->getName();  

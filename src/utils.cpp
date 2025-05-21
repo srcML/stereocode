@@ -10,7 +10,7 @@
 #include "utils.hpp"
 
 extern primitiveTypes                        PRIMITIVES;   
-extern typeModifiers                         TYPE_MODIFIERS;  
+extern typeSpecifiers                        TYPE_SPECIFIERS;  
 
 void checkNonPrimitiveType(const std::string& type, variable& var, 
                            const std::string& unitLanguage, 
@@ -28,7 +28,7 @@ void checkNonPrimitiveType(const std::string& type, variable& var,
         typeParsed = typeLeft + typeRight;
     }
 
-    removeTypeModifiers(typeParsed, unitLanguage); // Can take full type as is
+    removeTypeSpecifiers(typeParsed, unitLanguage); // Can take full type as is
     trimWhitespace(typeParsed);  // Can take full type as is
      
     std::size_t start = 0;
@@ -80,8 +80,8 @@ bool matchSubstringAtBeginning(const std::string& text, const std::string& subst
 
 // Removes specifiers from type name
 //
-void removeTypeModifiers(std::string& type, std::string unitLanguage) {
-    std::regex regexPattern(TYPE_MODIFIERS.getTypeModifiers(unitLanguage));
+void removeTypeSpecifiers(std::string& type, std::string unitLanguage) {
+    std::regex regexPattern(TYPE_SPECIFIERS.getTypeSpecifiers(unitLanguage));
     type = std::regex_replace(type, regexPattern, " ");
 }
 

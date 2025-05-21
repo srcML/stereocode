@@ -1,68 +1,68 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file TypeModifiers.cpp
+ * @file TypeSpecifiers.cpp
  *
  * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
-#include "TypeModifiers.hpp"
+#include "TypeSpecifiers.hpp"
 
 extern std::vector<std::string> LANGUAGE;
 
-const std::string& typeModifiers::getTypeModifiers (const std::string& unitLang) const {
+const std::string& typeSpecifiers::getTypeSpecifiers (const std::string& unitLang) const {
     return patterns.at(unitLang);
 }
 
-// Adds "type" to user-defined type modifiers if not already present
+// Adds "type" to user-defined type specifiers if not already present
 //
-void typeModifiers::addTypeModifier  (const std::string& type) {
-    userMtypes.insert(type);
+void typeSpecifiers::addTypeSpecifier  (const std::string& type) {
+    userSpecifiersTypes.insert(type);
 }
 
-// Reads a set of user-defined type Modifiers
+// Reads a set of user-defined type specifiers
 // File should list one type per line
 //
-std::istream& operator>>(std::istream& in, typeModifiers& tmodifiers) {
+std::istream& operator>>(std::istream& in, typeSpecifiers& specifiersList) {
     std::string name;
     while(std::getline(in, name))
-        tmodifiers.addTypeModifier  (name);
+        specifiersList.addTypeSpecifier(name);
     return in;
 }
 
-void typeModifiers::outputModifiers() {
-    std::cerr<<"---Type Modifiers---";
-    for (const auto& pair : mtypes) {
+void typeSpecifiers::outputSpecifiers() {
+    std::cerr<<"---Type Specifiers---";
+    for (const auto& pair : specifiersTypes) {
         std::cerr<<"\n[" << pair.first << "]:" ;
         for (const std::string& type : pair.second) 
             std::cerr << ' ' << type;
     }
-    if (userMtypes.size() > 0) {
+    if (userSpecifiersTypes.size() > 0) {
         std::cerr<<"\n[User-Defined]:";
-        for (const std::string& type : userMtypes) 
+        for (const std::string& type : userSpecifiersTypes) 
             std::cerr << ' ' << type;
     }
     std::cerr << "\n\n";
 }
 
-// Specific type Modifiers are used based on unit language
+// Specific type specifiers are used based on unit language
 //
-void typeModifiers::createModifierList() {
+void typeSpecifiers::createSpecifierList() {
     for (const auto& l : LANGUAGE) {
         if (l == "C++") {
-            mtypes.insert({l, { "const", "volatile", "inline", "virtual", "friend", "extern", "&", "&&", "\\*", "public", "private", "protected",
+            specifiersTypes.insert({l, { "const", "volatile", "inline", "virtual", "friend", "extern", "&", "&&", "\\*", "public", "private", "protected",
                         "mutable", "static", "thread_local", "register", "constexpr", "explicit", "signed", "unsigned",
                         "<", ">", "vector", "list", "set", "map", "unordered_map", "array", "multimap", "unordered_multimap", 
                         "::iterator", "::const_iterator", "forward_list", "stack", "queue", "priority_queue", "deque", "multiset", 
-                        "unordered_set", "unordered_multiset", "pair"}});
+                        "unordered_set", "unordered_multiset", "pair", "restrict", "_Noreturn", "_Thread_local"}});
         }
         
         // \\[.*\\] match any square brackets [] with any single character inside
         //   (if any) . with zero or more occurrence * (including empty)
         //   such as int[] or int[,] and so on
         else if (l == "C#") {
-             mtypes.insert({l, { "readonly", "ref", "out", "in", "unsafe", "internal", "params",
+            specifiersTypes.insert({l, { "readonly", "ref", "out", "in", "unsafe", "internal", "params",
                         "public", "private", "protected", "static", "virtual", "\\*", "volatile", "\\[.*\\]",
                         "this",  "override", "abstract",  "extern", "async", "partial", "explicit", "implicit"
                         "new", "sealed", "event", "const", "\\?", "<", ">", "List", "Dictionary", "HashSet", "Queue", "Stack", "SortedList", "LinkedList", 
@@ -71,7 +71,7 @@ void typeModifiers::createModifierList() {
                         "NameValueCollection", "StringCollection", "StringDictionary", "HybridDictionary", "OrderedDictionary"}});
         }
         else if (l == "Java") {
-            mtypes.insert({l, { "public", "private", "protected", "static", "final", "transient",  "\\[.*\\]", "\\?", "@\\w+",
+            specifiersTypes.insert({l, { "public", "private", "protected", "static", "final", "transient",  "\\[.*\\]", "\\?", "@\\w+",
                         "volatile", "synchronized", "native", "strictfp", "abstract", "default", "super", "extends", "\\.\\.\\.",
                         "<", ">", "List", "ArrayList", "LinkedList", "Set", "HashSet", "LinkedHashSet", "SortedSet", "TreeSet", "Map", 
                         "HashMap", "Hashtable", "LinkedHashMap", "SortedMap", "TreeMap", "Deque", "ArrayDeque", "Queue", "PriorityQueue", 
@@ -84,7 +84,7 @@ void typeModifiers::createModifierList() {
         // Non-word characters is anything outside of [A-Za-z0-9]
         //  For instance, \n or \r or ' ' or beginning or end of strings are considered as non-word characters
         std::string pattern;
-        for (const auto& s : mtypes.at(l)) {
+        for (const auto& s : specifiersTypes.at(l)) {
             if (pattern.size() > 0) pattern += "|";
             
             // If specifier is one of the special characters (like * or & or []), match them without word boundaries.
@@ -100,8 +100,8 @@ void typeModifiers::createModifierList() {
                 pattern += "\\b" + s + "\\b";      
         }
         
-        // User-defined modifer types apply to all languages
-        for (const auto& s : userMtypes) {
+        // User-defined specifier types apply to all languages
+        for (const auto& s : userSpecifiersTypes) {
             pattern += "|";
             
             bool isAlphaNumeric = true;

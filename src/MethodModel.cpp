@@ -205,7 +205,7 @@ void methodModel::findReturnType(srcml_archive* archive, srcml_unit* unit) {
     nonPrimitiveReturnTypeExternal = v.getNonPrimitiveExternal();
     
     returnTypeParsed = returnType;
-    removeTypeModifiers(returnTypeParsed, unitLanguage);  
+    removeTypeSpecifiers(returnTypeParsed, unitLanguage);  
 
     trimWhitespace(returnType);
     trimWhitespace(returnTypeParsed); 
