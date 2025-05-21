@@ -62,7 +62,7 @@ int main (int argc, char const *argv[]) {
     CLI11_PARSE(app, argc, argv);
     
     // Add user-defined primitive types to initial set
-    if (primitivesFile != "") {         
+    if (!primitivesFile.empty()) {         
         std::ifstream in(primitivesFile);
         if (in.is_open())
             in >> PRIMITIVES;
@@ -74,7 +74,7 @@ int main (int argc, char const *argv[]) {
     }
     
     // Add user-defined ignored calls to initial set
-    if (ignoredCallsFile != "") {         
+    if (!ignoredCallsFile.empty()) {         
         std::ifstream in(ignoredCallsFile);
         if (in.is_open())
             in >> IGNORED_CALLS;
@@ -86,7 +86,7 @@ int main (int argc, char const *argv[]) {
     }
 
     // Add user-defined type tokens to initial set
-    if (typeModifiersFile != "") {         
+    if (!typeModifiersFile.empty()) {         
         std::ifstream in(typeModifiersFile);
         if (in.is_open())
             in >> TYPE_MODIFIERS;
@@ -106,7 +106,7 @@ int main (int argc, char const *argv[]) {
     }
 
     // Default output file name if output a name is not specified by the user
-    if (outputFile == "") {                                             
+    if (outputFile.empty()) {                                             
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);     
         outputFile = InputFileNoExt + ".stereotypes.xml";     
     }  
@@ -133,8 +133,7 @@ int main (int argc, char const *argv[]) {
     
     // Find stereotypes
     XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
-    classModelCollection classObj(archive, outputArchive, 
-                                    inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
+    classModelCollection classObj(archive, outputArchive, inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
 
     if (overWriteInput) {
         std::filesystem::remove(inputFile);

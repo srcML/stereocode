@@ -239,7 +239,8 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
 //   They are ignored (since they are nested) and their methods (only if static) are collected as free functions
 //  Anonymous classes (classes without names and are nested as instances) are ignored
 void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
-    std::string unitLanguage = srcml_unit_get_language(unit);   
+    std::string unitLanguage = srcml_unit_get_language(unit);
+    if (unitLanguage == "C") { unitLanguage = "C++"; } // Quick hack. C is a simple case of C++, so we can process it as C++.
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage, "class").c_str()); 
 
@@ -312,6 +313,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
 //
 void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit); 
+    if (unitLanguage == "C") { unitLanguage = "C++"; }
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function").c_str());
         srcml_transform_result* result = nullptr;

@@ -132,7 +132,7 @@ void methodModel::findName(srcml_archive* archive, srcml_unit* unit) {
     if (constructorOrDestructor)
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"constructor_destructor_name").c_str());
     else
-        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"name").c_str());
+        srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_name").c_str());
 
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);

@@ -264,7 +264,7 @@ void classModel::findDataMemberType(srcml_archive* archive, srcml_unit* unit, st
 // C#:
 //   Nested local functions within methods in C# are ignored 
 void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method").c_str());
+    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage, "method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(archive, unit, &result);
     int n = srcml_transform_get_unit_size(result);    
@@ -288,7 +288,7 @@ void classModel::findMethod(srcml_archive* archive, srcml_unit* unit, const std:
 
         methodArchive = srcml_archive_create();
         srcml_archive_read_open_memory(methodArchive, methString.c_str(), methString.size()); // Workaround, remove when srcML v1.1 is released
-        //srcml_archive_read_open_memory(propertyArchive, unparsed, size); // Uncomment when srcML v1.1 is released
+        //srcml_archive_read_open_memory(methodArchive, unparsed, size); // Uncomment when srcML v1.1 is released
         srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
         
         std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";

@@ -50,7 +50,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["name"] = xpath; 
+    xpathTable[language]["method_name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor or self::src:destructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -173,7 +173,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["name"] = xpath; 
+    xpathTable[language]["method_name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor or self::src:destructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -282,7 +282,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["name"] = xpath; 
+    xpathTable[language]["method_name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
