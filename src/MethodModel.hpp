@@ -86,7 +86,7 @@ public:
                                              
 private:
     std::vector<std::string>                          callType;
-    std::string                                       name;                                       // Name without namespaces
+    std::string                                       name;                                       // Name
     std::string                                       nameSignature;                              // Name without namespaces + parameters list (commas only). For example, foo(,,)
     std::string                                       returnType;                                 // Return type without whitespaces
     std::string                                       returnTypeParsed;                           // Return type without specifiers, containers, and whitespaces

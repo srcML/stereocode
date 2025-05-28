@@ -49,9 +49,6 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
 
     // Finds inherited data members
     for (auto& pair : classCollection) {
-        if (pair.second.getName()[1] == "LexerStylerArray") {
-            std::cout << "LexerStylerArray" << std::endl;
-        }
         findInheritedDataMembers(pair.second);
         pair.second.setInherited(true);
         for (auto& pairS : classCollection)
@@ -270,12 +267,13 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
             classModel c(classArchive, unitClass, unitLanguage); 
 
             // Needed for partial classs in C#
-            if (classCollection.find(c.getName()[1]) != classCollection.end())
+            const std::string& classNameTrimmed = c.getName()[3];
+            if (classCollection.find(classNameTrimmed) != classCollection.end())
                 // Append the partial class data to the existing partial class
-                classCollection.at(c.getName()[1]).findData(classArchive, unitClass, classXpath, unitNumber);
+                classCollection.at(classNameTrimmed).findData(classArchive, unitClass, classXpath, unitNumber);
             else {
                 c.findData(classArchive, unitClass, classXpath, unitNumber);      
-                classCollection.insert({c.getName()[1], c});  
+                classCollection.insert({classNameTrimmed, c});  
             }                 
 
             // Needed for inheritance in Java and C#
@@ -360,9 +358,6 @@ void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit*
 //
 void classModelCollection::analyzeFreeFunctions() {
     for (std::vector<methodModel>::iterator function = freeFunctions.begin(); function != freeFunctions.end();) {
-        if (function->getName() == "LexerStylerArray::addLexerStyler") {
-            std::cout << "addLexerStyler" << std::endl;
-        }
         if (function->getUnitLanguage() == "C++") {
             // Removes namespaces if any
             std::string functionName = function->getName();  

@@ -59,7 +59,7 @@ public:
     void buildMethodSignature() { for (const auto& m : methods) methodSignatures.insert(m.getNameSignature()); }
 
 private:
-    std::vector<std::string>                                name;                            // Size = 4 containing | Original name | name without whitespaces | name without whitespaces, namespaces, and generic types in <> | same as last but without <>
+    std::vector<std::string>                                name;                            // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and generic types in <> | same as last but without <>
     std::unordered_map<std::string, std::string>            parentNames;                     // Key is parent class name without whitespaces and namespaces and value is specifier (public, private, or protected).
     std::string                                             type;                            // Class, or struct, or an interface
     std::string                                             unitLanguage;                    // Unit language
