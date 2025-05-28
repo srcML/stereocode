@@ -267,7 +267,7 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
             classModel c(classArchive, unitClass, unitLanguage); 
 
             // Needed for partial classs in C#
-            const std::string& classNameTrimmed = c.getName()[3];
+            const std::string& classNameTrimmed = c.getName()[1];
             if (classCollection.find(classNameTrimmed) != classCollection.end())
                 // Append the partial class data to the existing partial class
                 classCollection.at(classNameTrimmed).findData(classArchive, unitClass, classXpath, unitNumber);
