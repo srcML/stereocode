@@ -7,7 +7,17 @@
  * This file is part of the Stereocode application.
  */
 
+#include <fstream>
+#include <thread>
+#include <sstream>
+#include <filesystem>
 #include "ClassModelCollection.hpp"
+#include "stereotypes.hpp"
+#include "PrimitiveTypes.hpp"
+#include "IgnorableCalls.hpp"
+#include "TypeSpecifiers.hpp"
+#include "XPathBuilder.hpp"
+#include "utils.hpp"
 
 extern XPathBuilder                  XPATH_TRANSFORMATION;  
 extern std::unordered_map
@@ -404,10 +414,9 @@ void classModelCollection::analyzeFreeFunctions() {
 void classModelCollection::findInheritedDataMembers(classModel& c) {
     const std::string& unitLanguage = c.getUnitLanguage();
     c.setVisited(true); 
-    const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
+    const std::unordered_set<std::string>& parentClassName =  c.getParentClassName();
 
-    for (const auto& pair : parentClassName){
-        std::string parClassName = pair.first;
+    for (std::string parClassName : parentClassName){
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.isInherited() && !result->second.isVisited()) {
@@ -462,10 +471,9 @@ void classModelCollection::findInheritedDataMembers(classModel& c) {
 void classModelCollection::findInheritedMethods(classModel& c) {   
     const std::string& unitLanguage = c.getUnitLanguage();
     c.setVisited(true); 
-    const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
+    const std::unordered_set<std::string>& parentClassNames =  c.getParentClassName();
 
-    for (const auto& pair : parentClassName){
-        std::string parClassName = pair.first;
+    for (std::string parClassName : parentClassNames){
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.isInherited() && !result->second.isVisited()) {

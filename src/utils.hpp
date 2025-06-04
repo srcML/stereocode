@@ -10,22 +10,11 @@
 #ifndef UTILS_HPP
 #define UTILS_HPP
 
-#include <algorithm>
-#include <regex>
-#include <sstream>
-#include <iostream>
 #include <string>
 #include <string_view>
-#include <unordered_map>
-#include <map>
-#include <cstddef>
-#include "PrimitiveTypes.hpp"
-#include "TypeSpecifiers.hpp"
 #include "variable.hpp"
- 
 
-void                            checkNonPrimitiveType         (const std::string& type, variable&, 
-                                                               const std::string& unitLanguage, const std::string& className);
+void                            checkNonPrimitiveType         (const std::string& type, variable&, const std::string& unitLanguage, const std::string& className);
 bool                            isPrimitiveType               (const std::string&, const std::string& unitLanguage);
 bool                            matchSubstringAtBeginning     (const std::string&, const std::string&);
 void                            createSpecifierList           ();

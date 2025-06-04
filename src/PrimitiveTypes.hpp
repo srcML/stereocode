@@ -11,11 +11,8 @@
 #define PRIMITIVETYPES_HPP
 
 #include <string>
-#include <fstream>
 #include <unordered_set>
 #include <unordered_map>
-#include <vector>
-#include <iostream>
 
 class primitiveTypes {
 public:

@@ -8,6 +8,8 @@
  */
 
 #include "TypeSpecifiers.hpp"
+#include <iostream>
+#include <vector>
 
 extern std::vector<std::string> LANGUAGE;
 

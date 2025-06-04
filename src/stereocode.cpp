@@ -9,6 +9,10 @@
 
 #include "ClassModelCollection.hpp"
 #include "CLI11.hpp"
+#include "PrimitiveTypes.hpp"
+#include "IgnorableCalls.hpp"
+#include "TypeSpecifiers.hpp"
+#include "XPathBuilder.hpp"
 
 primitiveTypes                     PRIMITIVES;
 ignorableCalls                     IGNORED_CALLS;

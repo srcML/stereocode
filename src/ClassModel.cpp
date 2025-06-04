@@ -8,6 +8,8 @@
  */
 
 #include "ClassModel.hpp"
+#include "utils.hpp"
+#include "XPathBuilder.hpp"
 
 extern XPathBuilder                  XPATH_TRANSFORMATION;  
 
@@ -119,6 +121,62 @@ void classModel::findType(srcml_archive* archive, srcml_unit* unit) {
 //  Java interfaces can't inherit from classes
 //  Uses 'extends' for class-to-class and interface-to-interface inheritance and 'implements' for class-to-interface inheritance
 // 
+// void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) { 
+//     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parent_name").c_str());
+//     srcml_transform_result* result = nullptr;
+//     srcml_unit_apply_transforms(archive, unit, &result);
+//     int n = srcml_transform_get_unit_size(result);
+
+//     srcml_unit* resultUnit = nullptr;
+//     for (int i = 0; i < n; i++) {
+//         resultUnit = srcml_transform_get_unit(result, i);
+
+//         char* unparsed = nullptr;
+//         std::size_t size = 0;
+//         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
+//         std::string parentName = unparsed;
+
+//         std::string inheritanceSpecifier;
+//         if (unitLanguage == "C++") {
+//             std::string temp = srcml_unit_get_srcml(resultUnit);
+//             if (temp.find("<specifier>public</specifier>") != std::string::npos) {
+//                 inheritanceSpecifier = "public";
+//                 parentName.erase(0, inheritanceSpecifier.size());  
+//             }             
+//             else if (temp.find("<specifier>protected</specifier>") != std::string::npos) {
+//                 inheritanceSpecifier = "protected";
+//                 parentName.erase(0, inheritanceSpecifier.size());  
+//             }  
+//             else if (temp.find("<specifier>private</specifier>") != std::string::npos) {
+//                 inheritanceSpecifier = "private";
+//                 parentName.erase(0, inheritanceSpecifier.size());  
+//             }             
+//             else if (type == "class")
+//                 inheritanceSpecifier = "private";
+//             else
+//                 inheritanceSpecifier = "public";         
+            
+//         }
+//         trimWhitespace(parentName);
+
+//         std::size_t listOpen = parentName.find("<");
+//         if (listOpen != std::string::npos) {
+//             std::string parClassNameLeft = parentName.substr(0, listOpen);
+//             std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
+//             removeNamespace(parClassNameLeft, unitLanguage, true); 
+//             parentNames.insert({parClassNameLeft + parClassNameRight, inheritanceSpecifier});
+//         }
+//         else {
+//             removeNamespace(parentName, unitLanguage, true);
+//             parentNames.insert({parentName, inheritanceSpecifier});
+//         }
+    
+//         free(unparsed);      
+//     }
+    
+//     srcml_clear_transforms(archive);
+//     srcml_transform_free(result); 
+// }
 void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) { 
     srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"parent_name").c_str());
     srcml_transform_result* result = nullptr;
@@ -134,27 +192,6 @@ void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string parentName = unparsed;
 
-        std::string inheritanceSpecifier;
-        if (unitLanguage == "C++") {
-            std::string temp = srcml_unit_get_srcml(resultUnit);
-            if (temp.find("<specifier>public</specifier>") != std::string::npos) {
-                inheritanceSpecifier = "public";
-                parentName.erase(0, inheritanceSpecifier.size());  
-            }             
-            else if (temp.find("<specifier>protected</specifier>") != std::string::npos) {
-                inheritanceSpecifier = "protected";
-                parentName.erase(0, inheritanceSpecifier.size());  
-            }  
-            else if (temp.find("<specifier>private</specifier>") != std::string::npos) {
-                inheritanceSpecifier = "private";
-                parentName.erase(0, inheritanceSpecifier.size());  
-            }             
-            else if (type == "class")
-                inheritanceSpecifier = "private";
-            else
-                inheritanceSpecifier = "public";         
-            
-        }
         trimWhitespace(parentName);
 
         std::size_t listOpen = parentName.find("<");
@@ -162,11 +199,11 @@ void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) {
             std::string parClassNameLeft = parentName.substr(0, listOpen);
             std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
             removeNamespace(parClassNameLeft, unitLanguage, true); 
-            parentNames.insert({parClassNameLeft + parClassNameRight, inheritanceSpecifier});
+            parentNames.insert(parClassNameLeft + parClassNameRight);
         }
         else {
             removeNamespace(parentName, unitLanguage, true);
-            parentNames.insert({parentName, inheritanceSpecifier});
+            parentNames.insert(parentName);
         }
     
         free(unparsed);      
@@ -175,7 +212,6 @@ void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) {
     srcml_clear_transforms(archive);
     srcml_transform_free(result); 
 }
-
 // Finds data members names
 // Only collect the name if there is a type
 // C++:

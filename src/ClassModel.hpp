@@ -32,7 +32,7 @@ public:
     const std::string&                                        getUnitLanguage                    ()               const          { return unitLanguage;                           }
     const std::vector<std::string>&                           getName                            ()               const          { return name;                                   }
     const std::vector<std::string>&                           getStereotypeList                  ()               const          { return stereotype;                             }
-    const std::unordered_map<std::string, std::string>&       getParentClassName                 ()               const          { return parentNames;                            }  
+    const std::unordered_set<std::string>&                    getParentClassName                 ()               const          { return parentNames;                            }  
     const std::unordered_set<std::string>&                    getMethodSignatures                ()               const          { return methodSignatures;                       }    
     const std::unordered_map<int, std::vector<std::string>>&  getXpath                           ()               const          { return xpath;                                  }    
     int                                                       getConstructorDestructorCount      ()               const          { return constructorDestructorCount;             }
@@ -60,7 +60,7 @@ public:
 
 private:
     std::vector<std::string>                                name;                            // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and generic types in <> | same as last but without <>
-    std::unordered_map<std::string, std::string>            parentNames;                     // Key is parent class name without whitespaces and namespaces and value is specifier (public, private, or protected).
+    std::unordered_set<std::string>                         parentNames;                     // Parent class names without whitespaces and namespaces
     std::string                                             type;                            // Class, or struct, or an interface
     std::string                                             unitLanguage;                    // Unit language
     std::vector<std::string>                                stereotype;                      // Class stereotype(s)

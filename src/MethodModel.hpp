@@ -11,10 +11,11 @@
 #define METHODMODEL_HPP
 
 #include <srcml.h>
-#include "utils.hpp"
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 #include "variable.hpp"
-#include "XPathBuilder.hpp"
-#include "IgnorableCalls.hpp"
 #include "call.hpp"
 
 class methodModel {

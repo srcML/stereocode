@@ -11,12 +11,8 @@
 #define TYPESPECIFIERS_HPP
 
 #include <string>
-#include <fstream>
 #include <unordered_set>
 #include <unordered_map>
-#include <vector>
-#include <cctype>
-#include <iostream>
 
 class typeSpecifiers {
 public:

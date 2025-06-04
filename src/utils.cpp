@@ -7,7 +7,10 @@
  * This file is part of the Stereocode application.
  */
 
+#include <regex>
 #include "utils.hpp"
+#include "PrimitiveTypes.hpp"
+#include "TypeSpecifiers.hpp"
 
 extern primitiveTypes                        PRIMITIVES;   
 extern typeSpecifiers                        TYPE_SPECIFIERS;  

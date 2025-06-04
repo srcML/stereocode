@@ -31,7 +31,7 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/text()[1]";
     xpathTable[language]["class_type"] = xpath;   
 
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super";
+    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";

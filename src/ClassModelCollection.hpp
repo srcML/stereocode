@@ -10,12 +10,10 @@
 #ifndef CLASSMODELCOLLECTION_HPP
 #define CLASSMODELCOLLECTION_HPP
 
-#include <thread>
-#include <iomanip> 
+#include <srcml.h>
+#include <map>
 #include <mutex>
-#include <filesystem>
 #include "ClassModel.hpp"
-#include "stereotypes.hpp"
 
 class classModelCollection {
 public:

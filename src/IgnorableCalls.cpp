@@ -7,6 +7,8 @@
  * This file is part of the Stereocode application.
  */
 
+#include <iostream>
+#include <vector>
 #include "IgnorableCalls.hpp"
 
 extern std::vector<std::string> LANGUAGE;

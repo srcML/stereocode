@@ -10,7 +10,7 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include "utils.hpp"
+#include <string>
 
 // Used to store fields, locals, and parameters
 //

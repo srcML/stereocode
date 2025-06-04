@@ -7,7 +7,13 @@
  * This file is part of the Stereocode application.
  */
 
+#include <regex>
 #include "MethodModel.hpp"
+#include "utils.hpp"
+#include "IgnorableCalls.hpp"
+#include "XPathBuilder.hpp"
+#include "PrimitiveTypes.hpp"
+
 
 extern primitiveTypes    PRIMITIVES;
 extern ignorableCalls    IGNORED_CALLS;
