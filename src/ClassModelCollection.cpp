@@ -57,23 +57,14 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
     // Performed after the collection of all classes and free functions
     analyzeFreeFunctions();
 
+    // Build signatures for findInheritedMethods()
+    for (auto& pair : classCollection) 
+        pair.second.buildMethodSignature();
+    
+
     // Finds inherited data members
     for (auto& pair : classCollection) {
         findInheritedDataMembers(pair.second);
-        pair.second.setInherited(true);
-        for (auto& pairS : classCollection)
-            pairS.second.setVisited(false);
-    } 
-
-    // Resets inheritance and build signatures for findInheritedMethods()
-    for (auto& pair : classCollection) {
-        pair.second.setInherited(false); 
-        pair.second.buildMethodSignature();
-    }
-        
-    // Finds inherited methods
-    for (auto& pair : classCollection) {
-        findInheritedMethods(pair.second);
         pair.second.setInherited(true);
         for (auto& pairS : classCollection)
             pairS.second.setVisited(false);
@@ -420,13 +411,13 @@ void classModelCollection::findInheritedDataMembers(classModel& c) {
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.isInherited() && !result->second.isVisited()) {
-                c.appendInheritedDataMembers(result->second.getDataMembers()); 
+                c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedDataMembers(result->second);
-                c.appendInheritedDataMembers(result->second.getDataMembers());
+                c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
             }
         }       
         else {
@@ -435,13 +426,13 @@ void classModelCollection::findInheritedDataMembers(classModel& c) {
                 result = classCollection.find(parClassName);
                 if (result != classCollection.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
-                        c.appendInheritedDataMembers(result->second.getDataMembers());
+                        c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedDataMembers(result->second);
-                        c.appendInheritedDataMembers(result->second.getDataMembers());
+                        c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
                     }
                 }              
             }
@@ -452,69 +443,12 @@ void classModelCollection::findInheritedDataMembers(classModel& c) {
                     auto resultM = classCollection.find(resultG->second);
                     if (resultM != classCollection.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            c.appendInheritedDataMembers(resultM->second.getDataMembers());
+                            c.appendInheritedDataMembers(resultM->second.getDataMembers(), resultM->second.getMethodSignatures());
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedDataMembers(resultM->second);
-                            c.appendInheritedDataMembers(resultM->second.getDataMembers());
-                        }
-                    }
-                }
-            }      
-        }         
-    }
-}
-
-// Finds inherited methods
-//
-void classModelCollection::findInheritedMethods(classModel& c) {   
-    const std::string& unitLanguage = c.getUnitLanguage();
-    c.setVisited(true); 
-    const std::unordered_set<std::string>& parentClassNames =  c.getParentClassName();
-
-    for (std::string parClassName : parentClassNames){
-        auto result = classCollection.find(parClassName);
-        if (result != classCollection.end()) {
-            if (result->second.isInherited() && !result->second.isVisited()) {
-                c.appendInheritedMethod(result->second.getMethodSignatures()); 
-                result->second.setVisited(true);
-            }
-                
-            else if (!result->second.isVisited()) {
-                findInheritedMethods(result->second);                     
-                c.appendInheritedMethod(result->second.getMethodSignatures());  
-            }
-        }       
-        else {
-            if (unitLanguage == "C++") {
-                parClassName = parClassName.substr(0, parClassName.find("<"));
-                result = classCollection.find(parClassName);
-                if (result != classCollection.end()) {
-                    if (result->second.isInherited() && !result->second.isVisited()) {
-                        c.appendInheritedMethod(result->second.getMethodSignatures()); 
-                        result->second.setVisited(true);
-                    }
-                        
-                    else if (!result->second.isVisited()) {
-                        findInheritedMethods(result->second);                     
-                        c.appendInheritedMethod(result->second.getMethodSignatures()); 
-                    }
-                }              
-            }
-            else {  
-                removeBetweenComma(parClassName, true);
-                auto resultG = classGenerics.find(parClassName);
-                if (resultG != classGenerics.end()) {
-                    auto resultM = classCollection.find(resultG->second);
-                    if (resultM != classCollection.end()) {
-                        if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            c.appendInheritedMethod(resultM->second.getMethodSignatures());  
-                            resultM->second.setVisited(true);
-                        }
-                        else if (!resultM->second.isVisited()) {
-                            findInheritedMethods(resultM->second);                     
-                            c.appendInheritedMethod(resultM->second.getMethodSignatures());   
+                            c.appendInheritedDataMembers(resultM->second.getDataMembers(), resultM->second.getMethodSignatures());
                         }
                     }
                 }

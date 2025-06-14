@@ -28,9 +28,6 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/src:name";
     xpathTable[language]["class_name"] = xpath;
 
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/text()[1]";
-    xpathTable[language]["class_type"] = xpath;   
-
     xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
 
@@ -138,9 +135,6 @@ void XPathBuilder::generateXpath() {
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:name";
     xpathTable[language]["class_name"] = xpath;
-
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/text()[1]";
-    xpathTable[language]["class_type"] = xpath;   
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
@@ -259,9 +253,6 @@ void XPathBuilder::generateXpath() {
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:name";
     xpathTable[language]["class_name"] = xpath;
-
-    xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/text()[1]";
-    xpathTable[language]["class_type"] = xpath;   
 
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:super_list/*[self::src:extends or self::src:implements]/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  

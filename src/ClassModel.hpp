@@ -17,7 +17,6 @@ public:
          classModel                         (srcml_archive*, srcml_unit*, const std::string&);
          
     void findName                           (srcml_archive*, srcml_unit*);
-    void findType                           (srcml_archive*, srcml_unit*);
     void findParentName                     (srcml_archive*, srcml_unit*);
     void findDataMemberName                 (srcml_archive*, srcml_unit*, std::vector<variable>&);
     void findDataMemberType                 (srcml_archive*, srcml_unit*, std::vector<variable>&, int);
@@ -49,13 +48,11 @@ public:
     // Inheritance does not need to check for private data members or methods, this is because
     //   a method will only use a data member or call a method if it is not private, so we can simply collect them all
     //
-    void appendInheritedDataMembers(const std::unordered_map<std::string, variable>& inheritedDataMembers) { 
-        dataMembers.insert(inheritedDataMembers.begin(), inheritedDataMembers.end());         
+    void appendInheritedDataMembers(const std::unordered_map<std::string, variable>& inheritedDataMembers, const std::unordered_set<std::string>& parentMethods) { 
+        dataMembers.insert(inheritedDataMembers.begin(), inheritedDataMembers.end());   
+        methodSignatures.insert(parentMethods.begin(), parentMethods.end());      
     }
-    void appendInheritedMethod(const std::unordered_set<std::string>& parentMethods) {
-        methodSignatures.insert(parentMethods.begin(), parentMethods.end());
-    }
-
+    
     void buildMethodSignature() { for (const auto& m : methods) methodSignatures.insert(m.getNameSignature()); }
 
 private:

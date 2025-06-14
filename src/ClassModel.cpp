@@ -20,8 +20,7 @@ classModel::classModel(srcml_archive* archive, srcml_unit* unit, const std::stri
 
 void classModel::findData(srcml_archive* archive, srcml_unit* unit, const std::string& classXpath, int unitNumber) {
     xpath[unitNumber].push_back(classXpath);
-    if (unitLanguage == "C++") findType(archive, unit); // Needed for findParentClassName()
-    findParentName(archive, unit); // Requires class type for C++
+    findParentName(archive, unit);
     
     std::vector<variable> dataMembersOrdered;
     int numOfCurrentDataMembers = dataMembersOrdered.size(); // Used for partial classs
@@ -82,22 +81,6 @@ void classModel::findName(srcml_archive* archive, srcml_unit* unit) {
     // There might be a missing name (e.g., anonymous structs in C++)
     if (name.size() == 0) name = {"", "", "", ""}; 
 
-    srcml_clear_transforms(archive);
-    srcml_transform_free(result); 
-}
-
-// Determines the class type (class, interface, or struct)
-//
-void classModel::findType(srcml_archive* archive, srcml_unit* unit) {
-    srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"class_type").c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(archive, unit, &result);
-
-    if (srcml_transform_get_unit_size(result) == 1) {
-        type = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
-        trimWhitespace(type);
-    }
-    
     srcml_clear_transforms(archive);
     srcml_transform_free(result); 
 }
@@ -212,6 +195,7 @@ void classModel::findParentName(srcml_archive* archive, srcml_unit* unit) {
     srcml_clear_transforms(archive);
     srcml_transform_free(result); 
 }
+
 // Finds data members names
 // Only collect the name if there is a type
 // C++:
