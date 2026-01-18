@@ -53,7 +53,6 @@ public:
 private:
     std::vector<std::string>                                name;                            // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and generic types in <> | same as last but without <>
     std::unordered_set<std::string>                         parentNames;                     // Parent class names without whitespaces and namespaces
-    std::string                                             type;                            // Class, or struct, or an interface
     std::string                                             unitLanguage;                    // Unit language
     std::vector<std::string>                                stereotype;                      // Class stereotype(s)
     std::vector<methodModel>                                methods;                         // List of methods 

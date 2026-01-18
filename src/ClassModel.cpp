@@ -253,20 +253,19 @@ void classModel::findMethod(const std::string& classXpath, int unitNumber) {
         srcml_archive_write_unit(methodArchive, resultUnit);
         srcml_archive_close(methodArchive);
         srcml_archive_free(methodArchive);
-
+        
         methodArchive = srcml_archive_create();
         srcml_archive_read_open_memory(methodArchive, unparsed, size);
         methodUnit = srcml_archive_read_unit(methodArchive);
         
-
-        std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"method") + ")[" + std::to_string(i + 1) + "]";
+        std::string methodXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage, "method") + ")[" + std::to_string(i + 1) + "]";
         methodModel m = methodModel(methodXpath, unitLanguage, name[3], "", unitNumber, false);     
         methods.push_back(m);
 
         free(unparsed);
         srcml_unit_free(methodUnit);
         srcml_archive_close(methodArchive);
-        //srcml_archive_free(methodArchive); 
+        srcml_archive_free(methodArchive); 
     }
 
     srcml_transform_free(result);
@@ -277,7 +276,7 @@ void classModel::findMethod(const std::string& classXpath, int unitNumber) {
 // Properties cannot be nested in methods or in other properties
 //
 void classModel::findProperty(const std::string& classXpath, int unitNumber) {
-    srcml_append_transform_xpath(classArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"property").c_str());
+    srcml_append_transform_xpath(classArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage, "property").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(classArchive, classUnit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -300,13 +299,13 @@ void classModel::findProperty(const std::string& classXpath, int unitNumber) {
         propertyUnit = srcml_archive_read_unit(propertyArchive);
 
         std::string propertyXpath = "(" + classXpath + XPATH_TRANSFORMATION.getXpath(unitLanguage,"property") + ")[" + std::to_string(i + 1) + "]";
-        std::string propertyReturnType = findPropertyReturnType();
+        std::string propertyReturnType = findPropertyReturnType(); // No need to set pass the propertyXpath as the propertyArchive and propertyUnit are already set
         findMethodsInProperty(propertyXpath, propertyReturnType, unitNumber);
 
         free(unparsed);
         srcml_unit_free(propertyUnit);
         srcml_archive_close(propertyArchive);
-        //srcml_archive_free(propertyArchive); 
+        srcml_archive_free(propertyArchive); 
     }
 
     srcml_transform_free(result);
@@ -363,11 +362,11 @@ void classModel::findMethodsInProperty(const std::string& propertyXpath, const s
         free(unparsed);
         srcml_unit_free(methodUnit);
         srcml_archive_close(methodArchive);
-        //srcml_archive_free(methodArchive); 
+        srcml_archive_free(methodArchive); 
     }
     
-    srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
+    srcml_clear_transforms(propertyArchive);
 }
 
 // Gets the class stereotype

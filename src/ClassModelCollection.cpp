@@ -12,6 +12,8 @@
 #include <thread>
 #include <sstream>
 #include <filesystem>
+#include <iostream>
+#include <cstring>
 #include "ClassModelCollection.hpp"
 #include "stereotypes.hpp"
 #include "PrimitiveTypes.hpp"
@@ -29,16 +31,46 @@ extern ignorableCalls                IGNORED_CALLS;
 extern typeSpecifiers                TYPE_SPECIFIERS;  
 extern bool                          IS_VERBOSE;
 extern bool                          FREE_FUNCTION;
-extern srcml_archive*                archive;
-extern srcml_archive*                outputArchive;
 
-srcml_unit* unit{nullptr};
-srcml_archive* classArchive{nullptr};
-srcml_unit* classUnit{nullptr};
-srcml_unit* methodUnit{nullptr};
-srcml_archive* methodArchive{nullptr};
+srcml_archive*                       archive{srcml_archive_create()};
+srcml_archive*                       outputArchive{srcml_archive_create()};
+srcml_unit*                          unit{nullptr};
+srcml_archive*                       classArchive{nullptr};
+srcml_unit*                          classUnit{nullptr};
+srcml_unit*                          methodUnit{nullptr};
+srcml_archive*                       methodArchive{nullptr};
 
 classModelCollection::classModelCollection(const std::string& inputFile, const std::string& outputFile, bool outputTxtReport, bool outputCsvReport, bool reDocComment) {  
+    bool error{false};
+    
+    if (srcml_archive_read_open_filename(archive, inputFile.c_str())) {
+        std::cerr << "Error: File not found: " << inputFile << '\n';
+        error = true;
+    }
+
+    if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
+        std::cerr << "Error opening: " << outputFile << std::endl;
+        error = true;
+    }
+
+    if (error) {
+        srcml_archive_close(archive);
+        srcml_archive_close(outputArchive);
+        srcml_archive_free(archive);
+        srcml_archive_free(outputArchive);
+        exit(1);
+    }
+
+    // Register namespaces for output
+    srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
+    std::size_t size = srcml_archive_get_namespace_size(archive);
+    for (std::size_t i = 0; i < size; i++) {
+        if (strcmp(srcml_archive_get_namespace_prefix(archive, i), "pos")  == 0) {
+            srcml_archive_register_namespace(outputArchive, "pos", "http://www.srcML.org/srcML/position");
+            break;
+        }
+    }
+
     PRIMITIVES.createPrimitiveList();
     IGNORED_CALLS.createCallList();
     TYPE_SPECIFIERS.createSpecifierList();
@@ -60,7 +92,9 @@ classModelCollection::classModelCollection(const std::string& inputFile, const s
         ++unitNumber;
         unit = srcml_archive_read_unit(archive);
     }
-
+    srcml_archive_close(archive);
+    srcml_archive_free(archive); // Closing alone is not enough for reopening. Freeing and recreating is needed.
+    
     // Performed after the collection of all classes and free functions
     analyzeFreeFunctions();
 
@@ -141,7 +175,7 @@ classModelCollection::classModelCollection(const std::string& inputFile, const s
     unsigned int nthreads = std::thread::hardware_concurrency();
 
     // Read all units in the archive again for output generation
-    srcml_archive_close(archive);
+    archive = srcml_archive_create();
     srcml_archive_read_open_filename(archive, inputFile.c_str()); 
     unit = srcml_archive_read_unit(archive);
 
@@ -185,7 +219,6 @@ classModelCollection::classModelCollection(const std::string& inputFile, const s
         std::string temp = outputFile + ".temp.xml";
 
         srcml_archive_read_open_filename(archive, outputFile.c_str());  
-
         srcml_archive_write_open_filename(outputArchive, temp.c_str());
         srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
 
@@ -204,10 +237,8 @@ classModelCollection::classModelCollection(const std::string& inputFile, const s
         srcml_archive_close(outputArchive);
 
     }
-
     srcml_archive_free(archive);
     srcml_archive_free(outputArchive);
-    
 }
 
 // Finds classs in an archive
@@ -244,6 +275,7 @@ classModelCollection::classModelCollection(const std::string& inputFile, const s
 //   Static classes in java can contain non-static data members or methods
 //   They are ignored (since they are nested) and their methods (only if static) are collected as free functions
 //  Anonymous classes (classes without names and are nested as instances) are ignored
+//
 void classModelCollection::findClassInfo(int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit);
     if (unitLanguage == "C") { unitLanguage = "C++"; } // Quick hack. C is a simple case of C++, so we can process it as C++.
@@ -265,7 +297,7 @@ void classModelCollection::findClassInfo(int unitNumber) {
             srcml_archive_write_unit(classArchive, resultUnit);
             srcml_archive_close(classArchive);
             srcml_archive_free(classArchive);
-    
+
             classArchive = srcml_archive_create();
             srcml_archive_read_open_memory(classArchive, unparsed, size);
             classUnit = srcml_archive_read_unit(classArchive);
@@ -289,7 +321,7 @@ void classModelCollection::findClassInfo(int unitNumber) {
             free(unparsed);
             srcml_unit_free(classUnit);
             srcml_archive_close(classArchive);
-            //srcml_archive_free(classArchive); 
+            srcml_archive_free(classArchive); 
          }   
         srcml_transform_free(result);
         srcml_clear_transforms(archive);
@@ -340,19 +372,19 @@ void classModelCollection::findFreeFunctions(int unitNumber) {
             srcml_archive_write_unit(methodArchive, resultUnit);
             srcml_archive_close(methodArchive);
             srcml_archive_free(methodArchive);
-    
+            
             methodArchive = srcml_archive_create();
             srcml_archive_read_open_memory(methodArchive, unparsed, size);
             methodUnit = srcml_archive_read_unit(methodArchive);
 
-            std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function") + ")[" + std::to_string(i + 1) + "]";
+            std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage, "free_function") + ")[" + std::to_string(i + 1) + "]";
             methodModel function(functionXpath, unitLanguage, "", "", unitNumber, false);
             freeFunctions.push_back(function);
 
             free(unparsed);
             srcml_unit_free(methodUnit);
             srcml_archive_close(methodArchive);
-            //srcml_archive_free(methodArchive); 
+            srcml_archive_free(methodArchive); 
         }
         srcml_transform_free(result);
         srcml_clear_transforms(archive);  
@@ -694,7 +726,7 @@ void classModelCollection::outputCsvReportFile(std::ofstream& out, classModel* c
 //  Example: <function st:stereotype="get"> ... </function>
 //           <class st:stereotype="boundary"> ... ></class>
 //
-void classModelCollection::annotateWithStereotypes(srcml_unit* unit, std::map<int, srcml_unit*>& transformedUnits,
+void classModelCollection::annotateWithStereotypes(srcml_unit* localUnit, std::map<int, srcml_unit*>& transformedUnits,
                                                 int unitNumber, const std::unordered_map<std::string, std::string>& xpathPair,
                                                 std::unordered_map<int, srcml_transform_result*>& results, std::mutex& mu) {  
         srcml_archive* tempArchive = srcml_archive_create();
@@ -707,7 +739,7 @@ void classModelCollection::annotateWithStereotypes(srcml_unit* unit, std::map<in
         }  
         if (transform) {
             srcml_transform_result* result = nullptr; 
-            srcml_unit_apply_transforms(tempArchive, unit, &result);
+            srcml_unit_apply_transforms(tempArchive, localUnit, &result);
             srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);  
             {
                 std::lock_guard<std::mutex> guard(mu);
@@ -717,7 +749,7 @@ void classModelCollection::annotateWithStereotypes(srcml_unit* unit, std::map<in
         }
         else {
             std::lock_guard<std::mutex> guard(mu);
-            transformedUnits.insert({unitNumber, unit});
+            transformedUnits.insert({unitNumber, localUnit});
         }
              
         srcml_clear_transforms(tempArchive); 
@@ -728,7 +760,7 @@ void classModelCollection::annotateWithStereotypes(srcml_unit* unit, std::map<in
 // For example, /** @stereotype get */
 // last_ws is used to preserve to the whitespace that precedes each function or class
 //
-void classModelCollection::outputAsComments(srcml_unit* unit) {
+void classModelCollection::outputAsComments(srcml_unit* localUnit) {
     std::string xslt = R"**(<xsl:stylesheet
     xmlns="http://www.srcML.org/srcML/src"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -774,7 +806,7 @@ void classModelCollection::outputAsComments(srcml_unit* unit) {
     srcml_transform_result* result = nullptr; 
 
     srcml_append_transform_xslt_memory(tempArchive, xslt.c_str(), xslt.size());           
-    srcml_unit_apply_transforms(tempArchive, unit, &result);
+    srcml_unit_apply_transforms(tempArchive, localUnit, &result);
 
     srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);  
     srcml_archive_write_unit(outputArchive, resultUnit); 

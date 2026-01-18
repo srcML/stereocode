@@ -2,7 +2,7 @@
 /**
  * @file MethodModel.cpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -37,25 +37,18 @@ methodModel::methodModel(const std::string& xpath, const std::string& unitLangua
    
     if (constructorOrDestructor.empty()) {    
         findReturnType(); 
-
         findParameterName();
         findParameterType();
-
         findLocalVariableName();
         findLocalVariableType(); 
-
         findNonPrimitive();
-
         findReturnExpression();
-
         findCallName();
         findCallArgument();
         findNewAssignedVariables();
-
         findIgnorableCalls(methodCalls);
         findIgnorableCalls(functionCalls);
         findIgnorableCalls(newConstructorCalls);
-
         findExpressionNames();
         findExpressionAssignments();
         findNonCommentStatements(); 
@@ -111,7 +104,6 @@ void methodModel::findName() {
     else
         srcml_append_transform_xpath(methodArchive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"method_name").c_str());
 
-
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -122,9 +114,9 @@ void methodModel::findName() {
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         name = unparsed;
-        trimWhitespace(name);
         free(unparsed);   
     }
+
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
 }
@@ -173,6 +165,25 @@ void methodModel::findReturnType() {
             srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
             returnType += srcml_unit_get_srcml(resultUnit);
         }
+
+        // Handle C# conversion operators (e.g. "implicit operator IntPtr")
+        // The type tag often only has "public static implicit", so 'returnType' becomes empty after stripping specifiers
+        // We must extract the actual type ("IntPtr") from the name ("operator IntPtr")
+        if (unitLanguage == "C#" && name.rfind("operator", 0) == 0) {
+            std::string checkType = returnType;
+            removeTypeSpecifiers(checkType, unitLanguage);
+            trimWhitespace(checkType);
+
+            // If type is empty (meaning it was just specifiers), parse the name
+            if (checkType.empty()) {
+                std::size_t spacePos = name.find(' ');
+                if (spacePos != std::string::npos) {
+                    returnType = name.substr(spacePos + 1);
+                    trimWhitespace(returnType);
+                }
+            }
+        }
+
         srcml_clear_transforms(methodArchive);
         srcml_transform_free(result);
     }
@@ -803,16 +814,13 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
                                        bool isParamaterCheck, bool isLocalCheck) {
     std::string expr = expression; 
     trimWhitespace(expr);
-               
-    // Remove brackets. For example, a [3]
     removeBracketSuffix(expr);
     
     // Removing () and {} on the outside of expression
     // Might remove } and ) for calls but that doesn't affect the analysis
     if (unitLanguage == "C++") {
         while (!expr.empty() && (expr.front() == '{' || expr.front() == '(')) { 
-            if (expr.size() > 6 && expr.substr(1, 5) == "(*this)")
-                break;
+            if (expr.size() > 6 && expr.substr(1, 5) == "(*this)") break;
             expr.erase(0, 1);
         }
         while (!expr.empty() && (expr.back() == '}' || expr.back() == ')')) expr.pop_back();  
@@ -825,45 +833,46 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
     // In C# the null-coalescing  operator is represented by ? or ?? and it allows you to check if an object 
     //  is null before accessing its members or using its value. For example, testString?.Length; or userInput ?? "Default Name"; 
     if (unitLanguage == "C#") {
-        std::size_t nullCoalescingOperator = expr.find("?"); 
-        while (nullCoalescingOperator != std::string::npos) {
-            expr.erase(nullCoalescingOperator, 1); 
-            nullCoalescingOperator = expr.find("?"); // For chaining
+        std::size_t nullOp = expr.find("?"); 
+        while (nullOp != std::string::npos) {
+            expr.erase(nullOp, 1); 
+            nullOp = expr.find("?"); // For chaining
         }         
     }
 
     // Remove pointers. For example, *a
-    if (unitLanguage != "Java") 
-        removeLeadingAsterisks(expr);     
+    if (unitLanguage != "Java") removeLeadingAsterisks(expr);     
     
     if (expr.empty()) return false;  
 
     // ^ indicates that we should only match from the beginning
     // We only care about the first two variables. For example, in a.b.c() the a.b is sufficient to determine what "a" is
     // Each regex has only two capturing or matching groups
-    bool isMatched = false;
-    std::smatch match;
-    std::string pattern;
+    static const std::regex cppPattern(R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->]*))");
+    static const std::regex javaPattern(R"(^(?:super|this|([^.]*))\.([^.]*))");
+    static const std::regex csharpPattern(R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->]*))");
+
+    // $ Used to match end of line. For example, return this.a; matches but return this.a.b; doesn't
+    static const std::regex cppReturnPattern(R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->\(\){}]*)$)");
+    static const std::regex javaReturnPattern(R"(^(?:super|this|([^.]*))\.([^.\(\)]*)$)");
+    static const std::regex csharpReturnPattern(R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->\(\)]*)$)");
+
+    const std::regex* currentRegex = nullptr;
+
     if (!returnCheck) {
-        if (unitLanguage == "C++") 
-            pattern = R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->]*))";
-        else if (unitLanguage == "Java")
-            pattern = R"(^(?:super|this|([^.]*))\.([^.]*))";
-        else if (unitLanguage == "C#")
-            pattern = R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->]*))";
-    }
-    else {
-        // $ Used to match end of line. For example, return this.a; matches but return this.a.b; doesn't
-        if (unitLanguage == "C++") 
-            pattern = R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->\(\){}]*)$)";
-        else if (unitLanguage == "Java")
-            pattern = R"(^(?:super|this|([^.]*))\.([^.\(\)]*)$)";
-        else if (unitLanguage == "C#")
-            pattern = R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->\(\)]*)$)";
+        if (unitLanguage == "C++")       currentRegex = &cppPattern;
+        else if (unitLanguage == "Java") currentRegex = &javaPattern;
+        else if (unitLanguage == "C#")   currentRegex = &csharpPattern;
+    } else {
+        if (unitLanguage == "C++")       currentRegex = &cppReturnPattern;
+        else if (unitLanguage == "Java") currentRegex = &javaReturnPattern;
+        else if (unitLanguage == "C#")   currentRegex = &csharpReturnPattern;
     }
 
-    const std::regex regexPattern(pattern);
-    isMatched = std::regex_search(expr, match, regexPattern);
+    std::smatch match;
+    bool isMatched = std::regex_search(expr, match, *currentRegex);
+
+    
     int count = isMatched ? 2 : 1;
     bool overShadow = true; // Needed in cases such as this.data = data where this.data is an data member and data is a local or a parameter 
 
@@ -945,12 +954,7 @@ bool methodModel::isVariableUsed(std::unordered_map<std::string, variable>& vari
 
 std::string methodModel::getStereotype() const {
     std::string result;
-
-    for (const std::string &value : stereotype)
-        result += value + " ";
-
-    if (result != "") 
-        Rtrim(result);
-
+    for (const std::string &value : stereotype) result += value + " ";
+    if (result != "") Rtrim(result);
     return result;
 }

@@ -2,7 +2,7 @@
 /**
  * @file stereocode.cpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -13,10 +13,6 @@
 #include "IgnorableCalls.hpp"
 #include "TypeSpecifiers.hpp"
 #include "XPathBuilder.hpp"
-
-
-srcml_archive*                     archive{srcml_archive_create()};
-srcml_archive*                     outputArchive{srcml_archive_create()};
 
 primitiveTypes                     PRIMITIVES;
 ignorableCalls                     IGNORED_CALLS;
@@ -46,7 +42,6 @@ int main (int argc, char const *argv[]) {
     bool                outputCsvReport{false};
     bool                overWriteInput{false};
     bool                reDocComment{false};
-    bool                error{false};
 
     CLI::App app{"Stereocode: Determines method and class stereotypes\nSupports C, C++, C#, and Java\n" };
     
@@ -74,10 +69,8 @@ int main (int argc, char const *argv[]) {
         std::ifstream in(primitivesFile);
         if (in.is_open())
             in >> PRIMITIVES;
-        else {
+        else 
             std::cerr << "Error: Primitive types file not found: " << primitivesFile << '\n';
-            error = true;
-        }
         in.close();
     }
     
@@ -86,10 +79,8 @@ int main (int argc, char const *argv[]) {
         std::ifstream in(ignoredCallsFile);
         if (in.is_open())
             in >> IGNORED_CALLS;
-        else {
+        else
             std::cerr << "Error: Ignorable calls file not found: " << ignoredCallsFile << '\n';
-            error = true;
-        }
         in.close();
     }
 
@@ -98,16 +89,9 @@ int main (int argc, char const *argv[]) {
         std::ifstream in(typeSpecifiersFile);
         if (in.is_open())
             in >> TYPE_SPECIFIERS;
-        else {
-            std::cerr << "Error: Type specifiers file not found: " << typeSpecifiersFile << '\n';
-            error = true;
-        }
+        else
+            std::cerr << "Error: Type specifiers file not found: " << typeSpecifiersFile << '\n'; 
         in.close();
-    }
-
-    if (srcml_archive_read_open_filename(archive, inputFile.c_str())) {
-        std::cerr << "Error: File not found: " << inputFile << '\n';
-        error = true;
     }
 
     // Default output file name if output name is not specified by the user. 
@@ -117,29 +101,6 @@ int main (int argc, char const *argv[]) {
         outputFile = InputFileNoExt + ".stereotypes.xml";     
     }  
 
-    if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
-        std::cerr << "Error opening: " << outputFile << std::endl;
-        error = true;
-    }
-
-    if (error) {
-        srcml_archive_close(archive);
-        srcml_archive_close(outputArchive);
-        srcml_archive_free(archive);
-        srcml_archive_free(outputArchive);
-        exit(1);
-    }
-
-    // Register namespaces for output
-    srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
-    std::size_t size = srcml_archive_get_namespace_size(archive);
-    for (std::size_t i = 0; i < size; i++) {
-        if (strcmp(srcml_archive_get_namespace_prefix(archive, i), "pos")  == 0) {
-            srcml_archive_register_namespace(outputArchive, "pos", "http://www.srcML.org/srcML/position");
-            break;
-        }
-    }
-    
     // Find stereotypes
     XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
     classModelCollection classModelCollections(inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);

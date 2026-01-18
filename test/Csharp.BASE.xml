@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
 
-<unit revision="1.0.0" language="C#" filename="C#.cs"><using>using <name>System</name>;</using>
+<unit revision="1.0.0" language="C#" filename="Csharp.cs"><using>using <name>System</name>;</using>
 
 <class><specifier>public</specifier> <specifier>static</specifier> class <name>ExternalFunctions</name> <block>{
     <function st:stereotype="literal"><type><specifier>public</specifier> <specifier>static</specifier> <name>void</name></type> <name>ExternalFunction</name><parameter_list>()</parameter_list> <block>{<block_content>

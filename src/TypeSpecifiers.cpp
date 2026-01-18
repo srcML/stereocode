@@ -2,7 +2,7 @@
 /**
  * @file TypeSpecifiers.cpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -59,21 +59,17 @@ void typeSpecifiers::createSpecifierList() {
                         "::iterator", "::const_iterator", "forward_list", "stack", "queue", "priority_queue", "deque", "multiset", 
                         "unordered_set", "unordered_multiset", "pair", "restrict", "_Noreturn", "_Thread_local"}});
         }
-        
-        // \\[.*\\] match any square brackets [] with any single character inside
-        //   (if any) . with zero or more occurrence * (including empty)
-        //   such as int[] or int[,] and so on
         else if (l == "C#") {
             specifiersTypes.insert({l, { "readonly", "ref", "out", "in", "unsafe", "internal", "params",
-                        "public", "private", "protected", "static", "virtual", "\\*", "volatile", "\\[.*\\]",
-                        "this",  "override", "abstract",  "extern", "async", "partial", "explicit", "implicit"
+                        "public", "private", "protected", "static", "virtual", "\\*", "volatile",
+                        "this",  "override", "abstract",  "extern", "async", "partial", "explicit", "implicit",
                         "new", "sealed", "event", "const", "\\?", "<", ">", "List", "Dictionary", "HashSet", "Queue", "Stack", "SortedList", "LinkedList", 
                         "BitArray", "KeyedCollection", "SortedSet", "BlockingCollection", "ConcurrentQueue", "ConcurrentStack", 
                         "ConcurrentDictionary", "ConcurrentBag", "ReadOnlyCollection", "ReadOnlyDictionary", "Tuple", "ValueTuple", 
                         "NameValueCollection", "StringCollection", "StringDictionary", "HybridDictionary", "OrderedDictionary"}});
         }
         else if (l == "Java") {
-            specifiersTypes.insert({l, { "public", "private", "protected", "static", "final", "transient",  "\\[.*\\]", "\\?", "@\\w+",
+            specifiersTypes.insert({l, { "public", "private", "protected", "static", "final", "transient", "\\?", "@\\w+",
                         "volatile", "synchronized", "native", "strictfp", "abstract", "default", "super", "extends", "\\.\\.\\.",
                         "<", ">", "List", "ArrayList", "LinkedList", "Set", "HashSet", "LinkedHashSet", "SortedSet", "TreeSet", "Map", 
                         "HashMap", "Hashtable", "LinkedHashMap", "SortedMap", "TreeMap", "Deque", "ArrayDeque", "Queue", "PriorityQueue", 

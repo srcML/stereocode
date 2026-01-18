@@ -2,7 +2,7 @@
 
 
 ## 💡 **What does it do?**
-**Stereocode** classifies **methods** and **classes** based on their **stereotypes** for **C**, **C++**, **Java**, and/or **C#** systems.
+**Stereocode** classifies **methods** and **classes** based on their **stereotypes** (behavior) for **C**, **C++**, **Java**, and/or **C#** systems.
 
 In addition, Stereocode stereotypes **free functions** as well as other structures (e.g., struct)
 - Please refer to the Wiki for detailed information on stereotypes
@@ -16,9 +16,9 @@ In addition, Stereocode stereotypes **free functions** as well as other structur
 
 ## 🔧 Installation and Build
 1. Prerequisites
-- [srcML 1.0+](https://www.srcml.org/) (Including develop version for Linux)
-- [cmake 3.17+](https://cmake.org/)
-- GCC, Clang, or MSCV with C++17 or higher
+- [srcML 1.1+](https://www.srcml.org/) (Including develop version for Linux)
+- [cmake 3.20+](https://cmake.org/)
+- Clang, GCC, or MSCV with C++17 or higher
 
 2. Clone or download this repository.
 
