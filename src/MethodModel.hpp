@@ -20,7 +20,7 @@
 
 class methodModel {
 public:
-    methodModel(srcml_archive*, srcml_unit*, const std::string&, const std::string&, const std::string&, int);
+    methodModel(const std::string&, const std::string&, const std::string&, const std::string&, int, bool);
 
     std::string                     getStereotype                          () const;
     const std::vector<variable>&    getParametersOrdered                   () const                { return parametersOrdered;                    }
@@ -31,16 +31,17 @@ public:
     const std::string&              getName                                () const                { return name;                                 }
     const std::string&              getNameSignature                       () const                { return nameSignature;                        }
     const std::string&              getParameterList                       () const                { return parameterList;                        }
-    const std::string&              getSrcML                               () const                { return srcML;                                }
     const std::string&              getReturnType                          () const                { return returnType;                           }
     const std::string&              getReturnTypeParsed                    () const                { return returnTypeParsed;                     }
     const std::string&              getXpath                               () const                { return xpath;                                }
     const std::string&              getUnitLanguage                        () const                { return unitLanguage;                         }
+    const std::string&              getConstructorOrDestructor             () const                { return constructorOrDestructor;              }
     int                             getDataMembersModifiedCount            () const                { return dataMembersModifiedCount;             }
     int                             getUnitNumber                          () const                { return unitNumber;                           }
     int                             getExternalFunctionCallsCount          () const                { return externalFunctionCallsCount;           }
     int                             getExternalMethodCallsCount            () const                { return externalMethodCallsCount;             }
     int                             getNonCommentStatementsCount           () const                { return nonCommentStatementsCount;            }
+    int                             countMethodsInProperty                 () const;
     bool                            isMethodConst                          () const                { return methodConst;                          }
     bool                            isDataMemberUsed                       () const                { return dataMemberUsed;                       }
     bool                            isParameterUsed                        () const                { return parameterUsed;                        }
@@ -55,38 +56,39 @@ public:
     bool                            isNonPrimitiveLocalExternal            () const                { return nonPrimitiveLocalExternal;            }
     bool                            isNonPrimitiveParamaterExternal        () const                { return nonPrimitiveParamaterExternal;        }
     bool                            isNonPrimitiveReturnType               () const                { return nonPrimitiveReturnType;               }
-    bool                            isConstructorOrDestructor              () const                { return constructorOrDestructor;              }
     bool                            isVariableCreatedAndReturnedWithNew    () const                { return variableCreatedWithNewAndReturned;    }
     bool                            isNonPrimitiveLocalOrParameterModified () const                { return nonPrimitiveLocalOrParameterModified; }
     bool                            isVariableUsed                         (std::unordered_map<std::string, variable>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
- 
-    void                     findNameSignature          ();
-    void                     findFreeFunctionData       ();
-    void                     findData                   (std::unordered_map<std::string, variable>&, const std::unordered_set<std::string>&, const std::string&);
-    void                     findName                   (srcml_archive*, srcml_unit*);
-    void                     findReturnType             (srcml_archive*, srcml_unit*);
-    void                     findParameterList          (srcml_archive*, srcml_unit*);
-    void                     findLocalVariableName      (srcml_archive*, srcml_unit*);
-    void                     findLocalVariableType      (srcml_archive*, srcml_unit*);
-    void                     findParameterName          (srcml_archive*, srcml_unit*);
-    void                     findParameterType          (srcml_archive*, srcml_unit*);
-    void                     findReturnExpression       (srcml_archive*, srcml_unit*);   
-    void                     findCallName               (srcml_archive*, srcml_unit*);
-    void                     findCallArgument           (srcml_archive*, srcml_unit*);
-    void                     findNewAssignedVariables   (srcml_archive*, srcml_unit*);
-    void                     findConst                  (srcml_archive*, srcml_unit*);
-    void                     findConstructorOrDestructor(srcml_archive*, srcml_unit*);
-    void                     findIgnorableCalls         (std::vector<call>&);
-    void                     findCallsOnDataMembers     (std::unordered_map<std::string, variable>&, const std::unordered_set<std::string>&);   
-    void                     findReturnedVariables      (std::unordered_map<std::string, variable>&, bool);
-    void                     findModifiedVariables      (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);                             
-    void                     findVariablesInExpressions (srcml_archive*, srcml_unit*, std::unordered_map<std::string, variable>&, bool);
-    void                     findNonCommentStatements   (srcml_archive*, srcml_unit*);
-    void                     findModifiedRefParameter   (std::string, bool);      
-    void                     setStereotype              (const std::string& s) { stereotype.push_back(s);}
+    void                            findModifiedRefParameter               (std::string, bool);      
+    void                            findVariablesInExpressions             (std::unordered_map<std::string, variable>&, bool);
+    void                            findDataAfterCollection                (std::unordered_map<std::string, variable>&, const std::unordered_set<std::string>&);
+    void                            findIgnorableCalls                     (std::vector<call>&);
+    void                            findCallsOnDataMembers                 (std::unordered_map<std::string, variable>&, const std::unordered_set<std::string>&);   
+    void                            findReturnedVariables                  (std::unordered_map<std::string, variable>&, bool);
+    void                            findModifiedVariables                  (std::unordered_map<std::string, variable>&, bool);
+    void                            findNameSignature                      ();
+    void                            findDataFreeFunctionAfterCollection    ();
+    void                            findNonPrimitive                       ();
+    void                            findName                               ();
+    void                            findReturnType                         ();
+    void                            findParameterList                      ();
+    void                            findLocalVariableName                  ();
+    void                            findLocalVariableType                  ();
+    void                            findParameterName                      ();
+    void                            findParameterType                      ();
+    void                            findReturnExpression                   ();   
+    void                            findCallName                           ();
+    void                            findCallArgument                       ();
+    void                            findNewAssignedVariables               ();
+    void                            findConst                              ();
+    void                            isConstructorOrDestructor              ();
+    void                            findConstructorOrDestructorType        ();
+    void                            findExpressionNames                    ();
+    void                            findExpressionAssignments              ();
+    void                            findNonCommentStatements               ();
+    void                            setStereotype                          (const std::string& s) { stereotype.push_back(s);}
                                              
 private:
-    std::vector<std::string>                          callType;
     std::string                                       name;                                       // Name
     std::string                                       nameSignature;                              // Name without namespaces + parameters list (commas only). For example, foo(,,)
     std::string                                       returnType;                                 // Return type without whitespaces
@@ -94,13 +96,15 @@ private:
     std::string                                       parameterList;                              // Parameter list
     std::string                                       unitLanguage;                               // Unit language
     std::string                                       xpath;                                      // Unique xpath
-    std::string                                       srcML;                                      // Method srcML
+    std::string                                       constructorOrDestructor;                    // Method is a constructor or a destructor
     std::vector<variable>                             parametersOrdered;                          // List of all parameters (Needed in order to build the parameters map)
     std::vector<variable>                             localsOrdered;                              // List of all local (Needed in order to build the locals map)     
     std::unordered_map<std::string, variable>         parameters;                                 // Map of all parameters. Key is parameter name
     std::unordered_map<std::string, variable>         locals;                                     // Map of all locals. Key is local name         
     std::string                                       classNameParsed;                            // Class name without whitespaces, namespaces, and generic types <>
     std::unordered_set<std::string>                   variablesCreatedWithNew;                    // List of variables that are declared/initialized with the "new" operator
+    std::unordered_set<std::string>                   expressionNames;                            // List of names of expressions in a method
+    std::unordered_set<std::string>                   expressionAssignments;                      // List of assignments of expressions in a method
     std::vector<std::string>                          stereotype;                                 // Method stereotype
     std::vector<call>                                 functionCalls;                              // List of function calls (e.g., foo()) to methods in class
     std::vector<call>                                 methodCalls;                                // List of method calls (e.g., a.foo()) where 'a' is an data member
@@ -121,8 +125,8 @@ private:
     bool                                              nonPrimitiveLocalExternal{false};           // True if method uses at least 1 a non-primitive local that is not of the same type as class   
     bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as class                                                
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
-    bool                                              constructorOrDestructor{false};             // Method is a constructor or a destructor
     bool                                              variableCreatedWithNewAndReturned{false};   // There is at least 1 return expression that returns a data member, a local, a parameter, a static, or a global created with the 'new' operator 
+    bool                                              isProperty{false};                          // Is it a property? (C# only)
     int                                               unitNumber{-1};                             // srcML Unit number   
     int                                               dataMembersModifiedCount{0};                // Number of modified data members
     int                                               externalFunctionCallsCount{0};              // Number of function calls that are filtered (removed)

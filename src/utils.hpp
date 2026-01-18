@@ -26,6 +26,5 @@ void                            Ltrim                         (std::string&);
 void                            Rtrim                         (std::string&);
 void                            removeNamespace               (std::string&, std::string_view, bool);
 void                            removeBetweenComma            (std::string& s, bool);
-void                            srcmlBackwardCompatibility    (std::string&);
 
 #endif

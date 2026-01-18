@@ -14,16 +14,20 @@
 #include "TypeSpecifiers.hpp"
 #include "XPathBuilder.hpp"
 
+
+srcml_archive*                     archive{srcml_archive_create()};
+srcml_archive*                     outputArchive{srcml_archive_create()};
+
 primitiveTypes                     PRIMITIVES;
 ignorableCalls                     IGNORED_CALLS;
 typeSpecifiers                     TYPE_SPECIFIERS;
 int                                METHODS_PER_CLASS_THRESHOLD = 21;
-bool                               FREE_FUNCTION                   = false;
-bool                               STRUCT                          = false;
-bool                               INTERFACE                       = false;
-bool                               UNION                           = false;
-bool                               ENUM                            = false;
-bool                               IS_VERBOSE                      = false;
+bool                               FREE_FUNCTION{false};
+bool                               STRUCT{false};
+bool                               INTERFACE{false};
+bool                               UNION{false};
+bool                               ENUM{false};
+bool                               IS_VERBOSE{false};
 
 std::unordered_map
      <int, std::unordered_map
@@ -38,13 +42,13 @@ int main (int argc, char const *argv[]) {
     std::string         ignoredCallsFile;
     std::string         typeSpecifiersFile;
     std::string         outputFile;
-    bool                outputTxtReport    = false;
-    bool                outputCsvReport    = false;
-    bool                overWriteInput     = false;
-    bool                reDocComment       = false;
+    bool                outputTxtReport{false};
+    bool                outputCsvReport{false};
+    bool                overWriteInput{false};
+    bool                reDocComment{false};
+    bool                error{false};
 
-    CLI::App app{"Stereocode: Determines method and class stereotypes\n"
-                 "Supports C, C++, C#, and Java\n" };
+    CLI::App app{"Stereocode: Determines method and class stereotypes\nSupports C, C++, C#, and Java\n" };
     
     app.add_option("input-archive",            inputFile,                        "File name of srcML input archive")->required();
     app.add_option("-o,--output-file",         outputFile,                       "File name of srcML output archive with stereotypes");
@@ -72,7 +76,7 @@ int main (int argc, char const *argv[]) {
             in >> PRIMITIVES;
         else {
             std::cerr << "Error: Primitive types file not found: " << primitivesFile << '\n';
-            return -1;
+            error = true;
         }
         in.close();
     }
@@ -84,7 +88,7 @@ int main (int argc, char const *argv[]) {
             in >> IGNORED_CALLS;
         else {
             std::cerr << "Error: Ignorable calls file not found: " << ignoredCallsFile << '\n';
-            return -1;
+            error = true;
         }
         in.close();
     }
@@ -96,35 +100,36 @@ int main (int argc, char const *argv[]) {
             in >> TYPE_SPECIFIERS;
         else {
             std::cerr << "Error: Type specifiers file not found: " << typeSpecifiersFile << '\n';
-            return -1;
+            error = true;
         }
         in.close();
     }
 
-    srcml_archive* archive = srcml_archive_create();
-    int error = srcml_archive_read_open_filename(archive, inputFile.c_str());   
-    if (error) {
-        std::cerr << "Error: File not found: " << inputFile << ", error == " << error << '\n';
-        srcml_archive_free(archive);
-        return -1;
+    if (srcml_archive_read_open_filename(archive, inputFile.c_str())) {
+        std::cerr << "Error: File not found: " << inputFile << '\n';
+        error = true;
     }
 
-    // Default output file name if output a name is not specified by the user
+    // Default output file name if output name is not specified by the user. 
+    // Must come before opening the output archive.
     if (outputFile.empty()) {                                             
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);     
         outputFile = InputFileNoExt + ".stereotypes.xml";     
     }  
 
-    srcml_archive* outputArchive = srcml_archive_create();
-    error = srcml_archive_write_open_filename(outputArchive, outputFile.c_str());
-    if (error) {
+    if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
         std::cerr << "Error opening: " << outputFile << std::endl;
+        error = true;
+    }
+
+    if (error) {
         srcml_archive_close(archive);
+        srcml_archive_close(outputArchive);
         srcml_archive_free(archive);
         srcml_archive_free(outputArchive);
-        return -1;
+        exit(1);
     }
-    
+
     // Register namespaces for output
     srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
     std::size_t size = srcml_archive_get_namespace_size(archive);
@@ -137,7 +142,7 @@ int main (int argc, char const *argv[]) {
     
     // Find stereotypes
     XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
-    classModelCollection classObj(archive, outputArchive, inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
+    classModelCollection classModelCollections(inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
 
     if (overWriteInput) {
         std::filesystem::remove(inputFile);
