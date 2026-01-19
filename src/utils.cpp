@@ -2,19 +2,23 @@
 /**
  * @file utils.cpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
+#include <regex>
+#include <cctype>
 #include "utils.hpp"
+#include "PrimitiveTypes.hpp"
+#include "TypeSpecifiers.hpp"
 
-extern primitiveTypes                        PRIMITIVES;   
-extern typeModifiers                         TYPE_MODIFIERS;  
+extern primitiveTypes PRIMITIVES;   
+extern typeSpecifiers TYPE_SPECIFIERS;  
 
-void checkNonPrimitiveType(const std::string& type, variable& var, 
-                           const std::string& unitLanguage, 
-                           const std::string& className) {
+// Checks if type is non-primitive and sets variable attributes accordingly
+//
+void checkNonPrimitiveType(const std::string& type, variable& var, const std::string& unitLanguage, const std::string& className) {
     std::string typeParsed = type;
 
     std::size_t listOpen = typeParsed.find("<");
@@ -28,7 +32,8 @@ void checkNonPrimitiveType(const std::string& type, variable& var,
         typeParsed = typeLeft + typeRight;
     }
 
-    removeTypeModifiers(typeParsed, unitLanguage); // Can take full type as is
+    removeTypeSpecifiers(typeParsed, unitLanguage); // Can take full type as is
+    removeBracketSuffix(typeParsed);
     trimWhitespace(typeParsed);  // Can take full type as is
      
     std::size_t start = 0;
@@ -72,27 +77,34 @@ bool isPrimitiveType(const std::string& type, const std::string& unitLanguage) {
 // A word boundary character is a character that is not from these [A-Z, a-z, 0-9,  _]
 //
 bool matchSubstringAtBeginning(const std::string& text, const std::string& substring) {
-    const std::string pattern = "^\\b" + substring + "\\b";
-    const std::regex regexPattern(pattern);
-    std::smatch match;
-    return std::regex_search(text, match, regexPattern);
+    // 1. Fail fast if text is shorter than substring
+    if (text.size() < substring.size()) return false;
+
+    // 2. Check prefix match (0 = match)
+    if (text.compare(0, substring.size(), substring) != 0) return false;
+
+    // 3. Check Word Boundary
+    // We check the char *after* the substring
+    // If text == substring, this hits the null terminator '\0', which is safe and passes the check
+    char nextChar = text[substring.size()];
+    return !isalnum(nextChar) && nextChar != '_';
 }
 
 // Removes specifiers from type name
 //
-void removeTypeModifiers(std::string& type, std::string unitLanguage) {
-    std::regex regexPattern(TYPE_MODIFIERS.getTypeModifiers(unitLanguage));
-    type = std::regex_replace(type, regexPattern, " ");
-}
+void removeTypeSpecifiers(std::string& type, std::string unitLanguage) {
+    static const std::regex cppPattern(TYPE_SPECIFIERS.getTypeSpecifiers("C++"));
+    static const std::regex javaPattern(TYPE_SPECIFIERS.getTypeSpecifiers("Java"));
+    static const std::regex csharpPattern(TYPE_SPECIFIERS.getTypeSpecifiers("C#"));
 
-// Function that removes everything starting at '[' and then trims right whitespace
-//
-void removeBracketSuffix(std::string& text) {
-    std::size_t startPosition = text.find("[");
-    if (startPosition != std::string::npos) {
-        text = text.substr(0, startPosition);
-        Rtrim(text);
-    }
+    // Select the correct pointer
+    const std::regex* currentPattern = nullptr;
+    if (unitLanguage == "C++") currentPattern = &cppPattern;
+    else if (unitLanguage == "Java") currentPattern = &javaPattern;
+    else if (unitLanguage == "C#") currentPattern = &csharpPattern;
+    
+    // Apply
+    if (currentPattern) type = std::regex_replace(type, *currentPattern, " ");
 }
 
 // Function that removes the leading asterisks
@@ -114,6 +126,16 @@ void Rtrim(std::string& s) {
     std::size_t lastNonSpace = s.find_last_not_of(' ');
     if (lastNonSpace != std::string::npos)
         s = s.substr(0, lastNonSpace + 1);   
+}
+
+// Function that removes everything starting at '[' and then trims right whitespace
+//
+void removeBracketSuffix(std::string& text) {
+    std::size_t startPosition = text.find("[");
+    if (startPosition != std::string::npos) {
+        text = text.substr(0, startPosition);
+        Rtrim(text);
+    }
 }
 
 // Removes namespaces by finding the last :: or . and removing everything after it
@@ -154,44 +176,17 @@ void removeBetweenComma(std::string& s, bool isGeneric) {
         
         // This could be nested inside () or <> for types
         // <[^>]*> --> starts at <, then matches everything except > and stops at > including the >
-        std::string pattern = R"(<[^>]*>)";  
-        std::regex regexPattern(pattern);
-        s = std::regex_replace(s, regexPattern, "");  
+        static const std::regex nestedPattern(R"(<[^>]*>)");
+        s = std::regex_replace(s, nestedPattern, "");  
         
-        pattern = "";
-        if (isGeneric)
-          pattern = R"(([^,]*)(,|>))";
-        else
-          pattern = R"(([^,]*)(,|\)))";
-        
-        const std::regex regexPatternTwo (pattern);
-        s = std::regex_replace(s, regexPatternTwo, "$2"); // $2 is used to replace the content with the second group
+        // The comma splitters
+        static const std::regex genericSplit(R"(([^,]*)(,|>))");
+        static const std::regex functionSplit(R"(([^,]*)(,|\)))");
+
+        // Select and Apply
+        const std::regex& currentPattern = isGeneric ? genericSplit : functionSplit;
+        s = std::regex_replace(s, currentPattern, "$2");  // $2 is used to replace the content with the second group
+
         s = name + s;
-    }
-}
-
-// Workaround to get Stereocode to work with srcML 1.0.0
-// It works by removing the item= attribute, which has an issue in srcML 1.0.0
-//
-void srcmlBackwardCompatibility(std::string& xmlText) {
-    const std::vector<std::string> tags = {"><property", "><constructor", "><destructor", "><function"};
-
-    std::size_t pos = std::string::npos;
-    for (const auto& tag : tags) {
-        pos = xmlText.find(tag);
-        if (pos != std::string::npos) {
-            break;
-        }
-    }
-
-    if (pos != std::string::npos) { 
-        std::string beforeFunction = xmlText.substr(0, pos);
-        std::string afterFunction = xmlText.substr(pos);
-        std::size_t item = beforeFunction.find("item=");
-        if (item != std::string::npos) {}
-            beforeFunction = beforeFunction.substr(0, item);
-
-        beforeFunction.pop_back();
-        xmlText = beforeFunction + afterFunction;
     }
 }

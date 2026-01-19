@@ -2,7 +2,7 @@
 /**
  * @file ClassModelCollection.hpp
  *
- * @copyright Copyright (C) 2021-2024 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -10,26 +10,24 @@
 #ifndef CLASSMODELCOLLECTION_HPP
 #define CLASSMODELCOLLECTION_HPP
 
-#include <thread>
-#include <iomanip> 
+#include <srcml.h>
+#include <map>
 #include <mutex>
-#include <filesystem>
 #include "ClassModel.hpp"
-#include "stereotypes.hpp"
 
 class classModelCollection {
 public:
-                         classModelCollection           (srcml_archive*, srcml_archive*, const std::string&, const std::string&, bool, bool, bool);
+                         classModelCollection           (const std::string&, const std::string&, bool, bool, bool);
 
-    void                 findClassInfo                  (srcml_archive*, srcml_unit*, int);
-    void                 findFreeFunctions              (srcml_archive*, srcml_unit*, int);
+    void                 findClassInfo                  (int);
+    void                 findFreeFunctions              (int);
     void                 findInheritedDataMembers       (classModel&);
     void                 findInheritedMethods           (classModel&);
 
-    void                 outputWithStereotypes          (srcml_unit*, std::map<int, srcml_unit*>&,
-                                                         int, const std::unordered_map<std::string, std::string>&,  
+    void                 annotateWithStereotypes        (srcml_unit*, std::map<int, srcml_unit*>&,
+                                                          int, const std::unordered_map<std::string, std::string>&,  
                                                          std::unordered_map<int, srcml_transform_result*>&, std::mutex&);
-    void                 outputAsComments               (srcml_unit*, srcml_archive*) ;                            
+    void                 outputAsComments               (srcml_unit*) ;                            
     void                 outputTxtReportFile            (std::stringstream&, classModel*);
     void                 outputCsvReportFile            (std::ofstream&, classModel*);
     void                 outputCsvVerboseReportFile     (const std::string&);

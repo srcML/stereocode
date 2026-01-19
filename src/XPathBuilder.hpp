@@ -2,7 +2,7 @@
 /**
  * @file XPathBuilder.hpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -14,13 +14,13 @@
 #include <unordered_map>
 
 class XPathBuilder {
-private:
-    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> xpathTable;
-
 public:
-          void         generateXpath ();
+        void         generateXpath ();
+  const std::string& getXpath      (const std::string&, const std::string&);
 
-    const std::string& getXpath      (const std::string&, const std::string&);
+private:
+  std::unordered_map<std::string, std::unordered_map<std::string, std::string>> xpathTable;
 };
 
 #endif
+

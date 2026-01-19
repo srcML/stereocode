@@ -2,7 +2,7 @@
 /**
  * @file stereotypes.cpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -19,7 +19,6 @@ extern int                           METHODS_PER_CLASS_THRESHOLD;
 void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, classModel>& classCollection) {
     for (auto& pair : classCollection) {
         // Common operations
-        const std::vector<std::string>& className = pair.second.getName();
         const std::string& classUnitLanguage      = pair.second.getUnitLanguage();
         int constructorDestructorCount            = 0;
         std::vector<methodModel>& methods         = pair.second.getMethods();
@@ -54,15 +53,14 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
             
             // constructor copy-constructor destructor
             //
-            if (m.isConstructorOrDestructor()) {  
+            if (!m.getConstructorOrDestructor().empty()) {  
                 ++constructorDestructorCount;
 
-                const std::string& parameterList = m.getParameterList();
-                const std::string& srcML         = m.getSrcML();
+                const std::string& constructorOrDestructor = m.getConstructorOrDestructor();
     
-                if      (srcML.find("<destructor>") != std::string::npos      ) m.setStereotype ("destructor"      ); 
-                else if (parameterList.find(className[3]) != std::string::npos) m.setStereotype ("copy-constructor");
-                else                                                            m.setStereotype ("constructor"     );
+                if      (constructorOrDestructor == "destructor"      ) m.setStereotype ("destructor"      ); 
+                else if (constructorOrDestructor == "copy-constructor") m.setStereotype ("copy-constructor");
+                else                                                    m.setStereotype ("constructor"     );
             }
             // empty
             //
@@ -220,6 +218,7 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 2] Type could be a parameter, local variable, return type, or an data member
                 //
                 //
+
                 if ((dataMembersModifiedCount == 0) && (callsOnClassMethodsCount == 0) && (callsOnDataMembersCount == 0) 
                     && (callsToOtherClassMethods == 0) && (callsOnFreeFunctionsCount > 0)) 
                     m.setStereotype("wrapper");
@@ -301,7 +300,7 @@ void stereotypes::computeClassStereotypes(std::unordered_map<std::string, classM
         const std::vector<methodModel>& methods           = pair.second.getMethods();
         int                             nonCollaborators  = 0;
         for (const auto& m : methods) {      
-            if (!m.isConstructorOrDestructor()) {
+            if (m.getConstructorOrDestructor().empty()) {
                 for (const std::string& s : m.getStereotypeList()) methodStereotypes[s]++;
             
                 std::string methodStereotype = m.getStereotype();

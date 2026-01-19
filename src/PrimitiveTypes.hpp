@@ -2,7 +2,7 @@
 /**
  * @file PrimitiveTypes.hpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -11,11 +11,8 @@
 #define PRIMITIVETYPES_HPP
 
 #include <string>
-#include <fstream>
 #include <unordered_set>
 #include <unordered_map>
-#include <vector>
-#include <iostream>
 
 class primitiveTypes {
 public:

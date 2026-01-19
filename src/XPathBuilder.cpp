@@ -2,7 +2,7 @@
 /**
  * @file XPathBuilder.cpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -28,10 +28,7 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/src:name";
     xpathTable[language]["class_name"] = xpath;
 
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/text()[1]";
-    xpathTable[language]["class_type"] = xpath;   
-
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super";
+    xpath = "/src:unit/src:*[self::src:class or self::src:struct]/src:super_list/src:super/src:name";
     xpathTable[language]["parent_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
@@ -50,7 +47,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["name"] = xpath; 
+    xpathTable[language]["method_name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor or self::src:destructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -67,12 +64,10 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
     xpathTable[language]["method_return_type"] = xpath; 
 
-    xpath = "//src:decl_stmt/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpath += " | //src:control/src:init/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
+    xpath ="//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathTable[language]["local_variable_name"] = xpath; 
 
-    xpath = "//src:decl_stmt/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpath += " | //src:control/src:init/src:decl/src:type[following-sibling::*[1][self::src:name]]";
+    xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathTable[language]["local_variable_type"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
@@ -103,8 +98,10 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["constructor_call_arglist"] = xpath; 
 
     xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
-    xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
-    xpathTable[language]["new_operator_assign"] = xpath; 
+    xpathTable[language]["new_operator_assign_decl_stmt"] = xpath;  
+
+    xpath = "//src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
+    xpathTable[language]["new_operator_assign_expr_stmt"] = xpath; 
 
     xpath = "/src:unit/src:function/src:specifier[.='const']";
     xpathTable[language]["const"] = xpath; 
@@ -139,11 +136,8 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:name";
     xpathTable[language]["class_name"] = xpath;
 
-    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/text()[1]";
-    xpathTable[language]["class_type"] = xpath;   
-
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
-    xpathTable[language]["parent_name"] = xpath;  
+    xpathTable[language]["parent_name"] = xpath;
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
@@ -173,7 +167,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["name"] = xpath; 
+    xpathTable[language]["method_name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor or self::src:destructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -190,23 +184,20 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
     xpathTable[language]["method_return_type"] = xpath; 
 
-    xpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpath += " | //src:control/src:init/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
+    xpath ="//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
     xpathTable[language]["local_variable_name"] = xpath; 
 
-    xpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpath += " | //src:control/src:init/src:decl/src:type[following-sibling::*[1][self::src:name]]";
+    xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
     xpathTable[language]["local_variable_type"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpathTable[language]["parameter_name"] = xpath; 
+    xpathTable[language]["parameter_name"] = xpath;
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathTable[language]["parameter_type"] = xpath; 
+    xpathTable[language]["parameter_type"] = xpath;
 
     xpath = "//src:return[count(ancestor::src:function) = 1]/src:expr";
-
-    xpathTable[language]["return_expression"] = xpath; 
+    xpathTable[language]["return_expression"] = xpath;
 
     xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathTable[language]["function_call_name"] = xpath;  
@@ -227,8 +218,10 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["constructor_call_arglist"] = xpath;
 
     xpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
-    xpath += " | //src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
-    xpathTable[language]["new_operator_assign"] = xpath;  
+    xpathTable[language]["new_operator_assign_decl_stmt"] = xpath;  
+
+    xpath = "//src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
+    xpathTable[language]["new_operator_assign_expr_stmt"] = xpath;  
 
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["non_comment_statements"] = xpath; 
@@ -260,11 +253,8 @@ void XPathBuilder::generateXpath() {
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:name";
     xpathTable[language]["class_name"] = xpath;
 
-    xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/text()[1]";
-    xpathTable[language]["class_type"] = xpath;   
-
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:super_list/*[self::src:extends or self::src:implements]/src:super/src:name";
-    xpathTable[language]["parent_name"] = xpath;  
+    xpathTable[language]["parent_name"] = xpath; 
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
@@ -282,7 +272,7 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["free_function"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
-    xpathTable[language]["name"] = xpath; 
+    xpathTable[language]["method_name"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor]/src:name";
     xpathTable[language]["constructor_destructor_name"] = xpath; 
@@ -297,21 +287,19 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["method_parameter_list"] = xpath; 
     
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
-    xpathTable[language]["method_return_type"] = xpath; 
+    xpathTable[language]["method_return_type"] = xpath;
 
-    xpath = "//src:decl_stmt/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpath += " | //src:control/src:init/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
+    xpath ="//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathTable[language]["local_variable_name"] = xpath; 
-    
-    xpath = "//src:decl_stmt/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpath += " | //src:control/src:init/src:decl/src:type[following-sibling::*[1][self::src:name]]";
+
+    xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathTable[language]["local_variable_type"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
     xpathTable[language]["parameter_name"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathTable[language]["parameter_type"] = xpath; 
+    xpathTable[language]["parameter_type"] = xpath;
 
     xpath = "//src:return/src:expr";
     xpathTable[language]["return_expression"] = xpath; 
@@ -335,8 +323,10 @@ void XPathBuilder::generateXpath() {
     xpathTable[language]["constructor_call_arglist"] = xpath;
 
     xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
-    xpath += " | //src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
-    xpathTable[language]["new_operator_assign"] = xpath; 
+    xpathTable[language]["new_operator_assign_decl_stmt"] = xpath;  
+
+    xpath = "//src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
+    xpathTable[language]["new_operator_assign_expr_stmt"] = xpath; 
 
     xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathTable[language]["non_comment_statements"] = xpath; 

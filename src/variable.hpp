@@ -2,7 +2,7 @@
 /**
  * @file variable.hpp
  *
- * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
@@ -10,7 +10,7 @@
 #ifndef VARIABLE_HPP
 #define VARIABLE_HPP
 
-#include "utils.hpp"
+#include <string>
 
 // Used to store fields, locals, and parameters
 //

@@ -7,7 +7,20 @@
  * This file is part of the Stereocode application.
  */
 
+#include <fstream>
+#include <srcml.h>
+#include <thread>
+#include <sstream>
+#include <filesystem>
+#include <iostream>
+#include <cstring>
 #include "ClassModelCollection.hpp"
+#include "stereotypes.hpp"
+#include "PrimitiveTypes.hpp"
+#include "IgnorableCalls.hpp"
+#include "TypeSpecifiers.hpp"
+#include "XPathBuilder.hpp"
+#include "utils.hpp"
 
 extern XPathBuilder                  XPATH_TRANSFORMATION;  
 extern std::unordered_map
@@ -15,55 +28,83 @@ extern std::unordered_map
        <std::string, std::string>>   XPATH_LIST;   
 extern primitiveTypes                PRIMITIVES;
 extern ignorableCalls                IGNORED_CALLS;
-extern typeModifiers                 TYPE_MODIFIERS;  
+extern typeSpecifiers                TYPE_SPECIFIERS;  
 extern bool                          IS_VERBOSE;
 extern bool                          FREE_FUNCTION;
 
-classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive* outputArchive,
-                                                    const std::string& inputFile, const std::string& outputFile, 
-                                                    bool outputTxtReport, bool outputCsvReport, bool reDocComment) {  
+srcml_archive*                       archive{srcml_archive_create()};
+srcml_archive*                       outputArchive{srcml_archive_create()};
+srcml_unit*                          unit{nullptr};
+srcml_archive*                       classArchive{nullptr};
+srcml_unit*                          classUnit{nullptr};
+srcml_unit*                          methodUnit{nullptr};
+srcml_archive*                       methodArchive{nullptr};
+
+classModelCollection::classModelCollection(const std::string& inputFile, const std::string& outputFile, bool outputTxtReport, bool outputCsvReport, bool reDocComment) {  
+    bool error{false};
+    
+    if (srcml_archive_read_open_filename(archive, inputFile.c_str())) {
+        std::cerr << "Error: File not found: " << inputFile << '\n';
+        error = true;
+    }
+
+    if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
+        std::cerr << "Error opening: " << outputFile << std::endl;
+        error = true;
+    }
+
+    if (error) {
+        srcml_archive_close(archive);
+        srcml_archive_close(outputArchive);
+        srcml_archive_free(archive);
+        srcml_archive_free(outputArchive);
+        exit(1);
+    }
+
+    // Register namespaces for output
+    srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
+    std::size_t size = srcml_archive_get_namespace_size(archive);
+    for (std::size_t i = 0; i < size; i++) {
+        if (strcmp(srcml_archive_get_namespace_prefix(archive, i), "pos")  == 0) {
+            srcml_archive_register_namespace(outputArchive, "pos", "http://www.srcML.org/srcML/position");
+            break;
+        }
+    }
+
     PRIMITIVES.createPrimitiveList();
     IGNORED_CALLS.createCallList();
-    TYPE_MODIFIERS.createModifierList();
+    TYPE_SPECIFIERS.createSpecifierList();
 
     if (IS_VERBOSE) {
         PRIMITIVES.outputPrimitives();
         IGNORED_CALLS.outputCalls();
-        TYPE_MODIFIERS.outputModifiers();
+        TYPE_SPECIFIERS.outputSpecifiers();
     }
         
     // Analyze one unit at a time
-    srcml_unit* unit = srcml_archive_read_unit(archive);
+    unit = srcml_archive_read_unit(archive);
     int unitNumber = 1; // Count starts at 1 in XPath
     while (unit){
-        findClassInfo(archive, unit, unitNumber); 
-        findFreeFunctions(archive, unit, unitNumber);
+        findClassInfo(unitNumber); 
+        findFreeFunctions(unitNumber);
 
         srcml_unit_free(unit); 
         ++unitNumber;
         unit = srcml_archive_read_unit(archive);
     }
-
+    srcml_archive_close(archive);
+    srcml_archive_free(archive); // Closing alone is not enough for reopening. Freeing and recreating is needed.
+    
     // Performed after the collection of all classes and free functions
     analyzeFreeFunctions();
 
+    // Build signatures for findInheritedMethods()
+    for (auto& pair : classCollection) 
+        pair.second.buildMethodSignature();
+    
     // Finds inherited data members
     for (auto& pair : classCollection) {
         findInheritedDataMembers(pair.second);
-        pair.second.setInherited(true);
-        for (auto& pairS : classCollection)
-            pairS.second.setVisited(false);
-    } 
-
-    // Resets inheritance and build signatures for findInheritedMethods()
-    for (auto& pair : classCollection) {
-        pair.second.setInherited(false); 
-        pair.second.buildMethodSignature();
-    }
-        
-    // Finds inherited methods
-    for (auto& pair : classCollection) {
-        findInheritedMethods(pair.second);
         pair.second.setInherited(true);
         for (auto& pairS : classCollection)
             pairS.second.setVisited(false);
@@ -73,7 +114,7 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
     for (auto& pair : classCollection) {
         std::vector<methodModel>& methods = pair.second.getMethods();
         for (auto& m : methods)
-             m.findData(pair.second.getDataMembers(), pair.second.getMethodSignatures(), pair.second.getName()[3]);                         
+             m.findDataAfterCollection(pair.second.getDataMembers(), pair.second.getMethodSignatures());                         
     }
 
     // Compute stereotypes here
@@ -83,7 +124,7 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
 
     // Analyze and compute stereotypes for free functions
     if (FREE_FUNCTION) {
-        for (auto& f : freeFunctions) f.findFreeFunctionData();
+        for (auto& f : freeFunctions) f.findDataFreeFunctionAfterCollection();
         stereotypesObj.computeFreeFunctionsStereotypes(freeFunctions);
     }
     
@@ -134,9 +175,6 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
     unsigned int nthreads = std::thread::hardware_concurrency();
 
     // Read all units in the archive again for output generation
-    srcml_archive_close(archive);
-    srcml_archive_free(archive);
-
     archive = srcml_archive_create();
     srcml_archive_read_open_filename(archive, inputFile.c_str()); 
     unit = srcml_archive_read_unit(archive);
@@ -144,8 +182,8 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
     while (unit){
         while ((threadPoolCount < nthreads) && unit) {
             units.push_back(unit);
-            threads.push_back(std::thread(&classModelCollection::outputWithStereotypes, this, 
-                                        unit, std::ref(transformedUnits), unitNumberCount,  
+            threads.push_back(std::thread(&classModelCollection::annotateWithStereotypes, this, 
+                                        units.back(), std::ref(transformedUnits), unitNumberCount,  
                                         std::ref(XPATH_LIST[unitNumberCount]), std::ref(results), std::ref(mu)));
 
             unit = srcml_archive_read_unit(archive);
@@ -158,7 +196,9 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
         threads.clear();
 
         // Write output
-        for (const auto& pair : transformedUnits) srcml_archive_write_unit(outputArchive, pair.second); 
+        for (const auto& pair : transformedUnits)
+            srcml_archive_write_unit(outputArchive, pair.second); 
+
         transformedUnits.clear();
 
         // Clean
@@ -171,26 +211,21 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
         threadPoolCount = 0;       
     }
 
-    srcml_archive_close(outputArchive);
-    srcml_archive_free(outputArchive);   
     srcml_archive_close(archive);
-    srcml_archive_free(archive);
-
+    srcml_archive_close(outputArchive); 
+    
     // Annotate as comments
     if (reDocComment){
         std::string temp = outputFile + ".temp.xml";
 
-        archive = srcml_archive_create();
         srcml_archive_read_open_filename(archive, outputFile.c_str());  
-
-        outputArchive = srcml_archive_create();
         srcml_archive_write_open_filename(outputArchive, temp.c_str());
         srcml_archive_register_namespace(outputArchive, "st", "http://www.srcML.org/srcML/stereotype"); 
 
         unit = srcml_archive_read_unit(archive);
 
         while (unit) {
-            outputAsComments(unit, outputArchive);
+            outputAsComments(unit);
             srcml_unit_free(unit);
             unit = srcml_archive_read_unit(archive);
         }
@@ -200,8 +235,10 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
 
         srcml_archive_close(archive); 
         srcml_archive_close(outputArchive);
-        srcml_archive_free(outputArchive);   
+
     }
+    srcml_archive_free(archive);
+    srcml_archive_free(outputArchive);
 }
 
 // Finds classs in an archive
@@ -238,20 +275,22 @@ classModelCollection::classModelCollection(srcml_archive* archive, srcml_archive
 //   Static classes in java can contain non-static data members or methods
 //   They are ignored (since they are nested) and their methods (only if static) are collected as free functions
 //  Anonymous classes (classes without names and are nested as instances) are ignored
-void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
-    std::string unitLanguage = srcml_unit_get_language(unit);   
+//
+void classModelCollection::findClassInfo(int unitNumber) {
+    std::string unitLanguage = srcml_unit_get_language(unit);
+    if (unitLanguage == "C") { unitLanguage = "C++"; } // Quick hack. C is a simple case of C++, so we can process it as C++.
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage, "class").c_str()); 
-
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
         int n = srcml_transform_get_unit_size(result);
         srcml_unit* resultUnit = nullptr;
-        for (int i = 0; i < n; i++) {    
-            resultUnit = srcml_transform_get_unit(result, i);
-            srcml_archive* classArchive = srcml_archive_create();
-            srcml_archive_register_namespace(classArchive, "pos", "http://www.srcML.org/srcML/position"); // Needed for input with positions enabled
 
+        for (int i = 0; i < n; i++) {
+            resultUnit = srcml_transform_get_unit(result, i);
+
+            classArchive = srcml_archive_create();
+            srcml_archive_register_namespace(classArchive, "pos", "http://www.srcML.org/srcML/position");
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(classArchive, &unparsed, &size);
@@ -261,29 +300,31 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
 
             classArchive = srcml_archive_create();
             srcml_archive_read_open_memory(classArchive, unparsed, size);
-            srcml_unit* unitClass = srcml_archive_read_unit(classArchive);
+            classUnit = srcml_archive_read_unit(classArchive);
+
             std::string classXpath = "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage, "class") + ")[" + std::to_string(i + 1) + "]";
-            classModel c(classArchive, unitClass, unitLanguage); 
+            classModel c(unitLanguage); 
 
             // Needed for partial classs in C#
-            if (classCollection.find(c.getName()[1]) != classCollection.end())
+            const std::string& classNameTrimmed = c.getName()[1];
+            if (classCollection.find(classNameTrimmed) != classCollection.end())
                 // Append the partial class data to the existing partial class
-                classCollection.at(c.getName()[1]).findData(classArchive, unitClass, classXpath, unitNumber);
+                classCollection.at(classNameTrimmed).findData(classXpath, unitNumber);
             else {
-                c.findData(classArchive, unitClass, classXpath, unitNumber);      
-                classCollection.insert({c.getName()[1], c});  
+                c.findData(classXpath, unitNumber);      
+                classCollection.insert({classNameTrimmed, c});  
             }                 
 
             // Needed for inheritance in Java and C#
             if (unitLanguage != "C++") classGenerics.insert({c.getName()[2], c.getName()[1]}); 
-            
+
             free(unparsed);
-            srcml_unit_free(unitClass);
+            srcml_unit_free(classUnit);
             srcml_archive_close(classArchive);
-            srcml_archive_free(classArchive);            
-        }   
+            srcml_archive_free(classArchive); 
+         }   
         srcml_transform_free(result);
-        srcml_clear_transforms(archive);   
+        srcml_clear_transforms(archive);
     }      
 }
 
@@ -310,44 +351,43 @@ void classModelCollection::findClassInfo(srcml_archive* archive, srcml_unit* uni
 //      Function could be a free function (including normal free functions, friend functions, static methods, methods defined for external classes)
 //          Foo(){}, namespace::Foo(){}, static Foo(){}, externalClass::Foo(){}, 
 //
-void classModelCollection::findFreeFunctions(srcml_archive* archive, srcml_unit* unit, int unitNumber) {
+void classModelCollection::findFreeFunctions(int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(unit); 
+    if (unitLanguage == "C") { unitLanguage = "C++"; }
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
         srcml_append_transform_xpath(archive, XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function").c_str());
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(archive, unit, &result);
         int n = srcml_transform_get_unit_size(result);  
-
         srcml_unit* resultUnit = nullptr;
+
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
-            srcml_archive* methodArchive = srcml_archive_create();
+
+            methodArchive = srcml_archive_create();
             srcml_archive_register_namespace(methodArchive, "pos", "http://www.srcML.org/srcML/position");
-            
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
             srcml_archive_write_unit(methodArchive, resultUnit);
             srcml_archive_close(methodArchive);
             srcml_archive_free(methodArchive);
-
+            
             methodArchive = srcml_archive_create();
             srcml_archive_read_open_memory(methodArchive, unparsed, size);
-            srcml_unit* methodUnit = srcml_archive_read_unit(methodArchive);
+            methodUnit = srcml_archive_read_unit(methodArchive);
 
-            std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage,"free_function") + ")[" + std::to_string(i + 1) + "]";
-            methodModel function(methodArchive, methodUnit, functionXpath, unitLanguage, "", unitNumber);
-
+            std::string functionXpath =  "(" + XPATH_TRANSFORMATION.getXpath(unitLanguage, "free_function") + ")[" + std::to_string(i + 1) + "]";
+            methodModel function(functionXpath, unitLanguage, "", "", unitNumber, false);
             freeFunctions.push_back(function);
 
-            free(unparsed); 
+            free(unparsed);
             srcml_unit_free(methodUnit);
             srcml_archive_close(methodArchive);
-            srcml_archive_free(methodArchive);
+            srcml_archive_free(methodArchive); 
         }
         srcml_transform_free(result);
-        srcml_clear_transforms(archive);            
-    
+        srcml_clear_transforms(archive);  
     }
 }
 
@@ -401,20 +441,19 @@ void classModelCollection::analyzeFreeFunctions() {
 void classModelCollection::findInheritedDataMembers(classModel& c) {
     const std::string& unitLanguage = c.getUnitLanguage();
     c.setVisited(true); 
-    const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
+    const std::unordered_set<std::string>& parentClassName =  c.getParentClassName();
 
-    for (const auto& pair : parentClassName){
-        std::string parClassName = pair.first;
+    for (std::string parClassName : parentClassName){
         auto result = classCollection.find(parClassName);
         if (result != classCollection.end()) {
             if (result->second.isInherited() && !result->second.isVisited()) {
-                c.appendInheritedDataMembers(result->second.getDataMembers()); 
+                c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedDataMembers(result->second);
-                c.appendInheritedDataMembers(result->second.getDataMembers());
+                c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
             }
         }       
         else {
@@ -423,13 +462,13 @@ void classModelCollection::findInheritedDataMembers(classModel& c) {
                 result = classCollection.find(parClassName);
                 if (result != classCollection.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
-                        c.appendInheritedDataMembers(result->second.getDataMembers());
+                        c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedDataMembers(result->second);
-                        c.appendInheritedDataMembers(result->second.getDataMembers());
+                        c.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
                     }
                 }              
             }
@@ -440,70 +479,12 @@ void classModelCollection::findInheritedDataMembers(classModel& c) {
                     auto resultM = classCollection.find(resultG->second);
                     if (resultM != classCollection.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            c.appendInheritedDataMembers(resultM->second.getDataMembers());
+                            c.appendInheritedDataMembers(resultM->second.getDataMembers(), resultM->second.getMethodSignatures());
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedDataMembers(resultM->second);
-                            c.appendInheritedDataMembers(resultM->second.getDataMembers());
-                        }
-                    }
-                }
-            }      
-        }         
-    }
-}
-
-// Finds inherited methods
-//
-void classModelCollection::findInheritedMethods(classModel& c) {   
-    const std::string& unitLanguage = c.getUnitLanguage();
-    c.setVisited(true); 
-    const std::unordered_map<std::string, std::string>& parentClassName =  c.getParentClassName();
-
-    for (const auto& pair : parentClassName){
-        std::string parClassName = pair.first;
-        auto result = classCollection.find(parClassName);
-        if (result != classCollection.end()) {
-            if (result->second.isInherited() && !result->second.isVisited()) {
-                c.appendInheritedMethod(result->second.getMethodSignatures()); 
-                result->second.setVisited(true);
-            }
-                
-            else if (!result->second.isVisited()) {
-                findInheritedMethods(result->second);                     
-                c.appendInheritedMethod(result->second.getMethodSignatures());  
-            }
-        }       
-        else {
-            if (unitLanguage == "C++") {
-                parClassName = parClassName.substr(0, parClassName.find("<"));
-                result = classCollection.find(parClassName);
-                if (result != classCollection.end()) {
-                    if (result->second.isInherited() && !result->second.isVisited()) {
-                        c.appendInheritedMethod(result->second.getMethodSignatures()); 
-                        result->second.setVisited(true);
-                    }
-                        
-                    else if (!result->second.isVisited()) {
-                        findInheritedMethods(result->second);                     
-                        c.appendInheritedMethod(result->second.getMethodSignatures()); 
-                    }
-                }              
-            }
-            else {  
-                removeBetweenComma(parClassName, true);
-                auto resultG = classGenerics.find(parClassName);
-                if (resultG != classGenerics.end()) {
-                    auto resultM = classCollection.find(resultG->second);
-                    if (resultM != classCollection.end()) {
-                        if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            c.appendInheritedMethod(resultM->second.getMethodSignatures());  
-                            resultM->second.setVisited(true);
-                        }
-                        else if (!resultM->second.isVisited()) {
-                            findInheritedMethods(resultM->second);                     
-                            c.appendInheritedMethod(resultM->second.getMethodSignatures());   
+                            c.appendInheritedDataMembers(resultM->second.getDataMembers(), resultM->second.getMethodSignatures());
                         }
                     }
                 }
@@ -745,20 +726,20 @@ void classModelCollection::outputCsvReportFile(std::ofstream& out, classModel* c
 //  Example: <function st:stereotype="get"> ... </function>
 //           <class st:stereotype="boundary"> ... ></class>
 //
-void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int, srcml_unit*>& transformedUnits,
+void classModelCollection::annotateWithStereotypes(srcml_unit* localUnit, std::map<int, srcml_unit*>& transformedUnits,
                                                 int unitNumber, const std::unordered_map<std::string, std::string>& xpathPair,
                                                 std::unordered_map<int, srcml_transform_result*>& results, std::mutex& mu) {  
-        srcml_archive* archive = srcml_archive_create();
+        srcml_archive* tempArchive = srcml_archive_create();
         bool transform = false;
         for (auto& pair : xpathPair) { 
-            srcml_append_transform_xpath_attribute(archive, pair.first.c_str(), "st",
+            srcml_append_transform_xpath_attribute(tempArchive, pair.first.c_str(), "st",
                                     "http://www.srcML.org/srcML/stereotype",
                                     "stereotype", pair.second.c_str());             
             transform = true;               
         }  
         if (transform) {
             srcml_transform_result* result = nullptr; 
-            srcml_unit_apply_transforms(archive, unit, &result);
+            srcml_unit_apply_transforms(tempArchive, localUnit, &result);
             srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);  
             {
                 std::lock_guard<std::mutex> guard(mu);
@@ -768,18 +749,18 @@ void classModelCollection::outputWithStereotypes(srcml_unit* unit, std::map<int,
         }
         else {
             std::lock_guard<std::mutex> guard(mu);
-            transformedUnits.insert({unitNumber, unit});
+            transformedUnits.insert({unitNumber, localUnit});
         }
              
-        srcml_clear_transforms(archive); 
-        srcml_archive_free(archive);
+        srcml_clear_transforms(tempArchive); 
+        srcml_archive_free(tempArchive);
 }
 
 // Inserts the stereotype as a comment before each function or class tag
 // For example, /** @stereotype get */
 // last_ws is used to preserve to the whitespace that precedes each function or class
 //
-void classModelCollection::outputAsComments(srcml_unit* unit, srcml_archive* outputArchive) {
+void classModelCollection::outputAsComments(srcml_unit* localUnit) {
     std::string xslt = R"**(<xsl:stylesheet
     xmlns="http://www.srcML.org/srcML/src"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -821,17 +802,17 @@ void classModelCollection::outputAsComments(srcml_unit* unit, srcml_archive* out
     </xsl:stylesheet>
     )**"; 
 
-    srcml_archive* archive = srcml_archive_create();
+    srcml_archive* tempArchive = srcml_archive_create();
     srcml_transform_result* result = nullptr; 
 
-    srcml_append_transform_xslt_memory(archive, xslt.c_str(), xslt.size());           
-    srcml_unit_apply_transforms(archive, unit, &result);
+    srcml_append_transform_xslt_memory(tempArchive, xslt.c_str(), xslt.size());           
+    srcml_unit_apply_transforms(tempArchive, localUnit, &result);
 
     srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);  
     srcml_archive_write_unit(outputArchive, resultUnit); 
     
     srcml_transform_free(result);  
-    srcml_clear_transforms(archive); 
-    srcml_archive_free(archive);
+    srcml_clear_transforms(tempArchive); 
+    srcml_archive_free(tempArchive);
 }
 
