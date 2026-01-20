@@ -20,8 +20,8 @@ extern XPathBuilder      XPATH_TRANSFORMATION;
 extern srcml_unit*       methodUnit;
 extern srcml_archive*    methodArchive;
 
-methodModel::methodModel(const std::string& xpath, const std::string& unitLanguage, const std::string& classNameParsed, const std::string& returnType, int unitNumber, bool isProperty) :
-                         returnType(returnType), unitLanguage(unitLanguage), xpath(xpath), classNameParsed(classNameParsed),  isProperty(isProperty), unitNumber(unitNumber) {
+methodModel::methodModel(const std::string& xpath_, const std::string& unitLanguage_, const std::string& classNameParsed_, const std::string& returnType_, int unitNumber_, bool isProperty_) :
+                         returnType{returnType_}, unitLanguage{unitLanguage_}, xpath{xpath_}, classNameParsed{classNameParsed_},  isProperty{isProperty_}, unitNumber{unitNumber_} {
 
 
     if (unitLanguage == "C++") findConst();

@@ -28,7 +28,7 @@ srcml_archive* propertyArchive{nullptr};
 //   refers to the class itself, which is a non-primitive type
 // However, it is not a non-primitive of external type, so that is left as false
 //
-classModel::classModel(const std::string& unitLanguage) : unitLanguage(unitLanguage) {
+classModel::classModel(const std::string& unitLanguage_) : unitLanguage{unitLanguage_} {
     findName();  
 
     variable v;

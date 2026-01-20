@@ -81,11 +81,9 @@ endif()
 
 # Turn on compiler warnings
 target_compile_options(stereocode PRIVATE
-    # MSVC (Windows) flags
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
-
-    # GCC / Clang (Linux/macOS) flags
-    $<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-Wall -Wextra -Wpedantic -Wshadow -Wunused>
+    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -Wpedantic -Wshadow -Wunused>
+    $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wpedantic -Wshadow-all -Wunused>
 )
 
 enable_testing()

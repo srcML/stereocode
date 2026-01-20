@@ -19,8 +19,15 @@ In addition, Stereocode stereotypes **free functions** as well as other structur
 - [srcML 1.1+](https://www.srcml.org/) (Including develop version for Linux)
 - [cmake 3.20+](https://cmake.org/)
 - Clang, GCC, or MSCV with C++17 or higher
+- Git and Git LFS (Optional)
 
-2. Clone or download this repository.
+2. Clone this repository.
+```bash
+git clone https://github.com/srcML/stereocode.git
+
+# If you need testing:
+git lfs pull
+```
 
 3. Build using cmake:
 
