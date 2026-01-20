@@ -289,8 +289,8 @@ void classModelCollection::findClassInfo(int unitNumber) {
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
 
-            classArchive = srcml_archive_create();
-            srcml_archive_register_namespace(classArchive, "pos", "http://www.srcML.org/srcML/position");
+            classArchive = srcml_archive_clone(archive);
+
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(classArchive, &unparsed, &size);
@@ -364,8 +364,8 @@ void classModelCollection::findFreeFunctions(int unitNumber) {
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
 
-            methodArchive = srcml_archive_create();
-            srcml_archive_register_namespace(methodArchive, "pos", "http://www.srcML.org/srcML/position");
+            methodArchive = srcml_archive_clone(archive);
+
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
