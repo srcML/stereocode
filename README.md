@@ -104,3 +104,17 @@ These specifiers, such as **public**, are removed during analysis to enhance the
 <span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)
 
 <span style='color: lightgreen;'>**-v, --verbose:**</span> Verbose output: default primitives, ignored calls, type specifiers, and extra .csv report files
+
+## 📓 Developer Notes
+
+The initial version of this code base was developed by Doleh and documented in his MS Thesis December 2021 at Kent State University. Later, Al-Ramadan re-wrote Stereocode, adding support for additional programming languages (i.e., C# and Java), enabling the stereotyping of complete systems, and incorporating deep static analysis. This work was also documented in his MS Thesis May 2024 at Kent State University and published at ICSME 2024 [1]. Previously, a prototype of **Stereocode** was developed by Collard and Dragan for Dragan's dissertation in December 2010 at KSU. This prototype was further extended for DySDoc 2018 by Decker and Collard. 
+
+Developers of Stereocode:
+- Ali Al-Ramadan - Kent State University
+- Michael L. Collard - University of Akron
+- Michael Decker - Bowling Green State University
+- Zane Doleh - Kent State University
+- Jonathan I. Maletic - Kent State University
+- Nick Weber - Kent State University
+
+[1] Al-Ramadan, A. F., Behler, J. A., Decker, M. J., Dragan, N., Collard, M. L., & Maletic, J. I. (2024, October). Stereocode: A Tool for Automatic Identification of Method and Class Stereotypes for Software Systems. In 2024 IEEE International Conference on Software Maintenance and Evolution (ICSME) (pp. 898-902). IEEE.
