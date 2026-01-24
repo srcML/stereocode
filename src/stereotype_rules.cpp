@@ -1,55 +1,54 @@
 // SPDX-License-Identifier: GPL-3.0-only
 /**
- * @file stereotypes.cpp
+ * @file stereotype_rules.cpp
  *
  * @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
  *
  * This file is part of the Stereocode application.
  */
 
-#include "stereotypes.hpp"
+#include "stereotype_rules.hpp"
+#include "helper_functions.hpp"
 
-extern std::unordered_map
-       <int, std::unordered_map
-       <std::string, std::string>>   XPATH_LIST;   
-extern int                           METHODS_PER_CLASS_THRESHOLD;
+std::unordered_map<int, std::unordered_map<std::string, std::string>>   XPATH_LIST;        // Map key = unit number. Each map value is a pair of xpath and stereotype  
+extern int                                                              METHODS_PER_TYPE_THRESHOLD;
 
 // Compute method stereotypes
 //
-void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, classModel>& classCollection) {
+void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, typeModel>& classCollection) {
     for (auto& pair : classCollection) {
         // Common operations
-        const std::string& classUnitLanguage      = pair.second.getUnitLanguage();
-        int constructorDestructorCount            = 0;
-        std::vector<methodModel>& methods         = pair.second.getMethods();
+        const std::string&          classUnitLanguage          = pair.second.getUnitLanguage();
+        int                         constructorDestructorCount = 0;
+        std::vector<functionModel>& methods                    = pair.second.getMethods();
 
         for (auto& m : methods) {
             // Common operations
-            const std::string& returnTypeParsed             = m.getReturnTypeParsed();
-            int   dataMembersModifiedCount                  = m.getDataMembersModifiedCount();
-            int   callsOnDataMembersCount                   = m.getMethodCalls().size();
-            int   callsOnClassMethodsCount                  = m.getFunctionCalls().size();
-            int   newConstructorCallsCount                  = m.getNewConstructorCalls().size();
-            int   callsOnFreeFunctionsCount                 = m.getExternalFunctionCallsCount();
-            int   callsToOtherClassMethods                  = m.getExternalMethodCallsCount();
-            int   NumOfNonCommentStatements                 = m.getNonCommentStatementsCount();
-            bool  isDataMemberUsed                          = m.isDataMemberUsed();
-            bool  isMethodConst                             = m.isMethodConst();
-            bool  isVoidPointer                             = false;
-            bool  isVariableCreatedAndReturnedWithNew       = m.isVariableCreatedAndReturnedWithNew();
-            bool  isNonPrimitiveReturnType                  = m.isNonPrimitiveReturnType();
-            bool  isNewReturned                             = m.isNewReturned();
-            bool  isParameterRefModified                    = m.isParameterRefModified();
-            bool  hasSimpleReturn                           = m.hasSimpleReturn();   
-            bool  hasComplexReturn                          = m.hasComplexReturn(); 
-            bool  isNonPrimitiveLocalOrParameterModified    = m.isNonPrimitiveLocalOrParameterModified();
-            bool  isNonPrimitiveDataMemberExternal          = m.isNonPrimitiveDataMemberExternal();
-            bool  isNonPrimitiveLocalExternal               = m.isNonPrimitiveLocalExternal();
-            bool  isNonPrimitiveParamaterExternal           = m.isNonPrimitiveParamaterExternal();
-            bool  isNonPrimitiveReturnTypeExternal          = m.isNonPrimitiveReturnTypeExternal();
+            std::string        returnTypeParsed                       = m.getReturnTypeParsed();
+            int                dataMembersModifiedCount               = m.getDataMembersModifiedCount();
+            int                callsOnDataMembersCount                = m.getMethodCalls().size();
+            int                callsOnClassMethodsCount               = m.getFunctionCalls().size();
+            int                newConstructorCallsCount               = m.getNewConstructorCalls().size();
+            int                callsOnFreeFunctionsCount              = m.getExternalFunctionCallsCount();
+            int                callsToOtherClassMethods               = m.getExternalMethodCallsCount();
+            int                NumOfNonCommentStatements              = m.getNonCommentStatementsCount();
+            bool               isDataMemberUsed                       = m.isDataMemberUsed();
+            bool               isMethodConst                          = m.isMethodConst();
+            bool               isVoidPointer                          = false;
+            bool               isVariableCreatedAndReturnedWithNew    = m.isVariableCreatedAndReturnedWithNew();
+            bool               isNonPrimitiveReturnType               = m.isNonPrimitiveReturnType();
+            bool               isNewReturned                          = m.isNewReturned();
+            bool               isParameterRefModified                 = m.isParameterRefModified();
+            bool               hasSimpleReturn                        = m.hasSimpleReturn();   
+            bool               hasComplexReturn                       = m.hasComplexReturn(); 
+            bool               isNonPrimitiveLocalOrParameterModified = m.isNonPrimitiveLocalOrParameterModified();
+            bool               isNonPrimitiveDataMemberExternal       = m.isNonPrimitiveDataMemberExternal();
+            bool               isNonPrimitiveLocalExternal            = m.isNonPrimitiveLocalExternal();
+            bool               isNonPrimitiveParamaterExternal        = m.isNonPrimitiveParamaterExternal();
+            bool               isNonPrimitiveReturnTypeExternal       = m.isNonPrimitiveReturnTypeExternal();
 
             // Covers the case of void with * or more
-            if (classUnitLanguage != "Java") if (m.getReturnType().find("void*") != std::string::npos) isVoidPointer = true;
+            if (classUnitLanguage != "Java") if (m.getReturnTypeParsed().find("void*") != std::string::npos) isVoidPointer = true;
             
             // constructor copy-constructor destructor
             //
@@ -196,7 +195,6 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 if (isNonPrimitiveReturnType && (isNewReturned || isVariableCreatedAndReturnedWithNew))
                     m.setStereotype("factory"); 
                          
-                
                 // wrapper
                 //
                 // 1] No data members are modified
@@ -218,7 +216,6 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
                 // 2] Type could be a parameter, local variable, return type, or an data member
                 //
                 //
-
                 if ((dataMembersModifiedCount == 0) && (callsOnClassMethodsCount == 0) && (callsOnDataMembersCount == 0) 
                     && (callsToOtherClassMethods == 0) && (callsOnFreeFunctionsCount > 0)) 
                     m.setStereotype("wrapper");
@@ -263,21 +260,21 @@ void stereotypes::computeMethodStereotypes(std::unordered_map<std::string, class
             //
             // No stereotype found
             //
-            if (m.getStereotypeList().size() == 0)  m.setStereotype("unclassified");
+            if (m.getStereotypes().size() == 0)  m.setStereotype("unclassified");
 
             // Used to for re-documenting the system with the stereotype information
-            XPATH_LIST[m.getUnitNumber()].insert({m.getXpath(), m.getStereotype()});    
+
+            XPATH_LIST[m.getUnitNumber()].insert({m.getXpath(), m.getStereotypesString()});    
         }
         pair.second.setConstructorDestructorCount(constructorDestructorCount);
     }
 }
 
 
-// Compute class stereotype
-// Constructors and destructors are not considered in the computation of class stereotypes
-// Other structures (e.g., struct, interface, enum, and unions) are labeled with class stereotypes
+// Compute type stereotype
+// Constructors and destructors are not considered in the computation of type stereotypes
 // 
-void stereotypes::computeClassStereotypes(std::unordered_map<std::string, classModel>& classCollection) {
+void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typeModel>& classCollection) {
     for (auto& pair : classCollection) {
         std::unordered_map<std::string, int> methodStereotypes = {
             {"get", 0},
@@ -297,13 +294,13 @@ void stereotypes::computeClassStereotypes(std::unordered_map<std::string, classM
             {"unclassified", 0},
         };
 
-        const std::vector<methodModel>& methods           = pair.second.getMethods();
-        int                             nonCollaborators  = 0;
+        const std::vector<functionModel>& methods           = pair.second.getMethods();
+        int                               nonCollaborators  = 0;
         for (const auto& m : methods) {      
             if (m.getConstructorOrDestructor().empty()) {
-                for (const std::string& s : m.getStereotypeList()) methodStereotypes[s]++;
+                for (const std::string& s : m.getStereotypes()) methodStereotypes[s]++;
             
-                std::string methodStereotype = m.getStereotype();
+                std::string methodStereotype = m.getStereotypesString();
                 if (methodStereotype.find("collaborator") == std::string::npos &&
                     methodStereotype.find("controller") == std::string::npos && 
                     methodStereotype.find("wrapper") == std::string::npos)
@@ -379,66 +376,68 @@ void stereotypes::computeClassStereotypes(std::unordered_map<std::string, classM
             pair.second.setStereotype("pure-controller");
 
 
-        // Large Class
+        // Large
         //
-        {
-            int accPlusMut = accessors + mutators;
-            int facPlusCon = controllers + factory;
-            if (((0.2 * allMethods < accPlusMut) && (accPlusMut < 0.67 * allMethods )) &&
-                ((0.2 * allMethods < facPlusCon) && (facPlusCon < 0.67 * allMethods )) &&
-                (factory != 0) && (controllers != 0) && (accessors != 0) && (mutators != 0) ) {
-                    if (allMethods > METHODS_PER_CLASS_THRESHOLD) { 
-                        pair.second.setStereotype("large-class");
-                }
+        std::string dynamicStereotype = "large-" + pair.second.getStructureType();
+        int accPlusMut = accessors + mutators;
+        int facPlusCon = controllers + factory;
+        if (((0.2 * allMethods < accPlusMut) && (accPlusMut < 0.67 * allMethods )) &&
+            ((0.2 * allMethods < facPlusCon) && (facPlusCon < 0.67 * allMethods )) &&
+            (factory != 0) && (controllers != 0) && (accessors != 0) && (mutators != 0) ) {
+                if (allMethods > METHODS_PER_TYPE_THRESHOLD) { 
+                    pair.second.setStereotype(dynamicStereotype);
             }
         }
-
-
-        // Lazy Class
-        //
-        if ((getters + setters != 0) && (((degenerates / double(allMethods)) > 0.33)) &&
-        (((allMethods - (degenerates + getters + setters)) / double(allMethods))  <= 0.2))
-            pair.second.setStereotype("lazy-class");
         
 
-        // Degenerate Class
+        // Lazy
+        //
+        dynamicStereotype = "lazy-" + pair.second.getStructureType();
+        if ((getters + setters != 0) && (((degenerates / double(allMethods)) > 0.33)) &&
+        (((allMethods - (degenerates + getters + setters)) / double(allMethods))  <= 0.2))
+            pair.second.setStereotype(dynamicStereotype);
+        
+
+        // Degenerate
         //
         if ((degenerates / double(allMethods)) > 0.5)  
             pair.second.setStereotype("degenerate");
         
 
-        // Data Class
+        // Data
         //
+        dynamicStereotype = "data-" + pair.second.getStructureType();
         if ((allMethods - (getters + setters) == 0) && ((getters + setters) != 0))
-            pair.second.setStereotype("data-class");
+            pair.second.setStereotype(dynamicStereotype);
         
 
-        // Small Class
+        // Small
         //
+        dynamicStereotype = "small-" + pair.second.getStructureType();
         if ((0 < allMethods) && (allMethods < 3))
-            pair.second.setStereotype("small-class");
+            pair.second.setStereotype(dynamicStereotype);
 
 
-        // Empty Class (Considered degenerate)
+        // Empty (Considered degenerate)
         //
         if (allMethods == 0)
             pair.second.setStereotype("empty");
    
 
-        if (pair.second.getStereotype().size() == 0) 
+        if (pair.second.getStereotypes().size() == 0) 
             pair.second.setStereotype("unclassified");
 
         const std::unordered_map<int, std::vector<std::string>>& xpath = pair.second.getXpath();
         for (const auto& pairXpath : xpath) 
-            for (const auto& classXpath : pairXpath.second) XPATH_LIST[pairXpath.first].insert({classXpath, pair.second.getStereotype()});
+            for (const auto& classXpath : pairXpath.second) XPATH_LIST[pairXpath.first].insert({classXpath, pair.second.getStereotypesString()});
     }  
 }
 
-void stereotypes::computeFreeFunctionsStereotypes(std::vector<methodModel>& freeFunctions) {
-    for (methodModel& f : freeFunctions) {
+void stereotypeRules::computeFreeFunctionStereotypes(std::vector<functionModel>& freeFunctions) {
+    for (functionModel& f : freeFunctions) {
         // Common operations
         const std::string& methodName                               = f.getName();
-        const std::string& returnTypeParsed                         = f.getReturnTypeParsed(); 
+        std::string        returnTypeParsed                         = f.getReturnTypeParsed();
         const std::string& unitLanguage                             = f.getUnitLanguage();
         int                nonNewConstructorCallsCount              = f.getMethodCalls().size() + f.getFunctionCalls().size();
         int                nonCommentStatementsCount                = f.getNonCommentStatementsCount();
@@ -531,8 +530,8 @@ void stereotypes::computeFreeFunctionsStereotypes(std::vector<methodModel>& free
             if (!isParameterRefModified && (nonNewConstructorCallsCount > 0)) f.setStereotype("wrapper");
 
 
-            if (f.getStereotype() == "") f.setStereotype("unclassified");
+            if (f.getStereotypes().size() == 0) f.setStereotype("unclassified");
         }
-        XPATH_LIST[f.getUnitNumber()].insert({f.getXpath(), f.getStereotype()});
+        XPATH_LIST[f.getUnitNumber()].insert({f.getXpath(), f.getStereotypesString()});
     }
 }

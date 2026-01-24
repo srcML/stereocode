@@ -56,9 +56,9 @@ srcml PowerShell.zip -o PowerShell.xml
 
 ## 📜 Stereocode Options
 
-<span style='color: lightgreen;'>**-o, --output-file:**</span> File name of srcML output archive with stereotypes
+<span style='color: lightgreen;'>**-o, --output-file:**</span> File name of srcML output archive annotated with stereotypes
 
-<span style='color: lightgreen;'>**-p, --primitive-file:**</span> File name of user supplied primitive types (one per line) </br>
+<span style='color: lightgreen;'>**-p, --primitive-file:**</span> File name of user primitive types (one per line) </br>
 ```
 Datatype_1
 Datatype_2
@@ -66,7 +66,7 @@ Datatype_2
 ```
 These data types will be treated as primitive data types such as an **int**.
 
-<span style='color: lightgreen;'>**-g, --ignore-call-file:**</span> File name of user supplied calls to ignore (one per line) </br>
+<span style='color: lightgreen;'>**-g, --ignore-call-file:**</span> File name of user calls to ignore (one per line) </br>
 ```
 Call_Name_1
 Call_Name_2
@@ -75,7 +75,7 @@ Call_Name_2
 Do not use namespaces, parenthesis, or other special characters. Simply list the call name itself. For example, **foo**. </br>
 These calls are ignored from analysis. However, usage of fields within these calls (as parameters) are not ignored (considered as accessors to attributes).
 
-<span style='color: lightgreen;'>**-t, --type-specifier-file:**</span> File name of user supplied type specifiers to remove (one per line) </br>
+<span style='color: lightgreen;'>**-t, --type-specifier-file:**</span> File name of user type specifiers to remove (one per line) </br>
 ```
 specifier_1
 specifier_2
@@ -83,9 +83,9 @@ specifier_2
 ```
 These specifiers, such as **public**, are removed during analysis to enhance the detection of certain elements such as primitive data types and method return types. 
 
-<span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large-class stereotype (default = 21)
+<span style='color: lightgreen;'>**-l, --large-class \[int]:**</span> Method threshold for the large type stereotype (e.g., large-class) (default = 21)
 
-<span style='color: lightgreen;'>**-f, --free-function:**</span> Identify stereotypes for free functions (C, C++, C#, and Java)
+<span style='color: lightgreen;'>**-f, --free-function:**</span> Identify stereotypes for free functions (includes static methods) (C, C++, C#, and Java)
 
 <span style='color: lightgreen;'>**-i, --interface:**</span> Identify stereotypes for interfaces (C# and Java)
 
@@ -95,15 +95,11 @@ These specifiers, such as **public**, are removed during analysis to enhance the
 
 <span style='color: lightgreen;'>**-s, --struct:**</span> Identify stereotypes for structs (C, C++, C# and Java)
 
-<span style='color: lightgreen;'>**-e, --input-overwrite:**</span> Overwrite input with stereotype information
+<span style='color: lightgreen;'>**-e, --input-overwrite:**</span> Overwrite srcML input archive with stereotypes
 
-<span style='color: lightgreen;'>**-x, --txt-report:**</span> Output optional .txt report file containing stereotype information
+<span style='color: lightgreen;'>**-z, --csv-report:**</span> Output optional CSV file containing stereotypes and meta data
 
-<span style='color: lightgreen;'>**-z, --csv-report:**</span> Output optional .csv report file containing stereotype information
-
-<span style='color: lightgreen;'>**-c, --comment:**</span> Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)
-
-<span style='color: lightgreen;'>**-v, --verbose:**</span> Verbose output: default primitives, ignored calls, type specifiers, and extra .csv report files
+<span style='color: lightgreen;'>**-v, --verbose:**</span> Verbose output: primitives, ignorable calls, and specifiers
 
 ## 📓 Developer Notes
 

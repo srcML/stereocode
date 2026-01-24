@@ -49,6 +49,10 @@ target_include_directories(stereocode PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
+# Find the threading library (pthreads on Linux, Windows threads, etc.)
+find_package(Threads REQUIRED)
+target_link_libraries(stereocode PRIVATE Threads::Threads)
+
 # For srcML v1.1+
 # Finds and use libsrcml + srcml.h
 find_package(srcML QUIET) 

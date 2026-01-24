@@ -7,108 +7,93 @@
  * This file is part of the Stereocode application.
  */
 
-#include "ClassModelCollection.hpp"
 #include "CLI11.hpp"
-#include "PrimitiveTypes.hpp"
-#include "IgnorableCalls.hpp"
-#include "TypeSpecifiers.hpp"
-#include "XPathBuilder.hpp"
+#include "stereotypes_analyzer.hpp"
+#include "primitives.hpp"
+#include "calls.hpp"
+#include "specifiers.hpp"
+#include "xpath_generator.hpp"
 
-primitiveTypes                     PRIMITIVES;
-ignorableCalls                     IGNORED_CALLS;
-typeSpecifiers                     TYPE_SPECIFIERS;
-int                                METHODS_PER_CLASS_THRESHOLD = 21;
-bool                               FREE_FUNCTION{false};
-bool                               STRUCT{false};
-bool                               INTERFACE{false};
-bool                               UNION{false};
-bool                               ENUM{false};
-bool                               IS_VERBOSE{false};
+primitives                         PRIMITIVES_I;
+calls                              CALLS_I;
+specifiers                         SPECIFIERS_I;
 
-std::unordered_map
-     <int, std::unordered_map
-     <std::string, std::string>>   XPATH_LIST;                         // Map key = unit number. Each map value is a pair of xpath and stereotype
-std::vector<std::string>           LANGUAGE = {"C++", "C#", "Java"};   // Supported languages. C++ includes C as a subset.
-XPathBuilder                       XPATH_TRANSFORMATION;               // List of xpaths used for transformations
+// READ-ONLY (Thread Safe)
+int                                METHODS_PER_TYPE_THRESHOLD = 21;
+bool                               FREE_FUNCTION           {false};
+bool                               STRUCT                  {false};
+bool                               INTERFACE               {false};
+bool                               UNION                   {false};
+bool                               ENUM                    {false};
+bool                               IS_VERBOSE              {false};
+bool                               CSV_REPORT              {false};
 
 int main (int argc, char const *argv[]) {
-
     std::string         inputFile;
     std::string         primitivesFile;
-    std::string         ignoredCallsFile;
-    std::string         typeSpecifiersFile;
+    std::string         ignorableCallsFile;
+    std::string         specifiersFile;
     std::string         outputFile;
-    bool                outputTxtReport{false};
-    bool                outputCsvReport{false};
-    bool                overWriteInput{false};
-    bool                reDocComment{false};
+    
+    bool                overWriteInputFile{false};
 
-    CLI::App app{"Stereocode: Determines method and class stereotypes\nSupports C, C++, C#, and Java\n" };
+    CLI::App app{"Stereocode: Determines function (method and free functions) and type (class, struct, interface, union, enum) stereotypes\nSupports C, C++, C#, and Java\n" };
     
     app.add_option("input-archive",            inputFile,                        "File name of srcML input archive")->required();
-    app.add_option("-o,--output-file",         outputFile,                       "File name of srcML output archive with stereotypes");
-    app.add_option("-p,--primitive-file",      primitivesFile,                   "File name of user supplied primitive types (one per line)");
-    app.add_option("-g,--ignore-call-file",    ignoredCallsFile,                 "File name of user supplied calls to ignore (one per line)");
-    app.add_option("-t,--type-specifier-file", typeSpecifiersFile,               "File name of user supplied type specifiers to remove (one per line)");
-    app.add_option("-l,--large-class",         METHODS_PER_CLASS_THRESHOLD,      "Method threshold for the large-class stereotype (default = 21)");
-    app.add_flag  ("-f,--free-function",       FREE_FUNCTION,                    "Identify stereotypes for free functions (C, C++, C#, and Java)");
+    app.add_option("-o,--output-file",         outputFile,                       "File name of srcML output archive annotated with stereotypes");
+    app.add_option("-p,--primitive-file",      primitivesFile,                   "File name of user primitive types (one per line)");
+    app.add_option("-g,--ignore-call-file",    ignorableCallsFile,               "File name of user calls to ignore (one per line)");
+    app.add_option("-t,--type-specifier-file", specifiersFile,                   "File name of user specifiers to remove (one per line)");
+    app.add_option("-l,--large-class",         METHODS_PER_TYPE_THRESHOLD,       "Method threshold for the large type stereotype (e.g., large-class) (default = 21)");
+    app.add_flag  ("-f,--free-function",       FREE_FUNCTION,                    "Identify stereotypes for free functions (includes static methods) (C, C++, C#, and Java)");
     app.add_flag  ("-i,--interface",           INTERFACE,                        "Identify stereotypes for interfaces (C# and Java)");
     app.add_flag  ("-n,--union",               UNION,                            "Identify stereotypes for unions (C++)");
     app.add_flag  ("-m,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
     app.add_flag  ("-s,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
-    app.add_flag  ("-e,--input-overwrite",     overWriteInput,                   "Overwrite input with stereotypes");
-    app.add_flag  ("-x,--txt-report",          outputTxtReport,                  "Output optional .txt report file containing stereotypes");
-    app.add_flag  ("-z,--csv-report",          outputCsvReport,                  "Output optional .csv report file containing stereotypes");
-    app.add_flag  ("-c,--comment",             reDocComment,                     "Annotates stereotypes as a comment before method and class definitions (/** @stereotype stereotype */)");
-    app.add_flag  ("-v,--verbose",             IS_VERBOSE,                       "Verbose output: default primitives, ignored calls, type specifiers, and extra .csv report files");
+    app.add_flag  ("-e,--input-overwrite",     overWriteInputFile,               "Overwrite srcML input archive with stereotypes");
+    app.add_flag  ("-z,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes and meta data");
+    app.add_flag  ("-v,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, and specifiers");
     
     CLI11_PARSE(app, argc, argv);
     
-    // Add user-defined primitive types to initial set
+    // Add user-defined primitive to initial set
     if (!primitivesFile.empty()) {         
         std::ifstream in(primitivesFile);
-        if (in.is_open())
-            in >> PRIMITIVES;
-        else 
-            std::cerr << "Error: Primitive types file not found: " << primitivesFile << '\n';
+        if (in.is_open()) in >> PRIMITIVES_I;
+        else std::cerr << "Error: Primitive types file not found: " << primitivesFile << '\n';
         in.close();
     }
     
-    // Add user-defined ignored calls to initial set
-    if (!ignoredCallsFile.empty()) {         
-        std::ifstream in(ignoredCallsFile);
-        if (in.is_open())
-            in >> IGNORED_CALLS;
-        else
-            std::cerr << "Error: Ignorable calls file not found: " << ignoredCallsFile << '\n';
+    // Add user-defined ignorable calls to initial set
+    if (!ignorableCallsFile.empty()) {         
+        std::ifstream in(ignorableCallsFile);
+        if (in.is_open()) in >> CALLS_I;
+        else std::cerr << "Error: Ignorable calls file not found: " << ignorableCallsFile << '\n';
         in.close();
     }
 
-    // Add user-defined type tokens to initial set
-    if (!typeSpecifiersFile.empty()) {         
-        std::ifstream in(typeSpecifiersFile);
-        if (in.is_open())
-            in >> TYPE_SPECIFIERS;
-        else
-            std::cerr << "Error: Type specifiers file not found: " << typeSpecifiersFile << '\n'; 
+    // Add user-defined specifiers to initial set
+    if (!specifiersFile.empty()) {         
+        std::ifstream in(specifiersFile);
+        if (in.is_open()) in >> SPECIFIERS_I;
+        else std::cerr << "Error: Specifiers file not found: " << specifiersFile << '\n'; 
         in.close();
     }
 
-    // Default output file name if output name is not specified by the user. 
-    // Must come before opening the output archive.
+    // Create default output file name if an output name is not specified by the user
     if (outputFile.empty()) {                                             
         std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);     
         outputFile = InputFileNoExt + ".stereotypes.xml";     
     }  
 
-    // Find stereotypes
-    XPATH_TRANSFORMATION.generateXpath(); // Called here since it depends on globals initalized by user input
-    classModelCollection classModelCollections(inputFile, outputFile, outputTxtReport, outputCsvReport, reDocComment);
+    // Compute stereotypes
+    stereotypesAnalyzer analyzer(inputFile, outputFile);
 
-    if (overWriteInput) {
+    // Overwrite input file if specified
+    if (overWriteInputFile) {
         std::filesystem::remove(inputFile);
         std::filesystem::rename(outputFile, inputFile);
     }
  
     return 0;
-}   
+}
