@@ -172,3 +172,18 @@ public class Program {
         
     }
 }
+
+@Deprecated
+@CustomAnnotation(author = "Ali", version = 1.0)
+public class User implements Serializable {
+
+    @NotNull
+    @Size(max = 50)
+    private String name;
+
+    @Deprecated
+    @CustomAnnotation(description = "Use getFullName instead")
+    public String getName() {
+        return name;
+    }
+}

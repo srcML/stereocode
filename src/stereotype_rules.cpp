@@ -378,7 +378,7 @@ void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typ
 
         // Large
         //
-        std::string dynamicStereotype = "large-" + pair.second.getStructureType();
+        std::string dynamicStereotype = "large-" + pair.second.getStructure();
         int accPlusMut = accessors + mutators;
         int facPlusCon = controllers + factory;
         if (((0.2 * allMethods < accPlusMut) && (accPlusMut < 0.67 * allMethods )) &&
@@ -392,7 +392,7 @@ void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typ
 
         // Lazy
         //
-        dynamicStereotype = "lazy-" + pair.second.getStructureType();
+        dynamicStereotype = "lazy-" + pair.second.getStructure();
         if ((getters + setters != 0) && (((degenerates / double(allMethods)) > 0.33)) &&
         (((allMethods - (degenerates + getters + setters)) / double(allMethods))  <= 0.2))
             pair.second.setStereotype(dynamicStereotype);
@@ -406,14 +406,14 @@ void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typ
 
         // Data
         //
-        dynamicStereotype = "data-" + pair.second.getStructureType();
+        dynamicStereotype = "data-" + pair.second.getStructure();
         if ((allMethods - (getters + setters) == 0) && ((getters + setters) != 0))
             pair.second.setStereotype(dynamicStereotype);
         
 
         // Small
         //
-        dynamicStereotype = "small-" + pair.second.getStructureType();
+        dynamicStereotype = "small-" + pair.second.getStructure();
         if ((0 < allMethods) && (allMethods < 3))
             pair.second.setStereotype(dynamicStereotype);
 

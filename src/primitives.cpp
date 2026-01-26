@@ -53,9 +53,8 @@ bool primitives::isNonPrimitive(variableModel& variable, const std::string& unit
             variable.setNonPrimitive(true);
             
             // If parent is empty, then ( dataOrReturnTypeParsedSnippet ) is always external (e.g., free function return type)
-            if (dataOrReturnTypeParsedSnippet != dataOrReturnTypeParent) {
-                variable.setNonPrimitiveExternal(true);
-            }
+            if (dataOrReturnTypeParsedSnippet != dataOrReturnTypeParent) variable.setNonPrimitiveExternal(true);
+        
             return true; // Breaks on first non-primitive found
         }
     }

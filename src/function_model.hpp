@@ -23,7 +23,8 @@ public:
                                                         functionModel                          (const std::string&, const std::string&, const std::string&, const std::string&, int, bool);
 
     const std::vector<std::string>&                     getStereotypes                         () const                { return stereotypes;                          }
-    const std::string&                                  getSourceCode                          () const                { return sourceCode;                           }
+    const std::vector<std::string>&                     getAttributesOrAnnotations             () const                { return attributesOrAnnotations;              }
+    const std::string&                                  getParametersList                      () const                { return parametersList;                       }
     const std::unordered_set<std::string>&              getSpecifiers                          () const                { return specifiers;                           }
     const std::vector<callModel>&                       getFunctionCalls                       () const                { return functionCalls;                        }
     const std::vector<callModel>&                       getMethodCalls                         () const                { return methodCalls;                          }
@@ -58,20 +59,21 @@ public:
     bool                                                isNonPrimitiveLocalOrParameterModified () const                { return nonPrimitiveLocalOrParameterModified; }
     std::string                                         getStereotypesString                   () const;
     std::string                                         getSpecifiersString                    () const;
+    std::string                                         getAttributesOrAnnotationsString       () const;
     std::string                                         getReturnTypeParsed                    () const;    
     void                                                setStereotype                          (const std::string& s) { stereotypes.push_back(s);}  
-    void                                                findDataAfterCollection                (std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);
+    void                                                findDataAfterCollection                (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);
     void                                                findDataFreeFunctionAfterCollection    ();
 
 private:
-    bool                                                isVariableUsed                         (std::unordered_map<std::string, variableModel>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
+    bool                                                isVariableUsed                         (const std::unordered_map<std::string, variableModel>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
     int                                                 countMethodsInProperty                 () const;
     void                                                findModifiedRefParameter               (std::string, bool);      
-    void                                                findVariablesInExpressions             (std::unordered_map<std::string, variableModel>&, bool);
+    void                                                findVariablesInExpressions             (const std::unordered_map<std::string, variableModel>&, bool);
     void                                                findIgnorableCalls                     (std::vector<callModel>&);
-    void                                                findCallsOnDataMembers                 (std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);   
-    void                                                findReturnedVariables                  (std::unordered_map<std::string, variableModel>&, bool);
-    void                                                findModifiedVariables                  (std::unordered_map<std::string, variableModel>&, bool);
+    void                                                findCallsOnDataMembers                 (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);   
+    void                                                findReturnedVariables                  (const std::unordered_map<std::string, variableModel>&, bool);
+    void                                                findModifiedVariables                  (const std::unordered_map<std::string, variableModel>&, bool);
     void                                                findNameSignature                      ();
     void                                                findNonPrimitive                       ();
     void                                                findName                               ();
@@ -81,7 +83,7 @@ private:
     void                                                findLocalVariableType                  ();
     void                                                findParameterName                      ();
     void                                                findParameterType                      ();
-    void                                                findReturnExpression                   ();   
+    void                                                findReturnExpression                   ();
     void                                                findCallName                           ();
     void                                                findCallArgument                       ();
     void                                                findNewAssignedVariables               ();
@@ -90,16 +92,16 @@ private:
     void                                                findConstructorOrDestructorType        ();
     void                                                findExpressionNames                    ();
     void                                                findExpressionAssignments              ();
-    void                                                findNonCommentStatements               ();               
-    void                                                findMethodBody                         ();
+    void                                                findNonCommentStatements               ();
     void                                                findSpecifiers                         ();
+    void                                                findAttributesOrAnnotations            (); 
+    void                                                findPropertyAttributes                 (); 
 
-    std::string                                       sourceCode;
     std::string                                       name;                                       // Name
-    std::string                                       fileName;                        // File name where type is defined 
+    std::string                                       fileName;                                   // File name where method is defined 
     std::string                                       nameSignature;                              // Name without namespaces + parameters list (commas only). For example, foo(,,)
     variableModel                                     returnType;                                 // Return type without whitespaces
-    std::string                                       parameterList;                              // Parameter list
+    std::string                                       parametersList;                              // Parameter list
     std::string                                       unitLanguage;                               // Unit language
     std::string                                       xpath;                                      // Unique xpath
     std::string                                       constructorOrDestructor;                    // Method is a constructor or a destructor
@@ -108,11 +110,13 @@ private:
     std::unordered_map<std::string, variableModel>    parameters;                                 // Map of all parameters. Key is parameter name
     std::unordered_map<std::string, variableModel>    locals;                                     // Map of all locals. Key is local name         
     std::string                                       typeNameParsed;                             // Type name without whitespaces, namespaces, and generic types <>
-    std::unordered_set<std::string>                   specifiers;
+    std::unordered_set<std::string>                   specifiers;                                 // List of specifiers
     std::unordered_set<std::string>                   variablesCreatedWithNew;                    // List of variables that are declared/initialized with the "new" operator
     std::unordered_set<std::string>                   expressionNames;                            // List of names of expressions in a method
     std::unordered_set<std::string>                   expressionAssignments;                      // List of assignments of expressions in a method
-    std::vector<std::string>                          stereotypes;                                 // Method stereotype(s)
+    std::vector<std::string>                          stereotypes;                                // Method stereotype(s)
+    std::vector<std::string>                          attributesOrAnnotations;                    // List of attributes (C#) or annotations (Java) 
+    std::vector<std::string>                          propertyAttributes;                         // List of property attributes (C#)
     std::vector<callModel>                            functionCalls;                              // List of function calls (e.g., foo()) to methods in type
     std::vector<callModel>                            methodCalls;                                // List of method calls (e.g., a.foo()) where 'a' is an data member
     std::vector<callModel>                            newConstructorCalls;                        // List of constructor calls that uses the 'new' operator

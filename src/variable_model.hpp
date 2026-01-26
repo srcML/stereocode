@@ -12,10 +12,7 @@
 
 #include <string>
 
-// Used to store data members, locals, parameters, and globals
-//
-// Terminology:
-//   A data member =  field (C++, C#, Java) or an auto-property (C#)
+// Used to store fields (including auto-properties), locals, parameters, and globals
 //
 class variableModel {
 public:

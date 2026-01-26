@@ -36,11 +36,11 @@ void XPathGenerator::generateXPathList() {
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpathList[language]["data_member_name"] = xpath;  
+    xpathList[language]["field_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union[src:name]) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathList[language]["data_member_type"] = xpath;  
+    xpathList[language]["field_type"] = xpath;  
 
     xpath = "//*[(self::src:function or self::src:constructor or self::src:destructor)";
     xpath += " and not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:union) = 1]";
@@ -49,8 +49,8 @@ void XPathGenerator::generateXPathList() {
     xpath = "//*[self::src:function and (not(ancestor::src:class or ancestor::src:struct or ancestor::src:union) or src:type/src:specifier='static')]";
     xpathList[language]["free_function"] = xpath; 
 
-    xpath = "/src:unit/src:function/src:specifier";
-    xpathList[language]["method_specifier"] = xpath; 
+    xpath = "/src:unit/src:function/src:type/src:specifier";
+    xpathList[language]["method_specifiers"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
     xpathList[language]["method_name"] = xpath; 
@@ -70,10 +70,10 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
     xpathList[language]["method_return_type"] = xpath; 
 
-    xpath ="//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
+    xpath ="/src:unit/src:function/src:block//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_name"] = xpath; 
 
-    xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
+    xpath ="/src:unit/src:function/src:block//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_type"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
@@ -82,43 +82,43 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpathList[language]["parameter_type"] = xpath; 
 
-    xpath = "//src:return/src:expr";
+    xpath = "/src:unit/src:function/src:block//src:return/src:expr";
     xpathList[language]["return_expression"] = xpath; 
 
-    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["function_call_name"] = xpath;  
 
-    xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["method_call_name"] = xpath;  
 
-    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["constructor_call_name"] = xpath;  
 
-    xpath = "//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["function_call_arglist"] = xpath;  
 
-    xpath = "//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[(src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["method_call_arglist"] = xpath; 
 
-    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["constructor_call_arglist"] = xpath; 
 
-    xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_decl_stmt"] = xpath;  
 
-    xpath = "//src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_expr_stmt"] = xpath; 
 
     xpath = "/src:unit/src:function/src:specifier[.='const']";
     xpathList[language]["const"] = xpath; 
 
-    xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
+    xpath = "/src:unit/src:function/src:block//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathList[language]["non_comment_statements"] = xpath; 
 
-    xpath = "//src:expr/src:name";
+    xpath = "/src:unit/src:function/src:block//src:expr/src:name";
     xpathList[language]["expression_name"] = xpath;    
 
-    xpath = "//src:expr/src:name[";
+    xpath = "/src:unit/src:function/src:block//src:expr/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
@@ -138,6 +138,9 @@ void XPathGenerator::generateXPathList() {
     xpath += ") and not(src:specifier='static') and not(ancestor::src:class or ancestor::src:struct or ancestor::src:interface)]"; 
     xpathList[language]["type"] = xpath;
 
+    xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:attribute";
+    xpathList[language]["type_attributes_or_annotations"] = xpath; 
+
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/text()";
     xpathList[language]["structure_type"] = xpath;
 
@@ -150,12 +153,12 @@ void XPathGenerator::generateXPathList() {
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
     xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:name";
-    xpathList[language]["data_member_name"] = xpath;  
+    xpathList[language]["field_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:type";
-    xpathList[language]["data_member_type"] = xpath;  
+    xpathList[language]["field_type"] = xpath;  
 
     xpath = "//*[(self::src:function or self::src:constructor or self::src:destructor)";
     xpath += " and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1";
@@ -168,14 +171,20 @@ void XPathGenerator::generateXPathList() {
     xpath = "//src:property/src:type";
     xpathList[language]["property_type"] = xpath; 
 
+    xpath = "/src:unit/src:property/src:attribute";
+    xpathList[language]["property_attributes"] = xpath; 
+
     xpath = "//src:function[not(ancestor::src:function)]";
     xpathList[language]["property_method"] = xpath; 
 
     xpath = "//src:function[(src:type/src:specifier='static' or ancestor::src:property[1]/src:type/src:specifier='static')]";
     xpathList[language]["free_function"] = xpath; 
 
-    xpath = "/src:unit/src:function/src:specifier";
-    xpathList[language]["method_specifier"] = xpath; 
+    xpath = "/src:unit/src:function/src:type/src:specifier";
+    xpathList[language]["method_specifiers"] = xpath; 
+
+    xpath = "/src:unit/src:function/src:attribute";
+    xpathList[language]["method_attributes_or_annotations"] = xpath; 
 
     xpath = "/src:unit/src:function/src:name";
     xpathList[language]["method_name"] = xpath; 
@@ -195,7 +204,7 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
     xpathList[language]["method_return_type"] = xpath; 
 
-    xpath ="//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
+    xpath ="/src:unit/src:function/src:block//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_name"] = xpath; 
 
     xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
@@ -207,40 +216,40 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpathList[language]["parameter_type"] = xpath;
 
-    xpath = "//src:return[count(ancestor::src:function) = 1]/src:expr";
+    xpath = "/src:unit/src:function/src:block//src:return[count(ancestor::src:function) = 1]/src:expr";
     xpathList[language]["return_expression"] = xpath;
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["function_call_name"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["method_call_name"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["constructor_call_name"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[count(ancestor::src:function) = 1 and not(src:name/src:operator='->') and not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["function_call_arglist"] = xpath;  
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[count(ancestor::src:function) = 1 and (src:name/src:operator='->' or src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["method_call_arglist"] = xpath; 
 
-    xpath = "//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[count(ancestor::src:function) = 1 and preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["constructor_call_arglist"] = xpath;
 
-    xpath = "//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:decl_stmt[count(ancestor::src:function) = 1]/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_decl_stmt"] = xpath;  
 
-    xpath = "//src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_expr_stmt"] = xpath;  
 
-    xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
+    xpath = "/src:unit/src:function/src:block//src:block_content[1][*[not(self::src:comment)][1]]";
     xpathList[language]["non_comment_statements"] = xpath; 
 
-    xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:expr[count(ancestor::src:function) = 1]/src:name";
     xpathList[language]["expression_name"] = xpath;    
 
-    xpath = "//src:expr[count(ancestor::src:function) = 1]/src:name[";
+    xpath = "/src:unit/src:function/src:block//src:expr[count(ancestor::src:function) = 1]/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
@@ -260,6 +269,9 @@ void XPathGenerator::generateXPathList() {
     xpath += ") and not(ancestor::src:class or ancestor::src:interface or ancestor::src:enum)]"; 
     xpathList[language]["type"] = xpath;
 
+    xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/src:annotation";
+    xpathList[language]["type_attributes_or_annotations"] = xpath; 
+
     xpath = "/src:unit/src:*[self::src:class or self::src:interface or self::src:enum]/text()";
     xpathList[language]["structure_type"] = xpath;
 
@@ -271,11 +283,11 @@ void XPathGenerator::generateXPathList() {
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
-    xpathList[language]["data_member_name"] = xpath;  
+    xpathList[language]["field_name"] = xpath;  
 
     xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
-    xpathList[language]["data_member_type"] = xpath;  
+    xpathList[language]["field_type"] = xpath;  
 
     xpath = "//*[(self::src:function or self::src:constructor)";
     xpath += " and not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:interface | ancestor::src:enum) = 1]";
@@ -287,8 +299,11 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:name";
     xpathList[language]["method_name"] = xpath; 
 
-    xpath = "/src:unit/src:function/src:specifier";
-    xpathList[language]["method_specifier"] = xpath; 
+    xpath = "/src:unit/src:function/src:type/src:specifier";
+    xpathList[language]["method_specifiers"] = xpath; 
+
+    xpath = "/src:unit/src:function/src:annotation";
+    xpathList[language]["method_attributes_or_annotations"] = xpath; 
 
     xpath = "/src:unit/*[self::src:constructor]/src:name";
     xpathList[language]["constructor_destructor_name"] = xpath; 
@@ -305,10 +320,10 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:type//text()[not(ancestor::src:parameter_list)]";
     xpathList[language]["method_return_type"] = xpath;
 
-    xpath ="//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
+    xpath ="/src:unit/src:function/src:block//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_name"] = xpath; 
 
-    xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
+    xpath ="/src:unit/src:function/src:block//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_type"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
@@ -317,40 +332,40 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpathList[language]["parameter_type"] = xpath;
 
-    xpath = "//src:return/src:expr";
+    xpath = "/src:unit/src:function/src:block//src:return/src:expr";
     xpathList[language]["return_expression"] = xpath; 
 
-    xpath = "//src:call[not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["function_call_name"] = xpath;  
 
-    xpath = "//src:call[src:name/src:operator='.' and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[src:name/src:operator='.' and not(preceding-sibling::*[1][self::src:operator='new'])]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["method_call_name"] = xpath;  
 
-    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
+    xpath = "/src:unit/src:function/src:block//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:name[following-sibling::*[1][self::src:argument_list]]";
     xpathList[language]["constructor_call_name"] = xpath;  
 
-    xpath = "//src:call[not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[not(src:name/src:operator='.') and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["function_call_arglist"] = xpath;  
 
-    xpath = "//src:call[src:name/src:operator='.' and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[src:name/src:operator='.' and not(preceding-sibling::*[1][self::src:operator='new'])]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["method_call_arglist"] = xpath; 
 
-    xpath = "//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
+    xpath = "/src:unit/src:function/src:block//src:call[preceding-sibling::*[1][self::src:operator='new']]/src:argument_list[preceding-sibling::*[1][self::src:name]]";
     xpathList[language]["constructor_call_arglist"] = xpath;
 
-    xpath = "//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:decl_stmt/src:decl[./src:init/src:expr/src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_decl_stmt"] = xpath;  
 
-    xpath = "//src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
+    xpath = "/src:unit/src:function/src:block//src:expr_stmt/src:expr[./src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_expr_stmt"] = xpath; 
 
-    xpath = "//src:block_content[1][*[not(self::src:comment)][1]]";
+    xpath = "/src:unit/src:function/src:block/src:block_content[1][*[not(self::src:comment)][1]]";
     xpathList[language]["non_comment_statements"] = xpath; 
 
-    xpath = "//src:expr/src:name";
+    xpath = "/src:unit/src:function/src:block//src:expr/src:name";
     xpathList[language]["expression_name"] = xpath;    
 
-    xpath = "//src:expr/src:name[";
+    xpath = "/src:unit/src:function/src:block//src:expr/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";

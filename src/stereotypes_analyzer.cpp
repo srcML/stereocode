@@ -96,7 +96,6 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
 
     unsigned int unitNumber = 1;
     unsigned int nthreads = std::thread::hardware_concurrency();
-    if (nthreads == 0) nthreads = 4; // Fallback
 
     std::mutex mu;
     std::vector<srcml_unit*> inputUnits;
@@ -129,7 +128,7 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     // Performed after the collection of all types and free functions
     analyzeFreeFunctions();
 
-    // Build signatures for findInheritedMethods()
+    // Build signatures for findInheritedDataMembers()
     for (auto& pair : types) pair.second.buildMethodSignature();
     
     // Finds inherited data members
@@ -140,11 +139,8 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     } 
 
     // Analyze all methods for each type
-    for (auto& pair : types) {
-        std::vector<functionModel>& methods = pair.second.getMethods();
-        for (auto& m : methods) m.findDataAfterCollection(pair.second.getDataMembers(), pair.second.getMethodSignatures());                         
-    }
-
+    for (auto& pair : types) pair.second.findDataAfterCollection();                       
+    
     // Compute stereotypes here
     stereotypeRules stereotypes;
     stereotypes.computeMethodStereotypes (types);
@@ -161,7 +157,8 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
 
     // Optional CSV report file
     if (CSV_REPORT) {
-        std::string header = "type_name,type_stereotype,function_name,function_stereotype,function_return_type,function_specifiers,type_parents,function_source_code,file_name";
+        std::string header = "file_name,type_name,type_stereotype,type_parents,type_inherited_parents,function_signatures,"
+                             "inherited_function_signatures,function_name,function_stereotype,function_parameters_list,function_return_type,function_specifiers,function_attributes_annotations";
         std::ofstream out;
         out.open(InputFileNoExt + ".stereotypes.csv");
         out << header << '\n';
@@ -458,7 +455,7 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
     }
 }
 
-// Finds inherited data members 
+// Finds inherited fields and methods
 // In C++, you can inherit from a specialized templated type or
 //  you can specialize the inheritance itself from the generic type, or
 //  you can inherit from the generic type itself.
@@ -471,36 +468,42 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
 //  myType<T1, T2> --> childType : myType<T1, T2> or childType : myType<int, double>
 //
 void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
-    const std::string& unitLanguage = type.getUnitLanguage();
     type.setVisited(true); 
-    const std::unordered_set<std::string>& parentTypeNames =  type.getParents();
+    // A copy here since parentNames will append the inherited ones
+    std::unordered_set<std::string> parentTypeNames =  type.getParentNames();
 
     for (std::string parentTypeName : parentTypeNames){
         auto result = types.find(parentTypeName);
         if (result != types.end()) {
+            // Checking for ( isVisited ) is needed since even if ( isInherited ) is true, we might reach
+            //  this type multiple times from ( type ), and we do not want to append it multiple times 
             if (result->second.isInherited() && !result->second.isVisited()) {
-                type.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures()); 
+                type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
+                                                result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedDataMembers(result->second);
-                type.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
+                type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
+                                                result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
             }
         }       
         else {
-            if (unitLanguage == "C++") {
+            if (type.getUnitLanguage() == "C++") {
                 parentTypeName = parentTypeName.substr(0, parentTypeName.find("<"));
                 result = types.find(parentTypeName);
                 if (result != types.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
-                        type.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
+                        type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
+                                                        result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedDataMembers(result->second);
-                        type.appendInheritedDataMembers(result->second.getDataMembers(), result->second.getMethodSignatures());
+                        type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
+                                                        result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
                     }
                 }              
             }
@@ -511,12 +514,14 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                     auto resultM = types.find(resultG->second);
                     if (resultM != types.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            type.appendInheritedDataMembers(resultM->second.getDataMembers(), resultM->second.getMethodSignatures());
+                            type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getMethodSignatures(), resultM->second.getParentNames(),
+                                                            resultM->second.getInheritedFields(), resultM->second.getInheritedMethodSignatures(), resultM->second.getInheritedParentNames()); 
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedDataMembers(resultM->second);
-                            type.appendInheritedDataMembers(resultM->second.getDataMembers(), resultM->second.getMethodSignatures());
+                            type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getMethodSignatures(), resultM->second.getParentNames(),
+                                                            resultM->second.getInheritedFields(), resultM->second.getInheritedMethodSignatures(), resultM->second.getInheritedParentNames()); 
                         }
                     }
                 }
@@ -528,26 +533,35 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
 // Outputs a CSV report file containing stereotype information and meta data
 //  
 void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeModel* type, bool isFreeFunction) {
-    std::vector<functionModel>* functionsPtr = &type->getMethods();
+    const std::vector<functionModel>* functionsPtr = &type->getMethods();
 
     if (isFreeFunction) functionsPtr = &freeFunctions;
 
-    for (functionModel& function : *functionsPtr) {
-        std::string typeName = isFreeFunction ? "N/A" : type->getName()[0];
+    for (const functionModel& function : *functionsPtr) {
+        std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[0] : "N/A");
         std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
         std::string typeParents = isFreeFunction ? "N/A" : (type->getParentsString().size() > 0 ? type->getParentsString() : "N/A");
+        std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentsString().size() > 0 ? type->getInheritedParentsString() : "N/A");
+        std::string signatures = isFreeFunction ?  function.getNameSignature() : (type->getMethodSignatures().size() > 0 ? type->getMethodSignaturesString() : "N/A");
+        std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
+        std::string functionAttributesOrAnnotations = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
         std::string specifiers = function.getSpecifiersString().size() > 0 ? function.getSpecifiersString() : "N/A";
         std::string returnType = !function.getReturnTypeParsed().empty() ? function.getReturnTypeParsed() : "N/A";
+        std::string parametersList = function.getParametersList().empty() ? "N/A" : function.getParametersList();
 
-        csvFile << HELPERS.escapeCSV(typeName) << ","
+        csvFile << HELPERS.escapeCSV(function.getFileName()) << ","
+                << HELPERS.escapeCSV(typeName) << ","
                 << HELPERS.escapeCSV(typeStereotype) << ","
+                << HELPERS.escapeCSV(typeParents) << ","
+                << HELPERS.escapeCSV(typeInheritedParents) << ","
+                << HELPERS.escapeCSV(signatures) << ","
+                << HELPERS.escapeCSV(inheritedSignatures) << ","
                 << HELPERS.escapeCSV(function.getName()) << ","
                 << HELPERS.escapeCSV(function.getStereotypesString()) << ","
+                << HELPERS.escapeCSV(parametersList) << ","
                 << HELPERS.escapeCSV(returnType) << ","
                 << HELPERS.escapeCSV(specifiers) << ","
-                << HELPERS.escapeCSV(typeParents) << ","
-                << HELPERS.escapeCSV(function.getSourceCode()) << ","
-                << HELPERS.escapeCSV(function.getFileName()) << "\n";
+                << HELPERS.escapeCSV(functionAttributesOrAnnotations) << "\n";
     }
 }
 

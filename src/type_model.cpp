@@ -35,25 +35,43 @@ typeModel::typeModel(const std::string& unitLanguage_) : unitLanguage{unitLangua
     variableModel variable;
     variable.setName("this");
     variable.setNonPrimitive(true);
-    dataMembers.insert({variable.getName(), variable});
+    fields.insert({variable.getName(), variable});
 }
 
+// Finds other data for the type
+//
 void typeModel::findData(const std::string& classXpath, int unitNumber) {
     xpath[unitNumber].push_back(classXpath);
 
-    findStructureType();
-    findParentName();
+    findStructure();
+    findParentNames();
     
-    std::vector<variableModel> dataMembersOrdered;
-    findDataMemberName(dataMembersOrdered);
-    findDataMemberType(dataMembersOrdered);
+    std::vector<variableModel> fieldsOrdered;
+    findFieldNames(fieldsOrdered);
+    findFieldTypes(fieldsOrdered);
      
     findMethod(classXpath, unitNumber);
-
-    if (unitLanguage == "C#") findProperty(classXpath, unitNumber); 
+    if (unitLanguage == "C#" || unitLanguage == "Java") {
+        findAttributesOrAnnotations();
+        if (unitLanguage == "C#") findProperties(classXpath, unitNumber);
+    }
 }
 
-void typeModel::findStructureType() {
+// Finds method data after all types are collected
+//
+void typeModel::findDataAfterCollection() {
+    std::unordered_map<std::string, variableModel> allFields(fields.begin(), fields.end());
+    allFields.insert(inheritedFields.begin(), inheritedFields.end());
+
+    std::unordered_set<std::string> allMethodSignatures(methodSignatures.begin(), methodSignatures.end());
+    allMethodSignatures.insert(inheritedMethodSignatures.begin(), inheritedMethodSignatures.end());
+
+    for (auto& method : methods) method.findDataAfterCollection(allFields, allMethodSignatures);  
+}
+
+// Finds structure (e.g., class)
+//
+void typeModel::findStructure() {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"structure_type").c_str());
     srcml_transform_result* result = nullptr;
     
@@ -61,13 +79,34 @@ void typeModel::findStructureType() {
     int n = srcml_transform_get_unit_size(result);
     for (int i = 0; i < n; i++) {
         srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
-        structureType += srcml_unit_get_srcml(resultUnit);
+        structure += srcml_unit_get_srcml(resultUnit);
     }
-    HELPERS.removeWhitespace(structureType);
+    HELPERS.removeWhitespace(structure);
+
+    // Structures in C++ get the semi-colon at the end, so we need to remove it ( class; )
+    if (unitLanguage == "C++" && structure.back() ==';') structure.pop_back();
+
     srcml_clear_transforms(typeArchive);
     srcml_transform_free(result);
 }
 
+// Finds attributes ( C# ) or annotations ( Java )
+//
+void typeModel::findAttributesOrAnnotations() {
+    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"type_attributes_or_annotations").c_str());
+    srcml_transform_result* result = nullptr;
+    
+    srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
+    int n = srcml_transform_get_unit_size(result);
+    for (int i = 0; i < n; i++) {
+        char *unparsed = nullptr;
+        std::size_t size = 0;
+        srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
+        attributesOrAnnotations.push_back(unparsed);
+    }
+    srcml_clear_transforms(typeArchive);
+    srcml_transform_free(result);
+}
 
 // Finds type name
 //
@@ -129,7 +168,7 @@ void typeModel::findName() {
 //  Java interfaces can't inherit from classes
 //  Uses 'extends' for class-to-class and interface-to-interface inheritance and 'implements' for class-to-interface inheritance
 // 
-void typeModel::findParentName() { 
+void typeModel::findParentNames() { 
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"parent_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
@@ -148,14 +187,14 @@ void typeModel::findParentName() {
 
         std::size_t listOpen = parentName.find("<");
         if (listOpen != std::string::npos) {
-            std::string parClassNameLeft = parentName.substr(0, listOpen);
-            std::string parClassNameRight = parentName.substr(listOpen, parentName.size() - listOpen);
-            HELPERS.removeNamespace(parClassNameLeft, unitLanguage, true); 
-            parents.insert(parClassNameLeft + parClassNameRight);
+            std::string left = parentName.substr(0, listOpen);
+            std::string right = parentName.substr(listOpen, parentName.size() - listOpen);
+            HELPERS.removeNamespace(left, unitLanguage, true); 
+            parentNames.insert(left + right);
         }
         else {
             HELPERS.removeNamespace(parentName, unitLanguage, true);
-            parents.insert(parentName);
+            parentNames.insert(parentName);
         }
     
         free(unparsed);      
@@ -165,19 +204,20 @@ void typeModel::findParentName() {
     srcml_transform_free(result); 
 }
 
-// Finds data members names
+// Finds field names
 // Only collect the name if there is a type
 // C++:
-//  This does not count unions without a name, so their data members will be collected even if nested without a class or a struct
-//  Static data members  are ignored and treated as globals
+//  This does not count unions without a name, so their fields will be collected even if nested within another type
+//  Static fields are ignored and treated as globals
 // C#:
-//  Auto-properties can be used to declare data members implicitly 
-//   and regular properties are used to get or set data members (most of the time)
-//  Therefore, both types of properties will be treated as data members as they can be used and called as normal data members  
-//   where property name = data member name and where property type = data member type
+//  Auto-properties can be used to declare fields implicitly so they are treated as fields
+//  Regular properties can be used to get or set fields
+//   Therefore, regular properties will be treated like normal fields as they are used (most of the time) to get or set regular fields 
+//    where property name = field name and where property type = field type
+//   However, the assumption here is that their usage is assumed to be getting or setting a single field
 //
-void typeModel::findDataMemberName(std::vector<variableModel>& dataMembersOrdered) {
-    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"data_member_name").c_str());
+void typeModel::findFieldNames(std::vector<variableModel>& fieldsOrdered) {
+    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"field_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -194,12 +234,11 @@ void typeModel::findDataMemberName(std::vector<variableModel>& dataMembersOrdere
         variableModel v;
 
         // Chop off [] for arrays  
-        if (unitLanguage == "C++")
-            HELPERS.removeBracketSuffix(dataMemberName);
+        if (unitLanguage == "C++")  HELPERS.removeBracketSuffix(dataMemberName);
         
         v.setName(dataMemberName);
 
-        dataMembersOrdered.push_back(v); 
+        fieldsOrdered.push_back(v); 
         free(unparsed);
 
     }
@@ -207,11 +246,11 @@ void typeModel::findDataMemberName(std::vector<variableModel>& dataMembersOrdere
     srcml_transform_free(result);
 }
 
-// Finds data members types
+// Finds fields types
 // Only collect the type if there is a name
 //
-void typeModel::findDataMemberType(std::vector<variableModel>& dataMembersOrdered) {
-    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"data_member_type").c_str());
+void typeModel::findFieldTypes(std::vector<variableModel>& fieldsOrdered) {
+    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"field_type").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
@@ -227,20 +266,16 @@ void typeModel::findDataMemberType(std::vector<variableModel>& dataMembersOrdere
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
      
-        if (type == "<type ref=\"prev\"/>") {
-            type = prev;
-        }
+        if (type == "<type ref=\"prev\"/>") type = prev;
         else {  
             type = unparsed;
             prev = type;
         }
 
-        dataMembersOrdered[i].setType(type);  
-        dataMembers.insert({dataMembersOrdered[i].getName(), dataMembersOrdered[i]});
-        bool nonPrimitiveDataMemberExternal = false;
+        fieldsOrdered.at(i).setType(type);
+        PRIMITIVES.isNonPrimitive(fieldsOrdered[i], unitLanguage, name[3]);
 
-        if (PRIMITIVES.isNonPrimitive(dataMembersOrdered[i], unitLanguage, name[3])) 
-            if (nonPrimitiveDataMemberExternal) dataMembersOrdered[i].setNonPrimitiveExternal(true);
+        fields.insert({fieldsOrdered[i].getName(), std::move(fieldsOrdered[i])});
                           
         free(unparsed);
     }
@@ -251,6 +286,11 @@ void typeModel::findDataMemberType(std::vector<variableModel>& dataMembersOrdere
 // Finds methods defined inside the type
 // C#:
 //   Nested local functions within methods in C# are ignored 
+//   Attributes do not read/write to the state object. However, they can have expressions, decl_stmt, etc.
+//    Therefore, we ignore them when collecting data.
+// Java:
+//   Annotations have the same story as attributes, so we ignore these statements inside them
+//   
 void typeModel::findMethod(const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;
@@ -291,7 +331,7 @@ void typeModel::findMethod(const std::string& classXpath, int unitNumber) {
 // Properties need to be collected separately since they hold the return type of the getters
 // Properties cannot be nested in methods or in other properties
 //
-void typeModel::findProperty(const std::string& classXpath, int unitNumber) {
+void typeModel::findProperties(const std::string& classXpath, int unitNumber) {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage, "property").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
@@ -396,15 +436,49 @@ std::string typeModel::getStereotypesString() const {
     return stereotypesString;
 }
 
-// Gets the parent classs as a single string
+// Gets the parent types as a single string
 //
 std::string typeModel::getParentsString() const {
     std::string parentsString;
-    for (const std::string & s : parents) {
+    for (const std::string & s : parentNames) {
         if (!parentsString.empty()) parentsString += " ";
         parentsString += s;
     }
     return parentsString;
+}
+
+
+// Gets the inherited parent types as a single string
+//
+std::string typeModel::getInheritedParentsString() const {
+    std::string inheritedParentsString;
+    for (const std::string & s : inheritedParentNames) {
+        if (!inheritedParentsString.empty()) inheritedParentsString += " ";
+        inheritedParentsString += s;
+    }
+    return inheritedParentsString;
+}
+
+// Gets the method signatures as a single string
+//
+std::string typeModel::getMethodSignaturesString() const {
+    std::string methodsignature;
+    for (const std::string & s : methodSignatures) {
+        if (!methodsignature.empty()) methodsignature += " ";
+        methodsignature += s;
+    }
+    return methodsignature;
+}
+
+// Gets the inherited method signatures as a single string
+//
+std::string typeModel::getInheritedMethodSignaturesString() const {
+    std::string inheritedMethodsignature;
+    for (const std::string & s : inheritedMethodSignatures) {
+        if (!inheritedMethodsignature.empty()) inheritedMethodsignature += " ";
+        inheritedMethodsignature += s;
+    }
+    return inheritedMethodsignature;
 }
 
 // Merges another typeModel (e.g., partial class) into this one
@@ -414,16 +488,16 @@ void typeModel::mergeData(typeModel& other) {
     methods.insert(methods.end(), std::make_move_iterator(other.getMethods().begin()), std::make_move_iterator(other.getMethods().end()));
 
     // Merge Parents
-    const auto& otherParents = other.getParents();
-    parents.insert(otherParents.begin(), otherParents.end());
+    const auto& otherParents = other.getParentNames();
+    parentNames.insert(otherParents.begin(), otherParents.end());
 
     // Merge Method Signatures
     const auto& otherMethodSignatures = other.getMethodSignatures();
     methodSignatures.insert(otherMethodSignatures.begin(), otherMethodSignatures.end());
 
     // Merge Data Members
-    auto& otherDataMembers = other.getDataMembers();
-    dataMembers.insert(otherDataMembers.begin(), otherDataMembers.end());
+    auto& otherDataMembers = other.getFields();
+    fields.insert(otherDataMembers.begin(), otherDataMembers.end());
 
     // Merge XPaths for each unit number
     const auto& otherXpath = other.getXpath();

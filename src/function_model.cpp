@@ -42,9 +42,13 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
     if (!constructorOrDestructor.empty()) findConstructorOrDestructorType();
 
     findNameSignature();
-    findMethodBody(); 
    
-    if (constructorOrDestructor.empty()) {   
+    if (constructorOrDestructor.empty()) {
+        if (unitLanguage == "C#" || unitLanguage == "Java") {
+            findAttributesOrAnnotations();
+            if (isProperty) findPropertyAttributes();
+        }
+        findSpecifiers();
         findReturnType(); 
         findParameterName();
         findParameterType();
@@ -65,15 +69,16 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
 }
 
 // Finds all specifiers of the method
+//
 void functionModel::findSpecifiers() {
-    srcml_append_transform_xpath(methodArchive,  XPATH_GENERATOR.getXPathList(unitLanguage,"method_specifiers").c_str());
+    srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method_specifiers").c_str());
    
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
     for (int i = 0; i < n; ++i) {
-        srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
+        srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
         char* unparsed = nullptr;
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
@@ -87,15 +92,16 @@ void functionModel::findSpecifiers() {
 
 // Finds data after all type information is collected
 //
-void functionModel::findDataAfterCollection(std::unordered_map<std::string, variableModel>& dataMembers, const std::unordered_set<std::string>& typeMethods) {   
+void functionModel::findDataAfterCollection(const std::unordered_map<std::string, variableModel>& fields, 
+                                            const std::unordered_set<std::string>& typeMethods) {   
     if (constructorOrDestructor.empty()) {
         // Must only be called after findIgnorableCalls()
-        findCallsOnDataMembers(dataMembers, typeMethods);
+        findCallsOnDataMembers(fields, typeMethods);
 
         // Must only be called after findNewAssignedVariables()
-        findReturnedVariables(dataMembers, false); 
-        findVariablesInExpressions(dataMembers, false);
-        findModifiedVariables(dataMembers, false);
+        findReturnedVariables(fields, false); 
+        findVariablesInExpressions(fields, false);
+        findModifiedVariables(fields, false);
     }
 }
 
@@ -126,6 +132,42 @@ int functionModel::countMethodsInProperty() const {
     return n;
 }
 
+
+// Finds attributes ( C# ) or annotations ( Java )
+//
+void functionModel::findAttributesOrAnnotations() {
+    srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method_attributes_or_annotations").c_str());
+    srcml_transform_result* result = nullptr;
+    
+    srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
+    int n = srcml_transform_get_unit_size(result);
+    for (int i = 0; i < n; i++) {
+        char *unparsed = nullptr;
+        std::size_t size = 0;
+        srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
+        attributesOrAnnotations.push_back(unparsed);
+    }
+    srcml_clear_transforms(methodArchive);
+    srcml_transform_free(result);
+}
+
+// Finds attributes ( C# ) for properties
+//
+void functionModel::findPropertyAttributes() {
+    srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"property_attributes").c_str());
+    srcml_transform_result* result = nullptr;
+    
+    srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
+    int n = srcml_transform_get_unit_size(result);
+    for (int i = 0; i < n; i++) {
+        char *unparsed = nullptr;
+        std::size_t size = 0;
+        srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
+        propertyAttributes.push_back(unparsed);
+    }
+    srcml_clear_transforms(methodArchive);
+    srcml_transform_free(result);
+}
 
 // Gets the method name
 //
@@ -169,7 +211,7 @@ void functionModel::findParameterList() {
         char* unparsed = nullptr;
         std::size_t size = 0;
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        parameterList = unparsed;
+        parametersList = unparsed;
         free(unparsed);   
     }
     srcml_clear_transforms(methodArchive);
@@ -541,8 +583,8 @@ void functionModel::findConstructorOrDestructorType() {
     if (n == 1) {
         std::string srcML = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
         if      (srcML.find("<destructor>") != std::string::npos      )      constructorOrDestructor = "destructor"; 
-        else if (parameterList.find(typeNameParsed) != std::string::npos) constructorOrDestructor = "copy-constructor";
-        else                                                                    constructorOrDestructor = "constructor";
+        else if (parametersList.find(typeNameParsed) != std::string::npos)   constructorOrDestructor = "copy-constructor";
+        else                                                                 constructorOrDestructor = "constructor";
     }
 
     srcml_clear_transforms(methodArchive);
@@ -595,20 +637,10 @@ void functionModel::findExpressionAssignments()  {
     srcml_transform_free(result);    
 }
 
-// Finds the source code of the method
-//
-void functionModel::findMethodBody() {
-    char* unparsed = nullptr;
-    std::size_t size = 0;
-    srcml_unit_unparse_memory(methodUnit, &unparsed, &size);
-    sourceCode = unparsed;
-    free(unparsed);
-}
-
 // Finds the name signature of the method
 //
 void functionModel::findNameSignature() {
-    std::string paramList = parameterList;
+    std::string paramList = parametersList;
     std::string methName = name;
 
     HELPERS.removeBetweenComma(paramList, false);
@@ -643,7 +675,7 @@ void functionModel::findNonPrimitive() {
 
 // Finds variables in expressions
 //
-void functionModel::findVariablesInExpressions(std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) {
+void functionModel::findVariablesInExpressions(const std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) {
     for (const std::string& expr : expressionNames) {
         isVariableUsed(variables, nullptr, expr, false, false, false, isParameterCheck, false);
     }
@@ -702,7 +734,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
 // Both simple returns (e.g., return dm;) and 
 //   complex returns (e.g., return dm + 5; or return dm + 5;) are considered
 //
-void functionModel::findReturnedVariables(std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) {
+void functionModel::findReturnedVariables(const std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) {
     for (const std::string& expr : returnExpressions) {
         if (isParameterCheck) { 
             if (!isVariableUsed(variables, nullptr, expr, true, false, false, isParameterCheck, false))
@@ -726,7 +758,7 @@ void functionModel::findReturnedVariables(std::unordered_map<std::string, variab
 // Finds if a data member, local, or a parameter (normal and passed by reference) is modified
 // Multiple modifications to the same data member or parameter are only considered as 1 modification
 //
-void functionModel::findModifiedVariables(std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) { 
+void functionModel::findModifiedVariables(const std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) { 
     std::unordered_set<std::string> checked; 
 
     for (const std::string& expr : expressionAssignments) {
@@ -796,7 +828,8 @@ void functionModel::findIgnorableCalls(std::vector<callModel>& calls) {
 //  For example, this.methodName();
 //  So these should be also treated as function calls and not method calls
 //
-void functionModel::findCallsOnDataMembers(std::unordered_map<std::string, variableModel>& dataMembers, const std::unordered_set<std::string>& typeMethods) {  
+void functionModel::findCallsOnDataMembers(const std::unordered_map<std::string, variableModel>& fields,
+                                           const std::unordered_set<std::string>& typeMethods) {  
     // Check on function calls (Should be done before checking on method calls)
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
         if (typeMethods.find(it->getSignature()) == typeMethods.end()) { 
@@ -810,7 +843,7 @@ void functionModel::findCallsOnDataMembers(std::unordered_map<std::string, varia
     // Check on method calls 
     for (auto it = methodCalls.begin(); it != methodCalls.end();) {
         // Could be a normal method call on an data member
-        if (!isVariableUsed(dataMembers, nullptr, it->getName(), false, false, false, false, false)) {
+        if (!isVariableUsed(fields, nullptr, it->getName(), false, false, false, false, false)) {
             if (unitLanguage != "C++") {
                 // These should be function calls
                 if (unitLanguage == "C#" && (HELPERS.isSubstringAtBeginning(it->getName(), "this") || HELPERS.isSubstringAtBeginning(it->getName(), "base")))
@@ -820,7 +853,7 @@ void functionModel::findCallsOnDataMembers(std::unordered_map<std::string, varia
 
                 // Could be a call on a local or a parameter
                 // 'dataMembers' passed here is just a place holder, it is never used. 
-                else if (isVariableUsed(dataMembers, nullptr, it->getName(), false, false, false, true, true)) 
+                else if (isVariableUsed(fields, nullptr, it->getName(), false, false, false, true, true)) 
                     ++externalMethodCallsCount;
                     
                 // It is a static call
@@ -846,11 +879,11 @@ void functionModel::findCallsOnDataMembers(std::unordered_map<std::string, varia
 // Where 'a' is a variableModel and Foo is type itself if the variableModel is an data member
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 // 
-bool functionModel::isVariableUsed(std::unordered_map<std::string, variableModel>& variables, 
-                                       std::unordered_set<std::string>* dataMembersModified, 
-                                       const std::string& expression, bool returnCheck, 
-                                       bool parameterModifiedCheck,  bool localModifiedCheck,
-                                       bool isParamaterCheck, bool isLocalCheck) {
+bool functionModel::isVariableUsed(const std::unordered_map<std::string, variableModel>& variables, 
+                                   std::unordered_set<std::string>* dataMembersModified, 
+                                   const std::string& expression, bool returnCheck, 
+                                   bool parameterModifiedCheck,  bool localModifiedCheck,
+                                   bool isParamaterCheck, bool isLocalCheck) {
     std::string expr = expression; 
     HELPERS.removeWhitespace(expr);
     HELPERS.removeBracketSuffix(expr);
@@ -991,6 +1024,8 @@ bool functionModel::isVariableUsed(std::unordered_map<std::string, variableModel
     return false;  
 }
 
+// Gets stereotypes in one string
+//
 std::string functionModel::getStereotypesString() const {
     std::string stereotypesString;
     for (const std::string & s : stereotypes) {
@@ -1000,6 +1035,8 @@ std::string functionModel::getStereotypesString() const {
     return stereotypesString;
 }
 
+// Gets specifiers in one string
+//
 std::string functionModel::getSpecifiersString() const {
     std::string specifierString;
     for (const std::string& s : specifiers) {
@@ -1009,9 +1046,23 @@ std::string functionModel::getSpecifiersString() const {
     return specifierString;
 }
 
+// Gets return type string
+//
 std::string functionModel::getReturnTypeParsed() const {
-    std::string returnTypeParsed = returnType.getType();
-    SPECIFIERS.removeSpecifiers(returnTypeParsed, unitLanguage);  
-    HELPERS.removeWhitespace(returnTypeParsed);
-    return returnTypeParsed;
+    std::string returnTypeString = returnType.getType();
+    SPECIFIERS.removeSpecifiers(returnTypeString, unitLanguage);  
+    HELPERS.removeWhitespace(returnTypeString);
+    return returnTypeString;
+}
+
+
+// Get return type string
+//
+std::string functionModel::getAttributesOrAnnotationsString() const {
+    std::string attributesOrAnnotationsString;
+    for (const std::string& a : attributesOrAnnotations) {
+        if (!attributesOrAnnotationsString.empty()) attributesOrAnnotationsString += " ";
+        attributesOrAnnotationsString += a;
+    }
+    return attributesOrAnnotationsString;
 }

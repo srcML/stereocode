@@ -127,7 +127,7 @@ public partial class ExtendedClass : BaseClass
     public int ExtendedProperty { get; set; }
 }
 
-public partial class ExtendedClass
+public partial class ExtendedClass : MyClass
 {
     public int CalculateSum()
     {
@@ -171,5 +171,25 @@ public class MyNestedClass {
 public class Program {
     public static void Main() {
 
+    }
+}
+
+
+[Serializable]
+[Obsolete("Use NewUser instead.")]
+public class User
+{
+    [Range(18, 99)]
+    public int Age;
+
+    [Required]
+    [StringLength(50)]
+    public string Name { get; set; }
+
+    [Obsolete("Use GetFullName instead.")]
+    [Display(Name = "Get User Name")]
+    public string GetName()
+    {
+        return Name;
     }
 }
