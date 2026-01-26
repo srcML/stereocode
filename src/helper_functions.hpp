@@ -17,13 +17,13 @@
 
 class helperFunctions {
 public:
-    std::string                     escapeCSV                     (const std::string& data);
-    bool                            isSubstringAtBeginning        (const std::string&, const std::string&);
-    void                            removeBracketSuffix           (std::string&);
-    void                            removeLeadingAsterisks        (std::string&);
-    void                            removeNamespace               (std::string&, std::string_view, bool);
-    void                            removeBetweenComma            (std::string& s, bool);
-    void                            removeWhitespace              (std::string&);
+    static std::string                     escapeCSV                     (const std::string& data);
+    static bool                            isSubstringAtBeginning        (const std::string&, const std::string&);
+    static void                            removeBracketSuffix           (std::string&);
+    static void                            removeLeadingAsterisks        (std::string&);
+    static void                            removeNamespace               (std::string&, std::string_view, bool);
+    static void                            removeBetweenComma            (std::string& s, bool);
+    static void                            removeWhitespace              (std::string&);
 };
 
 #endif

@@ -14,15 +14,15 @@
 
 #include <srcml.h>
 
-extern thread_local helperFunctions    HELPERS;
-extern              XPathGenerator     XPATH_GENERATOR;
-extern thread_local primitives         PRIMITIVES;
-extern thread_local srcml_unit*        typeUnit;
-extern thread_local srcml_archive*     typeArchive;
-extern thread_local srcml_unit*        methodUnit;
-extern thread_local srcml_archive*     methodArchive;
-extern thread_local srcml_unit*        propertyUnit;
-extern thread_local srcml_archive*     propertyArchive;
+extern XPathGenerator                  XPATH_GENERATOR;
+extern primitives                      PRIMITIVES;
+extern srcml_unit*                     typeUnit;
+extern srcml_archive*                  typeArchive;
+extern srcml_unit*                     methodUnit;
+extern srcml_archive*                  methodArchive;
+
+srcml_unit*                            propertyUnit{nullptr};
+srcml_archive*                         propertyArchive{nullptr};
 
 // The "this" keyword functions in most cases as "accessor" to the state of the type
 // Therefore, it is added to the list of data members with the non-primitive type set to true since it always
@@ -40,8 +40,8 @@ typeModel::typeModel(const std::string& unitLanguage_) : unitLanguage{unitLangua
 
 // Finds other data for the type
 //
-void typeModel::findData(const std::string& classXpath, int unitNumber) {
-    xpath[unitNumber].push_back(classXpath);
+void typeModel::findData(const std::string& typeXpath, int unitNumber) {
+    xpath[unitNumber].push_back(typeXpath);
 
     findStructure();
     findParentNames();
@@ -50,10 +50,10 @@ void typeModel::findData(const std::string& classXpath, int unitNumber) {
     findFieldNames(fieldsOrdered);
     findFieldTypes(fieldsOrdered);
      
-    findMethod(classXpath, unitNumber);
+    findMethod(typeXpath, unitNumber);
     if (unitLanguage == "C#" || unitLanguage == "Java") {
         findAttributesOrAnnotations();
-        if (unitLanguage == "C#") findProperties(classXpath, unitNumber);
+        if (unitLanguage == "C#") findProperties(typeXpath, unitNumber);
     }
 }
 
@@ -81,7 +81,7 @@ void typeModel::findStructure() {
         srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
         structure += srcml_unit_get_srcml(resultUnit);
     }
-    HELPERS.removeWhitespace(structure);
+    helperFunctions::removeWhitespace(structure);
 
     // Structures in C++ get the semi-colon at the end, so we need to remove it ( class; )
     if (unitLanguage == "C++" && structure.back() ==';') structure.pop_back();
@@ -103,6 +103,7 @@ void typeModel::findAttributesOrAnnotations() {
         std::size_t size = 0;
         srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
         attributesOrAnnotations.push_back(unparsed);
+        free(unparsed);
     }
     srcml_clear_transforms(typeArchive);
     srcml_transform_free(result);
@@ -122,20 +123,20 @@ void typeModel::findName() {
         std::string tempName = unparsed;
         name.push_back(tempName); 
 
-        HELPERS.removeWhitespace(tempName);
+        helperFunctions::removeWhitespace(tempName);
         name.push_back(tempName);
         
         std::size_t listOpen = tempName.find("<");
         if (listOpen != std::string::npos) {
             std::string nameLeft = tempName.substr(0, listOpen);
             std::string nameRight = tempName.substr(listOpen, tempName.size() - listOpen);
-            HELPERS.removeBetweenComma(nameRight, true);
-            HELPERS.removeNamespace(nameLeft, unitLanguage, true);
+            helperFunctions::removeBetweenComma(nameRight, true);
+            helperFunctions::removeNamespace(nameLeft, unitLanguage, true);
             name.push_back(nameLeft + nameRight);
             name.push_back(nameLeft);
         }
         else {
-            HELPERS.removeNamespace(tempName, unitLanguage, true);
+            helperFunctions::removeNamespace(tempName, unitLanguage, true);
             name.push_back(tempName);
             name.push_back(tempName); // Not a duplicate
         }     
@@ -149,7 +150,7 @@ void typeModel::findName() {
     srcml_transform_free(result); 
 }
 
-// Finds parent classs
+// Finds parent types
 // C++:
 //  Supports multiple inheritance and can use the public, private, and protected specifiers to control inheritance
 //   It is private by default if nothing is specified for a class and public by default for a struct
@@ -183,17 +184,17 @@ void typeModel::findParentNames() {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string parentName = unparsed;
 
-        HELPERS.removeWhitespace(parentName);
+        helperFunctions::removeWhitespace(parentName);
 
         std::size_t listOpen = parentName.find("<");
         if (listOpen != std::string::npos) {
             std::string left = parentName.substr(0, listOpen);
             std::string right = parentName.substr(listOpen, parentName.size() - listOpen);
-            HELPERS.removeNamespace(left, unitLanguage, true); 
+            helperFunctions::removeNamespace(left, unitLanguage, true); 
             parentNames.insert(left + right);
         }
         else {
-            HELPERS.removeNamespace(parentName, unitLanguage, true);
+            helperFunctions::removeNamespace(parentName, unitLanguage, true);
             parentNames.insert(parentName);
         }
     
@@ -234,7 +235,7 @@ void typeModel::findFieldNames(std::vector<variableModel>& fieldsOrdered) {
         variableModel v;
 
         // Chop off [] for arrays  
-        if (unitLanguage == "C++")  HELPERS.removeBracketSuffix(dataMemberName);
+        if (unitLanguage == "C++")  helperFunctions::removeBracketSuffix(dataMemberName);
         
         v.setName(dataMemberName);
 

@@ -15,8 +15,7 @@
 #include <vector>
 #include <sstream>
 
-extern thread_local helperFunctions   HELPERS;
-thread_local extern specifiers        SPECIFIERS;
+extern specifiers        SPECIFIERS;
 
 // Checks if ( dataOrReturnType ) is non-primitive
 //
@@ -31,20 +30,20 @@ bool primitives::isNonPrimitive(variableModel& variable, const std::string& unit
         // removeNamespace() can mess up the string when there is a namespace inside <>
         // For example: Factory <hippodraw::DataRep> --> removeNamespace() --> DataRep>
         // This is why we need to separate them
-        HELPERS.removeNamespace(left, unitLanguage, true);
+        helperFunctions::removeNamespace(left, unitLanguage, true);
 
         dataOrReturnTypeParsed = left + right;
     }
 
     SPECIFIERS.removeSpecifiers(dataOrReturnTypeParsed, unitLanguage);
-    HELPERS.removeWhitespace(dataOrReturnTypeParsed);
+    helperFunctions::removeWhitespace(dataOrReturnTypeParsed);
      
     std::stringstream dataOrReturnTypeParsedStream(dataOrReturnTypeParsed);
     std::string dataOrReturnTypeParsedSnippet;
 
     while (std::getline(dataOrReturnTypeParsedStream, dataOrReturnTypeParsedSnippet, ',')) {
-        HELPERS.removeNamespace(dataOrReturnTypeParsedSnippet, unitLanguage, true);
-        HELPERS.removeBracketSuffix(dataOrReturnTypeParsedSnippet);
+        helperFunctions::removeNamespace(dataOrReturnTypeParsedSnippet, unitLanguage, true);
+        helperFunctions::removeBracketSuffix(dataOrReturnTypeParsedSnippet);
         
         // getline might return empty strings for types like "List<,>" if not fully cleaned
         if (dataOrReturnTypeParsedSnippet.empty()) continue; 

@@ -10,15 +10,16 @@
 #include "stereotype_rules.hpp"
 #include "helper_functions.hpp"
 
-std::unordered_map<int, std::unordered_map<std::string, std::string>>   XPATH_LIST;        // Map key = unit number. Each map value is a pair of xpath and stereotype  
-extern int                                                              METHODS_PER_TYPE_THRESHOLD;
+std::unordered_map<int, std::unordered_map
+                  <std::string, std::string>> XPATH_LIST; // Map key = unit number. Each map value is a pair of xpath and stereotype  
+extern int                                    METHODS_PER_TYPE_THRESHOLD;
 
 // Compute method stereotypes
 //
-void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, typeModel>& classCollection) {
-    for (auto& pair : classCollection) {
+void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, typeModel>& typeCollection) {
+    for (auto& pair : typeCollection) {
         // Common operations
-        const std::string&          classUnitLanguage          = pair.second.getUnitLanguage();
+        const std::string&          unitLanguage               = pair.second.getUnitLanguage();
         int                         constructorDestructorCount = 0;
         std::vector<functionModel>& methods                    = pair.second.getMethods();
 
@@ -27,10 +28,10 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
             std::string        returnTypeParsed                       = m.getReturnTypeParsed();
             int                dataMembersModifiedCount               = m.getDataMembersModifiedCount();
             int                callsOnDataMembersCount                = m.getMethodCalls().size();
-            int                callsOnClassMethodsCount               = m.getFunctionCalls().size();
+            int                callsOnTypeMethodsCount                = m.getFunctionCalls().size();
             int                newConstructorCallsCount               = m.getNewConstructorCalls().size();
             int                callsOnFreeFunctionsCount              = m.getExternalFunctionCallsCount();
-            int                callsToOtherClassMethods               = m.getExternalMethodCallsCount();
+            int                callsToOtherTypeMethods                = m.getExternalMethodCallsCount();
             int                NumOfNonCommentStatements              = m.getNonCommentStatementsCount();
             bool               isDataMemberUsed                       = m.isDataMemberUsed();
             bool               isMethodConst                          = m.isMethodConst();
@@ -48,7 +49,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
             bool               isNonPrimitiveReturnTypeExternal       = m.isNonPrimitiveReturnTypeExternal();
 
             // Covers the case of void with * or more
-            if (classUnitLanguage != "Java") if (m.getReturnTypeParsed().find("void*") != std::string::npos) isVoidPointer = true;
+            if (unitLanguage != "Java") if (m.getReturnTypeParsed().find("void*") != std::string::npos) isVoidPointer = true;
             
             // constructor copy-constructor destructor
             //
@@ -85,18 +86,18 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // 1] Return type is Boolean
                 // 2] Contains at least one complex return expression
                 // 3] Uses a data member in an expression or has at least 
-                //     one function call (except constructor calls) to other methods in class
+                //     one function call (except constructor calls) to other methods in type
                 //
                 // Returning "this" by itself is not a predicate (e.g., return this;) 
                 //  as it points to the current object rather than a bool value found using data members
                 // 
                 bool  returnType = false;
 
-                if      (classUnitLanguage == "C++")  returnType = (returnTypeParsed == "bool");
-                else if (classUnitLanguage == "C#")   returnType = (returnTypeParsed == "bool") || (returnTypeParsed == "Boolean");
-                else if (classUnitLanguage == "Java") returnType = (returnTypeParsed == "boolean");
+                if      (unitLanguage == "C++")  returnType = (returnTypeParsed == "bool");
+                else if (unitLanguage == "C#")   returnType = (returnTypeParsed == "bool") || (returnTypeParsed == "Boolean");
+                else if (unitLanguage == "Java") returnType = (returnTypeParsed == "boolean");
 
-                if (returnType && hasComplexReturn && (isDataMemberUsed || (callsOnClassMethodsCount > 0))) 
+                if (returnType && hasComplexReturn && (isDataMemberUsed || (callsOnTypeMethodsCount > 0))) 
                     m.setStereotype("predicate"); 
             
                 
@@ -105,22 +106,22 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // 1] Return type is not void or Boolean
                 // 2] Contains at least one complex return statement (e.g., return a+5;)
                 // 3] Uses a data member in an expression or has at least 
-                //     one function call (except constructor calls) to other methods in class
+                //     one function call (except constructor calls) to other methods in type
                 //
                 // Returning "this" by itself is not a property (e.g., return this;) 
                 //  as it points to the current object rather than a non-bool value found using data members
                 //  
                 bool returnNotVoidOrBool = false;
 
-                if      (classUnitLanguage == "C++")  returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "void" && 
-                                                                            returnTypeParsed != "") || isVoidPointer;
-                else if (classUnitLanguage == "C#")   returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" && 
-                                                                            returnTypeParsed != "void" && returnTypeParsed != "Void" && 
-                                                                            returnTypeParsed != "") || isVoidPointer;
-                else if (classUnitLanguage == "Java") returnNotVoidOrBool = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
-                                                                            returnTypeParsed != "Void" && returnTypeParsed != "");
+                if      (unitLanguage == "C++")  returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "void" && 
+                                                                        returnTypeParsed != "") || isVoidPointer;
+                else if (unitLanguage == "C#")   returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" && 
+                                                                        returnTypeParsed != "void" && returnTypeParsed != "Void" && 
+                                                                        returnTypeParsed != "") || isVoidPointer;
+                else if (unitLanguage == "Java") returnNotVoidOrBool = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
+                                                                        returnTypeParsed != "Void" && returnTypeParsed != "");
 
-                if (returnNotVoidOrBool && hasComplexReturn && (isDataMemberUsed || (callsOnClassMethodsCount > 0))) 
+                if (returnNotVoidOrBool && hasComplexReturn && (isDataMemberUsed || (callsOnTypeMethodsCount > 0))) 
                     m.setStereotype("property");
                 
             
@@ -129,23 +130,23 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // 1] Return type is void 
                 // 2] Contains at least one parameter that is passed by non-const reference and is assigned a value
                 // 3] Uses a data member in an expression or has at least 
-                //     one function call (except constructor calls) to other methods in class 
+                //     one function call (except constructor calls) to other methods in type 
                 //
                 // The "this" keyword by itself is considered (e.g., p = this or p = *this) 
                 //  as an accessor to the state of the object where 'p' is passed by reference
                 //
-                if (isParameterRefModified && (returnTypeParsed == "void") && !isVoidPointer && (isDataMemberUsed || (callsOnClassMethodsCount > 0))) 
+                if (isParameterRefModified && (returnTypeParsed == "void") && !isVoidPointer && (isDataMemberUsed || (callsOnTypeMethodsCount > 0))) 
                     m.setStereotype("void-accessor");       
                 
 
                 // set
                 //
                 // 1] Only one data member is changed or there is a single call on a data member
-                // 2] No calls to methods in class
+                // 2] No calls to methods in type
                 //
                 // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
                 //       
-                if (callsOnClassMethodsCount == 0 && 
+                if (callsOnTypeMethodsCount == 0 && 
                    ((dataMembersModifiedCount == 1 && callsOnDataMembersCount == 0) || 
                     (dataMembersModifiedCount == 0 && callsOnDataMembersCount == 1)))
                     m.setStereotype("set"); 
@@ -160,10 +161,10 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 //           
                 //   Case 2: one data member is modifed and
                 //            there is at least one call on a data member or
-                //            at least one function call to other methods (except constructor calls) in class
+                //            at least one function call to other methods (except constructor calls) in type
                 //   Case 3: zero data members are modifed and
                 //            there is at least two calls on data member or
-                //            at least one function call to other methods (except constructor calls) in class  
+                //            at least one function call to other methods (except constructor calls) in type  
                 //
                 // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
                 //
@@ -171,8 +172,8 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 //   Method return type is not void
                 //             
                 bool case1       = dataMembersModifiedCount > 1;
-                bool case2       = (dataMembersModifiedCount == 1) && ((callsOnClassMethodsCount + callsOnDataMembersCount) > 0);
-                bool case3       = (dataMembersModifiedCount == 0) && ((callsOnDataMembersCount > 1) || (callsOnClassMethodsCount > 0));
+                bool case2       = (dataMembersModifiedCount == 1) && ((callsOnTypeMethodsCount + callsOnDataMembersCount) > 0);
+                bool case3       = (dataMembersModifiedCount == 0) && ((callsOnDataMembersCount > 1) || (callsOnTypeMethodsCount > 0));
                 
                 bool isMutable = isMethodConst && case1;
                 bool isNonVoidReturn = returnTypeParsed != "void" && returnTypeParsed != "Void" && !isVoidPointer;
@@ -198,7 +199,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // wrapper
                 //
                 // 1] No data members are modified
-                // 2] No calls to methods in class
+                // 2] No calls to methods in type
                 // 3] No calls on data members
                 // 4] Has at least one free function call 
                 // Constructor calls using the 'new' operator are not considered 
@@ -206,22 +207,22 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // controller
                 //
                 // 1] No data members are modified
-                // 2] No calls to methods in class
+                // 2] No calls to methods in type
                 // 3] No calls on data members
-                // 3] Has at least one call to other class methods or mutates a parameter or a local that is non-primitive
+                // 3] Has at least one call to other type methods or mutates a parameter or a local that is non-primitive
                 //
                 // collaborator
                 //
-                // 1] It must use at least 1 non-primitive type (not of this class)
+                // 1] It must use at least 1 non-primitive type (not of this type)
                 // 2] Type could be a parameter, local variable, return type, or an data member
                 //
                 //
-                if ((dataMembersModifiedCount == 0) && (callsOnClassMethodsCount == 0) && (callsOnDataMembersCount == 0) 
-                    && (callsToOtherClassMethods == 0) && (callsOnFreeFunctionsCount > 0)) 
+                if ((dataMembersModifiedCount == 0) && (callsOnTypeMethodsCount == 0) && (callsOnDataMembersCount == 0) 
+                    && (callsToOtherTypeMethods == 0) && (callsOnFreeFunctionsCount > 0)) 
                     m.setStereotype("wrapper");
 
-                else if ((dataMembersModifiedCount == 0) && (callsOnClassMethodsCount == 0) && (callsOnDataMembersCount == 0) &&
-                    ((callsToOtherClassMethods > 0) || isNonPrimitiveLocalOrParameterModified))
+                else if ((dataMembersModifiedCount == 0) && (callsOnTypeMethodsCount == 0) && (callsOnDataMembersCount == 0) &&
+                    ((callsToOtherTypeMethods > 0) || isNonPrimitiveLocalOrParameterModified))
                     m.setStereotype("controller");   
 
                 else if (isNonPrimitiveDataMemberExternal || isNonPrimitiveLocalExternal || 
@@ -235,8 +236,8 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // 2] No data members are used or modified (including no use of keyword "this" by itself)
                 // 3] No calls of any kind
                 // 
-                bool noCalls = callsOnClassMethodsCount == 0 && callsOnDataMembersCount == 0 && 
-                               newConstructorCallsCount == 0 && callsToOtherClassMethods == 0 && callsOnFreeFunctionsCount == 0;
+                bool noCalls = callsOnTypeMethodsCount == 0 && callsOnDataMembersCount == 0 && 
+                               newConstructorCallsCount == 0 && callsToOtherTypeMethods == 0 && callsOnFreeFunctionsCount == 0;
 
                 if (!isDataMemberUsed & noCalls) 
                     m.setStereotype("incidental");          
@@ -246,12 +247,12 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 //
                 // 1]	Method contains at least one non-comment statement (i.e., method is not empty)
                 // 2]	No data members are used or modified (including no use of keyword "this" by itself)
-                // 3]	No calls to methods in class 
+                // 3]	No calls to methods in type 
                 // 4]   No calls on data members
-                // 5]   Has at least one call to other class methods (including constructor calls) or to a free function 
+                // 5]   Has at least one call to other type methods (including constructor calls) or to a free function 
                 //
-                if (!isDataMemberUsed && callsOnClassMethodsCount == 0 && callsOnDataMembersCount == 0 &&
-                   ((callsOnFreeFunctionsCount > 0) || (callsToOtherClassMethods > 0) || (newConstructorCallsCount > 0)))
+                if (!isDataMemberUsed && callsOnTypeMethodsCount == 0 && callsOnDataMembersCount == 0 &&
+                   ((callsOnFreeFunctionsCount > 0) || (callsToOtherTypeMethods > 0) || (newConstructorCallsCount > 0)))
                    m.setStereotype("stateless");             
                 
             }
@@ -274,8 +275,8 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
 // Compute type stereotype
 // Constructors and destructors are not considered in the computation of type stereotypes
 // 
-void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typeModel>& classCollection) {
-    for (auto& pair : classCollection) {
+void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typeModel>& typeCollection) {
+    for (auto& pair : typeCollection) {
         std::unordered_map<std::string, int> methodStereotypes = {
             {"get", 0},
             {"predicate", 0},
@@ -429,7 +430,7 @@ void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typ
 
         const std::unordered_map<int, std::vector<std::string>>& xpath = pair.second.getXpath();
         for (const auto& pairXpath : xpath) 
-            for (const auto& classXpath : pairXpath.second) XPATH_LIST[pairXpath.first].insert({classXpath, pair.second.getStereotypesString()});
+            for (const auto& typeXpath : pairXpath.second) XPATH_LIST[pairXpath.first].insert({typeXpath, pair.second.getStereotypesString()});
     }  
 }
 
@@ -524,7 +525,7 @@ void stereotypeRules::computeFreeFunctionStereotypes(std::vector<functionModel>&
 
             // wrapper
             //
-            // Does not change parameters passed by reference. Has at least one call to other class methods or to a free function  
+            // Does not change parameters passed by reference. Has at least one call to other type methods or to a free function  
             // Constructor calls using the 'new' operator are not considered
             //
             if (!isParameterRefModified && (nonNewConstructorCallsCount > 0)) f.setStereotype("wrapper");

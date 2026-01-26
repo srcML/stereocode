@@ -24,44 +24,40 @@
 #include <iostream>
 #include <cstring>
 
-// Those do need to be declared with thread_local because either they are used for read-only (e.g., PRIMITIVES), which multiple threads can share
-//  or they are not used in threading (e.g., XPATH_LIST)
+
+XPathGenerator                     XPATH_GENERATOR;
+
 extern std::unordered_map
        <int, std::unordered_map
-       <std::string, std::string>> XPATH_LIST;   
-XPathGenerator                     XPATH_GENERATOR; // Thread Safe
-thread_local helperFunctions       HELPERS;
-extern primitives                  PRIMITIVES_I;
-thread_local primitives            PRIMITIVES;
-extern calls                       CALLS_I;
-thread_local calls                 CALLS;
-extern specifiers                  SPECIFIERS_I;
-thread_local specifiers            SPECIFIERS;
+       <std::string, std::string>> XPATH_LIST;  
+
+extern primitives                  PRIMITIVES;
+extern calls                       CALLS;
+extern specifiers                  SPECIFIERS;
+
 extern bool                        IS_VERBOSE;
 extern bool                        FREE_FUNCTION;
 extern bool                        CSV_REPORT;
 
-srcml_archive*                     inputArchive{srcml_archive_create()};
+srcml_archive*                     archive{srcml_archive_create()};
 srcml_unit*                        unit{nullptr};
-thread_local srcml_archive*        transformationArchive{nullptr};
-thread_local srcml_archive*        typeArchive{nullptr};
-thread_local srcml_unit*           typeUnit{nullptr};
-thread_local srcml_archive*        methodArchive{nullptr};
-thread_local srcml_unit*           methodUnit{nullptr};
-thread_local srcml_unit*           propertyUnit{nullptr};
-thread_local srcml_archive*        propertyArchive{nullptr};
+srcml_archive*                     typeArchive{nullptr};
+srcml_unit*                        typeUnit{nullptr};
+srcml_archive*                     methodArchive{nullptr};
+srcml_unit*                        methodUnit{nullptr};
+
 
 stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std::string& outputFile) {
     bool error{false};
 
     // Open input archive
-    if (srcml_archive_read_open_filename(inputArchive, inputFile.c_str())) {
+    if (srcml_archive_read_open_filename(archive, inputFile.c_str())) {
         std::cerr << "Error: File not found: " << inputFile << '\n';
         error = true;
     }
 
     // Cloning is needed if input archive has extra namespaces (e.g., pos)
-    srcml_archive* outputArchive = srcml_archive_clone(inputArchive);
+    srcml_archive* outputArchive = srcml_archive_clone(archive);
 
     // Open output archive
     if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
@@ -71,9 +67,9 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
 
     // Error handling
     if (error) {
-        srcml_archive_close(inputArchive);
+        srcml_archive_close(archive);
         srcml_archive_close(outputArchive);
-        srcml_archive_free(inputArchive);
+        srcml_archive_free(archive);
         srcml_archive_free(outputArchive);
         exit(1);
     }
@@ -91,40 +87,22 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
         SPECIFIERS.outputSpecifiers();
     }
 
-    // // Multithreaded Analysis of Units
-    unit = srcml_archive_read_unit(inputArchive);
+    unit = srcml_archive_read_unit(archive);
 
-    unsigned int unitNumber = 1;
-    unsigned int nthreads = std::thread::hardware_concurrency();
-
-    std::mutex mu;
-    std::vector<srcml_unit*> inputUnits;
-    std::vector<std::thread> threads;
-    std::vector<ThreadResult> results(nthreads);
-
+    int unitNumber = 1;
     while (unit) {
-        unsigned int threadPoolCount = 0;
-        // Fill the Batch
-        while ((threadPoolCount < nthreads) && unit){
-            inputUnits.push_back(unit);
-            results[threadPoolCount].clear(); 
+        findTypeInfo(unit, unitNumber);
+        findFreeFunctions(unit, unitNumber);
 
-            threads.emplace_back(&stereotypesAnalyzer::analyzeWorker, this, unit, unitNumber, std::ref(results[threadPoolCount]), std::ref(mu)); // Spawn Thread
-            ++unitNumber;
-            ++threadPoolCount;
-
-            unit = srcml_archive_read_unit(inputArchive);
-        }
-        for (std::thread& thread : threads) if (thread.joinable()) thread.join();
-        for (const auto& inputUnit : inputUnits) srcml_unit_free(inputUnit); 
-        inputUnits.clear();
-        threads.clear();
-
-        accumulateResults(results, threadPoolCount);
+        srcml_unit_free(unit);
+        ++unitNumber;
+        unit = srcml_archive_read_unit(archive);
     }
-    srcml_archive_close(inputArchive);
-    srcml_archive_free(inputArchive);
+    srcml_archive_close(archive);
+    srcml_archive_free(archive);
 
+    analyzeDuplicates();
+    
     // Performed after the collection of all types and free functions
     analyzeFreeFunctions();
 
@@ -172,12 +150,18 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     }
 
     // Generate the stereotyped XML archive
-    inputArchive = srcml_archive_create();
-    srcml_archive_read_open_filename(inputArchive, inputFile.c_str());
-    unit = srcml_archive_read_unit(inputArchive);
+    archive = srcml_archive_create();
+    srcml_archive_read_open_filename(archive, inputFile.c_str());
+    unit = srcml_archive_read_unit(archive);
 
+    std::vector<srcml_unit*> inputUnits;
     std::map<int, srcml_unit*> outputUnits;
     std::unordered_map<int, srcml_transform_result*> resultUnits;
+    
+    std::vector<std::thread> threads;
+    std::mutex mu;
+
+    unsigned int nthreads = std::thread::hardware_concurrency();
 
     unitNumber = 1;
     while(unit) {
@@ -189,7 +173,7 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
             ++unitNumber;
             ++threadPoolCount;
 
-            unit = srcml_archive_read_unit(inputArchive);
+            unit = srcml_archive_read_unit(archive);
         }
         for (std::thread& thread : threads) if (thread.joinable()) thread.join();
         threads.clear();
@@ -207,63 +191,27 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
         outputUnits.clear();
         resultUnits.clear();
     }
-    srcml_archive_close(inputArchive);
-    srcml_archive_free(inputArchive);
+    srcml_archive_close(archive);
+    srcml_archive_free(archive);
     srcml_archive_close(outputArchive);
     srcml_archive_free(outputArchive);
 }
 
-// Thread worker for stereotype analysis per unit
-//
-void stereotypesAnalyzer::analyzeWorker(srcml_unit* inputUnit, int unitNumber, ThreadResult& result, std::mutex& mu) {
-    // Prepare primitives, ignored calls, and specifiers for threads
-    PRIMITIVES = PRIMITIVES_I; // Copy user-defined primitives (if any) from global to thread-local
-    PRIMITIVES.initializePrimitivesList(); // Append initial primitives list
-    CALLS = CALLS_I;
-    CALLS.initializeIgnorableCalls();
-    SPECIFIERS = SPECIFIERS_I;
-    SPECIFIERS.initializeSpecifiersList();
-
-    transformationArchive = srcml_archive_create();
-    findTypeInfo(inputUnit, unitNumber, result, mu);
-    findFreeFunctions(inputUnit, unitNumber, result, mu);
-    srcml_archive_free(transformationArchive);
-}
 
 void stereotypesAnalyzer::outputWorker(srcml_unit* inputUnit, int unitNumber, std::map<int, srcml_unit*>& outputUnits,
                                        const std::unordered_map<std::string, std::string>& xpathPair,
                                        std::unordered_map<int, srcml_transform_result*>& resultUnits, std::mutex& mu) {
-
-    transformationArchive = srcml_archive_create();
     outputStereotypes(inputUnit, unitNumber, outputUnits, xpathPair, resultUnits, mu);
-    srcml_archive_free(transformationArchive);
 }
 
 // Accumulate partial results of threads
 // 
-void stereotypesAnalyzer::accumulateResults(std::vector<ThreadResult>& results, int threadPoolCount) {
-    // Iterate over threadPoolCount and not results.size() since results may contain empty results
-    for (int i = 0; i < threadPoolCount; ++i) { 
-        ThreadResult& result = results[i];
-        freeFunctions.insert(freeFunctions.end(), std::make_move_iterator(result.freeFunctions.begin()), std::make_move_iterator(result.freeFunctions.end()));   
-
-        // Duplicates are ignored or identical
-        genericTypes.insert(result.genericTypes.begin(), result.genericTypes.end());
-
-        // We try to move every type from ( result.types ) into ( this->types )
-        // If a key exists (Collision/Partial Class), then merge
-        for (auto& resultType : result.types) {
-            auto it = types.find(resultType.first);
-            if (it != types.end()) it->second.mergeData(resultType.second);
-            else types.insert(std::move(resultType));
-        }
-
-        for (auto& duplicateType : result.duplicateTypes) {
-            std::string key = duplicateType.getName()[1];
-            auto it = types.find(key);
-            if (it != types.end()) it->second.mergeData(duplicateType);
-            else types.insert({key, std::move(duplicateType)});
-        }
+void stereotypesAnalyzer::analyzeDuplicates() {
+    for (auto& duplicateType : duplicateTypes) { 
+        std::string key = duplicateType.getName()[1];
+        auto it = types.find(key);
+        if (it != types.end()) it->second.mergeData(duplicateType);
+        else types.insert({key, std::move(duplicateType)});
     }
 }
 
@@ -302,22 +250,20 @@ void stereotypesAnalyzer::accumulateResults(std::vector<ThreadResult>& results, 
 //   They are ignored (since they are nested) and their methods (only if static) are collected as free functions
 //  Anonymous classes (classes without names and are nested as instances) are ignored
 //
-void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber, ThreadResult& resultStruct, std::mutex& mu) {
+void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(inputUnit);
     if (unitLanguage == "C") { unitLanguage = "C++"; }
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
-        srcml_append_transform_xpath(transformationArchive, XPATH_GENERATOR.getXPathList(unitLanguage, "type").c_str()); 
+        srcml_append_transform_xpath(archive, XPATH_GENERATOR.getXPathList(unitLanguage, "type").c_str()); 
         srcml_transform_result* result = nullptr;
-        srcml_unit_apply_transforms(transformationArchive, inputUnit, &result);
+        srcml_unit_apply_transforms(archive, inputUnit, &result);
         int n = srcml_transform_get_unit_size(result);
         srcml_unit* resultUnit = nullptr;
         
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
-            {
-                std::lock_guard<std::mutex> guard(mu);
-                typeArchive = srcml_archive_clone(inputArchive); // Creates an archive internally
-            }
+
+            typeArchive = srcml_archive_clone(archive); // Creates an archive internally
             
             char* unparsed = nullptr;
             std::size_t size = 0;
@@ -337,12 +283,12 @@ void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber, Th
             const std::string& typeNameParsed = type.getName()[1];
 
             // Needed for inheritance in Java and C#
-            if (unitLanguage != "C++") resultStruct.genericTypes.insert({type.getName()[2], type.getName()[1]}); 
+            if (unitLanguage != "C++") genericTypes.insert({type.getName()[2], type.getName()[1]}); 
 
-            if (resultStruct.types.find(typeNameParsed) != resultStruct.types.end()) 
-                resultStruct.duplicateTypes.push_back(std::move<typeModel&>(type));
+            if (types.find(typeNameParsed) != types.end()) 
+                duplicateTypes.push_back(std::move(type));
             else      
-                resultStruct.types.insert({typeNameParsed, std::move<typeModel&>(type)});
+                types.insert({typeNameParsed, std::move(type)});
             
             free(unparsed);
             srcml_unit_free(typeUnit);
@@ -350,8 +296,8 @@ void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber, Th
             srcml_archive_free(typeArchive); 
          }   
         srcml_transform_free(result);
-        srcml_clear_transforms(transformationArchive);
-    }      
+        srcml_clear_transforms(archive);
+    }    
 }
 
 // C++ only
@@ -377,24 +323,21 @@ void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber, Th
 //      Function could be a free function (including normal free functions, friend functions, static methods, methods defined for external types)
 //          Foo(){}, namespace::Foo(){}, static Foo(){}, externalType::Foo(){}, 
 //
-void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumber, ThreadResult& resultStruct, std::mutex& mu) {
+void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumber) {
     std::string unitLanguage = srcml_unit_get_language(inputUnit); 
     if (unitLanguage == "C") { unitLanguage = "C++"; }
     if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") {
-        srcml_append_transform_xpath(transformationArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"free_function").c_str());
+        srcml_append_transform_xpath(archive, XPATH_GENERATOR.getXPathList(unitLanguage,"free_function").c_str());
         srcml_transform_result* result = nullptr;
-        srcml_unit_apply_transforms(transformationArchive, inputUnit, &result);
+        srcml_unit_apply_transforms(archive, inputUnit, &result);
         int n = srcml_transform_get_unit_size(result);  
         srcml_unit* resultUnit = nullptr;
     
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
-          
-            {
-                std::lock_guard<std::mutex> guard(mu);
-                methodArchive = srcml_archive_clone(inputArchive);
-            }
 
+            methodArchive = srcml_archive_clone(archive);
+            
             char* unparsed = nullptr;
             std::size_t size = 0;
             srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
@@ -409,7 +352,7 @@ void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumbe
             std::string functionXpath =  "(" + XPATH_GENERATOR.getXPathList(unitLanguage, "free_function") + ")[" + std::to_string(i + 1) + "]";
             functionModel function(functionXpath, unitLanguage, "", "", unitNumber, false);
             
-            resultStruct.freeFunctions.push_back(std::move(function));
+            freeFunctions.push_back(std::move(function));
 
             free(unparsed);
             srcml_unit_free(methodUnit);
@@ -417,7 +360,7 @@ void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumbe
             srcml_archive_free(methodArchive); 
         }
         srcml_transform_free(result);
-        srcml_clear_transforms(transformationArchive); 
+        srcml_clear_transforms(archive); 
     }
 }
 
@@ -428,7 +371,7 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
         if (function->getUnitLanguage() == "C++") {
             // Removes namespaces if any
             std::string functionName = function->getName();  
-            HELPERS.removeNamespace(functionName, "C++", false);
+            helperFunctions::removeNamespace(functionName, "C++", false);
 
             // Get the type name (if any). Else, it is a free function
             std::size_t isTypeName = functionName.find("::");
@@ -508,7 +451,7 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                 }              
             }
             else {  
-                HELPERS.removeBetweenComma(parentTypeName, true);
+                helperFunctions::removeBetweenComma(parentTypeName, true);
                 auto resultG = genericTypes.find(parentTypeName);
                 if (resultG != genericTypes.end()) {
                     auto resultM = types.find(resultG->second);
@@ -549,19 +492,19 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
         std::string returnType = !function.getReturnTypeParsed().empty() ? function.getReturnTypeParsed() : "N/A";
         std::string parametersList = function.getParametersList().empty() ? "N/A" : function.getParametersList();
 
-        csvFile << HELPERS.escapeCSV(function.getFileName()) << ","
-                << HELPERS.escapeCSV(typeName) << ","
-                << HELPERS.escapeCSV(typeStereotype) << ","
-                << HELPERS.escapeCSV(typeParents) << ","
-                << HELPERS.escapeCSV(typeInheritedParents) << ","
-                << HELPERS.escapeCSV(signatures) << ","
-                << HELPERS.escapeCSV(inheritedSignatures) << ","
-                << HELPERS.escapeCSV(function.getName()) << ","
-                << HELPERS.escapeCSV(function.getStereotypesString()) << ","
-                << HELPERS.escapeCSV(parametersList) << ","
-                << HELPERS.escapeCSV(returnType) << ","
-                << HELPERS.escapeCSV(specifiers) << ","
-                << HELPERS.escapeCSV(functionAttributesOrAnnotations) << "\n";
+        csvFile << helperFunctions::escapeCSV(function.getFileName()) << ","
+                << helperFunctions::escapeCSV(typeName) << ","
+                << helperFunctions::escapeCSV(typeStereotype) << ","
+                << helperFunctions::escapeCSV(typeParents) << ","
+                << helperFunctions::escapeCSV(typeInheritedParents) << ","
+                << helperFunctions::escapeCSV(signatures) << ","
+                << helperFunctions::escapeCSV(inheritedSignatures) << ","
+                << helperFunctions::escapeCSV(function.getName()) << ","
+                << helperFunctions::escapeCSV(function.getStereotypesString()) << ","
+                << helperFunctions::escapeCSV(parametersList) << ","
+                << helperFunctions::escapeCSV(returnType) << ","
+                << helperFunctions::escapeCSV(specifiers) << ","
+                << helperFunctions::escapeCSV(functionAttributesOrAnnotations) << "\n";
     }
 }
 
@@ -578,6 +521,7 @@ void stereotypesAnalyzer::outputStereotypes(srcml_unit* inputUnit, int unitNumbe
         outputUnits.insert({unitNumber, inputUnit});
         return;
     }
+    srcml_archive* transformationArchive{srcml_archive_create()};
 
     for (const auto& pair : xpathPair) srcml_append_transform_xpath_attribute(transformationArchive, pair.first.c_str(), "st", "http://www.srcML.org/srcML/stereotype", "stereotype", pair.second.c_str());
 
@@ -591,4 +535,5 @@ void stereotypesAnalyzer::outputStereotypes(srcml_unit* inputUnit, int unitNumbe
     resultUnits.insert({unitNumber, resultUnit});   
 
     srcml_clear_transforms(transformationArchive);
+    srcml_archive_free(transformationArchive);
 }

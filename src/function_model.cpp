@@ -16,13 +16,13 @@
 
 #include <regex>
 
-extern thread_local helperFunctions   HELPERS;
-extern thread_local specifiers        SPECIFIERS;
-extern thread_local primitives        PRIMITIVES;
-extern thread_local calls             CALLS;
+extern              specifiers        SPECIFIERS;
+extern              primitives        PRIMITIVES;
+extern              calls             CALLS;
 extern              XPathGenerator    XPATH_GENERATOR;
-extern thread_local srcml_unit*       methodUnit;
-extern thread_local srcml_archive*    methodArchive;
+
+extern              srcml_unit*       methodUnit;
+extern              srcml_archive*    methodArchive;
 
 functionModel::functionModel(const std::string& xpath_, const std::string& unitLanguage_, const std::string& typeNameParsed_, 
                              const std::string& returnType_, int unitNumber_, bool isProperty_) :
@@ -146,6 +146,7 @@ void functionModel::findAttributesOrAnnotations() {
         std::size_t size = 0;
         srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
         attributesOrAnnotations.push_back(unparsed);
+        free(unparsed);
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -164,6 +165,7 @@ void functionModel::findPropertyAttributes() {
         std::size_t size = 0;
         srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
         propertyAttributes.push_back(unparsed);
+        free(unparsed);
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -247,14 +249,14 @@ void functionModel::findReturnType() {
         // We must extract the actual type ("IntPtr") from the name ("operator IntPtr")
         if (unitLanguage == "C#" && name.rfind("operator", 0) == 0) {
             SPECIFIERS.removeSpecifiers(returnTypeString, unitLanguage);
-            HELPERS.removeWhitespace(returnTypeString);
+            helperFunctions::removeWhitespace(returnTypeString);
 
             // If type is empty (meaning it was just specifiers), parse the name
             if (returnTypeString.empty()) {
                 std::size_t spacePosition = name.find(' ');
                 if (spacePosition != std::string::npos) {
                     std::string returnTypeName = name.substr(spacePosition + 1);
-                    HELPERS.removeWhitespace(returnTypeName);
+                    helperFunctions::removeWhitespace(returnTypeName);
                     returnType.setType(returnTypeName);
                 }
             }
@@ -284,7 +286,7 @@ void functionModel::findLocalVariableName() {
 
         // Chop off [] for arrays
         if (unitLanguage == "C++") 
-            HELPERS.removeBracketSuffix(localName); 
+            helperFunctions::removeBracketSuffix(localName); 
 
         localsOrdered.emplace_back(variableModel());
         localsOrdered.back().setName(localName);
@@ -349,7 +351,7 @@ void functionModel::findParameterName() {
 
         // Chop off [] for arrays
         if (unitLanguage == "C++") 
-            HELPERS.removeBracketSuffix(parameterName); 
+            helperFunctions::removeBracketSuffix(parameterName); 
 
         parametersOrdered.emplace_back(variableModel()); 
         parametersOrdered.back().setName(parameterName);
@@ -409,7 +411,7 @@ void functionModel::findReturnExpression() {
         
         returnExpressions.push_back(expr);
        
-        if (HELPERS.isSubstringAtBeginning(expr, "new")) newReturned = true; 
+        if (helperFunctions::isSubstringAtBeginning(expr, "new")) newReturned = true; 
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -488,11 +490,11 @@ void functionModel::findCallArgument() {
 
             if (c == "function")  {
                 functionCalls[i].setArgumentList(arguList);
-                HELPERS.removeBetweenComma(arguList, false);
+                helperFunctions::removeBetweenComma(arguList, false);
                 std::string funcCallName = functionCalls[i].getName();
-                HELPERS.removeNamespace(funcCallName, unitLanguage, true);
+                helperFunctions::removeNamespace(funcCallName, unitLanguage, true);
                 std::string funcCallParsed = funcCallName + arguList;
-                HELPERS.removeWhitespace(funcCallParsed);   
+                helperFunctions::removeWhitespace(funcCallParsed);   
                 functionCalls[i].setSignature(funcCallParsed);
             }             
             else if (c == "method") methodCalls[i].setArgumentList(arguList);                  
@@ -522,7 +524,7 @@ void functionModel::findNewAssignedVariables() {
         srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
         std::string varName = unparsed;
         free(unparsed);
-        HELPERS.removeWhitespace(varName);
+        helperFunctions::removeWhitespace(varName);
         
         variablesCreatedWithNew.insert(varName);
     }
@@ -643,12 +645,12 @@ void functionModel::findNameSignature() {
     std::string paramList = parametersList;
     std::string methName = name;
 
-    HELPERS.removeBetweenComma(paramList, false);
-    HELPERS.removeNamespace(methName, unitLanguage, true);
+    helperFunctions::removeBetweenComma(paramList, false);
+    helperFunctions::removeNamespace(methName, unitLanguage, true);
 
     nameSignature = methName + paramList;
 
-    HELPERS.removeWhitespace(nameSignature);
+    helperFunctions::removeWhitespace(nameSignature);
 }
 
 // Finds if the return type, local types, and parameter types are non-primitive
@@ -698,7 +700,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
             std::string parName = parameters[para].getName();
             bool reference = type.find("&") != std::string::npos;
     
-            HELPERS.removeWhitespace(parName);
+            helperFunctions::removeWhitespace(parName);
             bool referenceArray = parName.find("[]") != std::string::npos; 
             if (reference || referencePointer || referenceArray)                    
             parameterRefModified = true;   
@@ -708,7 +710,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
             bool referenceOut = type.find("out") != std::string::npos ||
                                 type.find("ref") != std::string::npos;
 
-            HELPERS.removeWhitespace(type);
+            helperFunctions::removeWhitespace(type);
             bool referenceArray = type.find("[]") != std::string::npos; 
             if (referenceOut || referenceArray || referencePointer)                  
             parameterRefModified = true;     
@@ -723,7 +725,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
     }
     else if (unitLanguage == "Java"){
         bool nonPrimitive = !PRIMITIVES.isPrimitive(type, unitLanguage);
-        HELPERS.removeWhitespace(type);
+        helperFunctions::removeWhitespace(type);
         bool referenceArray = type.find("[]") != std::string::npos; 
         if (referenceArray || (nonPrimitive && propertyCheck))                
         parameterRefModified = true;     
@@ -742,7 +744,7 @@ void functionModel::findReturnedVariables(const std::unordered_map<std::string, 
         }
         else {
             std::string checkThisPointer = expr;
-            HELPERS.removeLeadingAsterisks(checkThisPointer);
+            helperFunctions::removeLeadingAsterisks(checkThisPointer);
             if (checkThisPointer != "this") { // The 'this' is added as a data member, however, we do not consider it as a simple nor complex return
                 if (isVariableUsed(variables, nullptr, expr, true, false, false, false, false)) { // True if a data member is found
                     simpleReturn = true; 
@@ -846,9 +848,9 @@ void functionModel::findCallsOnDataMembers(const std::unordered_map<std::string,
         if (!isVariableUsed(fields, nullptr, it->getName(), false, false, false, false, false)) {
             if (unitLanguage != "C++") {
                 // These should be function calls
-                if (unitLanguage == "C#" && (HELPERS.isSubstringAtBeginning(it->getName(), "this") || HELPERS.isSubstringAtBeginning(it->getName(), "base")))
+                if (unitLanguage == "C#" && (helperFunctions::isSubstringAtBeginning(it->getName(), "this") || helperFunctions::isSubstringAtBeginning(it->getName(), "base")))
                     functionCalls.push_back(*it); 
-                else if (unitLanguage == "Java" && (HELPERS.isSubstringAtBeginning(it->getName(), "this") || HELPERS.isSubstringAtBeginning(it->getName(), "super")))
+                else if (unitLanguage == "Java" && (helperFunctions::isSubstringAtBeginning(it->getName(), "this") || helperFunctions::isSubstringAtBeginning(it->getName(), "super")))
                     functionCalls.push_back(*it); 
 
                 // Could be a call on a local or a parameter
@@ -885,8 +887,8 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
                                    bool parameterModifiedCheck,  bool localModifiedCheck,
                                    bool isParamaterCheck, bool isLocalCheck) {
     std::string expr = expression; 
-    HELPERS.removeWhitespace(expr);
-    HELPERS.removeBracketSuffix(expr);
+    helperFunctions::removeWhitespace(expr);
+    helperFunctions::removeBracketSuffix(expr);
     
     // Removing () and {} on the outside of expression
     // Might remove } and ) for calls but that doesn't affect the analysis
@@ -913,7 +915,7 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
     }
 
     // Remove pointers. For example, *a
-    if (unitLanguage != "Java") HELPERS.removeLeadingAsterisks(expr);     
+    if (unitLanguage != "Java") helperFunctions::removeLeadingAsterisks(expr);     
     
     if (expr.empty()) return false;  
 
@@ -1051,7 +1053,7 @@ std::string functionModel::getSpecifiersString() const {
 std::string functionModel::getReturnTypeParsed() const {
     std::string returnTypeString = returnType.getType();
     SPECIFIERS.removeSpecifiers(returnTypeString, unitLanguage);  
-    HELPERS.removeWhitespace(returnTypeString);
+    helperFunctions::removeWhitespace(returnTypeString);
     return returnTypeString;
 }
 

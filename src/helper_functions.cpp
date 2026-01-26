@@ -15,8 +15,8 @@
 #include <regex>
 #include <cctype>
 
-thread_local extern primitives PRIMITIVES;   
-thread_local extern specifiers SPECIFIERS;  
+extern primitives PRIMITIVES;   
+extern specifiers SPECIFIERS;  
 
 // Helper to escape CSV fields for CSV parsers
 // Outer quotes handle commas, newlines, carriage returns, etc.

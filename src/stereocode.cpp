@@ -14,12 +14,12 @@
 #include "specifiers.hpp"
 #include "xpath_generator.hpp"
 
-primitives                         PRIMITIVES_I;
-calls                              CALLS_I;
-specifiers                         SPECIFIERS_I;
+primitives                         PRIMITIVES;
+calls                              CALLS;
+specifiers                         SPECIFIERS;
 
-// READ-ONLY (Thread Safe)
 int                                METHODS_PER_TYPE_THRESHOLD = 21;
+
 bool                               FREE_FUNCTION           {false};
 bool                               STRUCT                  {false};
 bool                               INTERFACE               {false};
@@ -35,7 +35,6 @@ int main (int argc, char const *argv[]) {
     std::string         specifiersFile;
     std::string         outputFile;
     
-    bool                overWriteInputFile{false};
 
     CLI::App app{"Stereocode: Determines function (method and free functions) and type (class, struct, interface, union, enum) stereotypes\nSupports C, C++, C#, and Java\n" };
     
@@ -50,7 +49,6 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-n,--union",               UNION,                            "Identify stereotypes for unions (C++)");
     app.add_flag  ("-m,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
     app.add_flag  ("-s,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
-    app.add_flag  ("-e,--input-overwrite",     overWriteInputFile,               "Overwrite srcML input archive with stereotypes");
     app.add_flag  ("-z,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes and meta data");
     app.add_flag  ("-v,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, and specifiers");
     
@@ -59,7 +57,7 @@ int main (int argc, char const *argv[]) {
     // Add user-defined primitive to initial set
     if (!primitivesFile.empty()) {         
         std::ifstream in(primitivesFile);
-        if (in.is_open()) in >> PRIMITIVES_I;
+        if (in.is_open()) in >> PRIMITIVES;
         else std::cerr << "Error: Primitive types file not found: " << primitivesFile << '\n';
         in.close();
     }
@@ -67,7 +65,7 @@ int main (int argc, char const *argv[]) {
     // Add user-defined ignorable calls to initial set
     if (!ignorableCallsFile.empty()) {         
         std::ifstream in(ignorableCallsFile);
-        if (in.is_open()) in >> CALLS_I;
+        if (in.is_open()) in >> CALLS;
         else std::cerr << "Error: Ignorable calls file not found: " << ignorableCallsFile << '\n';
         in.close();
     }
@@ -75,7 +73,7 @@ int main (int argc, char const *argv[]) {
     // Add user-defined specifiers to initial set
     if (!specifiersFile.empty()) {         
         std::ifstream in(specifiersFile);
-        if (in.is_open()) in >> SPECIFIERS_I;
+        if (in.is_open()) in >> SPECIFIERS;
         else std::cerr << "Error: Specifiers file not found: " << specifiersFile << '\n'; 
         in.close();
     }
@@ -88,12 +86,6 @@ int main (int argc, char const *argv[]) {
 
     // Compute stereotypes
     stereotypesAnalyzer analyzer(inputFile, outputFile);
-
-    // Overwrite input file if specified
-    if (overWriteInputFile) {
-        std::filesystem::remove(inputFile);
-        std::filesystem::rename(outputFile, inputFile);
-    }
  
     return 0;
 }

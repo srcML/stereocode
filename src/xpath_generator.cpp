@@ -22,7 +22,7 @@ void XPathGenerator::generateXPathList() {
     std::string xpath = "//src:*[(self::src:class";
     if (STRUCT) xpath += " or self::src:struct";        
     if (UNION) xpath += " or self::src:union[src:name]";       
-    xpath += ") and not(ancestor::src:class or ancestor::src:struct or ancestor::src:union)]"; 
+    xpath += ") and not(ancestor::src:class or ancestor::src:struct or ancestor::src:union) and child::*[self::src:name]]"; 
     xpathList[language]["type"] = xpath;
 
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:union]/text()";
