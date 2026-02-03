@@ -2,9 +2,9 @@
 # CMake files for the Stereocode project
 
 # Supports any version of CMake >= specified
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.28)
 
-# If the user hasn't explicitly set a compiler, try to find Clang.
+# If the user has not explicitly set a compiler, try to find Clang.
 if(NOT CMAKE_CXX_COMPILER)
     find_program(CLANG_CXX_PATH NAMES clang++ clang-cl)
     if(CLANG_CXX_PATH)
@@ -16,7 +16,8 @@ endif()
 # Project information
 project(Stereocode LANGUAGES CXX)
 
-# Prevent in-source builds. However, it does not prevent CMakeFiles and CMakeCache.txt from being created (need to manually remove them)
+# Prevent in-source builds. 
+# However, it does not prevent the CMakeFiles folder and CMakeCache.txt from being created (need to manually remove them)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
     message(FATAL_ERROR "In-source builds are not allowed. Please create a separate build directory and run CMake from there.")
 endif()
@@ -24,34 +25,24 @@ endif()
 # Stereocode requires C++17 or higher
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Use Release build type if a build type is not specified
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "Setting build type to 'Release' as none was specified.")
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+    set(CMAKE_BUILD_TYPE)
 endif()
 
-# if (NOT CMAKE_BUILD_TYPE)
-#     set(CMAKE_BUILD_TYPE Release)
-# endif()
-
 # Get a list of paths for the cpp and hpp files
-# Using CONFIGURE_DEPENDS ensures CMake re-runs if you add a file to src/
-file(GLOB_RECURSE STEREOCODE_SOURCES CONFIGURE_DEPENDS "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE STEREOCODE_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp" 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp"
+)
 
 # The stereocode application (target)
 add_executable(stereocode ${STEREOCODE_SOURCES})
 
-# Include the source/include folders
-target_include_directories(stereocode PRIVATE 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-# Find the threading library (pthreads on Linux, Windows threads, etc.)
-find_package(Threads REQUIRED)
-target_link_libraries(stereocode PRIVATE Threads::Threads)
+# Include directory (Quotes for paths that contain a space)
+target_include_directories(stereocode PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # For srcML v1.1+
 # Finds and use libsrcml + srcml.h
@@ -60,20 +51,17 @@ find_package(srcML QUIET)
 if (srcML_FOUND)
     message(STATUS "Found srcML package version: ${srcML_VERSION}")
     target_link_libraries(stereocode PRIVATE srcML::LibsrcML)
-else() # For srcML v1.0
+else() # Manual search for headers and libs
     message(STATUS "srcML config not found. Attempting manual search for libs...")
     set(ROOT_DIR $ENV{SystemDrive}) # Windows could be on D:/ ... etc
-    # Manual search for headers and libs (Clean fallback)
     find_path(SRCML_INCLUDE_DIR 
         NAMES srcml.h 
         HINTS "${ROOT_DIR}/srcML/include" "/usr/local/include"
     )
-    
     find_library(SRCML_LIB 
         NAMES libsrcml
         HINTS "${ROOT_DIR}/srcML/lib" "/usr/local/lib"
     )
-
     if(SRCML_LIB AND SRCML_INCLUDE_DIR)
         target_include_directories(stereocode PRIVATE ${SRCML_INCLUDE_DIR})
         target_link_libraries(stereocode PRIVATE ${SRCML_LIB})

@@ -92,16 +92,16 @@ void functionModel::findSpecifiers() {
 
 // Finds data after all type information is collected
 //
-void functionModel::findDataAfterCollection(const std::unordered_map<std::string, variableModel>& fields, 
-                                            const std::unordered_set<std::string>& typeMethods) {   
+void functionModel::findDataAfterCollection(const std::unordered_map<std::string, variableModel>& allFields, 
+                                            const std::unordered_set<std::string>& allMethodSignatures) {   
     if (constructorOrDestructor.empty()) {
         // Must only be called after findIgnorableCalls()
-        findCallsOnDataMembers(fields, typeMethods);
+        findCallsOnFields(allFields, allMethodSignatures);
 
         // Must only be called after findNewAssignedVariables()
-        findReturnedVariables(fields, false); 
-        findVariablesInExpressions(fields, false);
-        findModifiedVariables(fields, false);
+        findReturnedVariables(allFields, false); 
+        findVariablesInExpressions(allFields, false);
+        findModifiedVariables(allFields, false);
     }
 }
 
@@ -109,7 +109,7 @@ void functionModel::findDataAfterCollection(const std::unordered_map<std::string
 //
 void functionModel::findDataFreeFunctionAfterCollection() {
     if (constructorOrDestructor.empty()) {
-        // For free functions, we do not need to filter the calls like in findCallsOnDataMembers()
+        // For free functions, we do not need to filter the calls like in findCallsOnFields()
         //  since all of the calls are external anyway
         findReturnedVariables(parameters, true); 
         findVariablesInExpressions(parameters, true);
@@ -639,16 +639,16 @@ void functionModel::findExpressionAssignments()  {
     srcml_transform_free(result);    
 }
 
-// Finds the name signature of the method
+// Finds the signature of a function
 //
 void functionModel::findNameSignature() {
-    std::string paramList = parametersList;
-    std::string methName = name;
+    std::string parametersList_ = parametersList;
+    std::string name_ = name;
 
-    helperFunctions::removeBetweenComma(paramList, false);
-    helperFunctions::removeNamespace(methName, unitLanguage, true);
+    helperFunctions::removeBetweenComma(parametersList_, false);
+    helperFunctions::removeNamespace(name_, unitLanguage, true);
 
-    nameSignature = methName + paramList;
+    nameSignature = name_ + parametersList_;
 
     helperFunctions::removeWhitespace(nameSignature);
 }
@@ -686,7 +686,7 @@ void functionModel::findVariablesInExpressions(const std::unordered_map<std::str
 // In C#, non-primitive parameters are passed by value and the value is a reference to the object,
 //  this means that if you re-assign the parameters itself (e.g., a = value), then the original object won't change
 //  So, C# need to use the ref, out, *(unsafe context), or [] to pass by reference and be able to re-assign the parameters
-//  But, if you use a data member inside the parameter (a.b = value) the change will persist and affect the original object
+//  But, if you use a field inside the parameter (a.b = value) the change will persist and affect the original object
 //  In Java, the (a.b = value) is the only way to change a parameter and keep the changes outside
 // C++ can use *, [], or & to pass by reference
 // No need to check for 'const' since this function is only called when there is a modification to the parameter
@@ -732,7 +732,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
     }     
 }
 
-// Determines if a return expression returns a data member or a parameter
+// Determines if a return expression returns a field or a parameter
 // Both simple returns (e.g., return dm;) and 
 //   complex returns (e.g., return dm + 5; or return dm + 5;) are considered
 //
@@ -745,8 +745,8 @@ void functionModel::findReturnedVariables(const std::unordered_map<std::string, 
         else {
             std::string checkThisPointer = expr;
             helperFunctions::removeLeadingAsterisks(checkThisPointer);
-            if (checkThisPointer != "this") { // The 'this' is added as a data member, however, we do not consider it as a simple nor complex return
-                if (isVariableUsed(variables, nullptr, expr, true, false, false, false, false)) { // True if a data member is found
+            if (checkThisPointer != "this") { // The 'this' is added as a field, however, we do not consider it as a simple nor complex return
+                if (isVariableUsed(variables, nullptr, expr, true, false, false, false, false)) { // True if a field is found
                     simpleReturn = true; 
                 }
                 else {
@@ -757,8 +757,8 @@ void functionModel::findReturnedVariables(const std::unordered_map<std::string, 
     }
 }
 
-// Finds if a data member, local, or a parameter (normal and passed by reference) is modified
-// Multiple modifications to the same data member or parameter are only considered as 1 modification
+// Finds if a field, local, or a parameter (normal and passed by reference) is modified
+// Multiple modifications to the same field or parameter are only considered as 1 modification
 //
 void functionModel::findModifiedVariables(const std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) { 
     std::unordered_set<std::string> checked; 
@@ -768,8 +768,8 @@ void functionModel::findModifiedVariables(const std::unordered_map<std::string, 
         if (isParameterCheck)
             isVariableUsed(variables, nullptr, expr, false, true, false, true, false);
         else if (isVariableUsed(variables, &checked, expr, false, true, true, false, false)) {
-            if (checked.size() > oldSize) { // 'checked' will not increase in size unless you add a new unique data member to it 
-                ++dataMembersModifiedCount; // That way this only increase if a new data member is changed
+            if (checked.size() > oldSize) { // 'checked' will not increase in size unless you add a new unique field to it 
+                ++fieldsModifiedCount; // That way this only increase if a new field is changed
                 oldSize = checked.size();
             }         
         }
@@ -778,7 +778,7 @@ void functionModel::findModifiedVariables(const std::unordered_map<std::string, 
 
 // Ignore calls from analysis
 // For example, if call to ignore is 'foo', then some of the matched cases are foo<>() or bar::foo() or a->b.foo()
-// However, usage of data members within these calls are not ignored (e.g., in arguments)
+// However, usage of fields within these calls are not ignored (e.g., in arguments)
 //
 void functionModel::findIgnorableCalls(std::vector<callModel>& calls) {
     for (auto it = calls.begin(); it != calls.end();) {
@@ -818,49 +818,46 @@ void functionModel::findIgnorableCalls(std::vector<callModel>& calls) {
 //  Checks if a function call is made to a method in the type, else it is removed and considered external 
 //  Static and free function calls are considered external calls
 //
-// Method Calls: --> bar.foo() where 'bar' could be a variableModel or a type name or a namespace 
-//  Checks if there is a method call on an data member
-//  For example, a.foo() where a is an data member, else it is removed and considered as external method call
+// Method Calls: --> bar.foo() where ( bar ) could be a field or a type name or a namespace 
+//  Checks if there is a method call on a field
+//  For example, a.foo() where ( a ) is a field, else it is removed and considered as external method call
 //
 //  In C# or Java, a type name can be used with the dot operator to invoke static methods
 //  For example, typeName.staticMethodName();
 //  These are removed and considered as external function calls
 //
-//  base, and super can only be used to invoke non-static methods in the current type (this) or parent type (base or super)
+//  ( this ), ( base ), and ( super ) can only be used to invoke non-static methods in the current type (this) or parent type (base or super)
 //  For example, this.methodName();
 //  So these should be also treated as function calls and not method calls
 //
-void functionModel::findCallsOnDataMembers(const std::unordered_map<std::string, variableModel>& fields,
-                                           const std::unordered_set<std::string>& typeMethods) {  
+void functionModel::findCallsOnFields(const std::unordered_map<std::string, variableModel>& allFields,
+                                           const std::unordered_set<std::string>& allMethodSignatures) {  
     // Check on function calls (Should be done before checking on method calls)
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
-        if (typeMethods.find(it->getSignature()) == typeMethods.end()) { 
+        if (allMethodSignatures.find(it->getSignature()) == allMethodSignatures.end()) { 
             it = functionCalls.erase(it);
             ++externalFunctionCallsCount;
         }
         else ++it;
-        
     }  
     
     // Check on method calls 
     for (auto it = methodCalls.begin(); it != methodCalls.end();) {
-        // Could be a normal method call on an data member
-        if (!isVariableUsed(fields, nullptr, it->getName(), false, false, false, false, false)) {
+        // Could be a normal method call on a field
+        if (!isVariableUsed(allFields, nullptr, it->getName(), false, false, false, false, false)) {
             if (unitLanguage != "C++") {
                 // These should be function calls
-                if (unitLanguage == "C#" && (helperFunctions::isSubstringAtBeginning(it->getName(), "this") || helperFunctions::isSubstringAtBeginning(it->getName(), "base")))
-                    functionCalls.push_back(*it); 
-                else if (unitLanguage == "Java" && (helperFunctions::isSubstringAtBeginning(it->getName(), "this") || helperFunctions::isSubstringAtBeginning(it->getName(), "super")))
-                    functionCalls.push_back(*it); 
+                std::string inheritKeyword = (unitLanguage == "C#") ? "base" : "super";
+                if ((unitLanguage == "C#" || unitLanguage == "Java") && 
+                    (helperFunctions::isSubstringAtBeginning(it->getName(), "this") || 
+                     helperFunctions::isSubstringAtBeginning(it->getName(), inheritKeyword))) functionCalls.push_back(*it);
 
                 // Could be a call on a local or a parameter
-                // 'dataMembers' passed here is just a place holder, it is never used. 
-                else if (isVariableUsed(fields, nullptr, it->getName(), false, false, false, true, true)) 
+                else if (isVariableUsed(allFields, nullptr, it->getName(), false, false, false, true, true)) 
                     ++externalMethodCallsCount;
                     
                 // It is a static call
-                else 
-                    ++externalFunctionCallsCount;
+                else ++externalFunctionCallsCount;
                 it = methodCalls.erase(it);  
                 
             }
@@ -873,19 +870,20 @@ void functionModel::findCallsOnDataMembers(const std::unordered_map<std::string,
     }
 }
 
-// Checks if an expression uses an data member, local, or a parameter 
+// Checks if an expression uses an field, local, or a parameter 
 // Possible cases: 
 // C++: this->a; (*this).a; Foo::a; this->a.b; (*this).a.b; Foo::a.b; a.b; a
 // Java: super.a; this.a; Foo.a; super.a.b; this.a.b; Foo.a.b; a.b; a
 // C#: base.a; this.a; Foo.a; base.a.b; this.a.b; Foo.a.b; a.b; a
-// Where 'a' is a variableModel and Foo is type itself if the variableModel is an data member
+// Where 'a' is a variableModel and Foo is type itself if the variableModel is an field
 // Can match with complex uses of variables (e.g., this->a.b.c or a[]->b or (*a).b.c)
 // 
 bool functionModel::isVariableUsed(const std::unordered_map<std::string, variableModel>& variables, 
-                                   std::unordered_set<std::string>* dataMembersModified, 
+                                   std::unordered_set<std::string>* fieldsModified, 
                                    const std::string& expression, bool returnCheck, 
                                    bool parameterModifiedCheck,  bool localModifiedCheck,
                                    bool isParamaterCheck, bool isLocalCheck) {
+                                    //else if (isVariableUsed(allFields, nullptr, it->getName(), false, false, false, true, true)) 
     std::string expr = expression; 
     helperFunctions::removeWhitespace(expr);
     helperFunctions::removeBracketSuffix(expr);
@@ -948,54 +946,54 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
 
     
     int count = isMatched ? 2 : 1;
-    bool overShadow = true; // Needed in cases such as this.data = data where this.data is an data member and data is a local or a parameter 
+    bool overShadow = true; // Needed in cases such as this.data = data where this.data is an field and data is a local or a parameter 
 
-    // Regex uses the original 'expr' to extract the matches. Therefore, we should not modify the original 'expr'
-    // 'possibleVar' is assigned 'expr' initially as it could be the variableModel itself especially for returns (e.g., return a;)
-    std::string possibleVar = expr; 
+    // Regex uses the original ( expr ) to extract the matches. Therefore, we should not modify the original ( expr )
+    // ( possibleVar ) is assigned ( expr ) initially as it could be the variableModel itself especially for returns (e.g., return a;)
+    std::string possibleVariable = expr; 
     for (int i = 0; i < count; i++) {
         if (isMatched && i == 0) {    
-            if (match[1] == "") { // We never catch 'base, super, or this' so if this condition is true, then it is one of them and the catch is a data member
-                possibleVar = match[2]; 
-                overShadow = false; // It is a data member, so skip checking locals and parameters
+            if (match[1] == "") { // We never catch 'base, super, or this' so if this condition is true, then it is one of them and the catch is a field
+                possibleVariable = match[2]; 
+                overShadow = false; // It is a field, so skip checking locals and parameters
             }   
-            else if (!returnCheck) // For 'returnCheck', this avoids conditions such as a.foo()
-                possibleVar = match[1]; // Perhaps variableModel itself (e.g., a or a.foo())        
+            else if (!returnCheck) // For ( returnCheck ), this avoids conditions such as a.foo()
+                possibleVariable = match[1]; // Perhaps variableModel itself (e.g., a or a.foo())        
         }
-        // In C# or Java, a type name can be used to access static data members only
-        // In C++, a type name can be used to access static and non-static data members
-        // Parent type names can also be used to access data members in the child type, but we will ignore this case for now
-        // Checking with type name also avoids problems with other typees or properties having the same names as the data members in the current type
+        // In C# or Java, a type name can be used to access static fields only
+        // In C++, a type name can be used to access static and non-static fields
+        // Parent type names can also be used to access fields in the child type, but we will ignore this case for now
+        // Checking with type name also avoids problems with other typees or properties having the same names as the fields in the current type
         else if (isMatched && match[1] != "" && match[2] != "") {// Case of type name itself. The 'match[2] != ""' is to skip if it is just 'a''.
             std::string possibleTypeName = match[1];
             std::size_t listOpen = possibleTypeName.find("<");
             if (listOpen != std::string::npos) 
                 possibleTypeName = possibleTypeName.substr(0, listOpen);
             if (typeNameParsed == possibleTypeName)
-                possibleVar = match[2];
+                possibleVariable = match[2];
         }
 
         if (overShadow) {
-            // Checked first in case of overshadowing if variables = data members
-            if (locals.find(possibleVar) != locals.end()) {
-                if (localModifiedCheck && locals.at(possibleVar).isNonPrimitive()) 
+            // Checked first in case of overshadowing if variables = fields
+            if (locals.find(possibleVariable) != locals.end()) {
+                if (localModifiedCheck && locals.at(possibleVariable).isNonPrimitive()) 
                     nonPrimitiveLocalOrParameterModified = true;
                 if (returnCheck) { 
-                    if (variablesCreatedWithNew.find(possibleVar) != variablesCreatedWithNew.end())
+                    if (variablesCreatedWithNew.find(possibleVariable) != variablesCreatedWithNew.end())
                         if (!variableCreatedWithNewAndReturned) variableCreatedWithNewAndReturned = true;
                 }
                 if (isLocalCheck) return true;
                 else return false;
             }
 
-            else if (parameters.find(possibleVar) != parameters.end()) {
+            else if (parameters.find(possibleVariable) != parameters.end()) {
                 parameterUsed = true;
                 if (parameterModifiedCheck) {
-                    if (parameters.at(possibleVar).isNonPrimitive()) nonPrimitiveLocalOrParameterModified = true;
-                    findModifiedRefParameter(possibleVar, isMatched);
+                    if (parameters.at(possibleVariable).isNonPrimitive()) nonPrimitiveLocalOrParameterModified = true;
+                    findModifiedRefParameter(possibleVariable, isMatched);
                 }
                 if (returnCheck) {        
-                    if (variablesCreatedWithNew.find(possibleVar) != variablesCreatedWithNew.end())
+                    if (variablesCreatedWithNew.find(possibleVariable) != variablesCreatedWithNew.end())
                         if (!variableCreatedWithNewAndReturned) variableCreatedWithNewAndReturned = true;
                 }
                 if (isParamaterCheck) return true;
@@ -1003,23 +1001,23 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
             }
         }
         
-        // You only ever get here if variables = data members
-        if (variables.find(possibleVar) != variables.end()) {
-            if (dataMembersModified)
-                if (dataMembersModified->find(possibleVar) == dataMembersModified->end())
-                    dataMembersModified->insert(possibleVar);
+        // You only ever get here if variables = fields
+        if (variables.find(possibleVariable) != variables.end()) {
+            if (fieldsModified)
+                if (fieldsModified->find(possibleVariable) == fieldsModified->end())
+                    fieldsModified->insert(possibleVariable);
                 
-            dataMemberUsed = true;
-            nonPrimitiveDataMemberExternal = variables.at(possibleVar).isNonPrimitiveExternal(); 
+            fieldUsed = true;
+            nonPrimitiveFieldExternal = variables.at(possibleVariable).isNonPrimitiveExternal(); 
             if (returnCheck) {    
-                if (variablesCreatedWithNew.find(possibleVar) != variablesCreatedWithNew.end())
+                if (variablesCreatedWithNew.find(possibleVariable) != variablesCreatedWithNew.end())
                     if (!variableCreatedWithNewAndReturned) variableCreatedWithNewAndReturned = true;
             }            
             return true;                                  
         }
     }
 
-    // If you get here, then whatever is modified is definitely not a data member, local, or a parameter
+    // If you get here, then whatever is modified is definitely not a field, local, or a parameter
     //   so, it is safe to assume that it is a global or a static
     if (parameterModifiedCheck) globalOrStaticVariableModified = true;
 
@@ -1067,4 +1065,15 @@ std::string functionModel::getAttributesOrAnnotationsString() const {
         attributesOrAnnotationsString += a;
     }
     return attributesOrAnnotationsString;
+}
+
+// Get return type string
+//
+std::string functionModel::getFunctionCallsString() const {
+    std::string functionCallsString;
+    for (const auto& f : functionCalls) {
+        if (!functionCallsString.empty()) functionCallsString += " ";
+        functionCallsString += f.getSignature();
+    }
+    return functionCallsString;
 }

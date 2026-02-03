@@ -34,7 +34,8 @@ int main (int argc, char const *argv[]) {
     std::string         ignorableCallsFile;
     std::string         specifiersFile;
     std::string         outputFile;
-    
+
+    bool                version{false};
 
     CLI::App app{"Stereocode: Determines function (method and free functions) and type (class, struct, interface, union, enum) stereotypes\nSupports C, C++, C#, and Java\n" };
     
@@ -49,11 +50,17 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-n,--union",               UNION,                            "Identify stereotypes for unions (C++)");
     app.add_flag  ("-m,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
     app.add_flag  ("-s,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
-    app.add_flag  ("-z,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes and meta data");
-    app.add_flag  ("-v,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, and specifiers");
+    app.add_flag  ("-z,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes");
+    app.add_flag  ("-b,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, specifiers, and CSV with metadata");
+    app.add_flag  ("-v,--version",             version,                          "Display version information");
     
     CLI11_PARSE(app, argc, argv);
     
+    if (version) {
+        std::cout << "Stereocode v1.0" << std::endl;
+        return 0;
+    }
+
     // Add user-defined primitive to initial set
     if (!primitivesFile.empty()) {         
         std::ifstream in(primitivesFile);

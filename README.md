@@ -95,9 +95,11 @@ These specifiers, such as **public**, are removed during analysis to enhance the
 
 <span style='color: lightgreen;'>**-s, --struct:**</span> Identify stereotypes for structs (C, C++, C# and Java)
 
-<span style='color: lightgreen;'>**-z, --csv-report:**</span> Output optional CSV file containing stereotypes and meta data
+<span style='color: lightgreen;'>**-z, --csv-report:**</span> Output optional CSV file containing stereotypes
 
-<span style='color: lightgreen;'>**-v, --verbose:**</span> Verbose output: primitives, ignorable calls, and specifiers
+<span style='color: lightgreen;'>**-b, --verbose:**</span> Verbose output: primitives, ignorable calls, specifiers, and CSV with metadata
+
+<span style='color: lightgreen;'>**-v, --version:**</span> Display version information
 
 ## 📓 Developer Notes
 

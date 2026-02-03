@@ -113,6 +113,11 @@ public:
         std::cout << "Sum of local numbers: " << sum << std::endl;
     }
 
+    void* returnPointer() {
+        int* p = new int(42);
+        return p;
+    }
+
     friend int getDataMemberFriend(const MyClass& obj);
     friend void incrementDataMember(MyClass& obj);
     friend void setDataMemberFriend(MyClass& obj, int dataMember);

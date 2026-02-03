@@ -26,9 +26,10 @@ public:
 
     friend std::istream&    operator>>                  (std::istream&, callModel&);
 private:
-    std::string                                                            name;                    // Call name
-    std::string                                                            argumentList;            // Argument list
-    std::string                                                            signature;               // Call signature
+    std::string             name;                    // Call name
+    std::string             argumentList;            // Argument list
+    std::string             signature;               // Call signature
+    bool                    internal{false};         // Whether it is a call to an internal method or an external
 };
 
 #endif

@@ -12,7 +12,8 @@
 
 #include <string>
 
-// Used to store fields (including auto-properties), locals, parameters, and globals
+// Used to store fields (data members), locals, parameters, and globals
+// auto-properties are also stored and treated as fields
 //
 class variableModel {
 public:

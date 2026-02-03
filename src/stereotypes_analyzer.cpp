@@ -74,19 +74,20 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
         exit(1);
     }
 
-    // Prepare XPaths, primitives, ignored calls, and specifiers for main thread
+    // Prepare XPaths, primitives, ignored calls, and specifiers
     XPATH_GENERATOR.generateXPathList(); 
     PRIMITIVES.initializePrimitivesList();
     CALLS.initializeIgnorableCalls();
     SPECIFIERS.initializeSpecifiersList();
 
-    // Verbose output (main thread outputting is enough)
+    // Verbose output
     if (IS_VERBOSE) {
         PRIMITIVES.outputPrimitives();
         CALLS.outputIgnorableCalls();
         SPECIFIERS.outputSpecifiers();
     }
 
+    // Perform data extraction
     unit = srcml_archive_read_unit(archive);
 
     int unitNumber = 1;
@@ -101,6 +102,7 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     srcml_archive_close(archive);
     srcml_archive_free(archive);
 
+    // Appends duplicate types
     analyzeDuplicates();
     
     // Performed after the collection of all types and free functions
@@ -117,9 +119,9 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     } 
 
     // Analyze all methods for each type
-    for (auto& pair : types) pair.second.findDataAfterCollection();                       
+    for (auto& pair : types) pair.second.findDataAfterCollection();
     
-    // Compute stereotypes here
+    // Compute method and type stereotypes
     stereotypeRules stereotypes;
     stereotypes.computeMethodStereotypes (types);
     stereotypes.computeTypeStereotypes   (types);
@@ -135,15 +137,33 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
 
     // Optional CSV report file
     if (CSV_REPORT) {
-        std::string header = "file_name,type_name,type_stereotype,type_parents,type_inherited_parents,function_signatures,"
-                             "inherited_function_signatures,function_name,function_stereotype,function_parameters_list,function_return_type,function_specifiers,function_attributes_annotations";
+        std::string header = "type_name,type_stereotype,method_name,method_stereotype";
         std::ofstream out;
         out.open(InputFileNoExt + ".stereotypes.csv");
         out << header << '\n';
         for (auto& pair : types) outputStereotypesAsCSV(out, &pair.second, false);        
         out.close();
 
+        header = "type_name,type_stereotype,free_function_name,free_function_stereotype";
         out.open(InputFileNoExt + ".free_functions_stereotypes.csv");
+        out << header << '\n';
+        outputStereotypesAsCSV(out, nullptr, true);        
+        out.close();
+    }
+
+    // Verbose output
+    if (IS_VERBOSE) {
+        std::string header = "file_name,type_name,type_stereotype,type_parents,type_inherited_parents,function_signatures,"
+                             "inherited_function_signatures,function_name,function_stereotype,function_parameters_list,"
+                             "function_return_type,function_specifiers,function_internal_calls,function_attributes_annotations,"
+                             "field_used,fields_modified,calls_on_fields";
+        std::ofstream out;
+        out.open(InputFileNoExt + ".stereotypes_verbose.csv");
+        out << header << '\n';
+        for (auto& pair : types) outputStereotypesAsCSV(out, &pair.second, false);        
+        out.close();
+
+        out.open(InputFileNoExt + ".free_functions_stereotypes_verbose.csv");
         out << header << '\n';
         outputStereotypesAsCSV(out, nullptr, true);        
         out.close();
@@ -197,23 +217,6 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     srcml_archive_free(outputArchive);
 }
 
-
-void stereotypesAnalyzer::outputWorker(srcml_unit* inputUnit, int unitNumber, std::map<int, srcml_unit*>& outputUnits,
-                                       const std::unordered_map<std::string, std::string>& xpathPair,
-                                       std::unordered_map<int, srcml_transform_result*>& resultUnits, std::mutex& mu) {
-    outputStereotypes(inputUnit, unitNumber, outputUnits, xpathPair, resultUnits, mu);
-}
-
-// Accumulate partial results of threads
-// 
-void stereotypesAnalyzer::analyzeDuplicates() {
-    for (auto& duplicateType : duplicateTypes) { 
-        std::string key = duplicateType.getName()[1];
-        auto it = types.find(key);
-        if (it != types.end()) it->second.mergeData(duplicateType);
-        else types.insert({key, std::move(duplicateType)});
-    }
-}
 
 // Finds types in an archive
 //
@@ -398,6 +401,17 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
     }
 }
 
+// Appends duplicates types (e.g., partial classes in C#)
+// 
+void stereotypesAnalyzer::analyzeDuplicates() {
+    for (auto& duplicateType : duplicateTypes) { 
+        std::string key = duplicateType.getName()[1];
+        auto it = types.find(key);
+        if (it != types.end()) it->second.mergeData(duplicateType);
+        else types.insert({key, std::move(duplicateType)});
+    }
+}
+
 // Finds inherited fields and methods
 // In C++, you can inherit from a specialized templated type or
 //  you can specialize the inheritance itself from the generic type, or
@@ -479,33 +493,63 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
     const std::vector<functionModel>* functionsPtr = &type->getMethods();
 
     if (isFreeFunction) functionsPtr = &freeFunctions;
+    
+    if (IS_VERBOSE) {
+        for (const functionModel& function : *functionsPtr) {
+            std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[0] : "N/A");
+            std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
+            std::string typeParents = isFreeFunction ? "N/A" : (type->getParentsString().size() > 0 ? type->getParentsString() : "N/A");
+            std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentsString().size() > 0 ? type->getInheritedParentsString() : "N/A");
+            std::string signatures = isFreeFunction ?  (function.getNameSignature().empty() ? "N/A" :  function.getNameSignature()) : (type->getMethodSignatures().size() > 0 ? type->getMethodSignaturesString() : "N/A");
+            std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
+            std::string functionAttributesOrAnnotations = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
+            std::string specifiers = function.getSpecifiers().size() > 0 ? function.getSpecifiersString() : "N/A";
+            std::string returnType = function.getReturnType().getType().empty() ? "N/A" : function.getReturnType().getType();
+            std::string parametersList = function.getParametersList().empty() ? "N/A" : function.getParametersList();
+            std::string internalCalls = isFreeFunction ? "N/A" : (function.getFunctionCalls().empty() ? "N/A" : function.getFunctionCallsString());
+            std::string isFieldUsed = function.isFieldUsed() ? "True" :  "False";
+            std::string isFieldModified = function.getFieldsModifiedCount() > 0 ? "True" :  "False";
+            std::string isCallOnField = function.getMethodCalls().size() > 0 ? "True" :  "False";
+            std::string functionName = function.getName().empty() ? "N/A" : function.getName();
 
-    for (const functionModel& function : *functionsPtr) {
-        std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[0] : "N/A");
-        std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
-        std::string typeParents = isFreeFunction ? "N/A" : (type->getParentsString().size() > 0 ? type->getParentsString() : "N/A");
-        std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentsString().size() > 0 ? type->getInheritedParentsString() : "N/A");
-        std::string signatures = isFreeFunction ?  function.getNameSignature() : (type->getMethodSignatures().size() > 0 ? type->getMethodSignaturesString() : "N/A");
-        std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
-        std::string functionAttributesOrAnnotations = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
-        std::string specifiers = function.getSpecifiersString().size() > 0 ? function.getSpecifiersString() : "N/A";
-        std::string returnType = !function.getReturnTypeParsed().empty() ? function.getReturnTypeParsed() : "N/A";
-        std::string parametersList = function.getParametersList().empty() ? "N/A" : function.getParametersList();
-
-        csvFile << helperFunctions::escapeCSV(function.getFileName()) << ","
-                << helperFunctions::escapeCSV(typeName) << ","
-                << helperFunctions::escapeCSV(typeStereotype) << ","
-                << helperFunctions::escapeCSV(typeParents) << ","
-                << helperFunctions::escapeCSV(typeInheritedParents) << ","
-                << helperFunctions::escapeCSV(signatures) << ","
-                << helperFunctions::escapeCSV(inheritedSignatures) << ","
-                << helperFunctions::escapeCSV(function.getName()) << ","
-                << helperFunctions::escapeCSV(function.getStereotypesString()) << ","
-                << helperFunctions::escapeCSV(parametersList) << ","
-                << helperFunctions::escapeCSV(returnType) << ","
-                << helperFunctions::escapeCSV(specifiers) << ","
-                << helperFunctions::escapeCSV(functionAttributesOrAnnotations) << "\n";
+            csvFile << helperFunctions::escapeCSV(function.getFileName()) << ","
+                    << helperFunctions::escapeCSV(typeName) << ","
+                    << helperFunctions::escapeCSV(typeStereotype) << ","
+                    << helperFunctions::escapeCSV(typeParents) << ","
+                    << helperFunctions::escapeCSV(typeInheritedParents) << ","
+                    << helperFunctions::escapeCSV(signatures) << ","
+                    << helperFunctions::escapeCSV(inheritedSignatures) << ","
+                    << helperFunctions::escapeCSV(functionName) << ","
+                    << helperFunctions::escapeCSV(function.getStereotypesString()) << ","
+                    << helperFunctions::escapeCSV(parametersList) << ","
+                    << helperFunctions::escapeCSV(returnType) << ","
+                    << helperFunctions::escapeCSV(specifiers) << ","
+                    << helperFunctions::escapeCSV(internalCalls) << ","
+                    << helperFunctions::escapeCSV(functionAttributesOrAnnotations) << ","
+                    << helperFunctions::escapeCSV(isFieldUsed) << ","
+                    << helperFunctions::escapeCSV(isFieldModified) << ","
+                    << helperFunctions::escapeCSV(isCallOnField) << "\n";
+        }
     }
+    else {
+            for (const functionModel& function : *functionsPtr) {
+            std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[0] : "N/A");
+            std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
+
+            csvFile << helperFunctions::escapeCSV(typeName) << ","
+                    << helperFunctions::escapeCSV(typeStereotype) << ","
+                    << helperFunctions::escapeCSV(function.getName()) << ","
+                    << helperFunctions::escapeCSV(function.getStereotypesString()) << "\n";
+        }
+    }
+}
+
+// Thread worker
+//
+void stereotypesAnalyzer::outputWorker(srcml_unit* inputUnit, int unitNumber, std::map<int, srcml_unit*>& outputUnits,
+                                       const std::unordered_map<std::string, std::string>& xpathPair,
+                                       std::unordered_map<int, srcml_transform_result*>& resultUnits, std::mutex& mu) {
+    outputStereotypes(inputUnit, unitNumber, outputUnits, xpathPair, resultUnits, mu);
 }
 
 //  Add in stereotypes on <type> and <function>

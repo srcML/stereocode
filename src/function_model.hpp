@@ -24,25 +24,30 @@ public:
 
     const std::vector<std::string>&                     getStereotypes                         () const                { return stereotypes;                          }
     const std::vector<std::string>&                     getAttributesOrAnnotations             () const                { return attributesOrAnnotations;              }
-    const std::string&                                  getParametersList                      () const                { return parametersList;                       }
     const std::unordered_set<std::string>&              getSpecifiers                          () const                { return specifiers;                           }
     const std::vector<callModel>&                       getFunctionCalls                       () const                { return functionCalls;                        }
     const std::vector<callModel>&                       getMethodCalls                         () const                { return methodCalls;                          }
     const std::vector<callModel>&                       getNewConstructorCalls                 () const                { return newConstructorCalls;                  }
+    const variableModel&                                getReturnType                          () const                { return returnType;                           }
+    const std::string&                                  getParametersList                      () const                { return parametersList;                       }
     const std::string&                                  getName                                () const                { return name;                                 }
     const std::string&                                  getNameSignature                       () const                { return nameSignature;                        }
-    const variableModel&                                getReturnType                          () const                { return returnType;                           }
     const std::string&                                  getXpath                               () const                { return xpath;                                }
     const std::string&                                  getUnitLanguage                        () const                { return unitLanguage;                         }
     const std::string&                                  getConstructorOrDestructor             () const                { return constructorOrDestructor;              }
     const std::string&                                  getFileName                            () const                { return fileName;                             }
-    int                                                 getDataMembersModifiedCount            () const                { return dataMembersModifiedCount;             }
+    std::string                                         getStereotypesString                   () const;
+    std::string                                         getSpecifiersString                    () const;
+    std::string                                         getAttributesOrAnnotationsString       () const;
+    std::string                                         getReturnTypeParsed                    () const;
+    std::string                                         getFunctionCallsString                 () const;
+    int                                                 getFieldsModifiedCount                 () const                { return fieldsModifiedCount;             }
     int                                                 getUnitNumber                          () const                { return unitNumber;                           }
     int                                                 getExternalFunctionCallsCount          () const                { return externalFunctionCallsCount;           }
     int                                                 getExternalMethodCallsCount            () const                { return externalMethodCallsCount;             }
     int                                                 getNonCommentStatementsCount           () const                { return nonCommentStatementsCount;            }
     bool                                                isMethodConst                          () const                { return methodConst;                          }
-    bool                                                isDataMemberUsed                       () const                { return dataMemberUsed;                       }
+    bool                                                isFieldUsed                            () const                { return fieldUsed;                       }
     bool                                                isParameterUsed                        () const                { return parameterUsed;                        }
     bool                                                hasSimpleReturn                        () const                { return simpleReturn;                         }
     bool                                                hasComplexReturn                       () const                { return complexReturn;                        }
@@ -50,17 +55,13 @@ public:
     bool                                                isParameterRefModified                 () const                { return parameterRefModified;                 }
     bool                                                isNewReturned                          () const                { return newReturned;                          }
     bool                                                isGlobalOrStaticVariableModified       () const                { return globalOrStaticVariableModified;       }
-    bool                                                isNonPrimitiveDataMemberExternal       () const                { return nonPrimitiveDataMemberExternal;       }
+    bool                                                isNonPrimitiveFieldExternal            () const                { return nonPrimitiveFieldExternal;       }
     bool                                                isNonPrimitiveReturnTypeExternal       () const                { return nonPrimitiveReturnTypeExternal;       }
     bool                                                isNonPrimitiveLocalExternal            () const                { return nonPrimitiveLocalExternal;            }
     bool                                                isNonPrimitiveParamaterExternal        () const                { return nonPrimitiveParamaterExternal;        }
     bool                                                isNonPrimitiveReturnType               () const                { return nonPrimitiveReturnType;               }
     bool                                                isVariableCreatedAndReturnedWithNew    () const                { return variableCreatedWithNewAndReturned;    }
     bool                                                isNonPrimitiveLocalOrParameterModified () const                { return nonPrimitiveLocalOrParameterModified; }
-    std::string                                         getStereotypesString                   () const;
-    std::string                                         getSpecifiersString                    () const;
-    std::string                                         getAttributesOrAnnotationsString       () const;
-    std::string                                         getReturnTypeParsed                    () const;    
     void                                                setStereotype                          (const std::string& s) { stereotypes.push_back(s);}  
     void                                                findDataAfterCollection                (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);
     void                                                findDataFreeFunctionAfterCollection    ();
@@ -71,7 +72,7 @@ private:
     void                                                findModifiedRefParameter               (std::string, bool);      
     void                                                findVariablesInExpressions             (const std::unordered_map<std::string, variableModel>&, bool);
     void                                                findIgnorableCalls                     (std::vector<callModel>&);
-    void                                                findCallsOnDataMembers                 (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);   
+    void                                                findCallsOnFields                      (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);   
     void                                                findReturnedVariables                  (const std::unordered_map<std::string, variableModel>&, bool);
     void                                                findModifiedVariables                  (const std::unordered_map<std::string, variableModel>&, bool);
     void                                                findNameSignature                      ();
@@ -100,8 +101,8 @@ private:
     std::string                                       name;                                       // Name
     std::string                                       fileName;                                   // File name where method is defined 
     std::string                                       nameSignature;                              // Name without namespaces + parameters list (commas only). For example, foo(,,)
-    variableModel                                     returnType;                                 // Return type without whitespaces
-    std::string                                       parametersList;                              // Parameter list
+    variableModel                                     returnType;                                 // Return type
+    std::string                                       parametersList;                             // Parameter list
     std::string                                       unitLanguage;                               // Unit language
     std::string                                       xpath;                                      // Unique xpath
     std::string                                       constructorOrDestructor;                    // Method is a constructor or a destructor
@@ -117,31 +118,31 @@ private:
     std::vector<std::string>                          stereotypes;                                // Method stereotype(s)
     std::vector<std::string>                          attributesOrAnnotations;                    // List of attributes (C#) or annotations (Java) 
     std::vector<std::string>                          propertyAttributes;                         // List of property attributes (C#)
-    std::vector<callModel>                            functionCalls;                              // List of function calls (e.g., foo()) to methods in type
-    std::vector<callModel>                            methodCalls;                                // List of method calls (e.g., a.foo()) where 'a' is an data member
-    std::vector<callModel>                            newConstructorCalls;                        // List of constructor calls that uses the 'new' operator
+    std::vector<callModel>                            functionCalls;                              // List of function calls (e.g., foo() or bar::foo()) where ( foo ) is another method in the type ( bar )
+    std::vector<callModel>                            methodCalls;                                // List of method calls (e.g., a.foo()) where ( a ) is a field in the type
+    std::vector<callModel>                            newConstructorCalls;                        // List of constructor calls that uses the ( new ) operator whether the type or external types
     std::vector<std::string>                          returnExpressions;                          // List of all return expressions in a method
     bool                                              methodConst{false};                         // Is it a const method? (C++ only)
-    bool                                              dataMemberUsed{false};                      // Does it use at least 1 data member in an expression? 
+    bool                                              fieldUsed{false};                           // Does it use at least 1 field in an expression? 
     bool                                              parameterUsed{false};                       // Does it use at least 1 parameter in an expression?
-    bool                                              simpleReturn{false};                        // Does it contain at least 1 return expression that just returns a data member?
+    bool                                              simpleReturn{false};                        // Does it contain at least 1 return expression that just returns a field?
     bool                                              complexReturn{false};                       // Does it contain at least 1 return expression that is not a simple return?
     bool                                              parameterComplexReturn{false};              // Does it contain at least 1 return expression that is not a simple return? (For parameters)
     bool                                              parameterRefModified{false};                // Does it modify at least 1 parameter that is passed by reference?
     bool                                              nonPrimitiveLocalOrParameterModified{false};// Does it modify at least 1 non-primitive parameter or a non-primitive local?
     bool                                              globalOrStaticVariableModified{false};      // Does it change any global or static variables?
-    bool                                              nonPrimitiveDataMemberExternal{false};      // True if method uses at least 1 non-primitive data member that is not of the same type as type  
+    bool                                              nonPrimitiveFieldExternal{false};           // True if method uses at least 1 non-primitive field that is not of the same type as type  
     bool                                              nonPrimitiveReturnType{false};              // True if method uses a non-primitive return type
     bool                                              nonPrimitiveReturnTypeExternal{false};      // True if method uses a non-primitive return type that is not of the same type as type   
     bool                                              nonPrimitiveLocalExternal{false};           // True if method uses at least 1 a non-primitive local that is not of the same type as type   
     bool                                              nonPrimitiveParamaterExternal{false};       // True if method uses at least 1 a non-primitive parameter that is not of the same type as type                                                
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
-    bool                                              variableCreatedWithNewAndReturned{false};   // There is at least 1 return expression that returns a data member, a local, a parameter, a static, or a global created with the 'new' operator 
+    bool                                              variableCreatedWithNewAndReturned{false};   // There is at least 1 return expression that returns a field, a local, a parameter, a static, or a global created with the 'new' operator 
     bool                                              isProperty{false};                          // Is it a property? (C# only)
     int                                               unitNumber{-1};                             // srcML Unit number   
-    int                                               dataMembersModifiedCount{0};                // Number of modified data members
-    int                                               externalFunctionCallsCount{0};              // Number of function calls that are filtered (removed)
-    int                                               externalMethodCallsCount{0};                // Number of method calls that are filtered (removed)
+    int                                               fieldsModifiedCount{0};                     // Number of modified fields
+    int                                               externalFunctionCallsCount{0};              // Number of function calls (e.g., foo()) where ( foo ) is a free function or a static method
+    int                                               externalMethodCallsCount{0};                // Number of method calls (e.g., a.foo()) where ( a ) is an external object that are filtered (removed)
     int                                               nonCommentStatementsCount{0};               // Number of non-comment statements 
 };
 
