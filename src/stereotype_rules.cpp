@@ -75,7 +75,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // 1] Return type is not void
                 // 2] Contains at least one simple return expression that 
                 //     returns a field (e.g., return a;) or the value to a field (e.g., return *a; or return **a; ... etc)
-                //    The field ( a ) can be of any data type (e.g., primitive, non-primitive, pointer, reference, etc)
+                //     The field ( a ) can be of any data type (e.g., primitive, non-primitive, pointer, reference, etc)
                 //
                 // Returning ( this ) by itself is not a getter (e.g., return this;) 
                 //  as it points to the current object rather than a field
@@ -86,7 +86,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // predicate
                 //
                 // 1] Return type is Boolean
-                // 2] Contains at least one complex return expression
+                // 2] Contains at least one complex return expression (e.g., return a+5;)
                 // 3] Uses a field in an expression or has at least 
                 //     one function call (except constructor calls) to other methods in type
                 //
@@ -165,7 +165,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 //            there is at least one call on a field or
                 //            at least one function call to other methods (except constructor calls) in type
                 //   Case 3: zero fields are modifed and
-                //            there is at least two calls on field or
+                //            there is at least two calls on one or more fields or
                 //            at least one function call to other methods (except constructor calls) in type  
                 //
                 // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
@@ -266,13 +266,11 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
             if (m.getStereotypes().size() == 0)  m.setStereotype("unclassified");
 
             // Used to for re-documenting the system with the stereotype information
-
             XPATH_LIST[m.getUnitNumber()].insert({m.getXpath(), m.getStereotypesString()});    
         }
         pair.second.setConstructorDestructorCount(constructorDestructorCount);
     }
 }
-
 
 // Compute type stereotype
 // Constructors and destructors are not considered in the computation of type stereotypes
