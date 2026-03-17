@@ -23,7 +23,7 @@
 #include <filesystem>
 #include <iostream>
 #include <cstring>
-
+#include <algorithm>
 
 XPathGenerator                     XPATH_GENERATOR;
 
@@ -263,37 +263,29 @@ void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber) {
         int n = srcml_transform_get_unit_size(result);
         srcml_unit* resultUnit = nullptr;
         
+        const char* inputUnitSrcml = srcml_unit_get_srcml(inputUnit);
+        std::string header(inputUnitSrcml, std::strchr(inputUnitSrcml, '>') + 1);
+
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
-
-            typeArchive = srcml_archive_clone(archive); // Creates an archive internally
-            
-            char* unparsed = nullptr;
-            std::size_t size = 0;
-            srcml_archive_write_open_memory(typeArchive, &unparsed, &size);
-            srcml_archive_write_unit(typeArchive, resultUnit);
-            srcml_archive_close(typeArchive);
-            srcml_archive_free(typeArchive);
+            std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
 
             typeArchive = srcml_archive_create();
-            srcml_archive_read_open_memory(typeArchive, unparsed, size);
+            srcml_archive_read_open_memory(typeArchive, resultUnitSrcml.c_str(), resultUnitSrcml.size());
             typeUnit = srcml_archive_read_unit(typeArchive);
 
             std::string typeXpath = "(" + XPATH_GENERATOR.getXPathList(unitLanguage, "type") + ")[" + std::to_string(i + 1) + "]"; 
 
             typeModel type(unitLanguage); 
-            type.findData(typeXpath, unitNumber);   
+            type.findData(typeXpath, header, unitNumber);   
             const std::string& typeNameParsed = type.getName()[1];
 
             // Needed for inheritance in Java and C#
             if (unitLanguage != "C++") genericTypes.insert({type.getName()[2], type.getName()[1]}); 
 
-            if (types.find(typeNameParsed) != types.end()) 
-                duplicateTypes.push_back(std::move(type));
-            else      
-                types.insert({typeNameParsed, std::move(type)});
+            if (types.find(typeNameParsed) != types.end()) duplicateTypes.push_back(std::move(type));
+            else types.insert({typeNameParsed, std::move(type)});
             
-            free(unparsed);
             srcml_unit_free(typeUnit);
             srcml_archive_close(typeArchive);
             srcml_archive_free(typeArchive); 
@@ -336,20 +328,15 @@ void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumbe
         int n = srcml_transform_get_unit_size(result);  
         srcml_unit* resultUnit = nullptr;
     
+        const char* inputUnitSrcml = srcml_unit_get_srcml(inputUnit);
+        std::string header(inputUnitSrcml, std::strchr(inputUnitSrcml, '>') + 1);
+
         for (int i = 0; i < n; i++) {
             resultUnit = srcml_transform_get_unit(result, i);
+            std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
 
-            methodArchive = srcml_archive_clone(archive);
-            
-            char* unparsed = nullptr;
-            std::size_t size = 0;
-            srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
-            srcml_archive_write_unit(methodArchive, resultUnit);
-            srcml_archive_close(methodArchive);
-            srcml_archive_free(methodArchive);
-            
             methodArchive = srcml_archive_create();
-            srcml_archive_read_open_memory(methodArchive, unparsed, size);
+            srcml_archive_read_open_memory(methodArchive, resultUnitSrcml.c_str(), resultUnitSrcml.size());
             methodUnit = srcml_archive_read_unit(methodArchive);
 
             std::string functionXpath =  "(" + XPATH_GENERATOR.getXPathList(unitLanguage, "free_function") + ")[" + std::to_string(i + 1) + "]";
@@ -357,7 +344,6 @@ void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumbe
             
             freeFunctions.push_back(std::move(function));
 
-            free(unparsed);
             srcml_unit_free(methodUnit);
             srcml_archive_close(methodArchive);
             srcml_archive_free(methodArchive); 
@@ -370,10 +356,11 @@ void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumbe
 // Analyzes free functions to determine externally defined methods
 //
 void stereotypesAnalyzer::analyzeFreeFunctions() {
-    for (std::vector<functionModel>::iterator function = freeFunctions.begin(); function != freeFunctions.end();) {
-        if (function->getUnitLanguage() == "C++") {
+    // std::remove_if shifts all "kept" items to the front and returns the new end iterator
+    auto newEnd = std::remove_if(freeFunctions.begin(), freeFunctions.end(), [this](functionModel& function) {
+        if (function.getUnitLanguage() == "C++") {
             // Removes namespaces if any
-            std::string functionName = function->getName();  
+            std::string functionName = function.getName();  
             helperFunctions::removeNamespace(functionName, "C++", false);
 
             // Get the type name (if any). Else, it is a free function
@@ -381,24 +368,26 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
             if (isTypeName != std::string::npos) { // Type found, it is a method       
                 std::string typeName = functionName.substr(0, isTypeName); 
                 auto result = types.find(typeName);
+                
                 if (result != types.end()) {
-                    result->second.addMethod(*function);
-                    function = freeFunctions.erase(function);
+                    result->second.addMethod(std::move(function));
+                    return true; // Return true to mark this element for removal from the vector
                 }                          
                 else { // Case specialized template method belongs to the generic template type
                     typeName = typeName.substr(0, typeName.find("<"));
                     result = types.find(typeName);
                     if (result != types.end())  {
-                        result->second.addMethod(*function);
-                        function = freeFunctions.erase(function);
+                        result->second.addMethod(std::move(function));
+                        return true; // Mark for removal
                     } 
-                    else ++function;                                                  
                 }
             }
-            else ++function;
         }
-        else ++function;
-    }
+        return false; // Keep this element in freeFunctions
+    });
+
+    // Erase all the elements marked for removal
+    freeFunctions.erase(newEnd, freeFunctions.end());
 }
 
 // Appends duplicates types (e.g., partial classes in C#)

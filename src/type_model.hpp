@@ -42,7 +42,7 @@ public:
     void                                                      setStereotype                      (const std::string& s)          { stereotypes.push_back(s);                      }
     void                                                      setConstructorDestructorCount      (int c)                         { constructorDestructorCount = c;                }     
     void                                                      mergeData                          (typeModel& other);
-    void                                                      findData                           (const std::string&, int);
+    void                                                      findData                           (const std::string&, const std::string&, int);
     void                                                      findDataAfterCollection            ();
     
     // Inheritance does not need to check for private fields or methods, this is because
@@ -65,7 +65,7 @@ public:
     }
 
     void buildMethodSignature() { for (const auto& m : methods) methodSignatures.insert(m.getNameSignature()); }
-    void addMethod(functionModel& m)  { methods.push_back(m); }
+    void addMethod(functionModel&& m)  { methods.push_back(m); }
 
 private:
     void                                                    findName                           ();
@@ -73,10 +73,10 @@ private:
     std::string                                             findPropertyReturnType             ();
     void                                                    findFieldNames                     (std::vector<variableModel>&);
     void                                                    findFieldTypes                     (std::vector<variableModel>&);
-    void                                                    findMethod                         (const std::string&, int);
-    void                                                    findProperties                     (const std::string&, int);
+    void                                                    findMethod                         (const std::string&, const std::string&, int);
+    void                                                    findProperties                     (const std::string&, const std::string&, int);
     void                                                    findStructure                      ();     
-    void                                                    findMethodsInProperty              (const std::string&, const std::string&, int);
+    void                                                    findMethodsInProperty              (const std::string&, const std::string&, const std::string&, int);
     void                                                    findAttributesOrAnnotations        (); 
 
     std::string                                             unitLanguage;                    // Unit language

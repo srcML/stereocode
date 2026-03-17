@@ -74,8 +74,8 @@ endif()
 # Turn on compiler warnings
 target_compile_options(stereocode PRIVATE
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
-    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -Wpedantic -Wshadow -Wunused>
-    $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wpedantic -Wshadow-all -Wunused>
+    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -pedantic -Wshadow -Wunused -fno-trigraphs -Wno-trigraphs>
+    $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -pedantic -Wshadow-all -Wunused -fno-trigraphs -Wno-trigraphs>
 )
 
 enable_testing()
@@ -87,18 +87,18 @@ file(GLOB TESTFILES ${CMAKE_CURRENT_BINARY_DIR}/test/*.xml)
 list(FILTER TESTFILES EXCLUDE REGEX "BASE.xml|stereotypes.xml")
 
 foreach(TEST_FILE_PATH ${TESTFILES})
-    # 1. Get the base name for the test label (e.g., "Cpp")
-    get_filename_component(TEST_NAME ${TEST_FILE_PATH} NAME_WE)
-    
-    # 2. Get the full path WITHOUT extension for the script (e.g., "build/test/Cpp")
-    #    The script will append .xml, .BASE.xml, etc.
+    # 1. Get the base name without extension
+    get_filename_component(TEST_FILENAME ${TEST_FILE_PATH} NAME)    # e.g. "Cpp.pos.xml"
+    string(REGEX REPLACE "\\.xml$" "" TEST_NAME "${TEST_FILENAME}") # e.g. "Cpp.pos"
+
+    # 2. Get the full path without extension (e.g., "build/test/Cpp.pos")
     string(REGEX REPLACE "\\.xml$" "" TEST_FILE_NO_EXT "${TEST_FILE_PATH}")
 
     add_test(
         NAME "${TEST_NAME}_test"
         COMMAND ${CMAKE_COMMAND}
             -DSTEREOCODE=$<TARGET_FILE:stereocode>
-            -DTEST_FILE=${TEST_FILE_NO_EXT}   # <--- Passing the stripped path
+            -DTEST_FILE=${TEST_FILE_NO_EXT}
             -P ${CMAKE_CURRENT_BINARY_DIR}/test/runtests.cmake
     )
 endforeach()

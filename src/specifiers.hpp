@@ -16,7 +16,6 @@
 
 class specifiers {
 public:
-    const std::string&   getSpecifiers            (const std::string&) const;
     void                 removeSpecifiers         (std::string&, std::string);
     void                 addSpecifiers            (const std::string&);
     void                 initializeSpecifiersList ();

@@ -112,7 +112,7 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:specifier[.='const']";
     xpathList[language]["const"] = xpath; 
 
-    xpath = "/src:unit/src:function/src:block//src:block_content[1][*[not(self::src:comment)][1]]";
+    xpath = "/src:unit/src:function/src:block/src:block_content[1][*[not(self::src:comment)][1]]";
     xpathList[language]["non_comment_statements"] = xpath; 
 
     xpath = "/src:unit/src:function/src:block//src:expr/src:name";
@@ -123,7 +123,7 @@ void XPathGenerator::generateXPathList() {
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
     xpath += " or self::src:operator='&=' or self::src:operator='^=' or self::src:operator='|='";
-    xpath += " or self::src:operator='\\?\\?=' or self::src:operator='>>>=' or self::src:operator='++'"; 
+    xpath += " or self::src:operator='++'"; 
     xpath += " or self::src:operator='--'] or preceding-sibling::*[1][self::src:operator='++' or self::src:operator='--']]";
     xpathList[language]["expression_assignment"] = xpath;    
 
@@ -207,7 +207,7 @@ void XPathGenerator::generateXPathList() {
     xpath ="/src:unit/src:function/src:block//src:decl/src:name[preceding-sibling::src:type and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_name"] = xpath; 
 
-    xpath ="//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
+    xpath ="/src:unit/src:function/src:block//src:decl/src:type[following-sibling::src:name and (ancestor::src:decl_stmt[count(ancestor::src:function) = 1] or ancestor::src:init/ancestor::src:control)]";
     xpathList[language]["local_variable_type"] = xpath; 
 
     xpath = "/src:unit/src:function/src:parameter_list/src:parameter/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
@@ -243,7 +243,7 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:block//src:expr_stmt[count(ancestor::src:function) = 1]/src:expr[./src:operator[.='new']]/src:name";
     xpathList[language]["new_operator_assign_expr_stmt"] = xpath;  
 
-    xpath = "/src:unit/src:function/src:block//src:block_content[1][*[not(self::src:comment)][1]]";
+    xpath = "/src:unit/src:function/src:block/src:block_content[1][*[not(self::src:comment)][1]]";
     xpathList[language]["non_comment_statements"] = xpath; 
 
     xpath = "/src:unit/src:function/src:block//src:expr[count(ancestor::src:function) = 1]/src:name";
@@ -254,7 +254,7 @@ void XPathGenerator::generateXPathList() {
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
     xpath += " or self::src:operator='&=' or self::src:operator='^=' or self::src:operator='|='";
-    xpath += " or self::src:operator='\\?\\?=' or self::src:operator='>>>=' or self::src:operator='++'"; 
+    xpath += " or self::src:operator='??=' or self::src:operator='>>>=' or self::src:operator='++'"; 
     xpath += " or self::src:operator='--'] or preceding-sibling::*[1][self::src:operator='++' or self::src:operator='--']]";
     xpathList[language]["expression_assignment"] = xpath;  
 
@@ -370,7 +370,7 @@ void XPathGenerator::generateXPathList() {
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";
     xpath += " or self::src:operator='&=' or self::src:operator='^=' or self::src:operator='|='";
-    xpath += " or self::src:operator='\\?\\?=' or self::src:operator='>>>=' or self::src:operator='++'"; 
+    xpath += " or self::src:operator='>>>=' or self::src:operator='++'"; 
     xpath += " or self::src:operator='--'] or preceding-sibling::*[1][self::src:operator='++' or self::src:operator='--']]";
     xpathList[language]["expression_assignment"] = xpath;  
 }

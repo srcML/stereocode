@@ -42,7 +42,7 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
     if (!constructorOrDestructor.empty()) findConstructorOrDestructorType();
 
     findNameSignature();
-   
+
     if (constructorOrDestructor.empty()) {
         if (unitLanguage == "C#" || unitLanguage == "Java") {
             findAttributesOrAnnotations();
@@ -66,6 +66,7 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
         findExpressionAssignments();
         findNonCommentStatements(); 
     }
+    
 }
 
 // Finds all specifiers of the method
@@ -77,15 +78,8 @@ void functionModel::findSpecifiers() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    for (int i = 0; i < n; ++i) {
-        srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        specifiers.emplace(unparsed);
-        free(unparsed);   
-    }
-
+    for (int i = 0; i < n; ++i) specifiers.emplace(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+     
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
 }
@@ -141,13 +135,8 @@ void functionModel::findAttributesOrAnnotations() {
     
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
-    for (int i = 0; i < n; i++) {
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
-        attributesOrAnnotations.push_back(unparsed);
-        free(unparsed);
-    }
+    for (int i = 0; i < n; i++) attributesOrAnnotations.push_back(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
 }
@@ -160,13 +149,8 @@ void functionModel::findPropertyAttributes() {
     
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
-    for (int i = 0; i < n; i++) {
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
-        propertyAttributes.push_back(unparsed);
-        free(unparsed);
-    }
+    for (int i = 0; i < n; i++) propertyAttributes.push_back(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
 }
@@ -183,14 +167,8 @@ void functionModel::findName() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) { 
-        srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        name = unparsed;
-        free(unparsed);   
-    }
+    if (n == 1) name = srcml_unit_get_src(srcml_transform_get_unit(result, 0)); 
+    
 
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -208,14 +186,8 @@ void functionModel::findParameterList() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) { 
-        srcml_unit* resultUnit = srcml_transform_get_unit(result, 0);
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        parametersList = unparsed;
-        free(unparsed);   
-    }
+    if (n == 1) parametersList = srcml_unit_get_src(srcml_transform_get_unit(result, 0));
+ 
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
 }
@@ -223,14 +195,14 @@ void functionModel::findParameterList() {
 // Gets the method return type 
 //
 // Java:
-//   The '+' for 'returnType' skips the generic parameter list in Java return types
+//   The '+=' for 'returnTypeString' skips the generic parameter list in Java return types
 //   For example, 'public static <T> void swap()' the <T> is included in <type>
-//   However, it is a generic declaration and not a type, so it needs to be ignored
+//   However, it is a generic declaration for the parameters and not a type, so it needs to be ignored
 // C#:
 //   Method could be inside a property (C# only), so the return type is collected separately
 //
 void functionModel::findReturnType() {
-    if (!isProperty) { // If method was a property (C#), type is found in previous steps
+    if (!isProperty) {
         srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method_return_type").c_str());
         srcml_transform_result* result = nullptr;
         srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
@@ -239,14 +211,14 @@ void functionModel::findReturnType() {
         std::string returnTypeString;
         for (int i = 0; i < n; i++) {
             srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
-            returnTypeString += srcml_unit_get_srcml(resultUnit);
+            returnTypeString += srcml_unit_get_srcml(resultUnit); // srcml_unit_get_src() will not work since the result is already just source code due to text()
         }
 
         returnType.setType(returnTypeString);
 
         // Handle C# conversion operators (e.g. "implicit operator IntPtr")
         // The type tag often only has "public static implicit", so 'returnType' becomes empty after stripping specifiers
-        // We must extract the actual type ("IntPtr") from the name ("operator IntPtr")
+        // We must extract the actual type "IntPtr" from the name "operator IntPtr"
         if (unitLanguage == "C#" && name.rfind("operator", 0) == 0) {
             SPECIFIERS.removeSpecifiers(returnTypeString, unitLanguage);
             helperFunctions::removeWhitespace(returnTypeString);
@@ -275,23 +247,14 @@ void functionModel::findLocalVariableName() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
     for (int i = 0; i < n; i++) {
-        resultUnit = srcml_transform_get_unit(result, i);  
-        char * unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-    
-        std::string localName = unparsed;
+        std::string localName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
         // Chop off [] for arrays
-        if (unitLanguage == "C++") 
-            helperFunctions::removeBracketSuffix(localName); 
+        if (unitLanguage == "C++") helperFunctions::removeBracketSuffix(localName); 
 
         localsOrdered.emplace_back(variableModel());
         localsOrdered.back().setName(localName);
-
-        free(unparsed);
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -305,27 +268,19 @@ void functionModel::findLocalVariableType() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
     std::string prev;
     for (int i = 0; i < n; i++) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        std::string type = srcml_unit_get_srcml(resultUnit);
-  
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
+        std::string type = srcml_unit_get_srcml(srcml_transform_get_unit(result, i));
 
-        if (type == "<type ref=\"prev\"/>") {
-            type = prev;           
-        }
+        if (type == "<type ref=\"prev\"/>") type = prev;           
+        
         else {  
-            type = unparsed;
+            type = srcml_unit_get_src(srcml_transform_get_unit(result, i));
             prev = type;
         }  
         localsOrdered[i].setType(type); 
         locals.insert({localsOrdered[i].getName(), localsOrdered[i]});
 
-        free(unparsed);
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -339,15 +294,8 @@ void functionModel::findParameterName() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
-
     for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        char * unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        
-        std::string parameterName = unparsed;
+        std::string parameterName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
         // Chop off [] for arrays
         if (unitLanguage == "C++") 
@@ -355,8 +303,6 @@ void functionModel::findParameterName() {
 
         parametersOrdered.emplace_back(variableModel()); 
         parametersOrdered.back().setName(parameterName);
-
-        free(unparsed);
     }
 
     srcml_clear_transforms(methodArchive);
@@ -373,19 +319,11 @@ void functionModel::findParameterType() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
-
     for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        char * unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        std::string type = unparsed;
+        std::string type = srcml_unit_get_src(srcml_transform_get_unit(result, i)); 
     
         parametersOrdered[i].setType(type);    
         parameters.insert({parametersOrdered[i].getName(), parametersOrdered[i]});
-
-        free(unparsed);
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -399,16 +337,9 @@ void functionModel::findReturnExpression() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
     for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
+        std::string expr = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        std::string expr = unparsed;
-        free(unparsed);
-        
         returnExpressions.push_back(expr);
        
         if (helperFunctions::isSubstringAtBeginning(expr, "new")) newReturned = true; 
@@ -435,29 +366,16 @@ void functionModel::findCallName() {
         srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
         int n = srcml_transform_get_unit_size(result);
 
-        srcml_unit* resultUnit = nullptr;
         for (int i = 0; i < n; ++i) {
-            resultUnit = srcml_transform_get_unit(result, i);
-            
-            char* unparsed = nullptr;
-            std::size_t size = 0;
-            srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-
             if (c == "function") {
-               functionCalls.emplace_back(callModel());
-               functionCalls.back().setName(unparsed);
+                functionCalls.emplace_back(callModel()).setName(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+            } else if (c == "method") {
+                methodCalls.emplace_back(callModel()).setName(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+            } else if (c == "constructor") {
+                newConstructorCalls.emplace_back(callModel()).setName(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
             }
-            else if (c == "method") {
-               methodCalls.push_back(callModel());
-               methodCalls.back().setName(unparsed);
-            }
-            else if (c == "constructor") {
-               newConstructorCalls.push_back(callModel());
-               newConstructorCalls.back().setName(unparsed);
-            }
-
-            free(unparsed);                    
         }
+        
         srcml_clear_transforms(methodArchive);
         srcml_transform_free(result);
     }
@@ -479,14 +397,9 @@ void functionModel::findCallArgument() {
         srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
         int n = srcml_transform_get_unit_size(result);
 
-        srcml_unit* resultUnit = nullptr;
         for (int i = 0; i < n; ++i) {
-            resultUnit = srcml_transform_get_unit(result, i);
-            char * unparsed = nullptr;
-            std::size_t size = 0;
-            srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-            
-            std::string arguList = unparsed;
+
+            std::string arguList = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
             if (c == "function")  {
                 functionCalls[i].setArgumentList(arguList);
@@ -499,8 +412,6 @@ void functionModel::findCallArgument() {
             }             
             else if (c == "method") methodCalls[i].setArgumentList(arguList);                  
             else if (c == "constructor") newConstructorCalls[i].setArgumentList(arguList); 
-                          
-            free(unparsed);
         }
         srcml_clear_transforms(methodArchive);
         srcml_transform_free(result);
@@ -515,15 +426,8 @@ void functionModel::findNewAssignedVariables() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
     for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
-
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        std::string varName = unparsed;
-        free(unparsed);
+        std::string varName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
         helperFunctions::removeWhitespace(varName);
         
         variablesCreatedWithNew.insert(varName);
@@ -600,18 +504,9 @@ void functionModel::findExpressionNames()  {
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
-    srcml_unit* resultUnit = nullptr;
 
-    for (int i = 0; i < n; i++) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
+    for (int i = 0; i < n; i++) expressionNames.insert(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
 
-        expressionNames.insert(unparsed);
-
-        free(unparsed);  
-    }        
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);    
 }
@@ -623,18 +518,9 @@ void functionModel::findExpressionAssignments()  {
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
-    srcml_unit* resultUnit = nullptr;
 
-    for (int i = 0; i < n; i++) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
+    for (int i = 0; i < n; i++) expressionAssignments.insert(srcml_unit_get_src(srcml_transform_get_unit(result, i)));     
 
-        expressionAssignments.insert(unparsed);
-
-        free(unparsed);  
-    }        
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);    
 }

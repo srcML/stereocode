@@ -30,7 +30,7 @@ srcml_archive*                         propertyArchive{nullptr};
 // However, it is not a non-primitive of external type, so that is left as false
 //
 typeModel::typeModel(const std::string& unitLanguage_) : unitLanguage{unitLanguage_} {
-    findName();  
+    findName();
 
     variableModel variable;
     variable.setName("this");
@@ -40,7 +40,7 @@ typeModel::typeModel(const std::string& unitLanguage_) : unitLanguage{unitLangua
 
 // Finds other data for the type
 //
-void typeModel::findData(const std::string& typeXpath, int unitNumber) {
+void typeModel::findData(const std::string& typeXpath, const std::string& header, int unitNumber) {
     xpath[unitNumber].push_back(typeXpath);
 
     findStructure();
@@ -50,10 +50,10 @@ void typeModel::findData(const std::string& typeXpath, int unitNumber) {
     findFieldNames(fieldsOrdered);
     findFieldTypes(fieldsOrdered);
      
-    findMethod(typeXpath, unitNumber);
+    findMethod(typeXpath, header, unitNumber);
     if (unitLanguage == "C#" || unitLanguage == "Java") {
         findAttributesOrAnnotations();
-        if (unitLanguage == "C#") findProperties(typeXpath, unitNumber);
+        if (unitLanguage == "C#") findProperties(typeXpath, header, unitNumber);
     }
 }
 
@@ -74,9 +74,9 @@ void typeModel::findDataAfterCollection() {
 void typeModel::findStructure() {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"structure_type").c_str());
     srcml_transform_result* result = nullptr;
-    
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
+
     for (int i = 0; i < n; i++) {
         srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
         structure += srcml_unit_get_srcml(resultUnit);
@@ -98,13 +98,8 @@ void typeModel::findAttributesOrAnnotations() {
     
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
-    for (int i = 0; i < n; i++) {
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(srcml_transform_get_unit(result, i), &unparsed, &size);
-        attributesOrAnnotations.push_back(unparsed);
-        free(unparsed);
-    }
+    for (int i = 0; i < n; i++) attributesOrAnnotations.push_back(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+
     srcml_clear_transforms(typeArchive);
     srcml_transform_free(result);
 }
@@ -115,12 +110,9 @@ void typeModel::findName() {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"type_name").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
-
-    if (srcml_transform_get_unit_size(result) == 1) {
-        char *unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(srcml_transform_get_unit(result, 0), &unparsed, &size);
-        std::string tempName = unparsed;
+    
+    if (srcml_transform_get_unit_size(result) > 0) {
+        std::string tempName = srcml_unit_get_src(srcml_transform_get_unit(result, 0));
         name.push_back(tempName); 
 
         helperFunctions::removeWhitespace(tempName);
@@ -139,8 +131,7 @@ void typeModel::findName() {
             helperFunctions::removeNamespace(tempName, unitLanguage, true);
             name.push_back(tempName);
             name.push_back(tempName); // Not a duplicate
-        }     
-        free(unparsed);     
+        }         
     }
 
     // There might be a missing name (e.g., anonymous structs in C++)
@@ -175,14 +166,8 @@ void typeModel::findParentNames() {
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
     for (int i = 0; i < n; i++) {
-        resultUnit = srcml_transform_get_unit(result, i);
-
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-        std::string parentName = unparsed;
+        std::string parentName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
         helperFunctions::removeWhitespace(parentName);
 
@@ -196,9 +181,7 @@ void typeModel::findParentNames() {
         else {
             helperFunctions::removeNamespace(parentName, unitLanguage, true);
             parentNames.insert(parentName);
-        }
-    
-        free(unparsed);      
+        }    
     }
     
     srcml_clear_transforms(typeArchive);
@@ -223,14 +206,8 @@ void typeModel::findFieldNames(std::vector<variableModel>& fieldsOrdered) {
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
-
     for (int i = 0; i < n; i++) {
-        resultUnit = srcml_transform_get_unit(result,i);
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);     
-        std::string dataMemberName = unparsed;
+        std::string dataMemberName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
         variableModel v;
 
@@ -240,8 +217,6 @@ void typeModel::findFieldNames(std::vector<variableModel>& fieldsOrdered) {
         v.setName(dataMemberName);
 
         fieldsOrdered.push_back(v); 
-        free(unparsed);
-
     }
     srcml_clear_transforms(typeArchive);
     srcml_transform_free(result);
@@ -256,29 +231,21 @@ void typeModel::findFieldTypes(std::vector<variableModel>& fieldsOrdered) {
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    srcml_unit* resultUnit = nullptr;
     std::string prev; 
-
     for (int i = 0; i < n; ++i) {
-        resultUnit = srcml_transform_get_unit(result, i);
-        std::string type = srcml_unit_get_srcml(resultUnit);
+        std::string type = srcml_unit_get_srcml(srcml_transform_get_unit(result, i));
+
+        if (type == "<type ref=\"prev\"/>") type = prev;           
         
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_unit_unparse_memory(resultUnit, &unparsed, &size);
-     
-        if (type == "<type ref=\"prev\"/>") type = prev;
         else {  
-            type = unparsed;
+            type = srcml_unit_get_src(srcml_transform_get_unit(result, i));
             prev = type;
-        }
+        }  
 
         fieldsOrdered.at(i).setType(type);
         PRIMITIVES.isNonPrimitive(fieldsOrdered[i], unitLanguage, name[3]);
 
         fields.insert({fieldsOrdered[i].getName(), std::move(fieldsOrdered[i])});
-                          
-        free(unparsed);
     }
     srcml_clear_transforms(typeArchive);
     srcml_transform_free(result);
@@ -292,7 +259,7 @@ void typeModel::findFieldTypes(std::vector<variableModel>& fieldsOrdered) {
 // Java:
 //   Annotations have the same story as attributes, so we ignore these statements inside them
 //   
-void typeModel::findMethod(const std::string& classXpath, int unitNumber) {
+void typeModel::findMethod(const std::string& classXpath, const std::string& header, int unitNumber) {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
@@ -301,25 +268,16 @@ void typeModel::findMethod(const std::string& classXpath, int unitNumber) {
 
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
-
-        methodArchive = srcml_archive_clone(typeArchive);
-
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
-        srcml_archive_write_unit(methodArchive, resultUnit);
-        srcml_archive_close(methodArchive);
-        srcml_archive_free(methodArchive);
+        std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
         
         methodArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(methodArchive, unparsed, size);
+        srcml_archive_read_open_memory(methodArchive, resultUnitSrcml.c_str(), resultUnitSrcml.size());
         methodUnit = srcml_archive_read_unit(methodArchive);
         
         std::string methodXpath = "(" + classXpath + XPATH_GENERATOR.getXPathList(unitLanguage, "method") + ")[" + std::to_string(i + 1) + "]";
         functionModel method = functionModel(methodXpath, unitLanguage, name[3], "", unitNumber, false);     
         methods.push_back(method);
 
-        free(unparsed);
         srcml_unit_free(methodUnit);
         srcml_archive_close(methodArchive);
         srcml_archive_free(methodArchive); 
@@ -332,7 +290,7 @@ void typeModel::findMethod(const std::string& classXpath, int unitNumber) {
 // Properties need to be collected separately since they hold the return type of the getters
 // Properties cannot be nested in methods or in other properties
 //
-void typeModel::findProperties(const std::string& classXpath, int unitNumber) {
+void typeModel::findProperties(const std::string& classXpath, const std::string& header, int unitNumber) {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage, "property").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
@@ -342,24 +300,16 @@ void typeModel::findProperties(const std::string& classXpath, int unitNumber) {
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
 
-        propertyArchive = srcml_archive_clone(typeArchive);
-
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_archive_write_open_memory(propertyArchive, &unparsed, &size);
-        srcml_archive_write_unit(propertyArchive, resultUnit);
-        srcml_archive_close(propertyArchive);
-        srcml_archive_free(propertyArchive);
+        std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
 
         propertyArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(propertyArchive, unparsed, size);
+        srcml_archive_read_open_memory(propertyArchive, resultUnitSrcml.c_str(), resultUnitSrcml.size());
         propertyUnit = srcml_archive_read_unit(propertyArchive);
 
         std::string propertyXpath = "(" + classXpath + XPATH_GENERATOR.getXPathList(unitLanguage,"property") + ")[" + std::to_string(i + 1) + "]";
         std::string propertyReturnType = findPropertyReturnType(); // No need to set pass the propertyXpath as the propertyArchive and propertyUnit are already set
-        findMethodsInProperty(propertyXpath, propertyReturnType, unitNumber);
+        findMethodsInProperty(propertyXpath, propertyReturnType, header, unitNumber);
 
-        free(unparsed);
         srcml_unit_free(propertyUnit);
         srcml_archive_close(propertyArchive);
         srcml_archive_free(propertyArchive); 
@@ -389,7 +339,7 @@ std::string typeModel::findPropertyReturnType() {
 
 // Finds the methods in a property
 //
-void typeModel::findMethodsInProperty(const std::string& propertyXpath, const std::string& propertyReturnType, int unitNumber) {
+void typeModel::findMethodsInProperty(const std::string& propertyXpath, const std::string& propertyReturnType, const std::string& header, int unitNumber) {
     srcml_append_transform_xpath(propertyArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"property_method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(propertyArchive, propertyUnit, &result);
@@ -399,24 +349,16 @@ void typeModel::findMethodsInProperty(const std::string& propertyXpath, const st
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
 
-        methodArchive = srcml_archive_create();
-        srcml_archive_register_namespace(methodArchive, "pos", "http://www.srcML.org/srcML/position");
-        char* unparsed = nullptr;
-        std::size_t size = 0;
-        srcml_archive_write_open_memory(methodArchive, &unparsed, &size);
-        srcml_archive_write_unit(methodArchive, resultUnit);
-        srcml_archive_close(methodArchive);
-        srcml_archive_free(methodArchive);
+        std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
 
         methodArchive = srcml_archive_create();
-        srcml_archive_read_open_memory(methodArchive, unparsed, size);
+        srcml_archive_read_open_memory(methodArchive, resultUnitSrcml.c_str(), resultUnitSrcml.size());
         methodUnit = srcml_archive_read_unit(methodArchive);
 
         std::string methodXpath = "(" + propertyXpath + XPATH_GENERATOR.getXPathList(unitLanguage,"property_method") + ")[" + std::to_string(i + 1) + "]";
         functionModel m = functionModel(methodXpath, unitLanguage, name[3], propertyReturnType, unitNumber, true);
         methods.push_back(m);
 
-        free(unparsed);
         srcml_unit_free(methodUnit);
         srcml_archive_close(methodArchive);
         srcml_archive_free(methodArchive); 
