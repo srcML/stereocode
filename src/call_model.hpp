@@ -13,23 +13,24 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
 
 class callModel {
 public:
-    const std::string&      getName                     () const                           { return name;          } 
-    const std::string&      getArgumentList             () const                           { return argumentList;  }
-    const std::string&      getSignature                () const                           { return signature;     }
+    std::vector<std::string>&               getName                     ()                                 { return name;                    } 
+    const std::string&                      getArgumentList             () const                           { return argumentList;            }
+    const std::string&                      getSignature                () const                           { return signature;               }
 
-    void                    setName                     (const std::string& name_)         { name = name_;                 }
-    void                    setArgumentList             (const std::string& argumentList_) { argumentList = argumentList_; }
-    void                    setSignature                (const std::string& signature_)    { signature = signature_;       }
+    void                                    setName                     (const std::string& name_)         { name.push_back(name_);          }
+    void                                    setArgumentList             (const std::string& argumentList_) { argumentList = argumentList_;   }
+    void                                    setSignature                (const std::string& signature_)    { signature = signature_;         }
 
-    friend std::istream&    operator>>                  (std::istream&, callModel&);
+    friend std::istream&                    operator>>                  (std::istream&, callModel&);
 private:
-    std::string             name;                    // Call name
-    std::string             argumentList;            // Argument list
-    std::string             signature;               // Call signature
-    bool                    internal{false};         // Whether it is a call to an internal method or an external
+    std::vector<std::string>   name;                    // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
+    std::string                argumentList;            // Argument list
+    std::string                signature;               // Call signature
+    bool                       internal{false};         // Whether it is a call to an internal method or an external
 };
 
 #endif

@@ -22,14 +22,43 @@ extern specifiers SPECIFIERS;
 // Outer quotes handle commas, newlines, carriage returns, etc.
 // Inner quotes handle inner quotes
 //
-std::string helperFunctions::escapeCSV(const std::string& data) {
+std::string HELPERS::escapeCSV(const std::string& data) {
     std::string result = "\""; // Outer
     for (char c : data) {
-        if (c == '\"') result += "\"\""; // Inner (Original + extra for escaping)
-        else result += c;
+        if (c == '\"') {
+            result += "\"\""; // Escape quotes
+        } 
+        else if (c == '\n' || c == '\r') {
+            result += " "; // Replace with a space
+        } 
+        else {
+            result += c;
+        }
     }
     result += "\""; // Outer
     return result;
+}
+
+// Extracts the line number from a string"
+//
+int HELPERS::extractFirstLineNumber(const std::string& text) {
+    std::string target = "pos:start=\"";
+    size_t startPos = text.find(target);
+
+    if (startPos != std::string::npos) {
+        // Move the index forward to where the actual numbers begin
+        startPos += target.length();
+
+        // Find the colon ':' that separates the line and column numbers
+        size_t endPos = text.find(':', startPos);
+
+        if (endPos != std::string::npos) {
+            // Extract the substring between the quote and the colon
+            std::string numberStr = text.substr(startPos, endPos - startPos);
+            return std::stoi(numberStr);
+        }
+    }
+    return -1; // Return -1 if the target wasn't found
 }
 
 // This function checks whether a given 'substring' appears in the beginning of 'text' as a whole word
@@ -39,7 +68,7 @@ std::string helperFunctions::escapeCSV(const std::string& data) {
 //   text = "hellothere" and substring = "hello" will not match
 // A word boundary character is a character that is not from these [A-Z, a-z, 0-9,  _]
 //
-bool helperFunctions::isSubstringAtBeginning(const std::string& text, const std::string& substring) {
+bool HELPERS::isSubstringAtBeginning(const std::string& text, const std::string& substring) {
     // 1. Fail fast if text is shorter than substring
     if (text.size() < substring.size()) return false;
 
@@ -55,7 +84,7 @@ bool helperFunctions::isSubstringAtBeginning(const std::string& text, const std:
 
 // Function that removes everything starting at '[' and then trims right whitespace
 //
-void helperFunctions::removeBracketSuffix(std::string& text) {
+void HELPERS::removeBracketSuffix(std::string& text) {
     std::size_t startPosition = text.find("[");
     if (startPosition != std::string::npos) {
         text = text.substr(0, startPosition);
@@ -65,16 +94,15 @@ void helperFunctions::removeBracketSuffix(std::string& text) {
 
 // Function that removes the leading asterisks
 //
-void helperFunctions::removeLeadingAsterisks(std::string& text) {
+void HELPERS::removeLeadingAsterisks(std::string& text) {
     while (!text.empty() && text.front() == '*') 
         text.erase(0, 1);   
 }
 
-
 // Removes namespaces by finding the last :: or . and removing everything after it
 // if 'removeAll = false', then it keeps the last :: or .
 //
-void helperFunctions::removeNamespace(std::string& name, std::string_view unitLanguage, bool removeAll) {
+void HELPERS::removeNamespace(std::string& name, std::string_view unitLanguage, bool removeAll) {
     std::size_t last, secondLast;
     if (unitLanguage == "C++") last = name.rfind("::");
     else last = name.rfind(".");
@@ -94,11 +122,11 @@ void helperFunctions::removeNamespace(std::string& name, std::string_view unitLa
     }
 }
 
-// Removes all characters inside <> or () except for comma
-// For example, myObject<int, std::pair<int, int>> becomes myObject<,>
-//  and Foo(int, std::pair<int, int>, double) becomes Foo(,,)
+// Removes all characters inside <> or () except for comma for two types of strings: generic types and function signatures
+// For example, myObject<int, std::pair<int, int>> becomes myObject<,> --> (isGeneric = true)
+//  and Foo(int, std::pair<int, int>, double) becomes Foo(,,) --> (isGeneric = false) 
 //
-void helperFunctions::removeBetweenComma(std::string& s, bool isGeneric) {
+void HELPERS::removeBetweenComma(std::string& s, bool isGeneric) {
     std::size_t opening;
     if (isGeneric) opening = s.find("<");
     else opening = s.find("(");
@@ -126,6 +154,34 @@ void helperFunctions::removeBetweenComma(std::string& s, bool isGeneric) {
 
 // Removes all whitespace from string
 //
-void helperFunctions::removeWhitespace(std::string& s) {
+void HELPERS::removeWhitespace(std::string& s) {
     s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) { return std::isspace(c); }), s.end());
+}
+
+// Removes 
+void HELPERS::nameFilter(std::string& name, std::vector<std::string>& generics,  std::string_view unitLanguage, bool removeNamespace) {
+    generics.push_back(name); 
+
+    HELPERS::removeWhitespace(name);
+    generics.push_back(name);
+    
+    std::size_t listOpen = name.find("<");
+    if (listOpen != std::string::npos) {
+        std::string nameLeft = name.substr(0, listOpen);
+        std::string nameRight = name.substr(listOpen, name.size() - listOpen);
+        HELPERS::removeBetweenComma(nameRight, true);
+        if (removeNamespace) {
+            HELPERS::removeNamespace(nameLeft, unitLanguage, true);
+        }
+        generics.push_back(nameLeft + nameRight);
+        generics.push_back(nameLeft);
+    }
+    else {
+        if (removeNamespace) {
+            HELPERS::removeNamespace(name, unitLanguage, true);
+        }
+        generics.push_back(name);
+        generics.push_back(name); // Not a duplicate
+    } 
+
 }

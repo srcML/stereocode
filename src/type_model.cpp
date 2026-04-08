@@ -63,10 +63,18 @@ void typeModel::findDataAfterCollection() {
     std::unordered_map<std::string, variableModel> allFields(fields.begin(), fields.end());
     allFields.insert(inheritedFields.begin(), inheritedFields.end());
 
-    std::unordered_set<std::string> allMethodSignatures(methodSignatures.begin(), methodSignatures.end());
-    allMethodSignatures.insert(inheritedMethodSignatures.begin(), inheritedMethodSignatures.end());
+    std::unordered_set<std::string> allMethodNames;
+    for (const auto& item : methodSignatures) {
+        allMethodNames.insert(item.first);
+    }
 
-    for (auto& method : methods) method.findDataAfterCollection(allFields, allMethodSignatures);  
+    for (const auto& item : inheritedMethodSignatures) {
+        allMethodNames.insert(item.first);
+    }
+
+    for (auto& method : methods) {
+        method.findDataAfterCollection(allFields, allMethodNames); 
+    }
 }
 
 // Finds structure (e.g., class)
@@ -81,7 +89,7 @@ void typeModel::findStructure() {
         srcml_unit* resultUnit = srcml_transform_get_unit(result, i);
         structure += srcml_unit_get_srcml(resultUnit);
     }
-    helperFunctions::removeWhitespace(structure);
+    HELPERS::removeWhitespace(structure);
 
     // Structures in C++ get the semi-colon at the end, so we need to remove it ( class; )
     if (unitLanguage == "C++" && structure.back() ==';') structure.pop_back();
@@ -113,25 +121,7 @@ void typeModel::findName() {
     
     if (srcml_transform_get_unit_size(result) > 0) {
         std::string tempName = srcml_unit_get_src(srcml_transform_get_unit(result, 0));
-        name.push_back(tempName); 
-
-        helperFunctions::removeWhitespace(tempName);
-        name.push_back(tempName);
-        
-        std::size_t listOpen = tempName.find("<");
-        if (listOpen != std::string::npos) {
-            std::string nameLeft = tempName.substr(0, listOpen);
-            std::string nameRight = tempName.substr(listOpen, tempName.size() - listOpen);
-            helperFunctions::removeBetweenComma(nameRight, true);
-            helperFunctions::removeNamespace(nameLeft, unitLanguage, true);
-            name.push_back(nameLeft + nameRight);
-            name.push_back(nameLeft);
-        }
-        else {
-            helperFunctions::removeNamespace(tempName, unitLanguage, true);
-            name.push_back(tempName);
-            name.push_back(tempName); // Not a duplicate
-        }         
+        HELPERS::nameFilter(tempName, name, unitLanguage, true);         
     }
 
     // There might be a missing name (e.g., anonymous structs in C++)
@@ -169,17 +159,17 @@ void typeModel::findParentNames() {
     for (int i = 0; i < n; i++) {
         std::string parentName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
-        helperFunctions::removeWhitespace(parentName);
+        HELPERS::removeWhitespace(parentName);
 
         std::size_t listOpen = parentName.find("<");
         if (listOpen != std::string::npos) {
             std::string left = parentName.substr(0, listOpen);
             std::string right = parentName.substr(listOpen, parentName.size() - listOpen);
-            helperFunctions::removeNamespace(left, unitLanguage, true); 
+            HELPERS::removeNamespace(left, unitLanguage, true); 
             parentNames.insert(left + right);
         }
         else {
-            helperFunctions::removeNamespace(parentName, unitLanguage, true);
+            HELPERS::removeNamespace(parentName, unitLanguage, true);
             parentNames.insert(parentName);
         }    
     }
@@ -199,6 +189,9 @@ void typeModel::findParentNames() {
 //   Therefore, regular properties will be treated like normal fields as they are used (most of the time) to get or set regular fields 
 //    where property name = field name and where property type = field type
 //   However, the assumption here is that their usage is assumed to be getting or setting a single field
+//  Static fields are ignored and treated as globals
+// Java:
+//  Static fields are ignored and treated as globals
 //
 void typeModel::findFieldNames(std::vector<variableModel>& fieldsOrdered) {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"field_name").c_str());
@@ -212,7 +205,7 @@ void typeModel::findFieldNames(std::vector<variableModel>& fieldsOrdered) {
         variableModel v;
 
         // Chop off [] for arrays  
-        if (unitLanguage == "C++")  helperFunctions::removeBracketSuffix(dataMemberName);
+        if (unitLanguage == "C++")  HELPERS::removeBracketSuffix(dataMemberName);
         
         v.setName(dataMemberName);
 
@@ -254,8 +247,10 @@ void typeModel::findFieldTypes(std::vector<variableModel>& fieldsOrdered) {
 // Finds methods defined inside the type
 // C#:
 //   Nested local functions within methods in C# are ignored 
-//   Attributes do not read/write to the state object. However, they can have expressions, decl_stmt, etc.
-//    Therefore, we ignore them when collecting data.
+//   Attributes do not read/write to the state object. However, they can have expressions, decl_stmt, etc
+//    Therefore, we ignore them when collecting data
+//   Partial methods in partial classes may or may not have an implementation
+//    If they do, we collect them as normal methods. Else, they are ignored since they are not implemented and thus cannot be called
 // Java:
 //   Annotations have the same story as attributes, so we ignore these statements inside them
 //   
@@ -268,6 +263,7 @@ void typeModel::findMethod(const std::string& classXpath, const std::string& hea
 
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
+        
         std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
         
         methodArchive = srcml_archive_create();
@@ -275,8 +271,10 @@ void typeModel::findMethod(const std::string& classXpath, const std::string& hea
         methodUnit = srcml_archive_read_unit(methodArchive);
         
         std::string methodXpath = "(" + classXpath + XPATH_GENERATOR.getXPathList(unitLanguage, "method") + ")[" + std::to_string(i + 1) + "]";
-        functionModel method = functionModel(methodXpath, unitLanguage, name[3], "", unitNumber, false);     
-        methods.push_back(method);
+        functionModel method = functionModel(methodXpath, unitLanguage, name[3], "", unitNumber, HELPERS::extractFirstLineNumber(srcml_unit_get_srcml(resultUnit)),  false);     
+        if (!method.getName().empty()) {
+            methods.push_back(std::move(method));
+        }
 
         srcml_unit_free(methodUnit);
         srcml_archive_close(methodArchive);
@@ -348,7 +346,7 @@ void typeModel::findMethodsInProperty(const std::string& propertyXpath, const st
     int n = srcml_transform_get_unit_size(result);
     for (int i = 0; i < n; ++i) {
         resultUnit = srcml_transform_get_unit(result, i);
-
+        
         std::string resultUnitSrcml = header + srcml_unit_get_srcml(resultUnit) + "</unit>";
 
         methodArchive = srcml_archive_create();
@@ -356,8 +354,10 @@ void typeModel::findMethodsInProperty(const std::string& propertyXpath, const st
         methodUnit = srcml_archive_read_unit(methodArchive);
 
         std::string methodXpath = "(" + propertyXpath + XPATH_GENERATOR.getXPathList(unitLanguage,"property_method") + ")[" + std::to_string(i + 1) + "]";
-        functionModel m = functionModel(methodXpath, unitLanguage, name[3], propertyReturnType, unitNumber, true);
-        methods.push_back(m);
+        functionModel method = functionModel(methodXpath, unitLanguage, name[3], propertyReturnType, unitNumber, HELPERS::extractFirstLineNumber(srcml_unit_get_srcml(resultUnit)), true);
+        if (!method.getName().empty()) {
+            methods.push_back(std::move(method));
+        }
 
         srcml_unit_free(methodUnit);
         srcml_archive_close(methodArchive);
@@ -406,9 +406,9 @@ std::string typeModel::getInheritedParentsString() const {
 //
 std::string typeModel::getMethodSignaturesString() const {
     std::string methodsignature;
-    for (const std::string & s : methodSignatures) {
+    for (const std::pair<std::string, std::string> &s : methodSignatures) {
         if (!methodsignature.empty()) methodsignature += " ";
-        methodsignature += s;
+        methodsignature += s.first + s.second;
     }
     return methodsignature;
 }
@@ -417,9 +417,9 @@ std::string typeModel::getMethodSignaturesString() const {
 //
 std::string typeModel::getInheritedMethodSignaturesString() const {
     std::string inheritedMethodsignature;
-    for (const std::string & s : inheritedMethodSignatures) {
+    for (const std::pair<std::string, std::string> &s : inheritedMethodSignatures) {
         if (!inheritedMethodsignature.empty()) inheritedMethodsignature += " ";
-        inheritedMethodsignature += s;
+        inheritedMethodsignature += s.first + s.second;
     }
     return inheritedMethodsignature;
 }

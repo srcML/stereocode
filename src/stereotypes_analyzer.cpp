@@ -119,7 +119,9 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     } 
 
     // Analyze all methods for each type
-    for (auto& pair : types) pair.second.findDataAfterCollection();
+    for (auto& pair : types) {
+        pair.second.findDataAfterCollection();
+    }
     
     // Compute method and type stereotypes
     stereotypeRules stereotypes;
@@ -135,35 +137,22 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     // Optional TXT report file
     std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
 
-    // Optional CSV report file
-    if (CSV_REPORT) {
-        std::string header = "type_name,type_stereotype,method_name,method_stereotype";
+    // Verbose or CSV output file
+    if (IS_VERBOSE || CSV_REPORT) {
+        std::string header = "type_name,type_stereotype,function_name,function_stereotype";
+        if (IS_VERBOSE) {
+            header = "type_file_name,type_name,type_stereotype,type_parents,type_inherited_parents,type_function_signatures,"
+                     "type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
+                     "function_return_type,function_specifiers,function_internal_call_to_type_signatures,function_attributes_annotations,function_field_used,function_fields_modified,function_calls_on_fields,function_source_code";
+        }
+
         std::ofstream out;
         out.open(InputFileNoExt + ".stereotypes.csv");
         out << header << '\n';
         for (auto& pair : types) outputStereotypesAsCSV(out, &pair.second, false);        
         out.close();
 
-        header = "type_name,type_stereotype,free_function_name,free_function_stereotype";
-        out.open(InputFileNoExt + ".free_functions_stereotypes.csv");
-        out << header << '\n';
-        outputStereotypesAsCSV(out, nullptr, true);        
-        out.close();
-    }
-
-    // Verbose output
-    if (IS_VERBOSE) {
-        std::string header = "file_name,type_name,type_stereotype,type_parents,type_inherited_parents,function_signatures,"
-                             "inherited_function_signatures,function_name,function_stereotype,function_parameters_list,"
-                             "function_return_type,function_specifiers,function_internal_calls,function_attributes_annotations,"
-                             "field_used,fields_modified,calls_on_fields";
-        std::ofstream out;
-        out.open(InputFileNoExt + ".stereotypes_verbose.csv");
-        out << header << '\n';
-        for (auto& pair : types) outputStereotypesAsCSV(out, &pair.second, false);        
-        out.close();
-
-        out.open(InputFileNoExt + ".free_functions_stereotypes_verbose.csv");
+        out.open(InputFileNoExt + ".free_functions.stereotypes.csv");
         out << header << '\n';
         outputStereotypesAsCSV(out, nullptr, true);        
         out.close();
@@ -283,6 +272,8 @@ void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber) {
             // Needed for inheritance in Java and C#
             if (unitLanguage != "C++") genericTypes.insert({type.getName()[2], type.getName()[1]}); 
 
+            // Checks for partial classes in C# and adds them to a separate list to be analyzed later. 
+            // For non-partial classes, adds them to the main types list
             if (types.find(typeNameParsed) != types.end()) duplicateTypes.push_back(std::move(type));
             else types.insert({typeNameParsed, std::move(type)});
             
@@ -340,9 +331,10 @@ void stereotypesAnalyzer::findFreeFunctions(srcml_unit* inputUnit, int unitNumbe
             methodUnit = srcml_archive_read_unit(methodArchive);
 
             std::string functionXpath =  "(" + XPATH_GENERATOR.getXPathList(unitLanguage, "free_function") + ")[" + std::to_string(i + 1) + "]";
-            functionModel function(functionXpath, unitLanguage, "", "", unitNumber, false);
-            
-            freeFunctions.push_back(std::move(function));
+            functionModel function(functionXpath, unitLanguage, "", "", unitNumber, HELPERS::extractFirstLineNumber(srcml_unit_get_srcml(resultUnit)), false);
+            if (!function.getName().empty()) {
+                freeFunctions.push_back(std::move(function));
+            }
 
             srcml_unit_free(methodUnit);
             srcml_archive_close(methodArchive);
@@ -360,8 +352,8 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
     auto newEnd = std::remove_if(freeFunctions.begin(), freeFunctions.end(), [this](functionModel& function) {
         if (function.getUnitLanguage() == "C++") {
             // Removes namespaces if any
-            std::string functionName = function.getName();  
-            helperFunctions::removeNamespace(functionName, "C++", false);
+            std::string functionName = function.getName()[1];  
+            HELPERS::removeNamespace(functionName, "C++", false);
 
             // Get the type name (if any). Else, it is a free function
             std::size_t isTypeName = functionName.find("::");
@@ -454,7 +446,7 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                 }              
             }
             else {  
-                helperFunctions::removeBetweenComma(parentTypeName, true);
+                HELPERS::removeBetweenComma(parentTypeName, true);
                 auto resultG = genericTypes.find(parentTypeName);
                 if (resultG != genericTypes.end()) {
                     auto resultM = types.find(resultG->second);
@@ -485,39 +477,46 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
     
     if (IS_VERBOSE) {
         for (const functionModel& function : *functionsPtr) {
-            std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[0] : "N/A");
+            std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[1] : "N/A"); // Name unparsed
             std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
-            std::string typeParents = isFreeFunction ? "N/A" : (type->getParentsString().size() > 0 ? type->getParentsString() : "N/A");
-            std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentsString().size() > 0 ? type->getInheritedParentsString() : "N/A");
-            std::string signatures = isFreeFunction ?  (function.getNameSignature().empty() ? "N/A" :  function.getNameSignature()) : (type->getMethodSignatures().size() > 0 ? type->getMethodSignaturesString() : "N/A");
+            std::string typeParents = isFreeFunction ? "N/A" : (type->getParentsString().size() > 0 ? type->getParentsString() : "N/A"); // No whitespaces and namespaces
+            std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentsString().size() > 0 ? type->getInheritedParentsString() : "N/A"); // No whitespaces and namespaces
+            std::string signatures = isFreeFunction ?  (function.getNameSignature().first.empty() ? "N/A" :  function.getNameSignature().first + function.getNameSignature().second) : (type->getMethodSignatures().size() > 0 ? type->getMethodSignaturesString() : "N/A");
             std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
             std::string functionAttributesOrAnnotations = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
             std::string specifiers = function.getSpecifiers().size() > 0 ? function.getSpecifiersString() : "N/A";
             std::string returnType = function.getReturnType().getType().empty() ? "N/A" : function.getReturnType().getType();
             std::string parametersList = function.getParametersList().empty() ? "N/A" : function.getParametersList();
-            std::string internalCalls = isFreeFunction ? "N/A" : (function.getFunctionCalls().empty() ? "N/A" : function.getFunctionCallsString());
+            std::string internalCallToTypeSignatures = isFreeFunction ? "N/A" : (function.getFunctionCalls().size() > 0 ? function.getInternalCallsString() : "N/A");
             std::string isFieldUsed = function.isFieldUsed() ? "True" :  "False";
             std::string isFieldModified = function.getFieldsModifiedCount() > 0 ? "True" :  "False";
             std::string isCallOnField = function.getMethodCalls().size() > 0 ? "True" :  "False";
-            std::string functionName = function.getName().empty() ? "N/A" : function.getName();
-
-            csvFile << helperFunctions::escapeCSV(function.getFileName()) << ","
-                    << helperFunctions::escapeCSV(typeName) << ","
-                    << helperFunctions::escapeCSV(typeStereotype) << ","
-                    << helperFunctions::escapeCSV(typeParents) << ","
-                    << helperFunctions::escapeCSV(typeInheritedParents) << ","
-                    << helperFunctions::escapeCSV(signatures) << ","
-                    << helperFunctions::escapeCSV(inheritedSignatures) << ","
-                    << helperFunctions::escapeCSV(functionName) << ","
-                    << helperFunctions::escapeCSV(function.getStereotypesString()) << ","
-                    << helperFunctions::escapeCSV(parametersList) << ","
-                    << helperFunctions::escapeCSV(returnType) << ","
-                    << helperFunctions::escapeCSV(specifiers) << ","
-                    << helperFunctions::escapeCSV(internalCalls) << ","
-                    << helperFunctions::escapeCSV(functionAttributesOrAnnotations) << ","
-                    << helperFunctions::escapeCSV(isFieldUsed) << ","
-                    << helperFunctions::escapeCSV(isFieldModified) << ","
-                    << helperFunctions::escapeCSV(isCallOnField) << "\n";
+            std::string functionName = function.getName().empty() ? "N/A" : function.getName()[1];
+            std::string functionLineNumber = function.getLineNumber() != -1 ? std::to_string(function.getLineNumber()) : "N/A";
+            std::string functionUnitLanguage = function.getUnitLanguage().empty() ? "N/A" : function.getUnitLanguage();
+            std::string functionSignature = function.getNameSignature().first.empty() ? "N/A" : function.getNameSignature().first + function.getNameSignature().second;
+            std::string functionSourceCode = function.getSourceCode().empty() ? "N/A" : function.getSourceCode();
+            csvFile << HELPERS::escapeCSV(function.getFileName()) << ","
+                    << HELPERS::escapeCSV(typeName) << ","
+                    << HELPERS::escapeCSV(typeStereotype) << ","
+                    << HELPERS::escapeCSV(typeParents) << ","
+                    << HELPERS::escapeCSV(typeInheritedParents) << ","
+                    << HELPERS::escapeCSV(signatures) << ","
+                    << HELPERS::escapeCSV(inheritedSignatures) << ","
+                    << HELPERS::escapeCSV(functionName) << ","
+                    << HELPERS::escapeCSV(function.getStereotypesString()) << ","
+                    << HELPERS::escapeCSV(functionLineNumber) << ","
+                    << HELPERS::escapeCSV(functionSignature) << ","
+                    << HELPERS::escapeCSV(functionUnitLanguage) << ","
+                    << HELPERS::escapeCSV(parametersList) << ","
+                    << HELPERS::escapeCSV(returnType) << ","
+                    << HELPERS::escapeCSV(specifiers) << ","
+                    << HELPERS::escapeCSV(internalCallToTypeSignatures) << ","
+                    << HELPERS::escapeCSV(functionAttributesOrAnnotations) << ","
+                    << HELPERS::escapeCSV(isFieldUsed) << ","
+                    << HELPERS::escapeCSV(isFieldModified) << ","
+                    << HELPERS::escapeCSV(isCallOnField) << ","
+                    << HELPERS::escapeCSV(functionSourceCode) << "\n";
         }
     }
     else {
@@ -525,10 +524,10 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
             std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[0] : "N/A");
             std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
 
-            csvFile << helperFunctions::escapeCSV(typeName) << ","
-                    << helperFunctions::escapeCSV(typeStereotype) << ","
-                    << helperFunctions::escapeCSV(function.getName()) << ","
-                    << helperFunctions::escapeCSV(function.getStereotypesString()) << "\n";
+            csvFile << HELPERS::escapeCSV(typeName) << ","
+                    << HELPERS::escapeCSV(typeStereotype) << ","
+                    << HELPERS::escapeCSV(function.getName()[1]) << ","
+                    << HELPERS::escapeCSV(function.getStereotypesString()) << "\n";
         }
     }
 }

@@ -14,16 +14,18 @@
 
 #include <string>
 #include <string_view>
+#include <vector>
 
-class helperFunctions {
-public:
-    static std::string                     escapeCSV                     (const std::string& data);
-    static bool                            isSubstringAtBeginning        (const std::string&, const std::string&);
-    static void                            removeBracketSuffix           (std::string&);
-    static void                            removeLeadingAsterisks        (std::string&);
-    static void                            removeNamespace               (std::string&, std::string_view, bool);
-    static void                            removeBetweenComma            (std::string& s, bool);
-    static void                            removeWhitespace              (std::string&);
+namespace HELPERS {
+    std::string                     escapeCSV                     (const std::string& data);
+    int                             extractFirstLineNumber        (const std::string& text);
+    bool                            isSubstringAtBeginning        (const std::string&, const std::string&);
+    void                            removeBracketSuffix           (std::string&);
+    void                            removeLeadingAsterisks        (std::string&);
+    void                            removeNamespace               (std::string&, std::string_view, bool);
+    void                            removeBetweenComma            (std::string& s, bool);
+    void                            removeWhitespace              (std::string&);
+    void                            nameFilter                    (std::string&, std::vector<std::string>&, std::string_view, bool);
 };
 
 #endif

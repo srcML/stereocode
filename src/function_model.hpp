@@ -20,7 +20,7 @@
 
 class functionModel {
 public:
-                                                        functionModel                          (const std::string&, const std::string&, const std::string&, const std::string&, int, bool);
+                                                        functionModel                          (const std::string&, const std::string&, const std::string&, const std::string&, int, int, bool);
 
     const std::vector<std::string>&                     getStereotypes                         () const                { return stereotypes;                          }
     const std::vector<std::string>&                     getAttributesOrAnnotations             () const                { return attributesOrAnnotations;              }
@@ -30,19 +30,21 @@ public:
     const std::vector<callModel>&                       getNewConstructorCalls                 () const                { return newConstructorCalls;                  }
     const variableModel&                                getReturnType                          () const                { return returnType;                           }
     const std::string&                                  getParametersList                      () const                { return parametersList;                       }
-    const std::string&                                  getName                                () const                { return name;                                 }
-    const std::string&                                  getNameSignature                       () const                { return nameSignature;                        }
+    const std::vector<std::string>&                     getName                                () const                { return name;                                 }
+    const std::pair<std::string, std::string>&          getNameSignature                       () const                { return nameSignature;                        }
     const std::string&                                  getXpath                               () const                { return xpath;                                }
     const std::string&                                  getUnitLanguage                        () const                { return unitLanguage;                         }
     const std::string&                                  getConstructorOrDestructor             () const                { return constructorOrDestructor;              }
     const std::string&                                  getFileName                            () const                { return fileName;                             }
+    const std::string&                                  getSourceCode                          () const                { return sourceCode;                           }
     std::string                                         getStereotypesString                   () const;
     std::string                                         getSpecifiersString                    () const;
     std::string                                         getAttributesOrAnnotationsString       () const;
     std::string                                         getReturnTypeParsed                    () const;
-    std::string                                         getFunctionCallsString                 () const;
+    std::string                                         getInternalCallsString                 () const;
     int                                                 getFieldsModifiedCount                 () const                { return fieldsModifiedCount;             }
     int                                                 getUnitNumber                          () const                { return unitNumber;                           }
+    int                                                 getLineNumber                          () const                { return lineNumber;                           }
     int                                                 getExternalFunctionCallsCount          () const                { return externalFunctionCallsCount;           }
     int                                                 getExternalMethodCallsCount            () const                { return externalMethodCallsCount;             }
     int                                                 getNonCommentStatementsCount           () const                { return nonCommentStatementsCount;            }
@@ -98,10 +100,11 @@ private:
     void                                                findAttributesOrAnnotations            (); 
     void                                                findPropertyAttributes                 (); 
 
-    std::string                                       name;                                       // Name
-    std::string                                       fileName;                                   // File name where method is defined 
-    std::string                                       nameSignature;                              // Name without namespaces + parameters list (commas only). For example, foo(,,)
+    std::vector<std::string>                          name;                                       // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and in-between generic in ( <> ) | same as last but without ( <> )
+    std::pair<std::string, std::string>               nameSignature;                              // Name without name without whitespaces, namespaces, and generic ( <> ) + parameters list (commas only). For example, foo(,,)
     variableModel                                     returnType;                                 // Return type
+    std::string                                       sourceCode;                                 // Source code of the method
+    std::string                                       fileName;                                   // File name where method is defined 
     std::string                                       parametersList;                             // Parameter list
     std::string                                       unitLanguage;                               // Unit language
     std::string                                       xpath;                                      // Unique xpath
@@ -140,6 +143,7 @@ private:
     bool                                              variableCreatedWithNewAndReturned{false};   // There is at least 1 return expression that returns a field, a local, a parameter, a static, or a global created with the 'new' operator 
     bool                                              isProperty{false};                          // Is it a property? (C# only)
     int                                               unitNumber{-1};                             // srcML Unit number   
+    int                                               lineNumber{-1};                             // Line number of the method declaration (Requires --position)
     int                                               fieldsModifiedCount{0};                     // Number of modified fields
     int                                               externalFunctionCallsCount{0};              // Number of function calls (e.g., foo()) where ( foo ) is a free function or a static method
     int                                               externalMethodCallsCount{0};                // Number of method calls (e.g., a.foo()) where ( a ) is an external object that are filtered (removed)

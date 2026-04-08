@@ -50,7 +50,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
 
             // Covers the case of void with * or more
             std::string returnTypeVoid = m.getReturnType().getType();
-            helperFunctions::removeWhitespace(returnTypeVoid);
+            HELPERS::removeWhitespace(returnTypeVoid);
             if (unitLanguage != "Java") if (returnTypeVoid.find("void*") != std::string::npos) isVoidPointer = true;
             
             
@@ -101,8 +101,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
 
                 if (returnType && hasComplexReturn && (isFieldUsed || (callsOnTypeMethodsCount > 0))) 
                     m.setStereotype("predicate"); 
-            
-                
+
                 // property
                 //
                 // 1] Return type is not void or Boolean
@@ -146,7 +145,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 // 1] Only one field is changed or there is a single call on a field
                 // 2] No calls to methods in type
                 //
-                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
+                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C# or this./->dataMember = value)
                 //       
                 if (callsOnTypeMethodsCount == 0 && 
                    ((fieldsModifiedCount == 1 && callsOnFieldsCount == 0) || 
@@ -168,7 +167,7 @@ void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, t
                 //            there is at least two calls on one or more fields or
                 //            at least one function call to other methods (except constructor calls) in type  
                 //
-                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C#)
+                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C# or this./->dataMember = value)
                 //
                 // non-void-command    
                 //   Method return type is not void
@@ -437,7 +436,7 @@ void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typ
 void stereotypeRules::computeFreeFunctionStereotypes(std::vector<functionModel>& freeFunctions) {
     for (functionModel& f : freeFunctions) {
         // Common operations
-        const std::string& methodName                               = f.getName();
+        const std::string& methodName                               = f.getName()[1];
         std::string        returnTypeParsed                         = f.getReturnTypeParsed();
         const std::string& unitLanguage                             = f.getUnitLanguage();
         int                nonNewConstructorCallsCount              = f.getMethodCalls().size() + f.getFunctionCalls().size();
@@ -476,7 +475,6 @@ void stereotypeRules::computeFreeFunctionStereotypes(std::vector<functionModel>&
             else if (unitLanguage == "Java")  boolReturnType = (returnTypeParsed == "boolean");
 
             if (boolReturnType && hasParameterComplexReturn && isParamaterUsed) f.setStereotype("predicate"); 
-
 
             // property
             //

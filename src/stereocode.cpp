@@ -51,7 +51,7 @@ int main (int argc, char const *argv[]) {
     app.add_flag  ("-m,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
     app.add_flag  ("-s,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
     app.add_flag  ("-z,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes");
-    app.add_flag  ("-b,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, specifiers, and CSV with metadata");
+    app.add_flag  ("-b,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, specifiers, and optional CSV containing stereotypes and extra metadata");
     app.add_flag  ("-v,--version",             version,                          "Display version information");
     
     CLI11_PARSE(app, argc, argv);

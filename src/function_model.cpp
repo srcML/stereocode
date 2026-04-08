@@ -25,10 +25,11 @@ extern              srcml_unit*       methodUnit;
 extern              srcml_archive*    methodArchive;
 
 functionModel::functionModel(const std::string& xpath_, const std::string& unitLanguage_, const std::string& typeNameParsed_, 
-                             const std::string& returnType_, int unitNumber_, bool isProperty_) :
+                             const std::string& returnType_, int unitNumber_, int lineNumber_, bool isProperty_) :
                              unitLanguage{unitLanguage_}, xpath{xpath_}, typeNameParsed{typeNameParsed_},  
-                             isProperty{isProperty_}, unitNumber{unitNumber_} {
+                             isProperty{isProperty_}, unitNumber{unitNumber_}, lineNumber{lineNumber_} {
     fileName = srcml_unit_get_filename(methodUnit); // Get file name here since free functions do not have a type
+    sourceCode = srcml_unit_get_src(methodUnit);
 
     returnType.setType(returnType_);
     
@@ -37,11 +38,13 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
     isConstructorOrDestructor();
 
     findName();          // Depends on isConstructorOrDestructor
+    if (name.empty()) return; // If there is no name, then it is not a valid method and we can skip the rest of the data collection
+    
     findParameterList(); // Depends on isConstructorOrDestructor
 
-    if (!constructorOrDestructor.empty()) findConstructorOrDestructorType();
-
-    findNameSignature();
+    if (!constructorOrDestructor.empty()) {
+        findConstructorOrDestructorType();
+    }
 
     if (constructorOrDestructor.empty()) {
         if (unitLanguage == "C#" || unitLanguage == "Java") {
@@ -58,13 +61,14 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
         findReturnExpression();
         findCallName();
         findCallArgument();
-        findNewAssignedVariables();
         findIgnorableCalls(methodCalls);
         findIgnorableCalls(functionCalls);
         findIgnorableCalls(newConstructorCalls);
+        findNewAssignedVariables();
         findExpressionNames();
         findExpressionAssignments();
         findNonCommentStatements(); 
+        findNameSignature();
     }
     
 }
@@ -86,10 +90,9 @@ void functionModel::findSpecifiers() {
 
 // Finds data after all type information is collected
 //
-void functionModel::findDataAfterCollection(const std::unordered_map<std::string, variableModel>& allFields, 
-                                            const std::unordered_set<std::string>& allMethodSignatures) {   
+void functionModel::findDataAfterCollection(const std::unordered_map<std::string, variableModel>& allFields, const std::unordered_set<std::string>& allMethodSignatures) {  
     if (constructorOrDestructor.empty()) {
-        // Must only be called after findIgnorableCalls()
+        // Must only be called after findIgnorableCalls(). Will Filter the calls.
         findCallsOnFields(allFields, allMethodSignatures);
 
         // Must only be called after findNewAssignedVariables()
@@ -167,7 +170,10 @@ void functionModel::findName() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) name = srcml_unit_get_src(srcml_transform_get_unit(result, 0)); 
+    if (n > 0) { // srcML issue where it returns multiple results for the name
+        std::string tempName = srcml_unit_get_src(srcml_transform_get_unit(result, 0)); // Just pick the first
+        HELPERS::nameFilter(tempName, name, unitLanguage, true);
+    }
     
 
     srcml_clear_transforms(methodArchive);
@@ -186,7 +192,7 @@ void functionModel::findParameterList() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) parametersList = srcml_unit_get_src(srcml_transform_get_unit(result, 0));
+    if (n > 0) parametersList = srcml_unit_get_src(srcml_transform_get_unit(result, 0));
  
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -216,19 +222,22 @@ void functionModel::findReturnType() {
 
         returnType.setType(returnTypeString);
 
-        // Handle C# conversion operators (e.g. "implicit operator IntPtr")
-        // The type tag often only has "public static implicit", so 'returnType' becomes empty after stripping specifiers
-        // We must extract the actual type "IntPtr" from the name "operator IntPtr"
-        if (unitLanguage == "C#" && name.rfind("operator", 0) == 0) {
+
+        // Handle C# conversion operators (e.g. "public static implicit operator IntPtr(MyHandle handle)")
+        // The return type here is actually 'IntPtr, but the type tag will only contain "public static implicit", 
+        //  so 'returnType' will become empty after stripping specifiers
+        // Therefore, we must extract the actual type 'IntPtr' from the name tag --> 'operator IntPtr'
+        // Operators cannot be generics, so we do not need to worry about the <> in name tag.
+        if (unitLanguage == "C#" && name[0].rfind("operator", 0) == 0) {
             SPECIFIERS.removeSpecifiers(returnTypeString, unitLanguage);
-            helperFunctions::removeWhitespace(returnTypeString);
+            HELPERS::removeWhitespace(returnTypeString);
 
             // If type is empty (meaning it was just specifiers), parse the name
             if (returnTypeString.empty()) {
-                std::size_t spacePosition = name.find(' ');
+                std::size_t spacePosition = name[0].find(' ');
                 if (spacePosition != std::string::npos) {
-                    std::string returnTypeName = name.substr(spacePosition + 1);
-                    helperFunctions::removeWhitespace(returnTypeName);
+                    std::string returnTypeName = name[0].substr(spacePosition + 1);
+                    HELPERS::removeWhitespace(returnTypeName);
                     returnType.setType(returnTypeName);
                 }
             }
@@ -251,7 +260,7 @@ void functionModel::findLocalVariableName() {
         std::string localName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
 
         // Chop off [] for arrays
-        if (unitLanguage == "C++") helperFunctions::removeBracketSuffix(localName); 
+        if (unitLanguage == "C++") HELPERS::removeBracketSuffix(localName); 
 
         localsOrdered.emplace_back(variableModel());
         localsOrdered.back().setName(localName);
@@ -299,7 +308,7 @@ void functionModel::findParameterName() {
 
         // Chop off [] for arrays
         if (unitLanguage == "C++") 
-            helperFunctions::removeBracketSuffix(parameterName); 
+            HELPERS::removeBracketSuffix(parameterName); 
 
         parametersOrdered.emplace_back(variableModel()); 
         parametersOrdered.back().setName(parameterName);
@@ -342,7 +351,7 @@ void functionModel::findReturnExpression() {
 
         returnExpressions.push_back(expr);
        
-        if (helperFunctions::isSubstringAtBeginning(expr, "new")) newReturned = true; 
+        if (HELPERS::isSubstringAtBeginning(expr, "new")) newReturned = true; 
     }
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -367,12 +376,17 @@ void functionModel::findCallName() {
         int n = srcml_transform_get_unit_size(result);
 
         for (int i = 0; i < n; ++i) {
+            callModel call;
+            std::string callName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
             if (c == "function") {
-                functionCalls.emplace_back(callModel()).setName(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+                HELPERS::nameFilter(callName, call.getName(), unitLanguage, false);
+                functionCalls.push_back(std::move(call));
             } else if (c == "method") {
-                methodCalls.emplace_back(callModel()).setName(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+                HELPERS::nameFilter(callName, call.getName(), unitLanguage, false);
+                methodCalls.push_back(std::move(call));
             } else if (c == "constructor") {
-                newConstructorCalls.emplace_back(callModel()).setName(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+                HELPERS::nameFilter(callName, call.getName(), unitLanguage, false);
+                newConstructorCalls.push_back(std::move(call));
             }
         }
         
@@ -398,20 +412,16 @@ void functionModel::findCallArgument() {
         int n = srcml_transform_get_unit_size(result);
 
         for (int i = 0; i < n; ++i) {
-
             std::string arguList = srcml_unit_get_src(srcml_transform_get_unit(result, i));
-
             if (c == "function")  {
                 functionCalls[i].setArgumentList(arguList);
-                helperFunctions::removeBetweenComma(arguList, false);
-                std::string funcCallName = functionCalls[i].getName();
-                helperFunctions::removeNamespace(funcCallName, unitLanguage, true);
-                std::string funcCallParsed = funcCallName + arguList;
-                helperFunctions::removeWhitespace(funcCallParsed);   
-                functionCalls[i].setSignature(funcCallParsed);
             }             
-            else if (c == "method") methodCalls[i].setArgumentList(arguList);                  
-            else if (c == "constructor") newConstructorCalls[i].setArgumentList(arguList); 
+            else if (c == "method") {
+                methodCalls[i].setArgumentList(arguList);                  
+            }
+            else if (c == "constructor") {
+                newConstructorCalls[i].setArgumentList(arguList); 
+            }
         }
         srcml_clear_transforms(methodArchive);
         srcml_transform_free(result);
@@ -428,7 +438,7 @@ void functionModel::findNewAssignedVariables() {
 
     for (int i = 0; i < n; ++i) {
         std::string varName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
-        helperFunctions::removeWhitespace(varName);
+        HELPERS::removeWhitespace(varName);
         
         variablesCreatedWithNew.insert(varName);
     }
@@ -458,7 +468,7 @@ void functionModel::findConst() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) methodConst = true;
+    if (n > 0) methodConst = true;
     
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -472,7 +482,7 @@ void functionModel::isConstructorOrDestructor() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) constructorOrDestructor = true;
+    if (n > 0) constructorOrDestructor = true;
 
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);
@@ -486,7 +496,7 @@ void functionModel::findConstructorOrDestructorType() {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    if (n == 1) {
+    if (n > 0) { // srcML issue where it returns multiple results for the name
         std::string srcML = srcml_unit_get_srcml(srcml_transform_get_unit(result, 0));
         if      (srcML.find("<destructor>") != std::string::npos      )      constructorOrDestructor = "destructor"; 
         else if (parametersList.find(typeNameParsed) != std::string::npos)   constructorOrDestructor = "copy-constructor";
@@ -529,14 +539,42 @@ void functionModel::findExpressionAssignments()  {
 //
 void functionModel::findNameSignature() {
     std::string parametersList_ = parametersList;
-    std::string name_ = name;
+    std::string name_ = name[3]; // We will ignore the generics <> for signatures
 
-    helperFunctions::removeBetweenComma(parametersList_, false);
-    helperFunctions::removeNamespace(name_, unitLanguage, true);
+    HELPERS::removeBetweenComma(parametersList_, false);
+    HELPERS::removeNamespace(name_, unitLanguage, true);
+    HELPERS::removeWhitespace(parametersList_);
+    HELPERS::removeWhitespace(name_);
 
-    nameSignature = name_ + parametersList_;
+    nameSignature = std::make_pair(name_, parametersList_);
 
-    helperFunctions::removeWhitespace(nameSignature);
+    for (size_t i = 0; i < functionCalls.size(); i++) {
+        std::string argumentList = functionCalls[i].getArgumentList();
+        HELPERS::removeBetweenComma(argumentList, false);
+        std::string funcCallName = functionCalls[i].getName()[3];
+        HELPERS::removeNamespace(funcCallName, unitLanguage, true);
+        std::string funcCallParsed = funcCallName + argumentList;
+        HELPERS::removeWhitespace(funcCallParsed);   
+        functionCalls[i].setSignature(funcCallParsed);
+    }
+    for (size_t i = 0; i < methodCalls.size(); i++) {
+        std::string argumentList = methodCalls[i].getArgumentList();
+        HELPERS::removeBetweenComma(argumentList, false);
+        std::string methodCallName = methodCalls[i].getName()[3];
+        HELPERS::removeNamespace(methodCallName, unitLanguage, true);
+        std::string methodCallParsed = methodCallName + argumentList;
+        HELPERS::removeWhitespace(methodCallParsed);   
+        methodCalls[i].setSignature(methodCallParsed);
+    }
+     for (size_t i = 0; i < newConstructorCalls.size(); i++) {
+        std::string argumentList = newConstructorCalls[i].getArgumentList();
+        HELPERS::removeBetweenComma(argumentList, false);
+        std::string constructorCallName = newConstructorCalls[i].getName()[3];
+        HELPERS::removeNamespace(constructorCallName, unitLanguage, true);
+        std::string constructorCallParsed = constructorCallName + argumentList;
+        HELPERS::removeWhitespace(constructorCallParsed);   
+        newConstructorCalls[i].setSignature(constructorCallParsed);
+    }
 }
 
 // Finds if the return type, local types, and parameter types are non-primitive
@@ -586,7 +624,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
             std::string parName = parameters[para].getName();
             bool reference = type.find("&") != std::string::npos;
     
-            helperFunctions::removeWhitespace(parName);
+            HELPERS::removeWhitespace(parName);
             bool referenceArray = parName.find("[]") != std::string::npos; 
             if (reference || referencePointer || referenceArray)                    
             parameterRefModified = true;   
@@ -596,7 +634,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
             bool referenceOut = type.find("out") != std::string::npos ||
                                 type.find("ref") != std::string::npos;
 
-            helperFunctions::removeWhitespace(type);
+            HELPERS::removeWhitespace(type);
             bool referenceArray = type.find("[]") != std::string::npos; 
             if (referenceOut || referenceArray || referencePointer)                  
             parameterRefModified = true;     
@@ -611,7 +649,7 @@ void functionModel::findModifiedRefParameter(std::string para, bool propertyChec
     }
     else if (unitLanguage == "Java"){
         bool nonPrimitive = !PRIMITIVES.isPrimitive(type, unitLanguage);
-        helperFunctions::removeWhitespace(type);
+        HELPERS::removeWhitespace(type);
         bool referenceArray = type.find("[]") != std::string::npos; 
         if (referenceArray || (nonPrimitive && propertyCheck))                
         parameterRefModified = true;     
@@ -630,7 +668,7 @@ void functionModel::findReturnedVariables(const std::unordered_map<std::string, 
         }
         else {
             std::string checkThisPointer = expr;
-            helperFunctions::removeLeadingAsterisks(checkThisPointer);
+            HELPERS::removeLeadingAsterisks(checkThisPointer);
             if (checkThisPointer != "this") { // The 'this' is added as a field, however, we do not consider it as a simple nor complex return
                 if (isVariableUsed(variables, nullptr, expr, true, false, false, false, false)) { // True if a field is found
                     simpleReturn = true; 
@@ -668,7 +706,7 @@ void functionModel::findModifiedVariables(const std::unordered_map<std::string, 
 //
 void functionModel::findIgnorableCalls(std::vector<callModel>& calls) {
     for (auto it = calls.begin(); it != calls.end();) {
-        std::string callName = it->getName();
+        std::string callName = it->getName()[3];
 
         std::size_t listOpen = callName.find("<");
         if (listOpen != std::string::npos)
@@ -717,10 +755,16 @@ void functionModel::findIgnorableCalls(std::vector<callModel>& calls) {
 //  So these should be also treated as function calls and not method calls
 //
 void functionModel::findCallsOnFields(const std::unordered_map<std::string, variableModel>& allFields,
-                                           const std::unordered_set<std::string>& allMethodSignatures) {  
+                                           const std::unordered_set<std::string>& allMethodNames) {  
     // Check on function calls (Should be done before checking on method calls)
+    // Notice we do not use parameters (i.e., signature) to check the function calls since some calls can use variable number of arguments with the 'params' keyword in C# or 'varargs' in Java and C++
+    //  For example, foo(1, 2) can match void foo(params int[] numbers) in C# or void foo(int... numbers) in Java and C++
+    // Or calls with default parameters in C++ where the arguments can be omitted. 
+    //  For example, foo() can match void foo(int a=5) if the default value of a is provided
+    // Therefore, we really only want to check that the function call name matches any of the overloaded methods (if any) and 
+    //  this is sufficient to determine if the call is a method call or a static/free function call
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
-        if (allMethodSignatures.find(it->getSignature()) == allMethodSignatures.end()) { 
+        if (allMethodNames.find(it->getName()[3]) == allMethodNames.end()) { 
             it = functionCalls.erase(it);
             ++externalFunctionCallsCount;
         }
@@ -730,16 +774,16 @@ void functionModel::findCallsOnFields(const std::unordered_map<std::string, vari
     // Check on method calls 
     for (auto it = methodCalls.begin(); it != methodCalls.end();) {
         // Could be a normal method call on a field
-        if (!isVariableUsed(allFields, nullptr, it->getName(), false, false, false, false, false)) {
+        if (!isVariableUsed(allFields, nullptr, it->getName()[3], false, false, false, false, false)) {
             if (unitLanguage != "C++") {
                 // These should be function calls
                 std::string inheritKeyword = (unitLanguage == "C#") ? "base" : "super";
                 if ((unitLanguage == "C#" || unitLanguage == "Java") && 
-                    (helperFunctions::isSubstringAtBeginning(it->getName(), "this") || 
-                     helperFunctions::isSubstringAtBeginning(it->getName(), inheritKeyword))) functionCalls.push_back(*it);
+                    (HELPERS::isSubstringAtBeginning(it->getName()[3], "this") || 
+                     HELPERS::isSubstringAtBeginning(it->getName()[3], inheritKeyword))) functionCalls.push_back(*it);
 
                 // Could be a call on a local or a parameter
-                else if (isVariableUsed(allFields, nullptr, it->getName(), false, false, false, true, true)) 
+                else if (isVariableUsed(allFields, nullptr, it->getName()[3], false, false, false, true, true)) 
                     ++externalMethodCallsCount;
                     
                 // It is a static call
@@ -771,8 +815,8 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
                                    bool isParamaterCheck, bool isLocalCheck) {
                                     //else if (isVariableUsed(allFields, nullptr, it->getName(), false, false, false, true, true)) 
     std::string expr = expression; 
-    helperFunctions::removeWhitespace(expr);
-    helperFunctions::removeBracketSuffix(expr);
+    HELPERS::removeWhitespace(expr);
+    HELPERS::removeBracketSuffix(expr);
     
     // Removing () and {} on the outside of expression
     // Might remove } and ) for calls but that doesn't affect the analysis
@@ -799,7 +843,7 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
     }
 
     // Remove pointers. For example, *a
-    if (unitLanguage != "Java") helperFunctions::removeLeadingAsterisks(expr);     
+    if (unitLanguage != "Java") HELPERS::removeLeadingAsterisks(expr);     
     
     if (expr.empty()) return false;  
 
@@ -849,7 +893,7 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
         // In C# or Java, a type name can be used to access static fields only
         // In C++, a type name can be used to access static and non-static fields
         // Parent type names can also be used to access fields in the child type, but we will ignore this case for now
-        // Checking with type name also avoids problems with other typees or properties having the same names as the fields in the current type
+        // Checking with type name also avoids problems with other types or properties having the same names as the fields in the current type
         else if (isMatched && match[1] != "" && match[2] != "") {// Case of type name itself. The 'match[2] != ""' is to skip if it is just 'a''.
             std::string possibleTypeName = match[1];
             std::size_t listOpen = possibleTypeName.find("<");
@@ -937,7 +981,7 @@ std::string functionModel::getSpecifiersString() const {
 std::string functionModel::getReturnTypeParsed() const {
     std::string returnTypeString = returnType.getType();
     SPECIFIERS.removeSpecifiers(returnTypeString, unitLanguage);  
-    helperFunctions::removeWhitespace(returnTypeString);
+    HELPERS::removeWhitespace(returnTypeString);
     return returnTypeString;
 }
 
@@ -955,11 +999,11 @@ std::string functionModel::getAttributesOrAnnotationsString() const {
 
 // Get return type string
 //
-std::string functionModel::getFunctionCallsString() const {
-    std::string functionCallsString;
+std::string functionModel::getInternalCallsString() const {
+    std::string internalCallsString;
     for (const auto& f : functionCalls) {
-        if (!functionCallsString.empty()) functionCallsString += " ";
-        functionCallsString += f.getSignature();
+        if (!internalCallsString.empty()) internalCallsString += " ";
+        internalCallsString += f.getSignature();
     }
-    return functionCallsString;
+    return internalCallsString;
 }
