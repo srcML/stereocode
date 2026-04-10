@@ -24,17 +24,26 @@ extern specifiers SPECIFIERS;
 //
 std::string HELPERS::escapeCSV(const std::string& data) {
     std::string result = "\""; // Outer
+    bool lastWasSpace = false;
+
     for (char c : data) {
         if (c == '\"') {
             result += "\"\""; // Escape quotes
+            lastWasSpace = false;
         } 
-        else if (c == '\n' || c == '\r') {
-            result += " "; // Replace with a space
+        // std::isspace catches spaces, tabs, and newlines (\n, \r)
+        else if (std::isspace(static_cast<unsigned char>(c))) {
+            if (!lastWasSpace) {
+                result += " "; // Replace with a single space
+                lastWasSpace = true;
+            }
         } 
         else {
             result += c;
+            lastWasSpace = false;
         }
     }
+    
     result += "\""; // Outer
     return result;
 }
@@ -125,31 +134,36 @@ void HELPERS::removeNamespace(std::string& name, std::string_view unitLanguage, 
 // Removes all characters inside <> or () except for comma for two types of strings: generic types and function signatures
 // For example, myObject<int, std::pair<int, int>> becomes myObject<,> --> (isGeneric = true)
 //  and Foo(int, std::pair<int, int>, double) becomes Foo(,,) --> (isGeneric = false) 
+//  and Foo(int, bar(int, int), double) becomes Foo(,,) --> (isGeneric = false)
 //
 void HELPERS::removeBetweenComma(std::string& s, bool isGeneric) {
-    std::size_t opening;
-    if (isGeneric) opening = s.find("<");
-    else opening = s.find("(");
+    std::size_t opening = isGeneric ? s.find('<') : s.find('(');
+    if (opening == std::string::npos) return;
 
-    if (opening != std::string::npos) {
-        std::string name = s.substr(0, opening + 1);
-        s = s.substr(opening + 1);
-        
-        // This could be nested inside () or <> for types
-        // <[^>]*> --> starts at <, then matches everything except > and stops at > including the >
-        static const std::regex nestedPattern(R"(<[^>]*>)");
-        s = std::regex_replace(s, nestedPattern, "");  
-        
-        // The comma splitters
-        static const std::regex genericSplit(R"(([^,]*)(,|>))");
-        static const std::regex functionSplit(R"(([^,]*)(,|\)))");
+    // Start with the prefix, e.g., "foo("
+    std::string result = s.substr(0, opening + 1); 
+    
+    int depth = 0;
+    for (std::size_t i = opening + 1; i < s.length(); ++i) {
+        char c = s[i];
 
-        // Select and Apply
-        const std::regex& currentPattern = isGeneric ? genericSplit : functionSplit;
-        s = std::regex_replace(s, currentPattern, "$2");  // $2 is used to replace the content with the second group
-
-        s = name + s;
+        if (c == '(' || c == '<') {
+            depth++;
+        } 
+        else if (c == ')' || c == '>') {
+            if (depth == 0) {
+                result += c; // We reached the absolute end of the main call/generic
+            } else {
+                depth--;
+            }
+        } 
+        else if (c == ',') {
+            if (depth == 0) {
+                result += c;  // We are at the top level, keep the comma
+            }
+        }
     }
+    s = result;
 }
 
 // Removes all whitespace from string

@@ -50,6 +50,6 @@ void calls::outputIgnorableCalls() const {
 //
 void calls::initializeIgnorableCalls() {
     ignoredCallsList.insert({"C++", {"assert","exit","abort"}});
-    ignoredCallsList.insert({"C#", {"WriteLine","Write","Trace","Assert","Exit"}});
-    ignoredCallsList.insert({"Java", {"println","print","printf","assert","exit"}});
+    ignoredCallsList.insert({"C#", {"Console.WriteLine","Console.Write","Trace.WriteLine", "Environment.Exit"}});
+    ignoredCallsList.insert({"Java", {"System.out.println","System.out.print","System.out.printf","assert","System.exit"}});
 }

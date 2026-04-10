@@ -41,7 +41,7 @@ public:
     std::string                                         getSpecifiersString                    () const;
     std::string                                         getAttributesOrAnnotationsString       () const;
     std::string                                         getReturnTypeParsed                    () const;
-    std::string                                         getInternalCallsString                 () const;
+    std::string                                         getInternalCallsString                 (bool) const;
     int                                                 getFieldsModifiedCount                 () const                { return fieldsModifiedCount;             }
     int                                                 getUnitNumber                          () const                { return unitNumber;                           }
     int                                                 getLineNumber                          () const                { return lineNumber;                           }
@@ -121,6 +121,7 @@ private:
     std::vector<std::string>                          stereotypes;                                // Method stereotype(s)
     std::vector<std::string>                          attributesOrAnnotations;                    // List of attributes (C#) or annotations (Java) 
     std::vector<std::string>                          propertyAttributes;                         // List of property attributes (C#)
+    std::unordered_map<std::string, std::vector<callModel>>     internalCalls;                              // Function calls + method calls + constructor calls before filtering
     std::vector<callModel>                            functionCalls;                              // List of function calls (e.g., foo() or bar::foo()) where ( foo ) is another method in the type ( bar )
     std::vector<callModel>                            methodCalls;                                // List of method calls (e.g., a.foo()) where ( a ) is a field in the type
     std::vector<callModel>                            newConstructorCalls;                        // List of constructor calls that uses the ( new ) operator whether the type or external types

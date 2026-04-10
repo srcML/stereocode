@@ -17,8 +17,8 @@
 #include <vector>
 
 namespace HELPERS {
-    std::string                     escapeCSV                     (const std::string& data);
-    int                             extractFirstLineNumber        (const std::string& text);
+    std::string                     escapeCSV                     (const std::string&);
+    int                             extractFirstLineNumber        (const std::string&);
     bool                            isSubstringAtBeginning        (const std::string&, const std::string&);
     void                            removeBracketSuffix           (std::string&);
     void                            removeLeadingAsterisks        (std::string&);

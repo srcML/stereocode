@@ -39,7 +39,7 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
 
     findName();          // Depends on isConstructorOrDestructor
     if (name.empty()) return; // If there is no name, then it is not a valid method and we can skip the rest of the data collection
-    
+
     findParameterList(); // Depends on isConstructorOrDestructor
 
     if (!constructorOrDestructor.empty()) {
@@ -61,16 +61,18 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
         findReturnExpression();
         findCallName();
         findCallArgument();
+        findNameSignature();
+        internalCalls["function"] = functionCalls;
+        internalCalls["method"] = methodCalls;
+        internalCalls["constructor"] = newConstructorCalls;
         findIgnorableCalls(methodCalls);
         findIgnorableCalls(functionCalls);
         findIgnorableCalls(newConstructorCalls);
         findNewAssignedVariables();
         findExpressionNames();
         findExpressionAssignments();
-        findNonCommentStatements(); 
-        findNameSignature();
+        findNonCommentStatements();   
     }
-    
 }
 
 // Finds all specifiers of the method
@@ -379,13 +381,13 @@ void functionModel::findCallName() {
             callModel call;
             std::string callName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
             if (c == "function") {
-                HELPERS::nameFilter(callName, call.getName(), unitLanguage, false);
+                HELPERS::nameFilter(callName, call.getNameVector(), unitLanguage, false);
                 functionCalls.push_back(std::move(call));
             } else if (c == "method") {
-                HELPERS::nameFilter(callName, call.getName(), unitLanguage, false);
+                HELPERS::nameFilter(callName, call.getNameVector(), unitLanguage, false);
                 methodCalls.push_back(std::move(call));
             } else if (c == "constructor") {
-                HELPERS::nameFilter(callName, call.getName(), unitLanguage, false);
+                HELPERS::nameFilter(callName, call.getNameVector(), unitLanguage, false);
                 newConstructorCalls.push_back(std::move(call));
             }
         }
@@ -686,7 +688,7 @@ void functionModel::findReturnedVariables(const std::unordered_map<std::string, 
 //
 void functionModel::findModifiedVariables(const std::unordered_map<std::string, variableModel>& variables, bool isParameterCheck) { 
     std::unordered_set<std::string> checked; 
-
+    
     for (const std::string& expr : expressionAssignments) {
         std::size_t oldSize = checked.size();
         if (isParameterCheck)
@@ -701,42 +703,52 @@ void functionModel::findModifiedVariables(const std::unordered_map<std::string, 
 }
 
 // Ignore calls from analysis
-// For example, if call to ignore is 'foo', then some of the matched cases are foo<>() or bar::foo() or a->b.foo()
+// For example, if call to ignore is 'foo', then some of the matched cases are 'foo<> or bar::foo or a->b.foo'
 // However, usage of fields within these calls are not ignored (e.g., in arguments)
 //
 void functionModel::findIgnorableCalls(std::vector<callModel>& calls) {
     for (auto it = calls.begin(); it != calls.end();) {
         std::string callName = it->getName()[3];
-
-        std::size_t listOpen = callName.find("<");
-        if (listOpen != std::string::npos)
-            callName = callName.substr(0, listOpen);
             
-        // Try to match the whole call
+        // 1. Try to match the exact whole call first (e.g., "Console.WriteLine")
         if (CALLS.isIgnored(callName, unitLanguage)) { 
             it = calls.erase(it);
+            continue;
         }
-        else {
-            std::size_t split = callName.rfind("::");
-            if (split != std::string::npos)
-                callName = callName.substr(split + 2);
-            else {
-                split = callName.rfind("->");
-                if (split != std::string::npos)
-                    callName = callName.substr(split + 2);
-                else {
-                    split = callName.rfind(".");
-                    if (split != std::string::npos)
-                        callName = callName.substr(split + 1);
-                }
-            }
+
+        // 2. Sequentially strip prefixes to isolate the final method name.
+        std::size_t split = callName.rfind("::");
+        if (split != std::string::npos) {
+            callName = callName.substr(split + 2);
+        }
+
+        split = callName.rfind("->");
+        if (split != std::string::npos) {
+            callName = callName.substr(split + 2);
+        }
+
+        split = callName.rfind(".");
+        if (split != std::string::npos) {
+            callName = callName.substr(split + 1);
+        }
+
+        // 3. Strip generics LAST, only after isolating the method name
+        // E.g., "WriteLine<T>" safely becomes "WriteLine"
+        std::size_t listOpen = callName.find("<");
+        if (listOpen != std::string::npos) {
+            callName = callName.substr(0, listOpen);
+        }
  
-            if (CALLS.isIgnored(callName, unitLanguage)) 
-                it = calls.erase(it);
-            else ++it;                      
+        // 4. Check the final isolated method name (e.g., "WriteLine", "assert")
+        if (CALLS.isIgnored(callName, unitLanguage)) {
+            it = calls.erase(it);
+        } else {
+            ++it;                      
         }
     }
 }
+
+
 
 // Function calls: --> foo() bar::foo()
 //  Checks if a function call is made to a method in the type, else it is removed and considered external 
@@ -850,14 +862,14 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
     // ^ indicates that we should only match from the beginning
     // We only care about the first two variables. For example, in a.b.c() the a.b is sufficient to determine what "a" is
     // Each regex has only two capturing or matching groups
-    static const std::regex cppPattern(R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->]*))");
+    static const std::regex cppPattern(R"(^(?:\(\*this\)\.|this->|([^.>-]*)(?:::|\.|->))([^.>-]*))");
     static const std::regex javaPattern(R"(^(?:super|this|([^.]*))\.([^.]*))");
-    static const std::regex csharpPattern(R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->]*))");
+    static const std::regex csharpPattern(R"(^(?:base|this|([^.>-]*))(?:\.|->)([^.>-]*))");
 
     // $ Used to match end of line. For example, return this.a; matches but return this.a.b; doesn't
-    static const std::regex cppReturnPattern(R"(^(?:\(\*this\)\.|this->|([^.->]*)(?:::|\.|->))([^.->\(\){}]*)$)");
+    static const std::regex cppReturnPattern(R"(^(?:\(\*this\)\.|this->|([^.>-]*)(?:::|\.|->))([^.>\(\){}-]*)$)");
     static const std::regex javaReturnPattern(R"(^(?:super|this|([^.]*))\.([^.\(\)]*)$)");
-    static const std::regex csharpReturnPattern(R"(^(?:base|this|([^.->]*))(?:\.|->)([^.->\(\)]*)$)");
+    static const std::regex csharpReturnPattern(R"(^(?:base|this|([^.>-]*))(?:\.|->)([^.>\(\)-]*)$)");
 
     const std::regex* currentRegex = nullptr;
 
@@ -932,11 +944,12 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
         }
         
         // You only ever get here if variables = fields
-        if (variables.find(possibleVariable) != variables.end()) {
-            if (fieldsModified)
-                if (fieldsModified->find(possibleVariable) == fieldsModified->end())
+        if (variables.find(possibleVariable) != variables.end()) {   
+            if (fieldsModified) {
+                if (fieldsModified->find(possibleVariable) == fieldsModified->end()) {
                     fieldsModified->insert(possibleVariable);
-                
+                }  
+            }
             fieldUsed = true;
             nonPrimitiveFieldExternal = variables.at(possibleVariable).isNonPrimitiveExternal(); 
             if (returnCheck) {    
@@ -945,6 +958,22 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
             }            
             return true;                                  
         }
+    }
+
+    // The fieldsModified is only ever true for the findModifiedVariables function, and in that case, 
+    //  if we ever get here, it means that it was not a local or a parameter or a field, so it has to be an external instance field or an instance field that 
+    //  is not detected, so we will count this as a field modification
+    // It would be nice if we can make the same assumption for modifications that do not involve assignments (e.g., foo.call()), but we cannot tell if 'foo' is an external field or field not detected or some external class
+    // The only case where this might fail is if 'foo' is static and it is a field somewhere, which we should not consider it as a field modification since it is not modifying the 
+    //  state of the object, but we have no way to know if 'foo' is static or not, so we will just assume it is a field modification
+    //  
+    if (fieldsModified) {
+        if (fieldsModified->find(possibleVariable) == fieldsModified->end()) {
+            fieldsModified->insert(possibleVariable);
+        }
+        fieldUsed = true;
+        nonPrimitiveFieldExternal = true; // We have to assume it is external since we cannot be sure if the field is in the type or not  
+        return true;  
     }
 
     // If you get here, then whatever is modified is definitely not a field, local, or a parameter
@@ -999,11 +1028,27 @@ std::string functionModel::getAttributesOrAnnotationsString() const {
 
 // Get return type string
 //
-std::string functionModel::getInternalCallsString() const {
+std::string functionModel::getInternalCallsString(bool all) const {
     std::string internalCallsString;
-    for (const auto& f : functionCalls) {
-        if (!internalCallsString.empty()) internalCallsString += " ";
-        internalCallsString += f.getSignature();
+    if (all) {
+        for (auto& f : internalCalls.at("function")) {
+            if (!internalCallsString.empty()) internalCallsString += "|";
+            internalCallsString += f.getName()[0] + f.getArgumentList();
+        }
+        for (auto& f : internalCalls.at("method")) {
+            if (!internalCallsString.empty()) internalCallsString += "|";
+            internalCallsString += f.getName()[0] + f.getArgumentList();
+        }
+        for (auto& f : internalCalls.at("constructor")) {
+            if (!internalCallsString.empty()) internalCallsString += "|";
+            internalCallsString += f.getName()[0] + f.getArgumentList();
+        }
+    }
+    else {
+        for (const auto& f : functionCalls) {
+            if (!internalCallsString.empty()) internalCallsString += " ";
+            internalCallsString += f.getSignature();
+        }
     }
     return internalCallsString;
 }

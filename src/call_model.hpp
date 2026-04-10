@@ -17,7 +17,8 @@
 
 class callModel {
 public:
-    std::vector<std::string>&               getName                     ()                                 { return name;                    } 
+    std::vector<std::string>&               getNameVector               ()                                 { return name;                    } 
+    const std::vector<std::string>&         getName                     () const                           { return name;                    } 
     const std::string&                      getArgumentList             () const                           { return argumentList;            }
     const std::string&                      getSignature                () const                           { return signature;               }
 
