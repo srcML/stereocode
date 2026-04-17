@@ -28,6 +28,7 @@ public:
     const std::vector<callModel>&                       getFunctionCalls                       () const                { return functionCalls;                        }
     const std::vector<callModel>&                       getMethodCalls                         () const                { return methodCalls;                          }
     const std::vector<callModel>&                       getNewConstructorCalls                 () const                { return newConstructorCalls;                  }
+    const std::vector<callModel>&                       getExternalCalls                       () const                { return externalCalls;                        }
     const variableModel&                                getReturnType                          () const                { return returnType;                           }
     const std::string&                                  getParametersList                      () const                { return parametersList;                       }
     const std::vector<std::string>&                     getName                                () const                { return name;                                 }
@@ -36,12 +37,12 @@ public:
     const std::string&                                  getUnitLanguage                        () const                { return unitLanguage;                         }
     const std::string&                                  getConstructorOrDestructor             () const                { return constructorOrDestructor;              }
     const std::string&                                  getFileName                            () const                { return fileName;                             }
-    const std::string&                                  getSourceCode                          () const                { return sourceCode;                           }
+    // const std::string&                                  getSourceCode                          () const                { return sourceCode;                           }
     std::string                                         getStereotypesString                   () const;
     std::string                                         getSpecifiersString                    () const;
     std::string                                         getAttributesOrAnnotationsString       () const;
     std::string                                         getReturnTypeParsed                    () const;
-    std::string                                         getInternalCallsString                 (bool) const;
+    std::string                                         getCallsString                         (bool) const;
     int                                                 getFieldsModifiedCount                 () const                { return fieldsModifiedCount;             }
     int                                                 getUnitNumber                          () const                { return unitNumber;                           }
     int                                                 getLineNumber                          () const                { return lineNumber;                           }
@@ -101,9 +102,8 @@ private:
     void                                                findPropertyAttributes                 (); 
 
     std::vector<std::string>                          name;                                       // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and in-between generic in ( <> ) | same as last but without ( <> )
-    std::pair<std::string, std::string>               nameSignature;                              // Name without name without whitespaces, namespaces, and generic ( <> ) + parameters list (commas only). For example, foo(,,)
+    std::pair<std::string, std::string>               nameSignature;                              // Name without name without whitespaces, namespaces, and generics <> + parameters list (commas only). For example, foo(,,)
     variableModel                                     returnType;                                 // Return type
-    std::string                                       sourceCode;                                 // Source code of the method
     std::string                                       fileName;                                   // File name where method is defined 
     std::string                                       parametersList;                             // Parameter list
     std::string                                       unitLanguage;                               // Unit language
@@ -113,7 +113,7 @@ private:
     std::vector<variableModel>                        localsOrdered;                              // List of all local (Needed in order to build the locals map)     
     std::unordered_map<std::string, variableModel>    parameters;                                 // Map of all parameters. Key is parameter name
     std::unordered_map<std::string, variableModel>    locals;                                     // Map of all locals. Key is local name         
-    std::string                                       typeNameParsed;                             // Type name without whitespaces, namespaces, and generic types <>
+    std::string                                       typeNameParsed;                             // Type name without whitespaces, namespaces, and generics <>
     std::unordered_set<std::string>                   specifiers;                                 // List of specifiers
     std::unordered_set<std::string>                   variablesCreatedWithNew;                    // List of variables that are declared/initialized with the "new" operator
     std::unordered_set<std::string>                   expressionNames;                            // List of names of expressions in a method
@@ -121,7 +121,7 @@ private:
     std::vector<std::string>                          stereotypes;                                // Method stereotype(s)
     std::vector<std::string>                          attributesOrAnnotations;                    // List of attributes (C#) or annotations (Java) 
     std::vector<std::string>                          propertyAttributes;                         // List of property attributes (C#)
-    std::unordered_map<std::string, std::vector<callModel>>     internalCalls;                              // Function calls + method calls + constructor calls before filtering
+    std::vector<callModel>                            externalCalls;                              // External function calls + method calls + constructor calls
     std::vector<callModel>                            functionCalls;                              // List of function calls (e.g., foo() or bar::foo()) where ( foo ) is another method in the type ( bar )
     std::vector<callModel>                            methodCalls;                                // List of method calls (e.g., a.foo()) where ( a ) is a field in the type
     std::vector<callModel>                            newConstructorCalls;                        // List of constructor calls that uses the ( new ) operator whether the type or external types

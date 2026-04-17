@@ -131,35 +131,66 @@ void HELPERS::removeNamespace(std::string& name, std::string_view unitLanguage, 
     }
 }
 
-// Removes all characters inside <> or () except for comma for two types of strings: generic types and function signatures
-// For example, myObject<int, std::pair<int, int>> becomes myObject<,> --> (isGeneric = true)
-//  and Foo(int, std::pair<int, int>, double) becomes Foo(,,) --> (isGeneric = false) 
-//  and Foo(int, bar(int, int), double) becomes Foo(,,) --> (isGeneric = false)
+// Removes all characters inside <> or () except for comma for generics and signatures
+// Input format: optional(...) with 'isGeneric = false' or optional<...> where 'isGeneric = true'
+// Examples:
+//  myObject<int, std::pair<int, int>> becomes myObject<,> --> (isGeneric = true)
+//  Foo(int, std::pair<int, int>, double) becomes Foo(,,) --> (isGeneric = false) 
+//  Foo(int, bar(int, int), double) becomes Foo(,,) --> (isGeneric = false)
+//  Foo(a < b, c) becomes Foo(,) --> (isGeneric = false)
+//  <a, b> becomes <,> --> (isGeneric = true)
+//  (a, b) becomes (,) --> (isGeneric = false)
 //
 void HELPERS::removeBetweenComma(std::string& s, bool isGeneric) {
     std::size_t opening = isGeneric ? s.find('<') : s.find('(');
     if (opening == std::string::npos) return;
 
-    // Start with the prefix, e.g., "foo("
     std::string result = s.substr(0, opening + 1); 
     
-    int depth = 0;
+    int parenDepth = 0;
+    int angleDepth = 0;
+    int trappedCommas = 0;
+
     for (std::size_t i = opening + 1; i < s.length(); ++i) {
         char c = s[i];
 
-        if (c == '(' || c == '<') {
-            depth++;
+        if (c == '(') { 
+            parenDepth++; 
         } 
-        else if (c == ')' || c == '>') {
-            if (depth == 0) {
-                result += c; // We reached the absolute end of the main call/generic
+        else if (c == '<') { 
+            angleDepth++; 
+        } 
+        else if (c == ')') {
+            if (parenDepth == 0) {
+                if (!isGeneric) { 
+                    if (angleDepth > 0) result.append(trappedCommas, ',');
+                    result += c;
+                    break;
+                }
             } else {
-                depth--;
+                parenDepth--;
+            }
+        } 
+        else if (c == '>') {
+            if (angleDepth == 0) {
+                if (isGeneric) { 
+                    result += c;
+                    break;
+                }
+            } else {
+                angleDepth--;
+                if (angleDepth == 0 && parenDepth == 0) {
+                    trappedCommas = 0; 
+                }
             }
         } 
         else if (c == ',') {
-            if (depth == 0) {
-                result += c;  // We are at the top level, keep the comma
+            if (parenDepth == 0) {
+                if (angleDepth == 0) {
+                    result += c;
+                } else {
+                    trappedCommas++;
+                }
             }
         }
     }
@@ -172,12 +203,13 @@ void HELPERS::removeWhitespace(std::string& s) {
     s.erase(std::remove_if(s.begin(), s.end(), [](unsigned char c) { return std::isspace(c); }), s.end());
 }
 
-// Removes 
-void HELPERS::nameFilter(std::string& name, std::vector<std::string>& generics,  std::string_view unitLanguage, bool removeNamespace) {
-    generics.push_back(name); 
+// Removes whitespaces, commas, and namespaces to get the core name of a type or a function for matching purposes
+//
+void HELPERS::nameFilter(std::string& name, std::vector<std::string>& nameVector,  std::string_view unitLanguage, bool removeNamespace) {
+    nameVector.push_back(name); 
 
     HELPERS::removeWhitespace(name);
-    generics.push_back(name);
+    nameVector.push_back(name);
     
     std::size_t listOpen = name.find("<");
     if (listOpen != std::string::npos) {
@@ -187,15 +219,21 @@ void HELPERS::nameFilter(std::string& name, std::vector<std::string>& generics, 
         if (removeNamespace) {
             HELPERS::removeNamespace(nameLeft, unitLanguage, true);
         }
-        generics.push_back(nameLeft + nameRight);
-        generics.push_back(nameLeft);
+        nameVector.push_back(nameLeft + nameRight);
+        nameVector.push_back(nameLeft);
     }
     else {
         if (removeNamespace) {
             HELPERS::removeNamespace(name, unitLanguage, true);
         }
-        generics.push_back(name);
-        generics.push_back(name); // Not a duplicate
+        nameVector.push_back(name);
+        nameVector.push_back(name); // Not a duplicate
     } 
+}
 
+// Removes namespaces and whitespace from parameter or argument lists for matching purposes
+//
+void HELPERS::parameterOrArgumentListFilter(std::string& parameterOrArgumentList) {
+    HELPERS::removeBetweenComma(parameterOrArgumentList, false);
+    HELPERS::removeWhitespace(parameterOrArgumentList);
 }

@@ -29,28 +29,20 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
                              unitLanguage{unitLanguage_}, xpath{xpath_}, typeNameParsed{typeNameParsed_},  
                              isProperty{isProperty_}, unitNumber{unitNumber_}, lineNumber{lineNumber_} {
     fileName = srcml_unit_get_filename(methodUnit); // Get file name here since free functions do not have a type
-    sourceCode = srcml_unit_get_src(methodUnit);
-
-    returnType.setType(returnType_);
+    returnType.setType(returnType_); // Set return here since properties (C#) return types are found outside
     
-    if (unitLanguage == "C++") findConst();
-
-    isConstructorOrDestructor();
-
-    findName();          // Depends on isConstructorOrDestructor
+    findName();
     if (name.empty()) return; // If there is no name, then it is not a valid method and we can skip the rest of the data collection
 
-    findParameterList(); // Depends on isConstructorOrDestructor
-
-    if (!constructorOrDestructor.empty()) {
-        findConstructorOrDestructorType();
-    }
+    findParameterList();
+    findConstructorOrDestructorType();
 
     if (constructorOrDestructor.empty()) {
         if (unitLanguage == "C#" || unitLanguage == "Java") {
             findAttributesOrAnnotations();
             if (isProperty) findPropertyAttributes();
         }
+        if (unitLanguage == "C++") findConst();
         findSpecifiers();
         findReturnType(); 
         findParameterName();
@@ -62,9 +54,6 @@ functionModel::functionModel(const std::string& xpath_, const std::string& unitL
         findCallName();
         findCallArgument();
         findNameSignature();
-        internalCalls["function"] = functionCalls;
-        internalCalls["method"] = methodCalls;
-        internalCalls["constructor"] = newConstructorCalls;
         findIgnorableCalls(methodCalls);
         findIgnorableCalls(functionCalls);
         findIgnorableCalls(newConstructorCalls);
@@ -185,10 +174,7 @@ void functionModel::findName() {
 // Gets the method parameter list
 //
 void functionModel::findParameterList() {
-    if (!constructorOrDestructor.empty())
-        srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"constructor_destructor_parameter_list").c_str());
-    else
-        srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method_parameter_list").c_str());
+    srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method_parameter_list").c_str());
    
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
@@ -476,20 +462,6 @@ void functionModel::findConst() {
     srcml_transform_free(result);
 }
 
-// Check if method is a constructor or a destructor
-//
-void functionModel::isConstructorOrDestructor() {
-    srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"constructor_or_destructor").c_str());
-    srcml_transform_result* result = nullptr;
-    srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
-    int n = srcml_transform_get_unit_size(result);
-
-    if (n > 0) constructorOrDestructor = true;
-
-    srcml_clear_transforms(methodArchive);
-    srcml_transform_free(result);
-}
-
 // Finds the type of constructor or destructor
 //
 void functionModel::findConstructorOrDestructorType() {
@@ -541,41 +513,23 @@ void functionModel::findExpressionAssignments()  {
 //
 void functionModel::findNameSignature() {
     std::string parametersList_ = parametersList;
-    std::string name_ = name[3]; // We will ignore the generics <> for signatures
-
-    HELPERS::removeBetweenComma(parametersList_, false);
-    HELPERS::removeNamespace(name_, unitLanguage, true);
-    HELPERS::removeWhitespace(parametersList_);
-    HELPERS::removeWhitespace(name_);
-
-    nameSignature = std::make_pair(name_, parametersList_);
+    HELPERS::parameterOrArgumentListFilter(parametersList_);
+    nameSignature = std::make_pair(name[3], parametersList_);
 
     for (size_t i = 0; i < functionCalls.size(); i++) {
         std::string argumentList = functionCalls[i].getArgumentList();
-        HELPERS::removeBetweenComma(argumentList, false);
-        std::string funcCallName = functionCalls[i].getName()[3];
-        HELPERS::removeNamespace(funcCallName, unitLanguage, true);
-        std::string funcCallParsed = funcCallName + argumentList;
-        HELPERS::removeWhitespace(funcCallParsed);   
-        functionCalls[i].setSignature(funcCallParsed);
+        HELPERS::parameterOrArgumentListFilter(argumentList);
+        functionCalls[i].setSignature(functionCalls[i].getName()[3] + argumentList);
     }
     for (size_t i = 0; i < methodCalls.size(); i++) {
         std::string argumentList = methodCalls[i].getArgumentList();
-        HELPERS::removeBetweenComma(argumentList, false);
-        std::string methodCallName = methodCalls[i].getName()[3];
-        HELPERS::removeNamespace(methodCallName, unitLanguage, true);
-        std::string methodCallParsed = methodCallName + argumentList;
-        HELPERS::removeWhitespace(methodCallParsed);   
-        methodCalls[i].setSignature(methodCallParsed);
+        HELPERS::parameterOrArgumentListFilter(argumentList);
+        methodCalls[i].setSignature(methodCalls[i].getName()[3] + argumentList);
     }
      for (size_t i = 0; i < newConstructorCalls.size(); i++) {
         std::string argumentList = newConstructorCalls[i].getArgumentList();
-        HELPERS::removeBetweenComma(argumentList, false);
-        std::string constructorCallName = newConstructorCalls[i].getName()[3];
-        HELPERS::removeNamespace(constructorCallName, unitLanguage, true);
-        std::string constructorCallParsed = constructorCallName + argumentList;
-        HELPERS::removeWhitespace(constructorCallParsed);   
-        newConstructorCalls[i].setSignature(constructorCallParsed);
+        HELPERS::parameterOrArgumentListFilter(argumentList);
+        newConstructorCalls[i].setSignature(newConstructorCalls[i].getName()[3] + argumentList);
     }
 }
 
@@ -777,10 +731,13 @@ void functionModel::findCallsOnFields(const std::unordered_map<std::string, vari
     //  this is sufficient to determine if the call is a method call or a static/free function call
     for (auto it = functionCalls.begin(); it != functionCalls.end();) {  
         if (allMethodNames.find(it->getName()[3]) == allMethodNames.end()) { 
-            it = functionCalls.erase(it);
+            externalCalls.push_back(*it);
             ++externalFunctionCallsCount;
+            it = functionCalls.erase(it);
         }
-        else ++it;
+        else {
+            ++it;
+        }
     }  
     
     // Check on method calls 
@@ -788,27 +745,38 @@ void functionModel::findCallsOnFields(const std::unordered_map<std::string, vari
         // Could be a normal method call on a field
         if (!isVariableUsed(allFields, nullptr, it->getName()[3], false, false, false, false, false)) {
             if (unitLanguage != "C++") {
-                // These should be function calls
+                // Could be a function call
                 std::string inheritKeyword = (unitLanguage == "C#") ? "base" : "super";
-                if ((unitLanguage == "C#" || unitLanguage == "Java") && 
-                    (HELPERS::isSubstringAtBeginning(it->getName()[3], "this") || 
-                     HELPERS::isSubstringAtBeginning(it->getName()[3], inheritKeyword))) functionCalls.push_back(*it);
+                if ((unitLanguage == "C#" || unitLanguage == "Java") && (HELPERS::isSubstringAtBeginning(it->getName()[3], "this") || HELPERS::isSubstringAtBeginning(it->getName()[3], inheritKeyword))) {
+                    functionCalls.push_back(*it);
+                }
 
                 // Could be a call on a local or a parameter
-                else if (isVariableUsed(allFields, nullptr, it->getName()[3], false, false, false, true, true)) 
+                else if (isVariableUsed(allFields, nullptr, it->getName()[3], false, false, false, true, true)) {
                     ++externalMethodCallsCount;
+                }
+                    
                     
                 // It is a static call
-                else ++externalFunctionCallsCount;
+                else {
+                    externalCalls.push_back(*it);
+                    ++externalFunctionCallsCount;
+                }
+
+                // Will need to be removed in any case
                 it = methodCalls.erase(it);  
                 
             }
             else {
+                externalCalls.push_back(*it);
                 ++externalMethodCallsCount;
                 it = methodCalls.erase(it);  
             }                  
         }
-        else ++it;   
+        // A call of a field
+        else {
+            ++it;
+        }
     }
 }
 
@@ -1028,27 +996,19 @@ std::string functionModel::getAttributesOrAnnotationsString() const {
 
 // Get return type string
 //
-std::string functionModel::getInternalCallsString(bool all) const {
-    std::string internalCallsString;
+std::string functionModel::getCallsString(bool all) const {
+    std::string externalCallsString;
     if (all) {
-        for (auto& f : internalCalls.at("function")) {
-            if (!internalCallsString.empty()) internalCallsString += "|";
-            internalCallsString += f.getName()[0] + f.getArgumentList();
-        }
-        for (auto& f : internalCalls.at("method")) {
-            if (!internalCallsString.empty()) internalCallsString += "|";
-            internalCallsString += f.getName()[0] + f.getArgumentList();
-        }
-        for (auto& f : internalCalls.at("constructor")) {
-            if (!internalCallsString.empty()) internalCallsString += "|";
-            internalCallsString += f.getName()[0] + f.getArgumentList();
+        for (auto& f : externalCalls) {
+            if (!externalCallsString.empty()) externalCallsString += " ";
+            externalCallsString += f.getSignature();
         }
     }
     else {
         for (const auto& f : functionCalls) {
-            if (!internalCallsString.empty()) internalCallsString += " ";
-            internalCallsString += f.getSignature();
+            if (!externalCallsString.empty()) externalCallsString += " ";
+            externalCallsString += f.getSignature();
         }
     }
-    return internalCallsString;
+    return externalCallsString;
 }

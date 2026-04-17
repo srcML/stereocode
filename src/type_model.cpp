@@ -50,11 +50,15 @@ void typeModel::findData(const std::string& typeXpath, const std::string& header
     findFieldNames(fieldsOrdered);
     findFieldTypes(fieldsOrdered);
      
-    findMethod(typeXpath, header, unitNumber);
+    findMethods(typeXpath, header, unitNumber);
     if (unitLanguage == "C#" || unitLanguage == "Java") {
         findAttributesOrAnnotations();
         if (unitLanguage == "C#") findProperties(typeXpath, header, unitNumber);
     }
+    std::vector<std::pair<std::string, std::string>> methodSignaturesOrdered;
+    findMethodDeclNames(methodSignaturesOrdered);
+    findMethodDeclParameters(methodSignaturesOrdered);
+    declMethodSignatures.insert(methodSignaturesOrdered.begin(), methodSignaturesOrdered.end());
 }
 
 // Finds method data after all types are collected
@@ -72,8 +76,43 @@ void typeModel::findDataAfterCollection() {
         allMethodNames.insert(item.first);
     }
 
+    for (const auto& item : declMethodSignatures) {
+        allMethodNames.insert(item.first);
+    }
+
+    for (const auto& item : inheritedDeclMethodSignatures) {
+        allMethodNames.insert(item.first);
+    }
+
+
     for (auto& method : methods) {
         method.findDataAfterCollection(allFields, allMethodNames); 
+    }
+}
+
+// Merges another typeModel (e.g., partial class) into this one
+//
+void typeModel::mergeData(typeModel& other) {
+    // Merge Methods
+    methods.insert(methods.end(), std::make_move_iterator(other.getMethods().begin()), std::make_move_iterator(other.getMethods().end()));
+
+    // Merge Parents
+    const auto& otherParents = other.getParentNames();
+    parentNames.insert(parentNames.end(), otherParents.begin(), otherParents.end());
+
+    // Merge Method Signatures
+    const auto& otherMethodSignatures = other.getMethodSignatures();
+    methodSignatures.insert(otherMethodSignatures.begin(), otherMethodSignatures.end());
+
+    // Merge Data Members
+    auto& otherDataMembers = other.getFields();
+    fields.insert(otherDataMembers.begin(), otherDataMembers.end());
+
+    // Merge XPaths for each unit number
+    const auto& otherXpath = other.getXpath();
+    for (const auto& pair : otherXpath) {
+        std::vector<std::string>& targetXpathVector = xpath[pair.first];
+        targetXpathVector.insert(targetXpathVector.end(), pair.second.begin(), pair.second.end());
     }
 }
 
@@ -124,7 +163,7 @@ void typeModel::findName() {
         HELPERS::nameFilter(tempName, name, unitLanguage, true);         
     }
 
-    // There might be a missing name (e.g., anonymous structs in C++)
+    // There might be a missing name (e.g., anonymous classes/structs in C++)
     if (name.size() == 0) name = {"", "", "", ""}; 
 
     srcml_clear_transforms(typeArchive);
@@ -155,23 +194,12 @@ void typeModel::findParentNames() {
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
     int n = srcml_transform_get_unit_size(result);
-
+    
     for (int i = 0; i < n; i++) {
         std::string parentName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
-
-        HELPERS::removeWhitespace(parentName);
-
-        std::size_t listOpen = parentName.find("<");
-        if (listOpen != std::string::npos) {
-            std::string left = parentName.substr(0, listOpen);
-            std::string right = parentName.substr(listOpen, parentName.size() - listOpen);
-            HELPERS::removeNamespace(left, unitLanguage, true); 
-            parentNames.insert(left + right);
-        }
-        else {
-            HELPERS::removeNamespace(parentName, unitLanguage, true);
-            parentNames.insert(parentName);
-        }    
+        std::vector<std::string> parentNameVector;
+        HELPERS::nameFilter(parentName, parentNameVector, unitLanguage, true);
+        parentNames.push_back(std::move(parentNameVector));
     }
     
     srcml_clear_transforms(typeArchive);
@@ -244,6 +272,49 @@ void typeModel::findFieldTypes(std::vector<variableModel>& fieldsOrdered) {
     srcml_transform_free(result);
 }
 
+// C#, Java, C++:
+//  Abstract methods can be declared without a body and called in the same type, even if their implementation is in a child class
+//  C# and Java use 'abstract' while C++ uses 'virtual' with no implementation (i.e., '= 0') to declare abstract methods
+//  Inheritance is not considered for abstract method signatures because a method in a child type will always need to implement the abstract method before using it
+//  The parent type where the abstract is declared is the only place where the type can call the abstract method without an implementation, 
+//   so we collect the signature of the abstract method declaration in the parent type and not in the child type
+//
+void typeModel::findMethodDeclNames(std::vector<std::pair<std::string, std::string>>& methodSignaturesOrdered) {
+    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"function_decl_name").c_str());
+    srcml_transform_result* result = nullptr;
+    srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
+    int n = srcml_transform_get_unit_size(result);
+
+    for (int i = 0; i < n; ++i) {
+        std::string methodName = srcml_unit_get_src(srcml_transform_get_unit(result, i));
+        std::vector<std::string> methodNameVector;
+        HELPERS::nameFilter(methodName, methodNameVector, unitLanguage, true);
+        methodSignaturesOrdered.push_back({methodNameVector[3], ""});
+    }
+
+    srcml_transform_free(result);
+    srcml_clear_transforms(typeArchive);
+}
+
+// Finds the parameter list of abstract method declarations to get the full signature
+//
+void typeModel::findMethodDeclParameters(std::vector<std::pair<std::string, std::string>>& methodSignaturesOrdered) {
+    srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"function_decl_parameters").c_str());
+    srcml_transform_result* result = nullptr;
+    srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
+    int n = srcml_transform_get_unit_size(result);
+
+    for (int i = 0; i < n; ++i) {
+        std::string parametersList = srcml_unit_get_src(srcml_transform_get_unit(result, i));
+        HELPERS::parameterOrArgumentListFilter(parametersList);
+        methodSignaturesOrdered.at(i).second = parametersList;
+    }
+
+    srcml_transform_free(result);
+    srcml_clear_transforms(typeArchive);
+}
+
+
 // Finds methods defined inside the type
 // C#:
 //   Nested local functions within methods in C# are ignored 
@@ -254,7 +325,7 @@ void typeModel::findFieldTypes(std::vector<variableModel>& fieldsOrdered) {
 // Java:
 //   Annotations have the same story as attributes, so we ignore these statements inside them
 //   
-void typeModel::findMethod(const std::string& classXpath, const std::string& header, int unitNumber) {
+void typeModel::findMethods(const std::string& classXpath, const std::string& header, int unitNumber) {
     srcml_append_transform_xpath(typeArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"method").c_str());
     srcml_transform_result* result = nullptr;
     srcml_unit_apply_transforms(typeArchive, typeUnit, &result);
@@ -383,23 +454,11 @@ std::string typeModel::getStereotypesString() const {
 //
 std::string typeModel::getParentsString() const {
     std::string parentsString;
-    for (const std::string & s : parentNames) {
+    for (const auto& s : parentNames) {
         if (!parentsString.empty()) parentsString += " ";
-        parentsString += s;
+        parentsString += s[3];
     }
     return parentsString;
-}
-
-
-// Gets the inherited parent types as a single string
-//
-std::string typeModel::getInheritedParentsString() const {
-    std::string inheritedParentsString;
-    for (const std::string & s : inheritedParentNames) {
-        if (!inheritedParentsString.empty()) inheritedParentsString += " ";
-        inheritedParentsString += s;
-    }
-    return inheritedParentsString;
 }
 
 // Gets the method signatures as a single string
@@ -407,6 +466,10 @@ std::string typeModel::getInheritedParentsString() const {
 std::string typeModel::getMethodSignaturesString() const {
     std::string methodsignature;
     for (const std::pair<std::string, std::string> &s : methodSignatures) {
+        if (!methodsignature.empty()) methodsignature += " ";
+        methodsignature += s.first + s.second;
+    }
+    for (const std::pair<std::string, std::string> &s : declMethodSignatures) {
         if (!methodsignature.empty()) methodsignature += " ";
         methodsignature += s.first + s.second;
     }
@@ -421,31 +484,10 @@ std::string typeModel::getInheritedMethodSignaturesString() const {
         if (!inheritedMethodsignature.empty()) inheritedMethodsignature += " ";
         inheritedMethodsignature += s.first + s.second;
     }
+    for (const std::pair<std::string, std::string> &s : inheritedDeclMethodSignatures) {
+        if (!inheritedMethodsignature.empty()) inheritedMethodsignature += " ";
+        inheritedMethodsignature += s.first + s.second;
+    }
     return inheritedMethodsignature;
 }
 
-// Merges another typeModel (e.g., partial class) into this one
-//
-void typeModel::mergeData(typeModel& other) {
-    // Merge Methods
-    methods.insert(methods.end(), std::make_move_iterator(other.getMethods().begin()), std::make_move_iterator(other.getMethods().end()));
-
-    // Merge Parents
-    const auto& otherParents = other.getParentNames();
-    parentNames.insert(otherParents.begin(), otherParents.end());
-
-    // Merge Method Signatures
-    const auto& otherMethodSignatures = other.getMethodSignatures();
-    methodSignatures.insert(otherMethodSignatures.begin(), otherMethodSignatures.end());
-
-    // Merge Data Members
-    auto& otherDataMembers = other.getFields();
-    fields.insert(otherDataMembers.begin(), otherDataMembers.end());
-
-    // Merge XPaths for each unit number
-    const auto& otherXpath = other.getXpath();
-    for (const auto& pair : otherXpath) {
-        std::vector<std::string>& targetXpathVector = xpath[pair.first];
-        targetXpathVector.insert(targetXpathVector.end(), pair.second.begin(), pair.second.end());
-    }
-}

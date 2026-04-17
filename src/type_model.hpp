@@ -28,40 +28,39 @@ public:
     const std::string&                                               getUnitLanguage                    ()               const          { return unitLanguage;                           }
     const std::vector<std::string>&                                  getName                            ()               const          { return name;                                   }
     const std::vector<std::string>&                                  getStereotypes                     ()               const          { return stereotypes;                            }
-    const std::unordered_set<std::string>&                           getParentNames                     ()               const          { return parentNames;                            }  
-    const std::set<std::pair<std::string, std::string>>&             getMethodSignatures                ()               const          { return methodSignatures;                       }    
-    const std::unordered_set<std::string>&                           getInheritedParentNames            ()               const          { return inheritedParentNames;                   }  
+    const std::vector<std::vector<std::string>>&                     getParentNames                     ()               const          { return parentNames;                            }  
+    const std::set<std::pair<std::string, std::string>>&             getMethodSignatures                ()               const          { return methodSignatures;                       }      
     const std::set<std::pair<std::string, std::string>>&             getInheritedMethodSignatures       ()               const          { return inheritedMethodSignatures;              }   
+    const std::set<std::pair<std::string, std::string>>&             getDeclMethodSignatures            ()               const          { return declMethodSignatures;                   }
+    const std::set<std::pair<std::string, std::string>>&             getInheritedDeclMethodSignatures   ()               const          { return inheritedDeclMethodSignatures;          }
     std::unordered_map<std::string, variableModel>&                  getInheritedFields                 ()                              { return inheritedFields;                        }
     const std::unordered_map<int, std::vector<std::string>>&         getXpath                           ()               const          { return xpath;                                  }    
     int                                                              getConstructorDestructorCount      ()               const          { return constructorDestructorCount;             }
     bool                                                             isInherited                        ()               const          { return inherited;                              }
     bool                                                             isVisited                          ()               const          { return visited;                                }
-       
+    bool                                                             hasUnknownParent                   ()               const          { return unknownParent;                          }
+
     void                                                             setInherited                       (bool flag)                     { inherited = flag;                              }
     void                                                             setVisited                         (bool flag)                     { visited = flag;                                }
+    void                                                             setUnknownParent                   (bool flag)                     { unknownParent = flag;                          }
     void                                                             setStereotype                      (const std::string& s)          { stereotypes.push_back(s);                      }
     void                                                             setConstructorDestructorCount      (int c)                         { constructorDestructorCount = c;                }     
-    void                                                             mergeData                          (typeModel& other);
     void                                                             findData                           (const std::string&, const std::string&, int);
     void                                                             findDataAfterCollection            ();
+    void                                                             mergeData                          (typeModel& other);
     
-    // Inheritance does not need to check for private fields or methods, this is because
-    //   a method in a child type will only use a field or call a method if it is not private in the parent type, 
-    //   so we can simply collect them all, and during analysis, these private data members will simply not occur
-    //
     void appendInheritedDataMembers(const std::unordered_map<std::string, variableModel>& fields_, 
+                                    const std::unordered_map<std::string, variableModel>& inheritedFields_,
                                     const std::set<std::pair<std::string, std::string>>& methodSignatures_,
-                                    const std::unordered_set<std::string>& parentNames_,
-                                    const std::unordered_map<std::string, variableModel>& inheritedFields_, 
                                     const std::set<std::pair<std::string, std::string>>& inheritedMethodSignatures_,
-                                    const std::unordered_set<std::string>& inheritedParentNames_) { 
+                                    const std::set<std::pair<std::string, std::string>>& declMethodSignatures_,
+                                    const std::set<std::pair<std::string, std::string>>& inheritedDeclMethodSignatures_) { 
         inheritedFields.insert(fields_.begin(), fields_.end());
-        inheritedParentNames.insert(parentNames_.begin(), parentNames_.end());
-        inheritedMethodSignatures.insert(methodSignatures_.begin(), methodSignatures_.end());
         inheritedFields.insert(inheritedFields_.begin(), inheritedFields_.end());
-        inheritedParentNames.insert(inheritedParentNames_.begin(), inheritedParentNames_.end());
+        inheritedMethodSignatures.insert(methodSignatures_.begin(), methodSignatures_.end()); // From a parent type
         inheritedMethodSignatures.insert(inheritedMethodSignatures_.begin(), inheritedMethodSignatures_.end());
+        inheritedDeclMethodSignatures.insert(declMethodSignatures_.begin(), declMethodSignatures_.end()); // From a parent type
+        inheritedDeclMethodSignatures.insert(inheritedDeclMethodSignatures_.begin(), inheritedDeclMethodSignatures_.end());
     }
 
     void buildMethodSignature() { 
@@ -79,27 +78,31 @@ private:
     std::string                                             findPropertyReturnType             ();
     void                                                    findFieldNames                     (std::vector<variableModel>&);
     void                                                    findFieldTypes                     (std::vector<variableModel>&);
-    void                                                    findMethod                         (const std::string&, const std::string&, int);
+    void                                                    findMethods                        (const std::string&, const std::string&, int);
+    void                                                    findMethodDeclNames                (std::vector<std::pair<std::string, std::string>>&);
+    void                                                    findMethodDeclParameters           (std::vector<std::pair<std::string, std::string>>&);
     void                                                    findProperties                     (const std::string&, const std::string&, int);
     void                                                    findStructure                      ();     
     void                                                    findMethodsInProperty              (const std::string&, const std::string&, const std::string&, int);
     void                                                    findAttributesOrAnnotations        (); 
 
-    std::string                                             unitLanguage;                    // Unit language
+    std::string                                             unitLanguage;                    // Unit language (C, C#, C++, Java)
     std::string                                             structure;                       // class, struct, interface, enum, union 
     std::vector<std::string>                                name;                            // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
-    std::vector<std::string>                                stereotypes;                     // Type stereotype(s)
-    std::vector<std::string>                                attributesOrAnnotations;         // List of attributes (C#) or annotations (Java)          
-    std::vector<functionModel>                              methods;                         // List of methods (including methods in properties for C#)
-    std::unordered_set<std::string>                         parentNames;                     // Parent names without whitespaces and namespaces
-    std::unordered_set<std::string>                         inheritedParentNames;            // Inherited parent names
-    std::set<std::pair<std::string, std::string>>           methodSignatures;                // List of method signatures
-    std::set<std::pair<std::string, std::string>>           inheritedMethodSignatures;       // Inherited method signatures
+    std::vector<std::string>                                stereotypes;                     // Stereotype(s)
+    std::vector<std::string>                                attributesOrAnnotations;         // Attributes (C#) or annotations (Java)          
+    std::vector<functionModel>                              methods;                         // Methods (including methods inside properties for C#)
+    std::vector<std::vector<std::string>>                   parentNames;                     // Parent names where each is of Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
+    std::set<std::pair<std::string, std::string>>           declMethodSignatures;            // Method declaration signatures (Unique)
+    std::set<std::pair<std::string, std::string>>           inheritedDeclMethodSignatures;   // Inherited method declaration signatures (Unique)
+    std::set<std::pair<std::string, std::string>>           methodSignatures;                // Method signatures (Unique)
+    std::set<std::pair<std::string, std::string>>           inheritedMethodSignatures;       // Inherited method signatures (Unique)
     std::unordered_map<std::string, variableModel>          fields;                          // Key is field name and value is the field object
     std::unordered_map<std::string, variableModel>          inheritedFields;                 // Inherited fields
     std::unordered_map<int, std::vector<std::string>>       xpath;                           // Unique xpath for type (types if partial in C# or duplicate types) along with the unit number
     bool                                                    inherited{false};                // Did type inherit the data members yet? (Used for inheritance)
     bool                                                    visited{false};                  // Has type been visited yet when inheriting? (Used for inheritance)    
+    bool                                                    unknownParent{false};            // True if type has an unknown parent (Used for inheritance and for checking degenerate methods)
     int                                                     constructorDestructorCount{0};   // Number of constructor + destructor methods (Needed for type stereotypes calculations)
 }; 
 

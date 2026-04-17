@@ -26,6 +26,7 @@ namespace HELPERS {
     void                            removeBetweenComma            (std::string& s, bool);
     void                            removeWhitespace              (std::string&);
     void                            nameFilter                    (std::string&, std::vector<std::string>&, std::string_view, bool);
+    void                            parameterOrArgumentListFilter (std::string&);
 };
 
 #endif

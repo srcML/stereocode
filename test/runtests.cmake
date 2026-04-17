@@ -1,9 +1,9 @@
 # Remove generated XML files (If they exist already)
 execute_process(COMMAND ${CMAKE_COMMAND} -E rm -f ${TEST_FILE}.stereotypes.xml)
 
-# Run stereocode AND check if it crashed (struts, interfaces, enums, and unions are considered)
+# Run stereocode AND check if it crashed (free functions, interfaces, structs, enums, and unions are considered)
 execute_process(
-    COMMAND ${STEREOCODE} ${TEST_FILE}.xml -f -i -n -m -s
+    COMMAND ${STEREOCODE} ${TEST_FILE}.xml -f -i -t -e -u
     RESULT_VARIABLE TOOL_EXIT_CODE
 )
 

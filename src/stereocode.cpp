@@ -25,13 +25,14 @@ bool                               STRUCT                  {false};
 bool                               INTERFACE               {false};
 bool                               UNION                   {false};
 bool                               ENUM                    {false};
-bool                               IS_VERBOSE              {false};
+bool                               VERBOSE_REPORT          {false};
 bool                               CSV_REPORT              {false};
+bool                               DISABLE_SRCML_OUTPUT    {false};
 
 int main (int argc, char const *argv[]) {
     std::string         inputFile;
     std::string         primitivesFile;
-    std::string         ignorableCallsFile;
+    std::string         callsFile;
     std::string         specifiersFile;
     std::string         outputFile;
 
@@ -41,17 +42,18 @@ int main (int argc, char const *argv[]) {
     
     app.add_option("input-archive",            inputFile,                        "File name of srcML input archive")->required();
     app.add_option("-o,--output-file",         outputFile,                       "File name of srcML output archive annotated with stereotypes");
-    app.add_option("-p,--primitive-file",      primitivesFile,                   "File name of user primitive types (one per line)");
-    app.add_option("-g,--ignore-call-file",    ignorableCallsFile,               "File name of user calls to ignore (one per line)");
-    app.add_option("-t,--type-specifier-file", specifiersFile,                   "File name of user specifiers to remove (one per line)");
+    app.add_option("-p,--primitive-file",      primitivesFile,                   "File name of user primitive types to consider (one per line) (Default set exists)");
+    app.add_option("-c,--call-file",           callsFile,                        "File name of user calls to ignore (one per line) (Default set exists)");
+    app.add_option("-s,--specifier-file",      specifiersFile,                   "File name of user specifiers to ignore (one per line) (Default set exists)");
     app.add_option("-l,--large-class",         METHODS_PER_TYPE_THRESHOLD,       "Method threshold for the large type stereotype (e.g., large-class) (default = 21)");
     app.add_flag  ("-f,--free-function",       FREE_FUNCTION,                    "Identify stereotypes for free functions (includes static methods) (C, C++, C#, and Java)");
     app.add_flag  ("-i,--interface",           INTERFACE,                        "Identify stereotypes for interfaces (C# and Java)");
-    app.add_flag  ("-n,--union",               UNION,                            "Identify stereotypes for unions (C++)");
-    app.add_flag  ("-m,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
-    app.add_flag  ("-s,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
-    app.add_flag  ("-z,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes");
-    app.add_flag  ("-b,--verbose",             IS_VERBOSE,                       "Verbose output: primitives, ignorable calls, specifiers, and optional CSV containing stereotypes and extra metadata");
+    app.add_flag  ("-u,--union",               UNION,                            "Identify stereotypes for unions (C++)");
+    app.add_flag  ("-e,--enum",                ENUM,                             "Identify stereotypes for enums (Java)");
+    app.add_flag  ("-t,--struct",              STRUCT,                           "Identify stereotypes for structs (C, C++, C#, and Java)");
+    app.add_flag  ("-r,--csv-report",          CSV_REPORT,                       "Output optional CSV file containing stereotypes");
+    app.add_flag  ("-b,--verbose",             VERBOSE_REPORT,                   "Verbose output: primitives, ignorable calls, specifiers, and optional CSV containing stereotypes and extra metadata (overrides --csv-report flag)");
+    app.add_flag  ("-d,--srcmlOutput",         DISABLE_SRCML_OUTPUT,             "Disables srcML output archive (Requires --csv-report or --verbose flag to be set for CSV output)");
     app.add_flag  ("-v,--version",             version,                          "Display version information");
     
     CLI11_PARSE(app, argc, argv);
@@ -59,6 +61,19 @@ int main (int argc, char const *argv[]) {
     if (version) {
         std::cout << "Stereocode v1.0" << std::endl;
         return 0;
+    }
+
+    // Validate input file extension
+    if (inputFile.size() < 4 || inputFile.substr(inputFile.size() - 4) != ".xml") {
+        std::cerr << "Error: Input archive must have a valid .xml extension.\n";
+        return 1;
+    }
+
+    // Ensure that if srcML output is disabled, a CSV/Verbose report is requested
+    if (DISABLE_SRCML_OUTPUT && !CSV_REPORT && !VERBOSE_REPORT) {
+        std::cerr << "Error: The --srcmlOutput (-d) flag disables the srcML output archive. "
+                  << "You must specify either --csv-report (-r) or --verbose (-b) to generate output.\n";
+        return 1;
     }
 
     // Add user-defined primitive to initial set
@@ -69,11 +84,11 @@ int main (int argc, char const *argv[]) {
         in.close();
     }
     
-    // Add user-defined ignorable calls to initial set
-    if (!ignorableCallsFile.empty()) {         
-        std::ifstream in(ignorableCallsFile);
+    // Add user-defined calls to initial set
+    if (!callsFile.empty()) {         
+        std::ifstream in(callsFile);
         if (in.is_open()) in >> CALLS;
-        else std::cerr << "Error: Ignorable calls file not found: " << ignorableCallsFile << '\n';
+        else std::cerr << "Error: Calls file not found: " << callsFile << '\n';
         in.close();
     }
 

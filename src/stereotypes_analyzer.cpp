@@ -35,9 +35,10 @@ extern primitives                  PRIMITIVES;
 extern calls                       CALLS;
 extern specifiers                  SPECIFIERS;
 
-extern bool                        IS_VERBOSE;
+extern bool                        VERBOSE_REPORT;
 extern bool                        FREE_FUNCTION;
 extern bool                        CSV_REPORT;
+extern bool                        DISABLE_SRCML_OUTPUT;
 
 srcml_archive*                     archive{srcml_archive_create()};
 srcml_unit*                        unit{nullptr};
@@ -48,30 +49,25 @@ srcml_unit*                        methodUnit{nullptr};
 
 
 stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std::string& outputFile) {
-    bool error{false};
-
     // Open input archive
     if (srcml_archive_read_open_filename(archive, inputFile.c_str())) {
         std::cerr << "Error: File not found: " << inputFile << '\n';
-        error = true;
+        srcml_archive_close(archive);
+        srcml_archive_free(archive);
+        exit(1);
     }
 
     // Cloning is needed if input archive has extra namespaces (e.g., pos)
     srcml_archive* outputArchive = srcml_archive_clone(archive);
 
-    // Open output archive
-    if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
-        std::cerr << "Error opening: " << outputFile << std::endl;
-        error = true;
-    }
-
-    // Error handling
-    if (error) {
-        srcml_archive_close(archive);
-        srcml_archive_close(outputArchive);
-        srcml_archive_free(archive);
-        srcml_archive_free(outputArchive);
-        exit(1);
+    if (!DISABLE_SRCML_OUTPUT) {
+        // Open output archive
+        if (srcml_archive_write_open_filename(outputArchive, outputFile.c_str())) {
+            std::cerr << "Error opening: " << outputFile << std::endl;
+            srcml_archive_close(outputArchive);
+            srcml_archive_free(outputArchive);
+            exit(1);
+        }
     }
 
     // Prepare XPaths, primitives, ignored calls, and specifiers
@@ -81,7 +77,7 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     SPECIFIERS.initializeSpecifiersList();
 
     // Verbose output
-    if (IS_VERBOSE) {
+    if (VERBOSE_REPORT) {
         PRIMITIVES.outputPrimitives();
         CALLS.outputIgnorableCalls();
         SPECIFIERS.outputSpecifiers();
@@ -111,10 +107,9 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     // Build signatures for findInheritedDataMembers()
     for (auto& pair : types) pair.second.buildMethodSignature();
     
-    // Finds inherited data members
+    // Finds unknown parents and inherited data members
     for (auto& pair : types) {
         findInheritedDataMembers(pair.second);
-        pair.second.setInherited(true);
         for (auto& pairS : types) pairS.second.setVisited(false);
     } 
 
@@ -138,12 +133,15 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     std::string InputFileNoExt = inputFile.substr(0, inputFile.size() - 4);
 
     // Verbose or CSV output file
-    if (IS_VERBOSE || CSV_REPORT) {
+    if (VERBOSE_REPORT || CSV_REPORT) {
         std::string header = "type_name,type_stereotype,function_name,function_stereotype";
-        if (IS_VERBOSE) {
-            header = "type_file_name,type_name,type_stereotype,type_parents,type_inherited_parents,type_function_signatures,"
-                     "type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
-                     "function_return_type,function_specifiers,function_internal_calls,function_internal_call_to_type_signatures,function_attributes_annotations,function_field_used,function_fields_modified,function_calls_on_fields,function_source_code";
+        if (VERBOSE_REPORT) {
+            // header = "type_file_name,type_name,type_stereotype,type_parents,type_inherited_parents,type_function_signatures,"
+            //          "type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
+            //          "function_return_type,function_specifiers,function_internal_calls,function_internal_call_to_type_signatures,function_attributes_annotations,function_field_used,function_fields_modified,function_calls_on_fields,function_source_code";
+            header = "type_file_name,type_name,type_parents,type_unknown_parents,type_function_signatures,type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
+                     "function_return_type,function_specifiers,function_external_calls,function_internal_calls,function_attributes,function_field_used,function_fields_modified,function_calls_on_fields";
+
         }
 
         std::ofstream out;
@@ -158,52 +156,54 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
         out.close();
     }
 
-    // Generate the stereotyped XML archive
-    archive = srcml_archive_create();
-    srcml_archive_read_open_filename(archive, inputFile.c_str());
-    unit = srcml_archive_read_unit(archive);
+    if (!DISABLE_SRCML_OUTPUT) {
+        // Generate the stereotyped XML archive
+        archive = srcml_archive_create();
+        srcml_archive_read_open_filename(archive, inputFile.c_str());
+        unit = srcml_archive_read_unit(archive);
 
-    std::vector<srcml_unit*> inputUnits;
-    std::map<int, srcml_unit*> outputUnits;
-    std::unordered_map<int, srcml_transform_result*> resultUnits;
-    
-    std::vector<std::thread> threads;
-    std::mutex mu;
+        std::vector<srcml_unit*> inputUnits;
+        std::map<int, srcml_unit*> outputUnits;
+        std::unordered_map<int, srcml_transform_result*> resultUnits;
+        
+        std::vector<std::thread> threads;
+        std::mutex mu;
 
-    unsigned int nthreads = std::thread::hardware_concurrency();
+        unsigned int nthreads = std::thread::hardware_concurrency();
 
-    unitNumber = 1;
-    while(unit) {
-        unsigned int threadPoolCount = 0;
-        while ((threadPoolCount < nthreads) && unit) {
-            inputUnits.push_back(unit);
+        unitNumber = 1;
+        while(unit) {
+            unsigned int threadPoolCount = 0;
+            while ((threadPoolCount < nthreads) && unit) {
+                inputUnits.push_back(unit);
 
-            threads.emplace_back(std::thread(&stereotypesAnalyzer::outputWorker, this, unit, unitNumber, std::ref(outputUnits), std::ref(XPATH_LIST[unitNumber]), std::ref(resultUnits), std::ref(mu)));
-            ++unitNumber;
-            ++threadPoolCount;
+                threads.emplace_back(std::thread(&stereotypesAnalyzer::outputWorker, this, unit, unitNumber, std::ref(outputUnits), std::ref(XPATH_LIST[unitNumber]), std::ref(resultUnits), std::ref(mu)));
+                ++unitNumber;
+                ++threadPoolCount;
 
-            unit = srcml_archive_read_unit(archive);
+                unit = srcml_archive_read_unit(archive);
+            }
+            for (std::thread& thread : threads) if (thread.joinable()) thread.join();
+            threads.clear();
+
+            // Registering the stereotype namespace for unit
+            for (const auto& pair : outputUnits) {
+                srcml_unit_register_namespace(pair.second, "st", "http://www.srcML.org/srcML/stereotype");
+                srcml_archive_write_unit(outputArchive, pair.second);
+            }
+        
+            // Clean
+            for (const auto& pair : resultUnits) srcml_transform_free(pair.second);
+            for (const auto& inputUnit : inputUnits) srcml_unit_free(inputUnit); 
+            inputUnits.clear();
+            outputUnits.clear();
+            resultUnits.clear();
         }
-        for (std::thread& thread : threads) if (thread.joinable()) thread.join();
-        threads.clear();
-
-        // Registering the stereotype namespace for unit
-        for (const auto& pair : outputUnits) {
-            srcml_unit_register_namespace(pair.second, "st", "http://www.srcML.org/srcML/stereotype");
-            srcml_archive_write_unit(outputArchive, pair.second);
-        }
-    
-        // Clean
-        for (const auto& pair : resultUnits) srcml_transform_free(pair.second);
-        for (const auto& inputUnit : inputUnits) srcml_unit_free(inputUnit); 
-        inputUnits.clear();
-        outputUnits.clear();
-        resultUnits.clear();
+        srcml_archive_close(archive);
+        srcml_archive_free(archive);
+        srcml_archive_close(outputArchive);
+        srcml_archive_free(outputArchive);
     }
-    srcml_archive_close(archive);
-    srcml_archive_free(archive);
-    srcml_archive_close(outputArchive);
-    srcml_archive_free(outputArchive);
 }
 
 
@@ -270,13 +270,18 @@ void stereotypesAnalyzer::findTypeInfo(srcml_unit* inputUnit, int unitNumber) {
             const std::string& typeNameParsed = type.getName()[1];
 
             // Needed for inheritance in Java and C#
-            if (unitLanguage != "C++") genericTypes.insert({type.getName()[2], type.getName()[1]}); 
+            if (unitLanguage != "C++") {
+                genericTypes.insert({type.getName()[2], type.getName()[1]}); 
+            }
 
             // Checks for partial classes in C# and adds them to a separate list to be analyzed later. 
             // For non-partial classes, adds them to the main types list
-            if (types.find(typeNameParsed) != types.end()) duplicateTypes.push_back(std::move(type));
-            else types.insert({typeNameParsed, std::move(type)});
-            
+            if (types.find(typeNameParsed) != types.end()) {
+                duplicateTypes.push_back(std::move(type));
+            } else {
+                types.insert({typeNameParsed, std::move(type)});
+            }
+
             srcml_unit_free(typeUnit);
             srcml_archive_close(typeArchive);
             srcml_archive_free(typeArchive); 
@@ -397,76 +402,115 @@ void stereotypesAnalyzer::analyzeDuplicates() {
 // In C++, you can inherit from a specialized templated type or
 //  you can specialize the inheritance itself from the generic type, or
 //  you can inherit from the generic type itself.
+// In srcML, the name does not have the generics <>. But the parent names can have them.
 // For example:
-//  myType --> childType : myType<T> or childType : myType<int>
-//  specializedType<int> --> childType : specializedType<int>
+//  myType | childType : myType<T> | childType : myType<int>
+//  specializedType<int> | childType : specializedType<int>
 //
 // In Java and C#, you can inherit from the generic type or specialize the inheritance.
+// In srcML, the name and the parent names have the generics <>
 // For example:
-//  myType<T1, T2> --> childType : myType<T1, T2> or childType : myType<int, double>
+//  myType<T1, T2> | childType : myType<T1, T2> | childType : myType<int, double>
 //
+// For C++, we do need to check which fields or methods are accessible in inheritance chain (e.g., using 'private' specifier for inheritance)
+//   this is because the first child (call it X) that inherits from the parent type will have access to all the parent's data members, including the private ones,
+//   and if 'private' specifier is used for inheritance, then everything inherited will simply become private in the child type, so the first child will still have access to all the parent's data members, 
+//   but any other later child that inherits from X will not have access to any of the X's data members since they are all private in X
+//   Therefore, we could just collect everything across the entire hierarchy and then during analysis, methods will only access data members that are not private in the parent type, 
+//   so even if these private data members are collected, they will simply not be accessed in the child type or any of its children anyway.
+// 
 void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
     type.setVisited(true); 
-    // A copy here since parentNames will append the inherited ones
-    std::unordered_set<std::string> parentTypeNames =  type.getParentNames();
 
-    for (std::string parentTypeName : parentTypeNames){
+    // Try to match the name as is
+    for (auto parentNamesVector : type.getParentNames()){
+        std::string parentTypeName = parentNamesVector[1];
         auto result = types.find(parentTypeName);
+
+        // Try matching name as is without whitespaces and namespaces for all languages
         if (result != types.end()) {
             // Checking for ( isVisited ) is needed since even if ( isInherited ) is true, we might reach
             //  this type multiple times from ( type ), and we do not want to append it multiple times 
             if (result->second.isInherited() && !result->second.isVisited()) {
-                type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
-                                                result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
+                type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
+                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
                 result->second.setVisited(true);
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedDataMembers(result->second);
-                type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
-                                                result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
+                type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
+                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
             }
         }       
         else {
+             // Try matching name as is without whitespaces, namespaces, and generics
             if (type.getUnitLanguage() == "C++") {
-                parentTypeName = parentTypeName.substr(0, parentTypeName.find("<"));
+                parentTypeName = parentNamesVector[3];
                 result = types.find(parentTypeName);
                 if (result != types.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
-                        type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
-                                                        result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
+                        type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
+                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
                         result->second.setVisited(true);
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedDataMembers(result->second);
-                        type.appendInheritedDataMembers(result->second.getFields(), result->second.getMethodSignatures(), result->second.getParentNames(),
-                                                        result->second.getInheritedFields(), result->second.getInheritedMethodSignatures(), result->second.getInheritedParentNames()); 
+                        type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(), 
+                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
                     }
-                }              
+                }  
+                else {
+                    // One of the parents is not defined in the code, 
+                    // so we mark the type as having unknown parents
+                    if (!type.hasUnknownParent()) {
+                        type.setUnknownParent(true);
+                    }
+                }
             }
             else {  
-                HELPERS::removeBetweenComma(parentTypeName, true);
+                parentTypeName = parentNamesVector[2];
                 auto resultG = genericTypes.find(parentTypeName);
+                 // Try matching name as is without whitespaces, namespaces, and anything between the generics <>
                 if (resultG != genericTypes.end()) {
                     auto resultM = types.find(resultG->second);
                     if (resultM != types.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
-                            type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getMethodSignatures(), resultM->second.getParentNames(),
-                                                            resultM->second.getInheritedFields(), resultM->second.getInheritedMethodSignatures(), resultM->second.getInheritedParentNames()); 
+                            type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getInheritedFields(), resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures(),
+                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures()); 
                             resultM->second.setVisited(true);
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedDataMembers(resultM->second);
-                            type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getMethodSignatures(), resultM->second.getParentNames(),
-                                                            resultM->second.getInheritedFields(), resultM->second.getInheritedMethodSignatures(), resultM->second.getInheritedParentNames()); 
+                            type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getInheritedFields(), resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures(), 
+                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures()); 
                         }
+                    }
+                }
+                else {
+                    if (!type.hasUnknownParent()) {
+                        type.setUnknownParent(true);
                     }
                 }
             }      
         }         
     }
+    if (!type.isInherited()) {
+        type.setInherited(true);
+    }
 }
+
+// // Finds unknown parents (parents that are not defined in the code) and marks the type as having unknown parents if any is found
+// //
+// void stereotypesAnalyzer::findUnknownParents(typeModel& type) {
+//     for (const auto& parentTypeName : type.getParentNames()) {
+//         if (types.find(parentTypeName[1]) == types.end()) {
+//             type.setUnknownParent(true);
+//             break;
+//         }
+//     }
+// }
 
 // Outputs a CSV report file containing stereotype information and meta data
 //  
@@ -475,22 +519,21 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
 
     if (isFreeFunction) functionsPtr = &freeFunctions;
     
-    if (IS_VERBOSE) {
+    if (VERBOSE_REPORT) {
         for (const functionModel& function : *functionsPtr) {
             std::string temp;
 
             std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[3] : "N/A");
-            std::string typeStereotype = isFreeFunction ? "N/A" : type->getStereotypesString();
             std::string typeParents = isFreeFunction ? "N/A" : (type->getParentNames().size() > 0 ? type->getParentsString() : "N/A");
-            std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentNames().size() > 0 ? type->getInheritedParentsString() : "N/A");
-            std::string signatures = isFreeFunction ?  (function.getNameSignature().first.empty() ? "N/A" :  function.getNameSignature().first + function.getNameSignature().second) : (type->getMethodSignatures().size() > 0 ? type->getMethodSignaturesString() : "N/A");
-            std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
-            std::string functionAttributesOrAnnotations = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
+            std::string typeUnknownParents = isFreeFunction ? "N/A" : (type->hasUnknownParent() ? "True" : "False");
+            std::string signatures = isFreeFunction ?  (function.getNameSignature().first.empty() ? "N/A" :  function.getNameSignature().first + function.getNameSignature().second) : (type->getMethodSignatures().size() > 0 || type->getDeclMethodSignatures().size() > 0  ? type->getMethodSignaturesString() : "N/A");
+            std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 || type->getInheritedDeclMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
+            std::string functionAttributes = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
             std::string specifiers = function.getSpecifiers().size() > 0 ? function.getSpecifiersString() : "N/A";
             std::string returnType = function.getReturnType().getType().empty() ? "N/A" : function.getReturnType().getType();
             std::string parametersList = function.getParametersList().empty() ? "N/A" : function.getParametersList();
-            std::string internalCallToTypeSignatures = function.getFunctionCalls().size() > 0 ? function.getInternalCallsString(false) : "N/A";
-            std::string internalCalls = function.getFunctionCalls().size() > 0 || function.getMethodCalls().size() > 0 || function.getNewConstructorCalls().size() > 0 ? function.getInternalCallsString(true) : "N/A";
+            std::string internalCalls = function.getFunctionCalls().size() > 0 ? function.getCallsString(false) : "N/A";
+            std::string externalCalls = function.getExternalCalls().size() > 0 ? function.getCallsString(true) : "N/A";
             std::string isFieldUsed = function.isFieldUsed() ? "True" :  "False";
             std::string isFieldModified = function.getFieldsModifiedCount() > 0 ? "True" :  "False";
             std::string isCallOnField = function.getMethodCalls().size() > 0 ? "True" :  "False";
@@ -498,12 +541,10 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
             std::string functionLineNumber = function.getLineNumber() != -1 ? std::to_string(function.getLineNumber()) : "N/A";
             std::string functionUnitLanguage = function.getUnitLanguage().empty() ? "N/A" : function.getUnitLanguage();
             std::string functionSignature = function.getNameSignature().first.empty() ? "N/A" : function.getNameSignature().first + function.getNameSignature().second;
-            std::string functionSourceCode = function.getSourceCode().empty() ? "N/A" : function.getSourceCode();
             csvFile << HELPERS::escapeCSV(function.getFileName()) << ","
                     << HELPERS::escapeCSV(typeName) << ","
-                    << HELPERS::escapeCSV(typeStereotype) << ","
                     << HELPERS::escapeCSV(typeParents) << ","
-                    << HELPERS::escapeCSV(typeInheritedParents) << ","
+                    << HELPERS::escapeCSV(typeUnknownParents) << ","
                     << HELPERS::escapeCSV(signatures) << ","
                     << HELPERS::escapeCSV(inheritedSignatures) << ","
                     << HELPERS::escapeCSV(functionName) << ","
@@ -514,13 +555,12 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
                     << HELPERS::escapeCSV(parametersList) << ","
                     << HELPERS::escapeCSV(returnType) << ","
                     << HELPERS::escapeCSV(specifiers) << ","
+                    << HELPERS::escapeCSV(externalCalls) << ","
                     << HELPERS::escapeCSV(internalCalls) << ","
-                    << HELPERS::escapeCSV(internalCallToTypeSignatures) << ","
-                    << HELPERS::escapeCSV(functionAttributesOrAnnotations) << ","
+                    << HELPERS::escapeCSV(functionAttributes) << ","
                     << HELPERS::escapeCSV(isFieldUsed) << ","
                     << HELPERS::escapeCSV(isFieldModified) << ","
-                    << HELPERS::escapeCSV(isCallOnField) << ","
-                    << HELPERS::escapeCSV(functionSourceCode) << "\n";
+                    << HELPERS::escapeCSV(isCallOnField) << "\n";
         }
     }
     else {
