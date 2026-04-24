@@ -489,14 +489,17 @@ void functionModel::findExpressionNames()  {
     srcml_unit_apply_transforms(methodArchive, methodUnit, &result);
     int n = srcml_transform_get_unit_size(result);
 
-    for (int i = 0; i < n; i++) expressionNames.insert(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+    for (int i = 0; i < n; i++) {
+        expressionNames.insert(srcml_unit_get_src(srcml_transform_get_unit(result, i)));
+    }
 
     srcml_clear_transforms(methodArchive);
     srcml_transform_free(result);    
 }
 
 // Finds names of expressions
-//
+// All expressions with some assignment operator is collected. 
+// Exception is made for C# where an assignment (e.g., Property = value) can be used in an initializer (e.g., var x = new Class { Property = value };), so only expressions with assignment that are not in an initializer are collected
 void functionModel::findExpressionAssignments()  {
     srcml_append_transform_xpath(methodArchive, XPATH_GENERATOR.getXPathList(unitLanguage,"expression_assignment").c_str());
     srcml_transform_result* result = nullptr;
@@ -793,7 +796,6 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
                                    const std::string& expression, bool returnCheck, 
                                    bool parameterModifiedCheck,  bool localModifiedCheck,
                                    bool isParamaterCheck, bool isLocalCheck) {
-                                    //else if (isVariableUsed(allFields, nullptr, it->getName(), false, false, false, true, true)) 
     std::string expr = expression; 
     HELPERS::removeWhitespace(expr);
     HELPERS::removeBracketSuffix(expr);
@@ -928,12 +930,8 @@ bool functionModel::isVariableUsed(const std::unordered_map<std::string, variabl
         }
     }
 
-    // The fieldsModified is only ever true for the findModifiedVariables function, and in that case, 
-    //  if we ever get here, it means that it was not a local or a parameter or a field, so it has to be an external instance field or an instance field that 
-    //  is not detected, so we will count this as a field modification
-    // It would be nice if we can make the same assumption for modifications that do not involve assignments (e.g., foo.call()), but we cannot tell if 'foo' is an external field or field not detected or some external class
-    // The only case where this might fail is if 'foo' is static and it is a field somewhere, which we should not consider it as a field modification since it is not modifying the 
-    //  state of the object, but we have no way to know if 'foo' is static or not, so we will just assume it is a field modification
+    // The 'fieldsModified' is only ever true for the 'findModifiedVariables' function, and in that case, 
+    //  if we ever get here, it means that it was not a local or a parameter or a field, so it has to be an external instance field/property that is not detected, so we will count this as a field modification
     //  
     if (fieldsModified) {
         if (fieldsModified->find(possibleVariable) == fieldsModified->end()) {

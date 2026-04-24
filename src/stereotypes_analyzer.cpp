@@ -139,7 +139,7 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
             // header = "type_file_name,type_name,type_stereotype,type_parents,type_inherited_parents,type_function_signatures,"
             //          "type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
             //          "function_return_type,function_specifiers,function_internal_calls,function_internal_call_to_type_signatures,function_attributes_annotations,function_field_used,function_fields_modified,function_calls_on_fields,function_source_code";
-            header = "type_file_name,type_name,type_parents,type_unknown_parents,type_function_signatures,type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
+            header = "type_file_name,type_name,type_parents,type_inherited_parents,type_unknown_parents,type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
                      "function_return_type,function_specifiers,function_external_calls,function_internal_calls,function_attributes,function_field_used,function_fields_modified,function_calls_on_fields";
 
         }
@@ -420,7 +420,7 @@ void stereotypesAnalyzer::analyzeDuplicates() {
 //   so even if these private data members are collected, they will simply not be accessed in the child type or any of its children anyway.
 // 
 void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
-    type.setVisited(true); 
+    type.setVisited(true);
 
     // Try to match the name as is
     for (auto parentNamesVector : type.getParentNames()){
@@ -429,18 +429,23 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
 
         // Try matching name as is without whitespaces and namespaces for all languages
         if (result != types.end()) {
-            // Checking for ( isVisited ) is needed since even if ( isInherited ) is true, we might reach
-            //  this type multiple times from ( type ), and we do not want to append it multiple times 
+            // Checking for 'isVisited' is needed since even if 'isInherited' is true, we might reach this parent multiple times (e.g., like B in A -> B,C and C -> B)
             if (result->second.isInherited() && !result->second.isVisited()) {
                 type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
-                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
+                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
                 result->second.setVisited(true);
+                // If the parent has unknown parents, then the child also has unknown parents
+                // This is needed because if the parent is inherited already, then we will not be able to reach it again to check for unknown parents, 
+                //  so we need to set the child as having unknown parents at this point if the parent has unknown parents
+                if (!type.hasUnknownParent()) {
+                    type.setUnknownParent(result->second.hasUnknownParent());
+                }
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedDataMembers(result->second);
                 type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
-                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
+                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
             }
         }       
         else {
@@ -451,14 +456,17 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                 if (result != types.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
                         type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
-                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
+                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
                         result->second.setVisited(true);
+                        if (!type.hasUnknownParent()) {
+                            type.setUnknownParent(result->second.hasUnknownParent());
+                        }
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedDataMembers(result->second);
                         type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(), 
-                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures()); 
+                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
                     }
                 }  
                 else {
@@ -478,13 +486,16 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                     if (resultM != types.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
                             type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getInheritedFields(), resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures(),
-                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures()); 
+                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures(), resultM->second.getParentNames(), resultM->second.getInheritedParentNames()); 
                             resultM->second.setVisited(true);
+                            if (!type.hasUnknownParent()) {
+                                type.setUnknownParent(resultM->second.hasUnknownParent());
+                            }
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedDataMembers(resultM->second);
                             type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getInheritedFields(), resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures(), 
-                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures()); 
+                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures(), resultM->second.getParentNames(), resultM->second.getInheritedParentNames()); 
                         }
                     }
                 }
@@ -501,17 +512,6 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
     }
 }
 
-// // Finds unknown parents (parents that are not defined in the code) and marks the type as having unknown parents if any is found
-// //
-// void stereotypesAnalyzer::findUnknownParents(typeModel& type) {
-//     for (const auto& parentTypeName : type.getParentNames()) {
-//         if (types.find(parentTypeName[1]) == types.end()) {
-//             type.setUnknownParent(true);
-//             break;
-//         }
-//     }
-// }
-
 // Outputs a CSV report file containing stereotype information and meta data
 //  
 void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeModel* type, bool isFreeFunction) {
@@ -524,10 +524,10 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
             std::string temp;
 
             std::string typeName = isFreeFunction ? "N/A" : (type->getName().size() > 0 ? type->getName()[3] : "N/A");
-            std::string typeParents = isFreeFunction ? "N/A" : (type->getParentNames().size() > 0 ? type->getParentsString() : "N/A");
+            std::string typeParents = isFreeFunction ? "N/A" : (type->getParentNames().size() > 0 ? type->getParentsString(false) : "N/A");
+            std::string typeInheritedParents = isFreeFunction ? "N/A" : (type->getInheritedParentNames().size() > 0 ? type->getParentsString(true) : "N/A");
             std::string typeUnknownParents = isFreeFunction ? "N/A" : (type->hasUnknownParent() ? "True" : "False");
-            std::string signatures = isFreeFunction ?  (function.getNameSignature().first.empty() ? "N/A" :  function.getNameSignature().first + function.getNameSignature().second) : (type->getMethodSignatures().size() > 0 || type->getDeclMethodSignatures().size() > 0  ? type->getMethodSignaturesString() : "N/A");
-            std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 || type->getInheritedDeclMethodSignatures().size() > 0 ? type->getInheritedMethodSignaturesString() : "N/A");
+            std::string inheritedSignatures = isFreeFunction ? "N/A" : (type->getInheritedMethodSignatures().size() > 0 || type->getInheritedDeclMethodSignatures().size() > 0 ? type->getMethodSignaturesString(true) : "N/A");
             std::string functionAttributes = function.getUnitLanguage() == "C++" ? "N/A" : (function.getAttributesOrAnnotations().size() > 0 ? function.getAttributesOrAnnotationsString() : "N/A");
             std::string specifiers = function.getSpecifiers().size() > 0 ? function.getSpecifiersString() : "N/A";
             std::string returnType = function.getReturnType().getType().empty() ? "N/A" : function.getReturnType().getType();
@@ -544,8 +544,8 @@ void stereotypesAnalyzer::outputStereotypesAsCSV(std::ofstream& csvFile, typeMod
             csvFile << HELPERS::escapeCSV(function.getFileName()) << ","
                     << HELPERS::escapeCSV(typeName) << ","
                     << HELPERS::escapeCSV(typeParents) << ","
+                    << HELPERS::escapeCSV(typeInheritedParents) << ","
                     << HELPERS::escapeCSV(typeUnknownParents) << ","
-                    << HELPERS::escapeCSV(signatures) << ","
                     << HELPERS::escapeCSV(inheritedSignatures) << ","
                     << HELPERS::escapeCSV(functionName) << ","
                     << HELPERS::escapeCSV(function.getStereotypesString()) << ","

@@ -217,7 +217,9 @@ void typeModel::findParentNames() {
 //   Therefore, regular properties will be treated like normal fields as they are used (most of the time) to get or set regular fields 
 //    where property name = field name and where property type = field type
 //   However, the assumption here is that their usage is assumed to be getting or setting a single field
-//  Static fields are ignored and treated as globals
+//  Static fields or auto-properties are ignored and treated as globals
+//  Const fields are ignored as they are implicitly static and thus treated as globals
+//  Auto-properties cannot be const
 // Java:
 //  Static fields are ignored and treated as globals
 //
@@ -452,42 +454,49 @@ std::string typeModel::getStereotypesString() const {
 
 // Gets the parent types as a single string
 //
-std::string typeModel::getParentsString() const {
+std::string typeModel::getParentsString(bool isInherited) const {
     std::string parentsString;
-    for (const auto& s : parentNames) {
-        if (!parentsString.empty()) parentsString += " ";
-        parentsString += s[3];
+    if (!isInherited) {
+        for (const auto& s : parentNames) {
+            if (!parentsString.empty()) parentsString += " ";
+            parentsString += s[3];
+        }
+    }
+    else {
+        for (const auto& s : inheritedParentNames) {
+            if (!parentsString.empty()) parentsString += " ";
+            parentsString += s[3];
+        }
     }
     return parentsString;
 }
 
-// Gets the method signatures as a single string
+
+
+// Gets the method signatures or inherited method signatures as a single string
 //
-std::string typeModel::getMethodSignaturesString() const {
+std::string typeModel::getMethodSignaturesString(bool isInherited) const {
     std::string methodsignature;
-    for (const std::pair<std::string, std::string> &s : methodSignatures) {
-        if (!methodsignature.empty()) methodsignature += " ";
-        methodsignature += s.first + s.second;
+    if (!isInherited) {
+        for (const std::pair<std::string, std::string> &s : methodSignatures) {
+            if (!methodsignature.empty()) methodsignature += " ";
+            methodsignature += s.first + s.second;
+        }
+        for (const std::pair<std::string, std::string> &s : declMethodSignatures) {
+            if (!methodsignature.empty()) methodsignature += " ";
+            methodsignature += s.first + s.second;
+        }
     }
-    for (const std::pair<std::string, std::string> &s : declMethodSignatures) {
-        if (!methodsignature.empty()) methodsignature += " ";
-        methodsignature += s.first + s.second;
+     else {
+        for (const std::pair<std::string, std::string> &s : inheritedMethodSignatures) {
+            if (!methodsignature.empty()) methodsignature += " ";
+            methodsignature += s.first + s.second;
+        }
+        for (const std::pair<std::string, std::string> &s : inheritedDeclMethodSignatures) {
+            if (!methodsignature.empty()) methodsignature += " ";
+            methodsignature += s.first + s.second;
+        }
     }
     return methodsignature;
-}
-
-// Gets the inherited method signatures as a single string
-//
-std::string typeModel::getInheritedMethodSignaturesString() const {
-    std::string inheritedMethodsignature;
-    for (const std::pair<std::string, std::string> &s : inheritedMethodSignatures) {
-        if (!inheritedMethodsignature.empty()) inheritedMethodsignature += " ";
-        inheritedMethodsignature += s.first + s.second;
-    }
-    for (const std::pair<std::string, std::string> &s : inheritedDeclMethodSignatures) {
-        if (!inheritedMethodsignature.empty()) inheritedMethodsignature += " ";
-        inheritedMethodsignature += s.first + s.second;
-    }
-    return inheritedMethodsignature;
 }
 

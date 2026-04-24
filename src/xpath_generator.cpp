@@ -150,12 +150,12 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:*[self::src:class or self::src:struct or self::src:interface]/src:super_list/src:super/src:name";
     xpathList[language]["parent_name"] = xpath;
 
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
+    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(src:decl/src:type/src:specifier='const') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:name[preceding-sibling::*[1][self::src:type]]";
     xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:name";
     xpathList[language]["field_name"] = xpath;  
 
-    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
+    xpath = "//src:decl_stmt[not(src:decl/src:type/src:specifier='static') and not(src:decl/src:type/src:specifier='const') and not(ancestor::src:function) and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]";
     xpath += "/src:decl/src:type[following-sibling::*[1][self::src:name]]";
     xpath += " | //src:property[not(src:type/src:specifier='static') and count(ancestor::src:class | ancestor::src:struct | ancestor::src:interface) = 1]/src:type";
     xpathList[language]["field_type"] = xpath;  
@@ -249,7 +249,7 @@ void XPathGenerator::generateXPathList() {
     xpath = "/src:unit/src:function/src:block//src:expr[count(ancestor::src:function) = 1]/src:name";
     xpathList[language]["expression_name"] = xpath;    
 
-    xpath = "/src:unit/src:function/src:block//src:expr[count(ancestor::src:function) = 1]/src:name[";
+    xpath = "/src:unit/src:function/src:block//src:expr[count(ancestor::src:function) = 1 and not(ancestor::src:decl_stmt)]/src:name[";
     xpath += "following-sibling::*[1][self::src:operator='=' or self::src:operator='+='";
     xpath += " or self::src:operator='-=' or self::src:operator='*=' or self::src:operator='/='";
     xpath += " or self::src:operator='%=' or self::src:operator='>>=' or self::src:operator='<<='";

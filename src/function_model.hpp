@@ -37,7 +37,6 @@ public:
     const std::string&                                  getUnitLanguage                        () const                { return unitLanguage;                         }
     const std::string&                                  getConstructorOrDestructor             () const                { return constructorOrDestructor;              }
     const std::string&                                  getFileName                            () const                { return fileName;                             }
-    // const std::string&                                  getSourceCode                          () const                { return sourceCode;                           }
     std::string                                         getStereotypesString                   () const;
     std::string                                         getSpecifiersString                    () const;
     std::string                                         getAttributesOrAnnotationsString       () const;

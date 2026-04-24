@@ -18,17 +18,16 @@ public:
                                                                      typeModel                          (const std::string&);
        
     std::string                                                      getStereotypesString               ()               const;
-    std::string                                                      getParentsString                   ()               const;
-    std::string                                                      getInheritedParentsString          ()               const;
-    std::string                                                      getMethodSignaturesString          ()               const;
-    std::string                                                      getInheritedMethodSignaturesString ()               const;
+    std::string                                                      getParentsString                   (bool)           const;
+    std::string                                                      getMethodSignaturesString          (bool)           const;
     std::string                                                      getStructure                       ()               const          { return structure;                              }
     const std::unordered_map<std::string, variableModel>&            getFields                          ()               const          { return fields;                                 }
     std::vector<functionModel>&                                      getMethods                         ()                              { return methods;                                }
     const std::string&                                               getUnitLanguage                    ()               const          { return unitLanguage;                           }
     const std::vector<std::string>&                                  getName                            ()               const          { return name;                                   }
     const std::vector<std::string>&                                  getStereotypes                     ()               const          { return stereotypes;                            }
-    const std::vector<std::vector<std::string>>&                     getParentNames                     ()               const          { return parentNames;                            }  
+    const std::vector<std::vector<std::string>>&                     getParentNames                     ()               const          { return parentNames;                            } 
+    const std::vector<std::vector<std::string>>&                     getInheritedParentNames            ()               const          { return inheritedParentNames;                   } 
     const std::set<std::pair<std::string, std::string>>&             getMethodSignatures                ()               const          { return methodSignatures;                       }      
     const std::set<std::pair<std::string, std::string>>&             getInheritedMethodSignatures       ()               const          { return inheritedMethodSignatures;              }   
     const std::set<std::pair<std::string, std::string>>&             getDeclMethodSignatures            ()               const          { return declMethodSignatures;                   }
@@ -54,13 +53,17 @@ public:
                                     const std::set<std::pair<std::string, std::string>>& methodSignatures_,
                                     const std::set<std::pair<std::string, std::string>>& inheritedMethodSignatures_,
                                     const std::set<std::pair<std::string, std::string>>& declMethodSignatures_,
-                                    const std::set<std::pair<std::string, std::string>>& inheritedDeclMethodSignatures_) { 
+                                    const std::set<std::pair<std::string, std::string>>& inheritedDeclMethodSignatures_,
+                                    const std::vector<std::vector<std::string>>& parentNames_,
+                                    const std::vector<std::vector<std::string>>& inheritedParentNames_) { 
         inheritedFields.insert(fields_.begin(), fields_.end());
         inheritedFields.insert(inheritedFields_.begin(), inheritedFields_.end());
         inheritedMethodSignatures.insert(methodSignatures_.begin(), methodSignatures_.end()); // From a parent type
         inheritedMethodSignatures.insert(inheritedMethodSignatures_.begin(), inheritedMethodSignatures_.end());
         inheritedDeclMethodSignatures.insert(declMethodSignatures_.begin(), declMethodSignatures_.end()); // From a parent type
         inheritedDeclMethodSignatures.insert(inheritedDeclMethodSignatures_.begin(), inheritedDeclMethodSignatures_.end());
+        inheritedParentNames.insert(inheritedParentNames.end(), parentNames_.begin(), parentNames_.end());
+        inheritedParentNames.insert(inheritedParentNames.end(), inheritedParentNames_.begin(), inheritedParentNames_.end());
     }
 
     void buildMethodSignature() { 
@@ -93,6 +96,7 @@ private:
     std::vector<std::string>                                attributesOrAnnotations;         // Attributes (C#) or annotations (Java)          
     std::vector<functionModel>                              methods;                         // Methods (including methods inside properties for C#)
     std::vector<std::vector<std::string>>                   parentNames;                     // Parent names where each is of Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
+    std::vector<std::vector<std::string>>                   inheritedParentNames;            // Inherited parent names
     std::set<std::pair<std::string, std::string>>           declMethodSignatures;            // Method declaration signatures (Unique)
     std::set<std::pair<std::string, std::string>>           inheritedDeclMethodSignatures;   // Inherited method declaration signatures (Unique)
     std::set<std::pair<std::string, std::string>>           methodSignatures;                // Method signatures (Unique)
