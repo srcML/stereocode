@@ -55,7 +55,8 @@ public:
                                     const std::set<std::pair<std::string, std::string>>& declMethodSignatures_,
                                     const std::set<std::pair<std::string, std::string>>& inheritedDeclMethodSignatures_,
                                     const std::vector<std::vector<std::string>>& parentNames_,
-                                    const std::vector<std::vector<std::string>>& inheritedParentNames_) { 
+                                    const std::vector<std::vector<std::string>>& inheritedParentNames_,
+                                    bool hasUnknownParent_) { 
         inheritedFields.insert(fields_.begin(), fields_.end());
         inheritedFields.insert(inheritedFields_.begin(), inheritedFields_.end());
         inheritedMethodSignatures.insert(methodSignatures_.begin(), methodSignatures_.end()); // From a parent type
@@ -64,6 +65,13 @@ public:
         inheritedDeclMethodSignatures.insert(inheritedDeclMethodSignatures_.begin(), inheritedDeclMethodSignatures_.end());
         inheritedParentNames.insert(inheritedParentNames.end(), parentNames_.begin(), parentNames_.end());
         inheritedParentNames.insert(inheritedParentNames.end(), inheritedParentNames_.begin(), inheritedParentNames_.end());
+
+        // If the parent has unknown parents, then the child also has unknown parents
+        // This is needed because if the parent is inherited already, then we will not be able to reach it again to check for unknown parents, 
+        //  so we need to set the child as having unknown parents at this point if the parent has unknown parents
+        if (!unknownParent && hasUnknownParent_) {
+            unknownParent = true;
+        }
     }
 
     void buildMethodSignature() { 

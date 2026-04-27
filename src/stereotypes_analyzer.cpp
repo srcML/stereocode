@@ -432,20 +432,14 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
             // Checking for 'isVisited' is needed since even if 'isInherited' is true, we might reach this parent multiple times (e.g., like B in A -> B,C and C -> B)
             if (result->second.isInherited() && !result->second.isVisited()) {
                 type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
-                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
+                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames(), result->second.hasUnknownParent()); 
                 result->second.setVisited(true);
-                // If the parent has unknown parents, then the child also has unknown parents
-                // This is needed because if the parent is inherited already, then we will not be able to reach it again to check for unknown parents, 
-                //  so we need to set the child as having unknown parents at this point if the parent has unknown parents
-                if (!type.hasUnknownParent()) {
-                    type.setUnknownParent(result->second.hasUnknownParent());
-                }
             }
                 
             else if (!result->second.isVisited()) {
                 findInheritedDataMembers(result->second);
                 type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
-                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
+                                                result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames(), result->second.hasUnknownParent()); 
             }
         }       
         else {
@@ -456,17 +450,15 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                 if (result != types.end()) {
                     if (result->second.isInherited() && !result->second.isVisited()) {
                         type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(),
-                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
+                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames(), result->second.hasUnknownParent()); 
                         result->second.setVisited(true);
-                        if (!type.hasUnknownParent()) {
-                            type.setUnknownParent(result->second.hasUnknownParent());
-                        }
+
                     }
                         
                     else if (!result->second.isVisited()) {
                         findInheritedDataMembers(result->second);
                         type.appendInheritedDataMembers(result->second.getFields(), result->second.getInheritedFields(), result->second.getMethodSignatures(), result->second.getInheritedMethodSignatures(), 
-                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames()); 
+                                                        result->second.getDeclMethodSignatures(), result->second.getInheritedDeclMethodSignatures(), result->second.getParentNames(), result->second.getInheritedParentNames(), result->second.hasUnknownParent()); 
                     }
                 }  
                 else {
@@ -486,16 +478,14 @@ void stereotypesAnalyzer::findInheritedDataMembers(typeModel& type) {
                     if (resultM != types.end()) {
                         if (resultM->second.isInherited() && !resultM->second.isVisited()) {
                             type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getInheritedFields(), resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures(),
-                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures(), resultM->second.getParentNames(), resultM->second.getInheritedParentNames()); 
+                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures(), resultM->second.getParentNames(), resultM->second.getInheritedParentNames(), resultM->second.hasUnknownParent()); 
                             resultM->second.setVisited(true);
-                            if (!type.hasUnknownParent()) {
-                                type.setUnknownParent(resultM->second.hasUnknownParent());
-                            }
+
                         }
                         else if (!resultM->second.isVisited()) {
                             findInheritedDataMembers(resultM->second);
                             type.appendInheritedDataMembers(resultM->second.getFields(), resultM->second.getInheritedFields(), resultM->second.getMethodSignatures(), resultM->second.getInheritedMethodSignatures(), 
-                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures(), resultM->second.getParentNames(), resultM->second.getInheritedParentNames()); 
+                                                            resultM->second.getDeclMethodSignatures(), resultM->second.getInheritedDeclMethodSignatures(), resultM->second.getParentNames(), resultM->second.getInheritedParentNames(), resultM->second.hasUnknownParent()); 
                         }
                     }
                 }
