@@ -51,8 +51,26 @@ std::string HELPERS::escapeCSV(const std::string& data) {
 // Extracts the line number from a string"
 //
 int HELPERS::extractFirstLineNumber(const std::string& text) {
+    size_t searchFrom = 0;
+
+    // Find where the method/constructor body begins
+    size_t blockPos = text.find("<block");
+    if (blockPos == std::string::npos) {
+        blockPos = text.length(); // Safe fallback if no block is found
+    }
+
+    // Jump to the actual function signature to bypass preceding attributes (if any)
+    // Visual Studio reports like numbers at the function level. srcML does it at the attribute level. We want to match Visual Studio's behavior for our analysis
+    // We look for "<type " ONLY before the <block> starts
+    // This prevents constructors from grabbing <type> tags from local variables inside the body
+    size_t typePos = text.find("<type ");
+    
+    if (typePos != std::string::npos && typePos < blockPos) {
+        searchFrom = typePos;
+    }
+
     std::string target = "pos:start=\"";
-    size_t startPos = text.find(target);
+    size_t startPos = text.find(target, searchFrom);
 
     if (startPos != std::string::npos) {
         // Move the index forward to where the actual numbers begin
@@ -67,6 +85,7 @@ int HELPERS::extractFirstLineNumber(const std::string& text) {
             return std::stoi(numberStr);
         }
     }
+    
     return -1; // Return -1 if the target wasn't found
 }
 

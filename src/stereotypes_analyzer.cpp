@@ -136,12 +136,8 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
     if (VERBOSE_REPORT || CSV_REPORT) {
         std::string header = "type_name,type_stereotype,function_name,function_stereotype";
         if (VERBOSE_REPORT) {
-            // header = "type_file_name,type_name,type_stereotype,type_parents,type_inherited_parents,type_function_signatures,"
-            //          "type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
-            //          "function_return_type,function_specifiers,function_internal_calls,function_internal_call_to_type_signatures,function_attributes_annotations,function_field_used,function_fields_modified,function_calls_on_fields,function_source_code";
             header = "type_file_name,type_name,type_parents,type_inherited_parents,type_unknown_parents,type_inherited_function_signatures,function_name,function_stereotype,function_line_number,function_signature,function_unit_language,function_parameters_list,"
                      "function_return_type,function_specifiers,function_external_calls,function_internal_calls,function_attributes,function_field_used,function_fields_modified,function_calls_on_fields";
-
         }
 
         std::ofstream out;
@@ -149,11 +145,13 @@ stereotypesAnalyzer::stereotypesAnalyzer(const std::string& inputFile, const std
         out << header << '\n';
         for (auto& pair : types) outputStereotypesAsCSV(out, &pair.second, false);        
         out.close();
-
-        out.open(InputFileNoExt + ".free_functions.stereotypes.csv");
-        out << header << '\n';
-        outputStereotypesAsCSV(out, nullptr, true);        
-        out.close();
+        
+        if (FREE_FUNCTION) {
+            out.open(InputFileNoExt + ".free_functions.stereotypes.csv");
+            out << header << '\n';
+            outputStereotypesAsCSV(out, nullptr, true);        
+            out.close();
+        }
     }
 
     if (!DISABLE_SRCML_OUTPUT) {
