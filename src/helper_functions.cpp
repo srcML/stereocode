@@ -9,14 +9,11 @@
 
 
 #include "helper_functions.hpp"
-#include "primitives.hpp"
-#include "specifiers.hpp"
+#include "qualified_name.hpp"
 
-#include <regex>
+#include <algorithm>
 #include <cctype>
-
-extern primitives PRIMITIVES;   
-extern specifiers SPECIFIERS;  
+#include <utility>
 
 // Helper to escape CSV fields for CSV parsers
 // Outer quotes handle commas, newlines, carriage returns, etc.
@@ -48,6 +45,48 @@ std::string HELPERS::escapeCSV(const std::string& data) {
     return result;
 }
 
+namespace {
+    // Tells whether an element with a name starts at a position of a srcML text
+    //
+    bool startsElement(const std::string& text, std::size_t position, const std::string& name) {
+        const std::size_t end = position + 1 + name.size();
+        return text.compare(position, name.size() + 1, "<" + name) == 0 && end < text.size() && (text[end] == ' ' || text[end] == '>');
+    }
+
+    // Gets the position after the attributes or annotations that the element at the start of a srcML text holds before its other children
+    // The elements of the same name inside an attribute or an annotation, such as the annotation of @A(@B), are counted to find its end
+    //
+    std::size_t afterLeadingAttributes(const std::string& text) {
+        std::size_t position = text.find('>');
+        if (position == std::string::npos) return 0;
+
+        for (++position;;) {
+            while (position < text.size() && std::isspace(static_cast<unsigned char>(text[position]))) ++position;
+
+            std::string name;
+            for (const char* candidate : {"attribute", "annotation"})
+                if (startsElement(text, position, candidate)) name = candidate;
+            if (name.empty()) return position;
+
+            const std::string endTag = "</" + name + ">";
+            int depth = 0;
+            do {
+                if (startsElement(text, position, name)) {
+                    ++depth;
+                    position += name.size() + 1;
+                }
+                else if (text.compare(position, endTag.size(), endTag) == 0) {
+                    --depth;
+                    position += endTag.size();
+                }
+                else if (++position >= text.size()) {
+                    return text.size();
+                }
+            } while (depth > 0);
+        }
+    }
+}
+
 // Extracts the line number from a string"
 //
 int HELPERS::extractFirstLineNumber(const std::string& text) {
@@ -67,6 +106,10 @@ int HELPERS::extractFirstLineNumber(const std::string& text) {
     
     if (typePos != std::string::npos && typePos < blockPos) {
         searchFrom = typePos;
+    }
+    // A constructor has no type, so its line is the line after its attributes
+    else {
+        searchFrom = afterLeadingAttributes(text);
     }
 
     std::string target = "pos:start=\"";
@@ -120,13 +163,6 @@ void HELPERS::removeBracketSuffix(std::string& text) {
     }
 }
 
-// Function that removes the leading asterisks
-//
-void HELPERS::removeLeadingAsterisks(std::string& text) {
-    while (!text.empty() && text.front() == '*') 
-        text.erase(0, 1);   
-}
-
 // Removes namespaces by finding the last :: or . and removing everything after it
 // if 'removeAll = false', then it keeps the last :: or .
 //
@@ -150,72 +186,6 @@ void HELPERS::removeNamespace(std::string& name, std::string_view unitLanguage, 
     }
 }
 
-// Removes all characters inside <> or () except for comma for generics and signatures
-// Input format: optional(...) with 'isGeneric = false' or optional<...> where 'isGeneric = true'
-// Examples:
-//  myObject<int, std::pair<int, int>> becomes myObject<,> --> (isGeneric = true)
-//  Foo(int, std::pair<int, int>, double) becomes Foo(,,) --> (isGeneric = false) 
-//  Foo(int, bar(int, int), double) becomes Foo(,,) --> (isGeneric = false)
-//  Foo(a < b, c) becomes Foo(,) --> (isGeneric = false)
-//  <a, b> becomes <,> --> (isGeneric = true)
-//  (a, b) becomes (,) --> (isGeneric = false)
-//
-void HELPERS::removeBetweenComma(std::string& s, bool isGeneric) {
-    std::size_t opening = isGeneric ? s.find('<') : s.find('(');
-    if (opening == std::string::npos) return;
-
-    std::string result = s.substr(0, opening + 1); 
-    
-    int parenDepth = 0;
-    int angleDepth = 0;
-    int trappedCommas = 0;
-
-    for (std::size_t i = opening + 1; i < s.length(); ++i) {
-        char c = s[i];
-
-        if (c == '(') { 
-            parenDepth++; 
-        } 
-        else if (c == '<') { 
-            angleDepth++; 
-        } 
-        else if (c == ')') {
-            if (parenDepth == 0) {
-                if (!isGeneric) { 
-                    if (angleDepth > 0) result.append(trappedCommas, ',');
-                    result += c;
-                    break;
-                }
-            } else {
-                parenDepth--;
-            }
-        } 
-        else if (c == '>') {
-            if (angleDepth == 0) {
-                if (isGeneric) { 
-                    result += c;
-                    break;
-                }
-            } else {
-                angleDepth--;
-                if (angleDepth == 0 && parenDepth == 0) {
-                    trappedCommas = 0; 
-                }
-            }
-        } 
-        else if (c == ',') {
-            if (parenDepth == 0) {
-                if (angleDepth == 0) {
-                    result += c;
-                } else {
-                    trappedCommas++;
-                }
-            }
-        }
-    }
-    s = result;
-}
-
 // Removes all whitespace from string
 //
 void HELPERS::removeWhitespace(std::string& s) {
@@ -223,36 +193,52 @@ void HELPERS::removeWhitespace(std::string& s) {
 }
 
 // Removes whitespaces, commas, and namespaces to get the core name of a type or a function for matching purposes
+// Each generic argument list is reduced to its commas, or removed, before the qualifier ends at the last :: or .,
+// so that a member of a class template, such as Box<T>::reset, keeps its own name, and operator< keeps its symbol
 //
 void HELPERS::nameFilter(std::string& name, std::vector<std::string>& nameVector,  std::string_view unitLanguage, bool removeNamespace) {
     nameVector.push_back(name); 
 
     HELPERS::removeWhitespace(name);
     nameVector.push_back(name);
-    
-    std::size_t listOpen = name.find("<");
-    if (listOpen != std::string::npos) {
-        std::string nameLeft = name.substr(0, listOpen);
-        std::string nameRight = name.substr(listOpen, name.size() - listOpen);
-        HELPERS::removeBetweenComma(nameRight, true);
-        if (removeNamespace) {
-            HELPERS::removeNamespace(nameLeft, unitLanguage, true);
-        }
-        nameVector.push_back(nameLeft + nameRight);
-        nameVector.push_back(nameLeft);
+
+    std::string skeleton = genericSkeleton(name);
+    std::string bare     = withoutGenericArguments(name);
+    if (removeNamespace) {
+        HELPERS::removeNamespace(skeleton, unitLanguage, true);
+        HELPERS::removeNamespace(bare, unitLanguage, true);
     }
-    else {
-        if (removeNamespace) {
-            HELPERS::removeNamespace(name, unitLanguage, true);
-        }
-        nameVector.push_back(name);
-        nameVector.push_back(name); // Not a duplicate
-    } 
+    nameVector.push_back(std::move(skeleton));
+    nameVector.push_back(std::move(bare));
 }
 
-// Removes namespaces and whitespace from parameter or argument lists for matching purposes
+// Gets the structure of a type, such as class or struct, from the text that its element holds besides its children
+// The text can hold the semicolon after a type body in any language, and a type without a keyword is a class
 //
-void HELPERS::parameterOrArgumentListFilter(std::string& parameterOrArgumentList) {
-    HELPERS::removeBetweenComma(parameterOrArgumentList, false);
-    HELPERS::removeWhitespace(parameterOrArgumentList);
+std::string HELPERS::typeStructure(std::string text) {
+    text.erase(std::remove_if(text.begin(), text.end(), [](unsigned char c) { return std::isspace(c) || c == ';'; }), text.end());
+    return text.empty() ? "class" : text;
+}
+
+// Gets a parameter or argument list of a signature, with one slot per item, such as (_,_) for two items
+//
+std::string HELPERS::signatureSlots(int itemCount) {
+    std::string slots = "(";
+    for (int i = 0; i < itemCount; ++i) slots += i == 0 ? "_" : ",_";
+    return slots + ")";
+}
+
+// Gets the type that the name of a conversion operator names, such as bool of 'operator bool' or of 'Ptr::operator bool', or nothing for another name
+//
+std::string HELPERS::conversionTypeOf(const std::string& functionName) {
+    const std::string keyword = "operator";
+    const std::size_t start = functionName.rfind(keyword);
+    if (start == std::string::npos || (start != 0 && (start < 2 || functionName.compare(start - 2, 2, "::") != 0))) return "";
+
+    const std::size_t typeStart = start + keyword.size();
+    if (typeStart >= functionName.size() || !std::isspace(static_cast<unsigned char>(functionName[typeStart]))) return "";
+
+    const std::size_t first = functionName.find_first_not_of(" \t\r\n", typeStart);
+    const std::size_t last  = functionName.find_last_not_of(" \t\r\n");
+    return first == std::string::npos ? "" : functionName.substr(first, last - first + 1);
 }

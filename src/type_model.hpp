@@ -10,69 +10,44 @@
 #ifndef TYPE_MODEL_HPP
 #define TYPE_MODEL_HPP
 
+#include <algorithm>
 #include <set>
 #include "function_model.hpp"
 
 class typeModel {
 public:
-                                                                     typeModel                          (const std::string&);
+                                                                     typeModel                          (const languageTables&, const std::string&, std::string);
        
     std::string                                                      getStereotypesString               ()               const;
     std::string                                                      getParentsString                   (bool)           const;
-    std::string                                                      getMethodSignaturesString          (bool)           const;
+    std::string                                                      getInheritedMethodSignaturesString ()               const;
     std::string                                                      getStructure                       ()               const          { return structure;                              }
-    const std::unordered_map<std::string, variableModel>&            getFields                          ()               const          { return fields;                                 }
     std::vector<functionModel>&                                      getMethods                         ()                              { return methods;                                }
+    const std::vector<functionModel>&                                getMethods                         ()               const          { return methods;                                }
     const std::string&                                               getUnitLanguage                    ()               const          { return unitLanguage;                           }
     const std::vector<std::string>&                                  getName                            ()               const          { return name;                                   }
-    const std::vector<std::string>&                                  getStereotypes                     ()               const          { return stereotypes;                            }
+    const std::vector<std::string>&                                  getScope                           ()               const          { return scope;                                  }
+    const std::vector<std::string>&                                  getPartFileNames                   ()               const          { return partFileNames;                          }
+    const std::vector<std::size_t>&                                  getParentParts                     ()               const          { return parentParts;                            }
     const std::vector<std::vector<std::string>>&                     getParentNames                     ()               const          { return parentNames;                            } 
     const std::vector<std::vector<std::string>>&                     getInheritedParentNames            ()               const          { return inheritedParentNames;                   } 
-    const std::set<std::pair<std::string, std::string>>&             getMethodSignatures                ()               const          { return methodSignatures;                       }      
     const std::set<std::pair<std::string, std::string>>&             getInheritedMethodSignatures       ()               const          { return inheritedMethodSignatures;              }   
-    const std::set<std::pair<std::string, std::string>>&             getDeclMethodSignatures            ()               const          { return declMethodSignatures;                   }
     const std::set<std::pair<std::string, std::string>>&             getInheritedDeclMethodSignatures   ()               const          { return inheritedDeclMethodSignatures;          }
-    std::unordered_map<std::string, variableModel>&                  getInheritedFields                 ()                              { return inheritedFields;                        }
-    const std::unordered_map<int, std::vector<std::string>>&         getXpath                           ()               const          { return xpath;                                  }    
-    int                                                              getConstructorDestructorCount      ()               const          { return constructorDestructorCount;             }
-    bool                                                             isInherited                        ()               const          { return inherited;                              }
-    bool                                                             isVisited                          ()               const          { return visited;                                }
+    const std::vector<elementLocation>&                              getLocations                       ()               const          { return locations;                              }
+    bool                                                             isPartial                          ()               const          { return partial;                                }
+    bool                                                             isStaticMethod                     (const std::string& s) const    { return staticMethodSignatures.count(s) > 0;    }
     bool                                                             hasUnknownParent                   ()               const          { return unknownParent;                          }
+    const std::unordered_set<std::string>&                           getStaticHolders                   ()               const          { return staticHolders;                          }
+    argumentRange                                                    argumentsOf                        (const functionModel&) const;
 
-    void                                                             setInherited                       (bool flag)                     { inherited = flag;                              }
-    void                                                             setVisited                         (bool flag)                     { visited = flag;                                }
     void                                                             setUnknownParent                   (bool flag)                     { unknownParent = flag;                          }
+    void                                                             addStaticHolders                   (const std::unordered_set<std::string>& h) { staticHolders.insert(h.begin(), h.end()); }
     void                                                             setStereotype                      (const std::string& s)          { stereotypes.push_back(s);                      }
-    void                                                             setConstructorDestructorCount      (int c)                         { constructorDestructorCount = c;                }     
-    void                                                             findData                           (const std::string&, const std::string&, int);
-    void                                                             findDataAfterCollection            ();
+    void                                                             findData                           (const srcmlDocument&, int, std::vector<std::string>);
+    void                                                             findDataAfterCollection            (const globalVariables&);
     void                                                             mergeData                          (typeModel& other);
-    
-    void appendInheritedDataMembers(const std::unordered_map<std::string, variableModel>& fields_, 
-                                    const std::unordered_map<std::string, variableModel>& inheritedFields_,
-                                    const std::set<std::pair<std::string, std::string>>& methodSignatures_,
-                                    const std::set<std::pair<std::string, std::string>>& inheritedMethodSignatures_,
-                                    const std::set<std::pair<std::string, std::string>>& declMethodSignatures_,
-                                    const std::set<std::pair<std::string, std::string>>& inheritedDeclMethodSignatures_,
-                                    const std::vector<std::vector<std::string>>& parentNames_,
-                                    const std::vector<std::vector<std::string>>& inheritedParentNames_,
-                                    bool hasUnknownParent_) { 
-        inheritedFields.insert(fields_.begin(), fields_.end());
-        inheritedFields.insert(inheritedFields_.begin(), inheritedFields_.end());
-        inheritedMethodSignatures.insert(methodSignatures_.begin(), methodSignatures_.end()); // From a parent type
-        inheritedMethodSignatures.insert(inheritedMethodSignatures_.begin(), inheritedMethodSignatures_.end());
-        inheritedDeclMethodSignatures.insert(declMethodSignatures_.begin(), declMethodSignatures_.end()); // From a parent type
-        inheritedDeclMethodSignatures.insert(inheritedDeclMethodSignatures_.begin(), inheritedDeclMethodSignatures_.end());
-        inheritedParentNames.insert(inheritedParentNames.end(), parentNames_.begin(), parentNames_.end());
-        inheritedParentNames.insert(inheritedParentNames.end(), inheritedParentNames_.begin(), inheritedParentNames_.end());
-
-        // If the parent has unknown parents, then the child also has unknown parents
-        // This is needed because if the parent is inherited already, then we will not be able to reach it again to check for unknown parents, 
-        //  so we need to set the child as having unknown parents at this point if the parent has unknown parents
-        if (!unknownParent && hasUnknownParent_) {
-            unknownParent = true;
-        }
-    }
+    void                                                             appendInheritedDataMembers         (const typeModel&);
+    void                                                             appendEnclosingDataMembers         (const typeModel&);
 
     void buildMethodSignature() { 
         for (const auto& m : methods) {
@@ -80,42 +55,49 @@ public:
         }
     }
     void addMethod(functionModel&& m)  { 
-        methods.push_back(m); 
+        methods.push_back(std::move(m));
     }
 
 private:
-    void                                                    findName                           ();
-    void                                                    findParentNames                    ();
-    std::string                                             findPropertyReturnType             ();
-    void                                                    findFieldNames                     (std::vector<variableModel>&);
-    void                                                    findFieldTypes                     (std::vector<variableModel>&);
-    void                                                    findMethods                        (const std::string&, const std::string&, int);
-    void                                                    findMethodDeclNames                (std::vector<std::pair<std::string, std::string>>&);
-    void                                                    findMethodDeclParameters           (std::vector<std::pair<std::string, std::string>>&);
-    void                                                    findProperties                     (const std::string&, const std::string&, int);
-    void                                                    findStructure                      ();     
-    void                                                    findMethodsInProperty              (const std::string&, const std::string&, const std::string&, int);
-    void                                                    findAttributesOrAnnotations        (); 
+    void                                                    findParentNames                    (const srcmlDocument&);
+    std::string                                             findPropertyReturnType             (const srcmlDocument&);
+    void                                                    findFields                         (const srcmlDocument&, int);
+    void                                                    findStaticFields                   (const srcmlDocument&);
+    void                                                    findMethods                        (const srcmlDocument&, int);
+    void                                                    findMethodDeclNames                (const srcmlDocument&, std::vector<std::pair<std::string, std::string>>&);
+    void                                                    findMethodDeclParameters           (const srcmlDocument&, std::vector<std::pair<std::string, std::string>>&);
+    void                                                    findProperties                     (const srcmlDocument&, int);
+    void                                                    findStructure                      (const srcmlDocument&);     
+    void                                                    findMethodsInProperty              (const srcmlDocument&, const std::string&, const std::string&, int);
+    void                                                    findStaticMethodSignatures         (const srcmlDocument&);
 
+    const languageTables*                                   tables{nullptr};                 // XPaths and lists read while the type is built
     std::string                                             unitLanguage;                    // Unit language (C, C#, C++, Java)
     std::string                                             structure;                       // class, struct, interface, enum, union 
     std::vector<std::string>                                name;                            // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
     std::vector<std::string>                                stereotypes;                     // Stereotype(s)
-    std::vector<std::string>                                attributesOrAnnotations;         // Attributes (C#) or annotations (Java)          
     std::vector<functionModel>                              methods;                         // Methods (including methods inside properties for C#)
     std::vector<std::vector<std::string>>                   parentNames;                     // Parent names where each is of Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
-    std::vector<std::vector<std::string>>                   inheritedParentNames;            // Inherited parent names
+    std::vector<std::vector<std::string>>                   inheritedParentNames;            // Inherited parent names, each once
     std::set<std::pair<std::string, std::string>>           declMethodSignatures;            // Method declaration signatures (Unique)
     std::set<std::pair<std::string, std::string>>           inheritedDeclMethodSignatures;   // Inherited method declaration signatures (Unique)
     std::set<std::pair<std::string, std::string>>           methodSignatures;                // Method signatures (Unique)
     std::set<std::pair<std::string, std::string>>           inheritedMethodSignatures;       // Inherited method signatures (Unique)
+    std::unordered_set<std::string>                         staticMethodSignatures;          // Name and parameter types of each static method that the type declares (C++)
+    std::unordered_map<std::string, argumentRange>          declaredArguments;               // Numbers of arguments of each method declaration by name and parameter types without qualifiers
     std::unordered_map<std::string, variableModel>          fields;                          // Key is field name and value is the field object
     std::unordered_map<std::string, variableModel>          inheritedFields;                 // Inherited fields
-    std::unordered_map<int, std::vector<std::string>>       xpath;                           // Unique xpath for type (types if partial in C# or duplicate types) along with the unit number
-    bool                                                    inherited{false};                // Did type inherit the data members yet? (Used for inheritance)
-    bool                                                    visited{false};                  // Has type been visited yet when inheriting? (Used for inheritance)    
-    bool                                                    unknownParent{false};            // True if type has an unknown parent (Used for inheritance and for checking degenerate methods)
-    int                                                     constructorDestructorCount{0};   // Number of constructor + destructor methods (Needed for type stereotypes calculations)
+    std::unordered_set<std::string>                         staticFields;                    // Names of the static fields, which are globals
+    std::unordered_set<std::string>                         staticHolders;                   // Types around the type and types of static imports, whose static fields its methods reach without their names
+    std::unordered_set<std::string>                         inheritedStaticFields;           // Names of the static fields of the known ancestors
+    std::unordered_map<std::string, variableModel>          enclosingFields;                 // Fields of the enclosing instances of a Java inner class, which no child inherits
+    std::unordered_set<std::string>                         enclosingStaticFields;           // Names of the static fields of the types of the enclosing instances
+    std::vector<elementLocation>                            locations;                       // Elements of the type (several for a partial type in C#)
+    std::vector<std::string>                                scope;                           // Namespaces or package around the type, outermost first
+    std::vector<std::string>                                partFileNames;                   // File of each element in locations
+    std::vector<std::size_t>                                parentParts;                     // Element in locations that names each parent in parentNames
+    bool                                                    partial{false};                  // The type is one part of a C# partial type
+    bool                                                    unknownParent{false};            // True if the type or one of its ancestors has a parent outside the archive, which only the verbose report reads
 }; 
 
 #endif

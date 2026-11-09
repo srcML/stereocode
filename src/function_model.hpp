@@ -10,40 +10,81 @@
 #ifndef FUNCTION_MODEL_HPP
 #define FUNCTION_MODEL_HPP
 
+#include "argument_range.hpp"
+#include "element_path.hpp"
+#include "global_variables.hpp"
+#include "name_resolution.hpp"
 #include "variable_model.hpp"
 #include "call_model.hpp"
 
-#include <srcml.h>
+#include <optional>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 
+struct languageTables;
+class srcmlDocument;
+class elementOrder;
+
+// A name or an expression in the body of a function, with its place among the scopes of the locals
+//
+struct bodyText {
+    std::string     text;                   // Source code of the name or the expression
+    int             position{0};            // Position of its element in the function, in document order
+    bool            dereferenced{false};    // A unary * writes the target of the name, as in *p = 1
+};
+
+// A local variable with the positions at which its name refers to it
+//
+struct scopedLocal {
+    variableModel   variable;
+    int             declared{0};            // Position of the declaration
+    int             scopeEnd{0};            // Position after the block, statement, or lambda that holds the declaration
+    bool            isStatic{false};        // A static local of C or C++ keeps its value between calls, as a global does
+};
+
+// The names that the type of a method declares or inherits, which tell the state of an object from the other names in its methods
+//
+struct typeMembers {
+    std::unordered_map<std::string, variableModel>  fields;                 // Data members of the type and of its known ancestors, this included
+    std::unordered_set<std::string>                 staticFields;           // Static fields of the type and of its known ancestors, which are globals
+    std::unordered_set<std::string>                 methodNames;            // Methods that the type and its known ancestors define or declare
+    std::unordered_set<std::string>                 ownTypes;               // The type and its parents, whose names qualify members of the object itself
+    std::unordered_set<std::string>                 staticHolders;          // Types whose static fields a name without a qualifier reaches, as the own types do
+    bool                                            unknownParent{false};   // An ancestor outside the archive may declare any other name
+};
+
 class functionModel {
 public:
-                                                        functionModel                          (const std::string&, const std::string&, const std::string&, const std::string&, int, int, bool);
+                                                        functionModel                          (const languageTables&, const srcmlDocument&, const std::optional<elementLocation>&, const std::string&, const std::string&, const std::string&, const std::string&, int, bool);
 
     const std::vector<std::string>&                     getStereotypes                         () const                { return stereotypes;                          }
     const std::vector<std::string>&                     getAttributesOrAnnotations             () const                { return attributesOrAnnotations;              }
-    const std::unordered_set<std::string>&              getSpecifiers                          () const                { return specifiers;                           }
+    const std::vector<std::string>&                     getSpecifiers                          () const                { return specifiers;                           }
     const std::vector<callModel>&                       getFunctionCalls                       () const                { return functionCalls;                        }
     const std::vector<callModel>&                       getMethodCalls                         () const                { return methodCalls;                          }
     const std::vector<callModel>&                       getNewConstructorCalls                 () const                { return newConstructorCalls;                  }
+    const std::vector<callModel>&                       getCallsOnResults                      () const                { return callsOnResults;                       }
     const std::vector<callModel>&                       getExternalCalls                       () const                { return externalCalls;                        }
     const variableModel&                                getReturnType                          () const                { return returnType;                           }
     const std::string&                                  getParametersList                      () const                { return parametersList;                       }
+    const std::string&                                  getParameterTypes                      () const                { return parameterTypes;                       }
+    const std::string&                                  getSignatureTypes                      () const                { return signatureTypes;                       }
+    const argumentRange&                                getArguments                           () const                { return arguments;                            }
     const std::vector<std::string>&                     getName                                () const                { return name;                                 }
     const std::pair<std::string, std::string>&          getNameSignature                       () const                { return nameSignature;                        }
-    const std::string&                                  getXpath                               () const                { return xpath;                                }
+    const std::optional<elementLocation>&               getLocation                            () const                { return location;                             }
     const std::string&                                  getUnitLanguage                        () const                { return unitLanguage;                         }
     const std::string&                                  getConstructorOrDestructor             () const                { return constructorOrDestructor;              }
     const std::string&                                  getFileName                            () const                { return fileName;                             }
+    const std::string&                                  getPropertyName                        () const                { return propertyName;                         }
+    const std::unordered_set<std::string>&              getStaticHolders                       () const                { return staticHolders;                        }
     std::string                                         getStereotypesString                   () const;
     std::string                                         getSpecifiersString                    () const;
     std::string                                         getAttributesOrAnnotationsString       () const;
     std::string                                         getReturnTypeParsed                    () const;
     std::string                                         getCallsString                         (bool) const;
     int                                                 getFieldsModifiedCount                 () const                { return fieldsModifiedCount;             }
-    int                                                 getUnitNumber                          () const                { return unitNumber;                           }
     int                                                 getLineNumber                          () const                { return lineNumber;                           }
     int                                                 getExternalFunctionCallsCount          () const                { return externalFunctionCallsCount;           }
     int                                                 getExternalMethodCallsCount            () const                { return externalMethodCallsCount;             }
@@ -51,9 +92,13 @@ public:
     bool                                                isMethodConst                          () const                { return methodConst;                          }
     bool                                                isFieldUsed                            () const                { return fieldUsed;                       }
     bool                                                isParameterUsed                        () const                { return parameterUsed;                        }
+    bool                                                isGlobalUsed                           () const                { return globalUsed;                           }
+    bool                                                isObjectReturned                       () const                { return objectReturned;                       }
+    bool                                                isObjectReplaced                       () const                { return objectReplaced;                       }
     bool                                                hasSimpleReturn                        () const                { return simpleReturn;                         }
     bool                                                hasComplexReturn                       () const                { return complexReturn;                        }
     bool                                                hasParameterComplexReturn              () const                { return parameterComplexReturn;               }
+    bool                                                isParameterReturned                    () const                { return parameterReturned;                    }
     bool                                                isParameterRefModified                 () const                { return parameterRefModified;                 }
     bool                                                isNewReturned                          () const                { return newReturned;                          }
     bool                                                isGlobalOrStaticVariableModified       () const                { return globalOrStaticVariableModified;       }
@@ -65,72 +110,85 @@ public:
     bool                                                isVariableCreatedAndReturnedWithNew    () const                { return variableCreatedWithNewAndReturned;    }
     bool                                                isNonPrimitiveLocalOrParameterModified () const                { return nonPrimitiveLocalOrParameterModified; }
     void                                                setStereotype                          (const std::string& s) { stereotypes.push_back(s);}  
-    void                                                findDataAfterCollection                (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);
-    void                                                findDataFreeFunctionAfterCollection    ();
+    void                                                addStaticHolders                       (const std::unordered_set<std::string>& h) { staticHolders.insert(h.begin(), h.end()); }
+    void                                                findDataAfterCollection                (const typeMembers&, const globalVariables&);
+    void                                                findDataFreeFunctionAfterCollection    (const globalVariables&, const std::unordered_set<std::string>&);
 
 private:
-    bool                                                isVariableUsed                         (const std::unordered_map<std::string, variableModel>&, std::unordered_set<std::string>*, const std::string&, bool, bool, bool, bool, bool);
-    int                                                 countMethodsInProperty                 () const;
-    void                                                findModifiedRefParameter               (std::string, bool);      
-    void                                                findVariablesInExpressions             (const std::unordered_map<std::string, variableModel>&, bool);
+    variableScopes                                      scopesAt                               (int, const std::unordered_map<std::string, variableModel>&, const globalVariables&) const;
+    int                                                 unitNumber                             () const;
+    const scopedLocal*                                  localAt                                (const std::string&, int, bool) const;
+    bool                                                isStaticLocal                          (const nameResolution&, int) const;
+    static bool                                         refersToObject                         (const nameResolution&);
+    void                                                noteUse                                (const nameResolution&, int, const std::unordered_map<std::string, variableModel>&);
+    void                                                noteReturnedVariable                   (const nameResolution&);
+    bool                                                changesCallerData                      (const std::string&, const nameResolution&) const;
+    void                                                findVariablesInExpressions             (const std::unordered_map<std::string, variableModel>&, const globalVariables&);
     void                                                findIgnorableCalls                     (std::vector<callModel>&);
-    void                                                findCallsOnFields                      (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&);   
-    void                                                findReturnedVariables                  (const std::unordered_map<std::string, variableModel>&, bool);
-    void                                                findModifiedVariables                  (const std::unordered_map<std::string, variableModel>&, bool);
-    void                                                findNameSignature                      ();
+    void                                                findCallsOnFields                      (const std::unordered_map<std::string, variableModel>&, const std::unordered_set<std::string>&, const std::unordered_set<std::string>&,
+                                                                                                const globalVariables&);
+    void                                                findReturnedVariables                  (const std::unordered_map<std::string, variableModel>&, const globalVariables&, bool);
+    void                                                findModifiedVariables                  (const std::unordered_map<std::string, variableModel>&, const typeMembers&, const globalVariables&, bool);
     void                                                findNonPrimitive                       ();
-    void                                                findName                               ();
-    void                                                findReturnType                         ();
-    void                                                findParameterList                      ();
-    void                                                findLocalVariableName                  ();
-    void                                                findLocalVariableType                  ();
-    void                                                findParameterName                      ();
-    void                                                findParameterType                      ();
-    void                                                findReturnExpression                   ();
-    void                                                findCallName                           ();
-    void                                                findCallArgument                       ();
-    void                                                findNewAssignedVariables               ();
-    void                                                findConst                              ();
-    void                                                isConstructorOrDestructor              ();
-    void                                                findConstructorOrDestructorType        ();
-    void                                                findExpressionNames                    ();
-    void                                                findExpressionAssignments              ();
-    void                                                findNonCommentStatements               ();
-    void                                                findSpecifiers                         ();
-    void                                                findAttributesOrAnnotations            (); 
-    void                                                findPropertyAttributes                 (); 
+    void                                                findName                               (const srcmlDocument&);
+    void                                                findReturnType                         (const srcmlDocument&, const std::string&);
+    void                                                findParameterList                      (const srcmlDocument&);
+    void                                                findLocalVariables                     (const srcmlDocument&, elementOrder&);
+    void                                                findParameters                         (const srcmlDocument&, const std::string&);
+    void                                                findReturnExpression                   (const srcmlDocument&, elementOrder&);
+    void                                                findCalls                              (const srcmlDocument&, elementOrder&);
+    void                                                findNewAssignedVariables               (const srcmlDocument&);
+    void                                                findConst                              (const srcmlDocument&);
+    void                                                findConstructorOrDestructorType        (const srcmlDocument&);
+    void                                                findExpressionNames                    (const srcmlDocument&, elementOrder&);
+    void                                                findExpressionAssignments              (const srcmlDocument&, elementOrder&);
+    void                                                findNonCommentStatements               (const srcmlDocument&);
+    void                                                findSpecifiers                         (const srcmlDocument&);
+    void                                                findAttributesOrAnnotations            (const srcmlDocument&); 
 
+    const languageTables*                             tables{nullptr};                            // XPaths and lists, which findDataAfterCollection() and getReturnTypeParsed() also read
     std::vector<std::string>                          name;                                       // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and in-between generic in ( <> ) | same as last but without ( <> )
-    std::pair<std::string, std::string>               nameSignature;                              // Name without name without whitespaces, namespaces, and generics <> + parameters list (commas only). For example, foo(,,)
+    std::pair<std::string, std::string>               nameSignature;                              // Name without whitespaces, namespaces, and generics <> + the types of the parameters. For example, foo(int,double)
     variableModel                                     returnType;                                 // Return type
     std::string                                       fileName;                                   // File name where method is defined 
     std::string                                       parametersList;                             // Parameter list
+    std::string                                       parameterTypes;                             // Types of the parameters, such as (int,constchar*), which tell overloads apart
+    std::string                                       signatureTypes;                             // Types of the parameters in the signature, without names and specifiers, such as (int,char*)
+    argumentRange                                     arguments;                                  // Numbers of arguments that the parameter list takes
     std::string                                       unitLanguage;                               // Unit language
-    std::string                                       xpath;                                      // Unique xpath
+    std::string                                       propertyName;                               // Property or indexer that holds a C# accessor, such as Count or this(int)
+    std::optional<elementLocation>                    location;                                   // Element that receives the stereotypes in the srcML output, if any
     std::string                                       constructorOrDestructor;                    // Method is a constructor or a destructor
-    std::vector<variableModel>                        parametersOrdered;                          // List of all parameters (Needed in order to build the parameters map)
-    std::vector<variableModel>                        localsOrdered;                              // List of all local (Needed in order to build the locals map)     
     std::unordered_map<std::string, variableModel>    parameters;                                 // Map of all parameters. Key is parameter name
-    std::unordered_map<std::string, variableModel>    locals;                                     // Map of all locals. Key is local name         
+    std::unordered_set<std::string>                   arrayParameters;                            // Parameters declared as arrays after their name, such as a of int a[]
+    std::unordered_set<std::string>                   referenceParameters;                        // Parameters passed by reference with out or ref (C# only)
+    std::unordered_set<std::string>                   sharedParameters;                           // Parameters whose object the caller shares, which calls on them may change
+    std::unordered_set<std::string>                   sharedPointees;                             // C++ parameters of a std::shared_ptr or std::weak_ptr, whose object a call or a write through -> may change
+    std::unordered_set<std::string>                   staticHolders;                              // Types whose static fields a name without a qualifier reaches: the types around the function, the type of a method and its known ancestors, and the types of static imports
+    std::unordered_multimap<std::string, scopedLocal> locals;                                     // All locals with their scopes. Key is local name
     std::string                                       typeNameParsed;                             // Type name without whitespaces, namespaces, and generics <>
-    std::unordered_set<std::string>                   specifiers;                                 // List of specifiers
+    std::vector<std::string>                          specifiers;                                 // List of specifiers, each once, in source order
     std::unordered_set<std::string>                   variablesCreatedWithNew;                    // List of variables that are declared/initialized with the "new" operator
-    std::unordered_set<std::string>                   expressionNames;                            // List of names of expressions in a method
-    std::unordered_set<std::string>                   expressionAssignments;                      // List of assignments of expressions in a method
+    std::vector<bodyText>                             expressionNames;                            // Names that the expressions of a method use
+    std::vector<bodyText>                             expressionAssignments;                      // Names that the expressions of a method write
     std::vector<std::string>                          stereotypes;                                // Method stereotype(s)
     std::vector<std::string>                          attributesOrAnnotations;                    // List of attributes (C#) or annotations (Java) 
-    std::vector<std::string>                          propertyAttributes;                         // List of property attributes (C#)
     std::vector<callModel>                            externalCalls;                              // External function calls + method calls + constructor calls
     std::vector<callModel>                            functionCalls;                              // List of function calls (e.g., foo() or bar::foo()) where ( foo ) is another method in the type ( bar )
     std::vector<callModel>                            methodCalls;                                // List of method calls (e.g., a.foo()) where ( a ) is a field in the type
     std::vector<callModel>                            newConstructorCalls;                        // List of constructor calls that uses the ( new ) operator whether the type or external types
-    std::vector<std::string>                          returnExpressions;                          // List of all return expressions in a method
+    std::vector<callModel>                            callsOnResults;                             // List of calls on the result of a call or a cast (e.g., c() of a.b().c())
+    std::vector<bodyText>                             returnExpressions;                          // List of all return expressions in a method
     bool                                              methodConst{false};                         // Is it a const method? (C++ only)
     bool                                              fieldUsed{false};                           // Does it use at least 1 field in an expression? 
     bool                                              parameterUsed{false};                       // Does it use at least 1 parameter in an expression?
+    bool                                              globalUsed{false};                          // Does it use a global or a static, as a read, a write, or a call?
+    bool                                              objectReturned{false};                      // Does a return expression return the object itself, as return this; or return *this; does?
+    bool                                              objectReplaced{false};                      // Does it write the whole object, as this = value; or *this = value; does?
     bool                                              simpleReturn{false};                        // Does it contain at least 1 return expression that just returns a field?
     bool                                              complexReturn{false};                       // Does it contain at least 1 return expression that is not a simple return?
     bool                                              parameterComplexReturn{false};              // Does it contain at least 1 return expression that is not a simple return? (For parameters)
+    bool                                              parameterReturned{false};                   // Does it contain at least 1 return expression that returns a parameter? (For free functions)
     bool                                              parameterRefModified{false};                // Does it modify at least 1 parameter that is passed by reference?
     bool                                              nonPrimitiveLocalOrParameterModified{false};// Does it modify at least 1 non-primitive parameter or a non-primitive local?
     bool                                              globalOrStaticVariableModified{false};      // Does it change any global or static variables?
@@ -142,7 +200,7 @@ private:
     bool                                              newReturned{false};                         // There is at least one return that a return a "new" call
     bool                                              variableCreatedWithNewAndReturned{false};   // There is at least 1 return expression that returns a field, a local, a parameter, a static, or a global created with the 'new' operator 
     bool                                              isProperty{false};                          // Is it a property? (C# only)
-    int                                               unitNumber{-1};                             // srcML Unit number   
+    bool                                              unknownParent{false};                       // Its type has an ancestor outside the archive, which may declare any name that is no global of the unit of the function
     int                                               lineNumber{-1};                             // Line number of the method declaration (Requires --position)
     int                                               fieldsModifiedCount{0};                     // Number of modified fields
     int                                               externalFunctionCallsCount{0};              // Number of function calls (e.g., foo()) where ( foo ) is a free function or a static method

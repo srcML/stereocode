@@ -10,13 +10,24 @@
  #ifndef STEREOTYPE_RULES_HPP
  #define STEREOTYPE_RULES_HPP
 
+ #include "called_methods.hpp"
+ #include "stereotype_classifier.hpp"
  #include "type_model.hpp"
+
+ #include <optional>
+ #include <vector>
  
  class stereotypeRules {
  public:
-    void computeMethodStereotypes         (std::unordered_map<std::string, typeModel>&);
-    void computeTypeStereotypes          (std::unordered_map<std::string, typeModel>&);
+    explicit stereotypeRules              (std::optional<int>);
+    void computeMethodStereotypes         (std::vector<typeModel>&, const calledMethods&);
+    void computeTypeStereotypes          (const std::vector<typeModel*>&             );
     void computeFreeFunctionStereotypes  (std::vector<functionModel>&                );
+    void outputLargeClassThreshold       () const;
+ private:
+    std::optional<int>  largeClassThreshold;  // Method threshold of -l for the large type stereotype (e.g., large-class)
+    methodCountSummary  methodSummary;        // Methods per class of the run, or per labeled type without a class, which give the threshold without -l
+    bool                thresholdOverClasses{false};  // The run has a class, so methodSummary counts the classes alone
  }; 
  
  #endif

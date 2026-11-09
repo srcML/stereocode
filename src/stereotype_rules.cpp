@@ -9,528 +9,178 @@
 
 #include "stereotype_rules.hpp"
 #include "helper_functions.hpp"
+#include "stereotype_classifier.hpp"
 
-std::unordered_map<int, std::unordered_map
-                  <std::string, std::string>> XPATH_LIST; // Map key = unit number. Each map value is a pair of xpath and stereotype  
-extern int                                    METHODS_PER_TYPE_THRESHOLD;
+#include <cstddef>
+#include <iomanip>
+#include <iostream>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <unordered_set>
 
-// Compute method stereotypes
+// Takes the method threshold of -l for large types, or nothing to compute the threshold from the types of the run
 //
-void stereotypeRules::computeMethodStereotypes(std::unordered_map<std::string, typeModel>& typeCollection) {
-    for (auto& pair : typeCollection) {
-        // Common operations
-        const std::string&          unitLanguage               = pair.second.getUnitLanguage();
-        int                         constructorDestructorCount = 0;
-        std::vector<functionModel>& methods                    = pair.second.getMethods();
+stereotypeRules::stereotypeRules(std::optional<int> largeClassThreshold_) : largeClassThreshold{largeClassThreshold_} {}
 
-        for (auto& m : methods) {
-            // Common operations
-            std::string        returnTypeParsed                       = m.getReturnTypeParsed();
-            int                fieldsModifiedCount                    = m.getFieldsModifiedCount();
-            int                callsOnFieldsCount                     = m.getMethodCalls().size();
-            int                callsOnTypeMethodsCount                = m.getFunctionCalls().size();
-            int                newConstructorCallsCount               = m.getNewConstructorCalls().size();
-            int                callsOnFreeFunctionsCount              = m.getExternalFunctionCallsCount();
-            int                callsToOtherTypeMethods                = m.getExternalMethodCallsCount();
-            int                numOfNonCommentStatements              = m.getNonCommentStatementsCount();
-            bool               isFieldUsed                            = m.isFieldUsed();
-            bool               isMethodConst                          = m.isMethodConst();
-            bool               isVoidPointer                          = false;
-            bool               isVariableCreatedAndReturnedWithNew    = m.isVariableCreatedAndReturnedWithNew();
-            bool               isNonPrimitiveReturnType               = m.isNonPrimitiveReturnType();
-            bool               isNewReturned                          = m.isNewReturned();
-            bool               isParameterRefModified                 = m.isParameterRefModified();
-            bool               hasSimpleReturn                        = m.hasSimpleReturn();   
-            bool               hasComplexReturn                       = m.hasComplexReturn(); 
-            bool               isNonPrimitiveLocalOrParameterModified = m.isNonPrimitiveLocalOrParameterModified();
-            bool               isNonPrimitiveFieldExternal            = m.isNonPrimitiveFieldExternal();
-            bool               isNonPrimitiveLocalExternal            = m.isNonPrimitiveLocalExternal();
-            bool               isNonPrimitiveParamaterExternal        = m.isNonPrimitiveParamaterExternal();
-            bool               isNonPrimitiveReturnTypeExternal       = m.isNonPrimitiveReturnTypeExternal();
+namespace {
+    // Gets the signature that tells a method of a type from the other methods, where a C# accessor takes the name of its property, such as Count.get,
+    // or nothing for a function whose markup lacks a parameter list
+    //
+    std::optional<std::string> methodSignature(const functionModel& m) {
+        if (!m.getPropertyName().empty()) return m.getPropertyName() + "." + m.getName()[1];
+        if (m.getParameterTypes().empty()) return std::nullopt;
+        return m.getName()[1] + m.getParameterTypes() + (m.isMethodConst() ? "const" : "");
+    }
 
-            // Covers the case of void with * or more
-            std::string returnTypeVoid = m.getReturnType().getType();
-            HELPERS::removeWhitespace(returnTypeVoid);
-            if (unitLanguage != "Java") if (returnTypeVoid.find("void*") != std::string::npos) isVoidPointer = true;
-            
-            
-            // constructor copy-constructor destructor
-            //
-            if (!m.getConstructorOrDestructor().empty()) {  
-                ++constructorDestructorCount;
+    // Reads the facts of a method of a type that the method stereotype rules use, with the methods of the run that its calls may reach
+    //
+    methodFacts readMethodFacts(const functionModel& m, std::size_t type, const std::string& unitLanguage, const calledMethods& called) {
+        methodFacts facts;
+        facts.language                             = unitLanguage;
+        facts.constructorOrDestructor              = m.getConstructorOrDestructor();
+        facts.returnType                           = m.getReturnTypeParsed();
+        facts.declaredReturnType                   = m.getReturnType().getType();
+        HELPERS::removeWhitespace(facts.declaredReturnType);
+        facts.fieldsModified                       = m.getFieldsModifiedCount();
+        for (const callModel& call : m.getMethodCalls())   facts.callsOnFields.push_back({called.ofCallOnField(type, call), call.isResultWritten()});
+        for (const callModel& call : m.getFunctionCalls()) facts.typeMethodCalls.push_back({called.ofCallToType(type, call), call.isResultWritten()});
+        facts.newConstructorCalls                  = static_cast<int>(m.getNewConstructorCalls().size());
+        facts.callsOnFreeFunctions                 = m.getExternalFunctionCallsCount();
+        facts.callsToOtherTypeMethods              = m.getExternalMethodCallsCount();
+        facts.nonCommentStatements                 = m.getNonCommentStatementsCount();
+        facts.fieldUsed                            = m.isFieldUsed();
+        facts.isConst                              = m.isMethodConst();
+        facts.simpleReturn                         = m.hasSimpleReturn();
+        facts.complexReturn                        = m.hasComplexReturn();
+        facts.returnsObject                        = m.isObjectReturned();
+        facts.objectReplaced                       = m.isObjectReplaced();
+        facts.parameterRefModified                 = m.isParameterRefModified();
+        facts.nonPrimitiveReturnType               = m.isNonPrimitiveReturnType();
+        facts.newReturned                          = m.isNewReturned();
+        facts.variableCreatedWithNewAndReturned    = m.isVariableCreatedAndReturnedWithNew();
+        facts.nonPrimitiveLocalOrParameterModified = m.isNonPrimitiveLocalOrParameterModified();
+        facts.nonPrimitiveFieldExternal            = m.isNonPrimitiveFieldExternal();
+        facts.nonPrimitiveLocalExternal            = m.isNonPrimitiveLocalExternal();
+        facts.nonPrimitiveParameterExternal        = m.isNonPrimitiveParamaterExternal();
+        facts.nonPrimitiveReturnTypeExternal       = m.isNonPrimitiveReturnTypeExternal();
+        return facts;
+    }
 
-                if      (m.getConstructorOrDestructor() == "destructor"      ) m.setStereotype ("destructor"      ); 
-                else if (m.getConstructorOrDestructor() == "copy-constructor") m.setStereotype ("copy-constructor");
-                else                                                           m.setStereotype ("constructor"     );
-            }
+    // Reads the stereotypes of the methods of a type, constructors and destructors excluded
+    // A method defined in several #if or #else alternatives counts once, with the stereotypes of its first definition
+    //
+    std::vector<stereotypeList> readMethodStereotypes(const std::vector<functionModel>& methods) {
+        std::vector<stereotypeList> stereotypes;
+        std::unordered_set<std::string> signatures;
+        for (const functionModel& m : methods) {
+            if (!m.getConstructorOrDestructor().empty()) continue;
 
-            // empty
-            //
-            // 1] Method has no statements except for comments
-            //
-            else if (numOfNonCommentStatements == 0) m.setStereotype("empty");
-            else {
-                // get
-                //
-                // 1] Return type is not void
-                // 2] Contains at least one simple return expression that 
-                //     returns a field (e.g., return a;) or the value to a field (e.g., return *a; or return **a; ... etc)
-                //     The field ( a ) can be of any data type (e.g., primitive, non-primitive, pointer, reference, etc)
-                //
-                // Returning ( this ) by itself is not a getter (e.g., return this;) 
-                //  as it points to the current object rather than a field
-                //
-                if (hasSimpleReturn) m.setStereotype("get"); 
-                    
-                
-                // predicate
-                //
-                // 1] Return type is Boolean
-                // 2] Contains at least one complex return expression (e.g., return a+5;)
-                // 3] Uses a field in an expression or has at least 
-                //     one function call (except constructor calls) to other methods in type
-                //
-                // Returning "this" by itself is not a predicate (e.g., return this;) 
-                //  as it points to the current object rather than a bool value found using fields
-                // 
-                bool  returnType = false;
+            const std::optional<std::string> signature = methodSignature(m);
+            if (signature && !signatures.insert(*signature).second) continue;
 
-                if      (unitLanguage == "C++")  returnType = (returnTypeParsed == "bool");
-                else if (unitLanguage == "C#")   returnType = (returnTypeParsed == "bool") || (returnTypeParsed == "Boolean");
-                else if (unitLanguage == "Java") returnType = (returnTypeParsed == "boolean");
-
-                if (returnType && hasComplexReturn && (isFieldUsed || (callsOnTypeMethodsCount > 0))) 
-                    m.setStereotype("predicate"); 
-
-                // property
-                //
-                // 1] Return type is not void or Boolean
-                // 2] Contains at least one complex return statement (e.g., return a+5;)
-                // 3] Uses a field in an expression or has at least 
-                //     one function call (except constructor calls) to other methods in type
-                //
-                // Returning "this" by itself is not a property (e.g., return this;) 
-                //  as it points to the current object rather than a non-bool value found using fields
-                //  
-                bool returnNotVoidOrBool = false;
-
-                if      (unitLanguage == "C++")  returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "void" && 
-                                                                        returnTypeParsed != "") || isVoidPointer;
-                else if (unitLanguage == "C#")   returnNotVoidOrBool = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" && 
-                                                                        returnTypeParsed != "void" && returnTypeParsed != "Void" && 
-                                                                        returnTypeParsed != "") || isVoidPointer;
-                else if (unitLanguage == "Java") returnNotVoidOrBool = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
-                                                                        returnTypeParsed != "Void" && returnTypeParsed != "");
-
-                if (returnNotVoidOrBool && hasComplexReturn && (isFieldUsed || (callsOnTypeMethodsCount > 0))) 
-                    m.setStereotype("property");
-                
-            
-                // void-accessor
-                //
-                // 1] Return type is void 
-                // 2] Contains at least one parameter that is passed by non-const reference and is assigned a value
-                // 3] Uses a field in an expression or has at least 
-                //     one function call (except constructor calls) to other methods in type 
-                //
-                // The "this" keyword by itself is considered (e.g., p = this or p = *this) 
-                //  as an accessor to the state of the object where 'p' is passed by reference
-                //
-                if (isParameterRefModified && (returnTypeParsed == "void") && !isVoidPointer && (isFieldUsed || (callsOnTypeMethodsCount > 0))) 
-                    m.setStereotype("void-accessor");       
-                
-
-                // set
-                //
-                // 1] Only one field is changed or there is a single call on a field
-                // 2] No calls to methods in type
-                //
-                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C# or this./->dataMember = value)
-                //       
-                if (callsOnTypeMethodsCount == 0 && 
-                   ((fieldsModifiedCount == 1 && callsOnFieldsCount == 0) || 
-                    (fieldsModifiedCount == 0 && callsOnFieldsCount == 1)))
-                    m.setStereotype("set"); 
-                
-
-                // command
-                //
-                // Method has a void return type
-                // Method is not const or const but has mutable fields (C++ only)
-                // Cases:
-                //   Case 1: More than one field is modifed
-                //           
-                //   Case 2: one field is modifed and
-                //            there is at least one call on a field or
-                //            at least one function call to other methods (except constructor calls) in type
-                //   Case 3: zero fields are modifed and
-                //            there is at least two calls on one or more fields or
-                //            at least one function call to other methods (except constructor calls) in type  
-                //
-                // The "this" keyword by itself is considered (e.g., this["index"] = value; for indexers in C# or this./->dataMember = value)
-                //
-                // non-void-command    
-                //   Method return type is not void
-                //             
-                bool case1       = fieldsModifiedCount > 1;
-                bool case2       = (fieldsModifiedCount == 1) && ((callsOnTypeMethodsCount + callsOnFieldsCount) > 0);
-                bool case3       = (fieldsModifiedCount == 0) && ((callsOnFieldsCount > 1) || (callsOnTypeMethodsCount > 0));
-                
-                bool isMutable = isMethodConst && case1;
-                bool isNonVoidReturn = returnTypeParsed != "void" && returnTypeParsed != "Void" && !isVoidPointer;
-
-                if (case1 || case2 || case3) {
-                    if (!isMethodConst || isMutable){ // Handles case of mutable fields in C++
-                        if (isNonVoidReturn) m.setStereotype("non-void-command");  
-                        else m.setStereotype("command");
-                    }
-                } 
-                    
-
-                // factory
-                //
-                // 1] Factories must include a non-primitive type in their return type
-                //      and their return expression must be a local variable, parameter, or field, that 
-                //      call a constructor call or has a return expression with a constructor call (e.g., new)
-                //
-                //
-                if (isNonPrimitiveReturnType && (isNewReturned || isVariableCreatedAndReturnedWithNew))
-                    m.setStereotype("factory"); 
-                         
-                // wrapper
-                //
-                // 1] No fields are modified
-                // 2] No calls to methods in type
-                // 3] No calls on fields
-                // 4] Has at least one free function call 
-                // Constructor calls using the 'new' operator are not considered 
-                //
-                // controller
-                //
-                // 1] No fields are modified
-                // 2] No calls to methods in type
-                // 3] No calls on fields
-                // 3] Has at least one call to other type methods or mutates a parameter or a local that is non-primitive
-                //
-                // collaborator
-                //
-                // 1] It must use at least 1 non-primitive type (not of this type)
-                // 2] Type could be a parameter, local variable, return type, or an field
-                //
-                //
-                if ((fieldsModifiedCount == 0) && (callsOnTypeMethodsCount == 0) && (callsOnFieldsCount == 0) 
-                    && (callsToOtherTypeMethods == 0) && (callsOnFreeFunctionsCount > 0)) 
-                    m.setStereotype("wrapper");
-
-                else if ((fieldsModifiedCount == 0) && (callsOnTypeMethodsCount == 0) && (callsOnFieldsCount == 0) &&
-                    ((callsToOtherTypeMethods > 0) || isNonPrimitiveLocalOrParameterModified))
-                    m.setStereotype("controller");   
-
-                else if (isNonPrimitiveFieldExternal || isNonPrimitiveLocalExternal || 
-                    isNonPrimitiveParamaterExternal || (isNonPrimitiveReturnTypeExternal || isVoidPointer))
-                    m.setStereotype("collaborator"); 
-
-
-                // incidental 
-                //
-                // 1] Method contains at least one non-comment statement (i.e., method is not empty)
-                // 2] No fields are used or modified (including no use of keyword "this" by itself)
-                // 3] No calls of any kind
-                // 
-                bool noCalls = callsOnTypeMethodsCount == 0 && callsOnFieldsCount == 0 && 
-                               newConstructorCallsCount == 0 && callsToOtherTypeMethods == 0 && callsOnFreeFunctionsCount == 0;
-
-                if (!isFieldUsed & noCalls) 
-                    m.setStereotype("incidental");          
-            
-                    
-                // stateless
-                //
-                // 1]	Method contains at least one non-comment statement (i.e., method is not empty)
-                // 2]	No fields are used or modified (including no use of keyword "this" by itself)
-                // 3]	No calls to methods in type 
-                // 4]   No calls on fields
-                // 5]   Has at least one call to other type methods (including constructor calls) or to a free function 
-                //
-                if (!isFieldUsed && callsOnTypeMethodsCount == 0 && callsOnFieldsCount == 0 &&
-                   ((callsOnFreeFunctionsCount > 0) || (callsToOtherTypeMethods > 0) || (newConstructorCallsCount > 0)))
-                   m.setStereotype("stateless");             
-                
-            }
-            
-            // unclassified
-            //
-            // No stereotype found
-            //
-            if (m.getStereotypes().size() == 0)  m.setStereotype("unclassified");
-
-            // Used to for re-documenting the system with the stereotype information
-            XPATH_LIST[m.getUnitNumber()].insert({m.getXpath(), m.getStereotypesString()});    
+            stereotypeList labels;
+            for (const std::string& name : m.getStereotypes())
+                if (std::optional<stereotype> label = stereotypeFromName(name)) labels.push_back(*label);
+            stereotypes.push_back(labels);
         }
-        pair.second.setConstructorDestructorCount(constructorDestructorCount);
+        return stereotypes;
+    }
+
+    // Tells whether a type is a class element of C++, C#, or Java, a Java record included, which no option adds to the run
+    //
+    bool isClassElement(const typeModel& type) {
+        return type.getStructure() == "class" || type.getStructure() == "record";
+    }
+
+    // Reads the facts of a free function that the free-function stereotype rules use
+    //
+    freeFunctionFacts readFreeFunctionFacts(const functionModel& f) {
+        freeFunctionFacts facts;
+        facts.language                          = f.getUnitLanguage();
+        facts.name                              = f.getName()[1];
+        facts.returnType                        = f.getReturnTypeParsed();
+        facts.declaredReturnType                = f.getReturnType().getType();
+        HELPERS::removeWhitespace(facts.declaredReturnType);
+        facts.calls                             = static_cast<int>(f.getMethodCalls().size() + f.getFunctionCalls().size() + f.getCallsOnResults().size());
+        facts.nonCommentStatements              = f.getNonCommentStatementsCount();
+        facts.parameterUsed                     = f.isParameterUsed();
+        facts.globalUsed                        = f.isGlobalUsed();
+        facts.parameterComplexReturn            = f.hasParameterComplexReturn();
+        facts.parameterReturned                 = f.isParameterReturned();
+        facts.parameterRefModified              = f.isParameterRefModified();
+        facts.globalOrStaticVariableModified    = f.isGlobalOrStaticVariableModified();
+        facts.nonPrimitiveReturnType            = f.isNonPrimitiveReturnType();
+        facts.newReturned                       = f.isNewReturned();
+        facts.variableCreatedWithNewAndReturned = f.isVariableCreatedAndReturnedWithNew();
+        return facts;
     }
 }
 
-// Compute type stereotype
+// Compute the method stereotypes of the run at once, since a call reads the stereotypes of the methods that it may reach
+//
+void stereotypeRules::computeMethodStereotypes(std::vector<typeModel>& typeCollection, const calledMethods& called) {
+    std::vector<methodFacts> facts;
+    for (std::size_t type = 0; type < typeCollection.size(); ++type) {
+        for (const functionModel& m : typeCollection[type].getMethods())
+            facts.push_back(readMethodFacts(m, type, typeCollection[type].getUnitLanguage(), called));
+    }
+
+    const std::vector<stereotypeList> labels = classifyMethods(facts);
+    std::size_t position = 0;
+    for (typeModel& type : typeCollection) {
+        for (functionModel& m : type.getMethods()) {
+            for (stereotype label : labels[position]) m.setStereotype(std::string(stereotypeName(label)));
+            ++position;
+        }
+    }
+}
+
+// Compute the type stereotypes of the types that the run labels
+// Without -l, the numbers of methods of the classes give the large-class threshold, so -t, -u, -i, and -e leave it unchanged,
+// while a run without a class takes every labeled type
 // Constructors and destructors are not considered in the computation of type stereotypes
-// 
-void stereotypeRules::computeTypeStereotypes(std::unordered_map<std::string, typeModel>& typeCollection) {
-    for (auto& pair : typeCollection) {
-        std::unordered_map<std::string, int> methodStereotypes = {
-            {"get", 0},
-            {"predicate", 0},
-            {"property", 0},
-            {"void-accessor", 0},
-            {"set", 0},
-            {"command", 0},
-            {"non-void-command", 0},
-            {"collaborator", 0},
-            {"controller", 0},
-            {"wrapper", 0},
-            {"factory", 0},
-            {"incidental", 0},
-            {"stateless", 0},  
-            {"empty", 0},
-            {"unclassified", 0},
-        };
+//
+void stereotypeRules::computeTypeStereotypes(const std::vector<typeModel*>& labeledTypes) {
+    std::vector<typeCounts> counts;
+    std::vector<int>        typeMethodCounts;
+    std::vector<int>        classMethodCounts;
+    for (const typeModel* type : labeledTypes) {
+        counts.push_back(countTypeStereotypes(readMethodStereotypes(type->getMethods())));
+        typeMethodCounts.push_back(counts.back().methods);
+        if (isClassElement(*type)) classMethodCounts.push_back(counts.back().methods);
+    }
+    thresholdOverClasses = !classMethodCounts.empty();
+    methodSummary = summarizeMethodCounts(thresholdOverClasses ? classMethodCounts : typeMethodCounts);
 
-        const std::vector<functionModel>& methods           = pair.second.getMethods();
-        int                               nonCollaborators  = 0;
-        for (const auto& m : methods) {      
-            if (m.getConstructorOrDestructor().empty()) {
-                for (const std::string& s : m.getStereotypes()) methodStereotypes[s]++;
-            
-                std::string methodStereotype = m.getStereotypesString();
-                if (methodStereotype.find("collaborator") == std::string::npos &&
-                    methodStereotype.find("controller") == std::string::npos && 
-                    methodStereotype.find("wrapper") == std::string::npos)
-                    nonCollaborators++;
-            }
-        }
-
-        int getters       = methodStereotypes["get"];
-        int accessors     = getters + methodStereotypes["predicate"] +
-                            methodStereotypes["property"] +
-                            methodStereotypes["void-accessor"]; 
-        int setters       = methodStereotypes["set"];     
-        int commands      = methodStereotypes["command"] + methodStereotypes["non-void-command"];           
-        int mutators      = setters + commands;
-        int controllers   = methodStereotypes["controller"];
-        int collaborator  = methodStereotypes["collaborator"] + methodStereotypes["wrapper"]; 
-        int collaborators = controllers + collaborator;
-        int factory       = methodStereotypes["factory"];
-        int degenerates   = methodStereotypes["incidental"] + methodStereotypes["stateless"] + methodStereotypes["empty"];
-        int allMethods    = methods.size() - pair.second.getConstructorDestructorCount();
-
-        // Entity
-        //
-        if (((accessors - getters) != 0) && ((mutators - setters)  != 0) ) {
-            double ratio = double(collaborators) / double(nonCollaborators);
-            if (ratio >= 2 && controllers == 0) 
-                pair.second.setStereotype("entity");   
-        }
-
-
-        // Minimal Entity
-        //
-        if (((allMethods - (getters + setters + commands)) == 0) && (getters != 0) && (setters != 0) & (commands != 0)) {
-            double ratio = double(collaborators) / double(nonCollaborators);
-            if (ratio >= 2) 
-                pair.second.setStereotype("minimal-entity");   
-        }
-
-
-        // Data Provider
-        //
-        if ((accessors > 2 * mutators) && (accessors > 2 * (controllers + factory)) )
-            pair.second.setStereotype("data-provider");
-
-
-        // Commander
-        //
-        if ((mutators > 2 * accessors) && (mutators > 2 * (controllers + factory)))
-            pair.second.setStereotype("commander");
-
-
-        // Boundary
-        //
-        if ((collaborators > nonCollaborators) && (factory < 0.5 * allMethods) && (controllers < 0.33 * allMethods))
-            pair.second.setStereotype("boundary");
-
-
-        // Factory
-        //
-        if (factory > 0.67 * allMethods)
-            pair.second.setStereotype("factory");
-        
-
-        // Controller
-        //
-        if ((controllers + factory > 0.67 * allMethods) && ((accessors != 0) || (mutators != 0)))
-            pair.second.setStereotype("controller");
-
-
-        // Pure Controller
-        //
-        if ((controllers + factory != 0) && ((accessors + mutators + collaborator) == 0) && (controllers != 0)) 
-            pair.second.setStereotype("pure-controller");
-
-
-        // Large
-        //
-        std::string dynamicStereotype = "large-" + pair.second.getStructure();
-        int accPlusMut = accessors + mutators;
-        int facPlusCon = controllers + factory;
-        if (((0.2 * allMethods < accPlusMut) && (accPlusMut < 0.67 * allMethods )) &&
-            ((0.2 * allMethods < facPlusCon) && (facPlusCon < 0.67 * allMethods )) &&
-            (factory != 0) && (controllers != 0) && (accessors != 0) && (mutators != 0) ) {
-                if (allMethods > METHODS_PER_TYPE_THRESHOLD) { 
-                    pair.second.setStereotype(dynamicStereotype);
-            }
-        }
-        
-
-        // Lazy
-        //
-        dynamicStereotype = "lazy-" + pair.second.getStructure();
-        if ((getters + setters != 0) && (((degenerates / double(allMethods)) > 0.33)) &&
-        (((allMethods - (degenerates + getters + setters)) / double(allMethods))  <= 0.2))
-            pair.second.setStereotype(dynamicStereotype);
-        
-
-        // Degenerate
-        //
-        if ((degenerates / double(allMethods)) > 0.5)  
-            pair.second.setStereotype("degenerate");
-        
-
-        // Data
-        //
-        dynamicStereotype = "data-" + pair.second.getStructure();
-        if ((allMethods - (getters + setters) == 0) && ((getters + setters) != 0))
-            pair.second.setStereotype(dynamicStereotype);
-        
-
-        // Small
-        //
-        dynamicStereotype = "small-" + pair.second.getStructure();
-        if ((0 < allMethods) && (allMethods < 3))
-            pair.second.setStereotype(dynamicStereotype);
-
-
-        // Empty (Considered degenerate)
-        //
-        if (allMethods == 0)
-            pair.second.setStereotype("empty");
-   
-
-        if (pair.second.getStereotypes().size() == 0) 
-            pair.second.setStereotype("unclassified");
-
-        const std::unordered_map<int, std::vector<std::string>>& xpath = pair.second.getXpath();
-        for (const auto& pairXpath : xpath) 
-            for (const auto& typeXpath : pairXpath.second) XPATH_LIST[pairXpath.first].insert({typeXpath, pair.second.getStereotypesString()});
-    }  
+    const int threshold = largeClassThreshold.value_or(methodSummary.largeTypeThreshold);
+    for (std::size_t i = 0; i < labeledTypes.size(); ++i) {
+        for (stereotype label : classifyType(counts[i], threshold))
+            labeledTypes[i]->setStereotype(typeStereotypeName(label, labeledTypes[i]->getStructure()));
+    }
 }
 
 void stereotypeRules::computeFreeFunctionStereotypes(std::vector<functionModel>& freeFunctions) {
     for (functionModel& f : freeFunctions) {
-        // Common operations
-        const std::string& methodName                               = f.getName()[1];
-        std::string        returnTypeParsed                         = f.getReturnTypeParsed();
-        const std::string& unitLanguage                             = f.getUnitLanguage();
-        int                nonNewConstructorCallsCount              = f.getMethodCalls().size() + f.getFunctionCalls().size();
-        int                nonCommentStatementsCount                = f.getNonCommentStatementsCount();
-        bool               isVariableCreatedAndReturnedWithNew      = f.isVariableCreatedAndReturnedWithNew();
-        bool               hasParameterComplexReturn                = f.hasParameterComplexReturn();
-        bool               isParamaterUsed                          = f.isParameterUsed();
-        bool               isParameterRefModified                   = f.isParameterRefModified();
-        bool               isNonPrimitiveReturnType                 = f.isNonPrimitiveReturnType();
-        bool               isNewReturned                            = f.isNewReturned();
-        bool               isGlobalOrStaticVariableModified         = f.isGlobalOrStaticVariableModified();
-
-
-        // main
-        //
-        // A main function
-        //
-        if (methodName == "main" || methodName == "Main") f.setStereotype("main");
-
-
-        // empty
-        //
-        // Has no statements
-        //
-        else if (nonCommentStatementsCount == 0) f.setStereotype("empty");
-                
-        
-        else {
-            // predicate
-            //
-            // Returns a bool derived from the parameters
-            //
-            bool                              boolReturnType = false;
-            if      (unitLanguage == "C++")   boolReturnType = (returnTypeParsed == "bool");
-            else if (unitLanguage == "C#")    boolReturnType = (returnTypeParsed == "bool") ||  (returnTypeParsed == "Boolean");
-            else if (unitLanguage == "Java")  boolReturnType = (returnTypeParsed == "boolean");
-
-            if (boolReturnType && hasParameterComplexReturn && isParamaterUsed) f.setStereotype("predicate"); 
-
-            // property
-            //
-            // Returns a non-bool derived from the parameters
-            //
-            // The returnTypeParsed != "" is used to handle the case of a function that has no return type
-            //
-            bool nonBoolOrVoidReturnType = false;
-            if      (unitLanguage == "C++")  nonBoolOrVoidReturnType = (returnTypeParsed != "bool" && returnTypeParsed != "void" && returnTypeParsed != "");
-            else if (unitLanguage == "C#")   nonBoolOrVoidReturnType = (returnTypeParsed != "bool" && returnTypeParsed != "Boolean" &&
-                                                                        returnTypeParsed != "void" && returnTypeParsed != "Void" && returnTypeParsed != "");
-            else if (unitLanguage == "Java") nonBoolOrVoidReturnType = (returnTypeParsed != "boolean" && returnTypeParsed != "void" && 
-                                                                        returnTypeParsed != "Void" && returnTypeParsed != "");
-
-            if (nonBoolOrVoidReturnType && hasParameterComplexReturn && isParamaterUsed) f.setStereotype("property"); 
-            
-
-            // global-command
-            //
-            // Modifies a global or a static variable
-            //
-            if (isGlobalOrStaticVariableModified) f.setStereotype("global-command");
-            
-
-            // command
-            //
-            // Modifies a parameter passed by reference
-            //
-            if (isParameterRefModified) f.setStereotype("command");
-
-
-            // factory
-            //
-            // Creates and returns a 'new' locally created object
-            // Constructor calls that are not using the 'new' operator are not considered 
-            //
-            if (isNonPrimitiveReturnType && (isNewReturned || isVariableCreatedAndReturnedWithNew)) f.setStereotype("factory");
-
-            
-            // literal
-            //
-            // Does not read or change parameters
-            //
-            if (!isParamaterUsed) f.setStereotype("literal");
-
-
-            // wrapper
-            //
-            // Does not change parameters passed by reference. Has at least one call to other type methods or to a free function  
-            // Constructor calls using the 'new' operator are not considered
-            //
-            if (!isParameterRefModified && (nonNewConstructorCallsCount > 0)) f.setStereotype("wrapper");
-
-
-            if (f.getStereotypes().size() == 0) f.setStereotype("unclassified");
+        for (stereotype label : classifyFreeFunction(readFreeFunctionFacts(f))) {
+            f.setStereotype(std::string(stereotypeName(label)));
         }
-        XPATH_LIST[f.getUnitNumber()].insert({f.getXpath(), f.getStereotypesString()});
     }
+}
+
+// Prints the number of methods that a large type exceeds in the run, after computeTypeStereotypes()
+//
+void stereotypeRules::outputLargeClassThreshold() const {
+    std::ostringstream description;
+    if (largeClassThreshold) {
+        description << "More than " << *largeClassThreshold << " methods, as given with -l";
+    }
+    else {
+        description << std::fixed << std::setprecision(2) << "More than " << methodSummary.largeTypeThreshold
+                    << " methods, the mean " << methodSummary.mean << " plus the standard deviation " << methodSummary.standardDeviation;
+        if (thresholdOverClasses) description << " of the methods per class over the " << methodSummary.types << " classes of the run, rounded down";
+        else                      description << " of the methods per type over the " << methodSummary.types << " labeled types of the run, which has no class, rounded down";
+    }
+    std::cerr << "---Large-Class Threshold---\n" << description.str() << "\n\n";
 }

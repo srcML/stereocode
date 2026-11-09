@@ -21,12 +21,12 @@ namespace HELPERS {
     int                             extractFirstLineNumber        (const std::string&);
     bool                            isSubstringAtBeginning        (const std::string&, const std::string&);
     void                            removeBracketSuffix           (std::string&);
-    void                            removeLeadingAsterisks        (std::string&);
     void                            removeNamespace               (std::string&, std::string_view, bool);
-    void                            removeBetweenComma            (std::string& s, bool);
     void                            removeWhitespace              (std::string&);
     void                            nameFilter                    (std::string&, std::vector<std::string>&, std::string_view, bool);
-    void                            parameterOrArgumentListFilter (std::string&);
+    std::string                     typeStructure                 (std::string);
+    std::string                     signatureSlots                (int);
+    std::string                     conversionTypeOf              (const std::string&);
 };
 
 #endif
