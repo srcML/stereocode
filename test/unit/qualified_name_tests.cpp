@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "qualified_name.hpp"
+#include "model/qualified_name.hpp"
 
 #include <string>
 #include <vector>

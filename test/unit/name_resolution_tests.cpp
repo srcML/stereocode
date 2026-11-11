@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "name_resolution.hpp"
+#include "model/name_resolution.hpp"
 
 #include <string>
 #include <unordered_map>

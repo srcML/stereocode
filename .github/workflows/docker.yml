@@ -1,0 +1,120 @@
+# Builds the Docker image of Stereocode with the newest srcML release and the newest Ubuntu packages,
+# runs the tests of Stereocode and a small project in the image, and publishes the image of the newest release
+name: Docker
+
+on:
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE: ghcr.io/srcml/stereocode
+
+jobs:
+  versions:
+    runs-on: ubuntu-24.04
+    outputs:
+      ref: ${{ steps.find.outputs.ref }}
+      version: ${{ steps.find.outputs.version }}
+      srcml: ${{ steps.find.outputs.srcml }}
+      newest: ${{ steps.find.outputs.newest }}
+      publish: ${{ steps.find.outputs.publish }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Find the source and the srcML release of the image
+        id: find
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          srcml=$(gh api repos/srcML/srcML/releases/latest --jq '.tag_name')
+          newest=$(git tag --list 'v*' --sort=-version:refname | head -n 1)
+          # A release tag, the weekly run, and a manual run publish a release, while branches and pull requests only test
+          case "$GITHUB_EVENT_NAME/$GITHUB_REF" in
+            push/refs/tags/v*)              ref=$GITHUB_REF_NAME publish=true ;;
+            schedule/*|workflow_dispatch/*) ref=$newest publish=true ;;
+            *)                              ref=$GITHUB_SHA publish=false ;;
+          esac
+          {
+            echo "ref=$ref"
+            echo "version=${ref#v}"
+            echo "srcml=${srcml#v}"
+            echo "newest=$([ "$ref" = "$newest" ] && echo true || echo false)"
+            echo "publish=$publish"
+          } | tee -a "$GITHUB_OUTPUT"
+
+  image:
+    needs: versions
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.versions.outputs.ref }}
+      - name: Build the image, which runs the tests of Stereocode
+        env:
+          GITHUB_AUTH: 'Authorization: Bearer ${{ github.token }}'
+        run: >-
+          docker build --pull --no-cache
+          --build-arg SRCML_VERSION=${{ needs.versions.outputs.srcml }}
+          --secret id=github_auth,env=GITHUB_AUTH
+          --tag stereocode:test .
+      - name: Run the image on a small C++ project
+        run: |
+          mkdir -p sample/my_project
+          printf 'class Point {\n    int x;\npublic:\n    int getX() const { return x; }\n};\n' > sample/my_project/point.cpp
+          docker run --rm -v "$PWD/sample:/data" stereocode:test srcml my_project -o my_project.xml
+          docker run --rm -v "$PWD/sample:/data" stereocode:test stereocode my_project.xml -r
+          grep -q 'st:stereotype="get"' sample/my_project.stereotypes.xml
+          test -s sample/my_project.stereotypes.csv
+          # The entrypoint keeps the owner of the mounted folder as the owner of the output
+          test "$(stat -c %u sample/my_project.stereotypes.xml)" = "$(id -u)"
+          docker run --rm stereocode:test stereocode --version
+      - name: Push the image of this architecture
+        if: needs.versions.outputs.publish == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          docker tag stereocode:test "$IMAGE:build-${{ matrix.arch }}"
+          docker push "$IMAGE:build-${{ matrix.arch }}"
+
+  publish:
+    needs: [versions, image]
+    if: needs.versions.outputs.publish == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Publish the image of both architectures under its tags
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.versions.outputs.version }}
+          SRCML: ${{ needs.versions.outputs.srcml }}
+          NEWEST: ${{ needs.versions.outputs.newest }}
+        run: |
+          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+          tags=(--tag "$IMAGE:$VERSION")
+          # The tag of a release with one srcML release keeps its first build
+          pinned="$IMAGE:$VERSION-srcml$SRCML"
+          if ! docker buildx imagetools inspect "$pinned" > /dev/null 2>&1; then
+            tags+=(--tag "$pinned")
+          fi
+          if [ "$NEWEST" = true ]; then
+            tags+=(--tag "$IMAGE:latest")
+          fi
+          docker buildx imagetools create "${tags[@]}" "$IMAGE:build-amd64" "$IMAGE:build-arm64"

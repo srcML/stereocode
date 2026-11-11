@@ -1,0 +1,54 @@
+# Builds Stereocode and runs every test on each push and pull request to main and develop
+name: Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: GCC
+            cxx: g++
+            options: -DCMAKE_BUILD_TYPE=Release
+          - name: Clang
+            cxx: clang++
+            options: -DCMAKE_BUILD_TYPE=Release
+          - name: Sanitizers
+            cxx: g++
+            options: -DCMAKE_BUILD_TYPE=Debug -DSTEREOCODE_SANITIZE=ON
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install srcML 1.2 and libxml2
+        working-directory: ${{ runner.temp }}
+        run: |
+          release=https://github.com/srcML/srcML/releases/download/v1.2.0
+          curl -sSfLO "$release/srcml_1.2.0-1_ubuntu24.04_amd64.deb"
+          curl -sSfLO "$release/srcml-dev_1.2.0-1_ubuntu24.04_amd64.deb"
+          sha256sum -c <<'SUMS'
+          accd249b99228b26a6c218caca1b676d93ddaca720a5b8d7d3612694255af06e  srcml_1.2.0-1_ubuntu24.04_amd64.deb
+          3842b1d8d76f3a7a956cdab6310cdde77439463ec532a99105f9609f6f8b3d2a  srcml-dev_1.2.0-1_ubuntu24.04_amd64.deb
+          SUMS
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libxml2-dev ./srcml_1.2.0-1_ubuntu24.04_amd64.deb ./srcml-dev_1.2.0-1_ubuntu24.04_amd64.deb
+
+      - name: Build
+        run: |
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} ${{ matrix.options }}
+          cmake --build build
+
+      - name: Test
+        working-directory: build
+        run: ctest -j 4 --output-on-failure

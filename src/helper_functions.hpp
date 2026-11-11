@@ -10,7 +10,7 @@
 #ifndef HELPER_FUNCTIONS_HPP
 #define HELPER_FUNCTIONS_HPP
 
-#include "variable_model.hpp"
+#include "model/variable_model.hpp"
 
 #include <string>
 #include <string_view>

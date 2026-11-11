@@ -9,7 +9,7 @@
 
 #include "CLI11.hpp"
 #include "options.hpp"
-#include "output_names.hpp"
+#include "output/output_names.hpp"
 #include "stereotypes_analyzer.hpp"
 
 #include <algorithm>
@@ -53,7 +53,7 @@ int main (int argc, char const *argv[]) try {
     app.add_option("-q,--query-file",          settings.queryMethodsFile,        "File of query methods, whose calls on data members, parameters, and globals read them, in addition to the default set, one per line, with optional [C++], [C#], and [Java] sections")->check(CLI::ExistingFile);
     app.add_option("-l,--large-class",         settings.largeClassThreshold,     "Number of methods that a large type exceeds (e.g., large-class) (default = mean plus standard deviation of the methods per class of the run)")
         ->check(countUpTo(std::numeric_limits<int>::max(), "POSITIVE"));
-    app.add_option("-j,--threads",             settings.threads,                 "Number of worker threads (default = number of hardware threads, at most 256)")
+    app.add_option("-j,--threads",             settings.threads,                 "Number of worker threads (default = as many as the machine has, at most 256)")
         ->check(countUpTo(maxThreads, "1 to 256"));
     app.add_flag  ("-f,--free-function",       settings.freeFunctions,           "Identify stereotypes for free functions, including static methods (C, C++, C#, and Java)");
     app.add_flag  ("-i,--interface",           settings.interfaces,              "Identify stereotypes for interfaces (C# and Java)");

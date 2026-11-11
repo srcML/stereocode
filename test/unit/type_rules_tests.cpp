@@ -9,7 +9,7 @@
 
 #include "doctest.h"
 #include "joined_names.hpp"
-#include "stereotype_classifier.hpp"
+#include "rules/stereotype_classifier.hpp"
 
 #include <initializer_list>
 #include <string>

@@ -9,18 +9,18 @@
 
 
 #include "stereotypes_analyzer.hpp"
-#include "annotated_unit.hpp"
-#include "csv_report.hpp"
+#include "output/annotated_unit.hpp"
+#include "output/csv_report.hpp"
 #include "helper_functions.hpp"
-#include "input_archive.hpp"
+#include "archive/input_archive.hpp"
 #include "ordered_pool.hpp"
-#include "output_archive.hpp"
-#include "qualified_name.hpp"
-#include "query_engine.hpp"
-#include "srcml_handles.hpp"
-#include "stereotype_labels.hpp"
-#include "txt_report.hpp"
-#include "unit_models.hpp"
+#include "archive/output_archive.hpp"
+#include "model/qualified_name.hpp"
+#include "archive/query_engine.hpp"
+#include "archive/srcml_handles.hpp"
+#include "rules/stereotype_labels.hpp"
+#include "output/txt_report.hpp"
+#include "model/unit_models.hpp"
 
 #include <algorithm>
 #include <future>
@@ -134,6 +134,7 @@ void stereotypesAnalyzer::run() {
     input.reset();
     wellFormed.get();
     indexTypes();
+    confirmReturnTypeMacros();
 
     // Performed after the collection of all types and free functions
     analyzeFreeFunctions();
@@ -252,6 +253,7 @@ void stereotypesAnalyzer::mergeModels(unitModels models) {
     globalStaticImports.insert(models.globalStaticImports.begin(), models.globalStaticImports.end());
     valueTypes.insert(models.valueTypes.begin(), models.valueTypes.end());
     cClassNames.insert(models.cClassNames.begin(), models.cClassNames.end());
+    declaredTypeNames.merge(models.declaredTypeNames);
     for (indexedAlias& alias : models.aliases) typeNames.addAlias(std::move(alias));
     if (!models.warning.empty()) std::cerr << "Warning: " << models.warning << '\n';
 }
@@ -274,6 +276,14 @@ void stereotypesAnalyzer::indexTypes() {
     }
 }
 
+// Keeps in the C++ return types the names spelled as macros that a type or an alias of the archive has, which only the names of every unit tell
+//
+void stereotypesAnalyzer::confirmReturnTypeMacros() {
+    for (typeModel& type : types)
+        for (functionModel& method : type.getMethods()) method.confirmReturnTypeMacros(declaredTypeNames);
+    for (functionModel& function : freeFunctions) function.confirmReturnTypeMacros(declaredTypeNames);
+}
+
 // Finds the type of a C++ method defined outside its type, as the qualifier of its name, the namespaces around the definition,
 // and the using directives in effect at the definition name it
 // The definition of a static method that the type declares stays a free function
@@ -290,8 +300,38 @@ std::optional<std::size_t> stereotypesAnalyzer::findDefinitionType(const functio
     reference.directives = directives;
     if (location) reference.position = location->path;
     const std::optional<std::size_t> type = typeNames.find(reference);
-    if (type && types[*type].isStaticMethod(methodName + function.getParameterTypes())) return std::nullopt;
+    if (type && declaresStaticMethod(*type, methodName, function)) return std::nullopt;
     return type;
+}
+
+// Tells whether a C++ type declares a static method with the name and the parameter types of a definition outside the type,
+// where the two signatures write each type alike or one writes an alias in place of the type that the alias stands for
+// The files of a declaration and its definition may resolve the name of an alias apart, while a type written alike is the same type
+//
+bool stereotypesAnalyzer::declaresStaticMethod(std::size_t position, const std::string& methodName, const functionModel& definition) const {
+    const typeModel& type = types[position];
+    const auto [first, last] = type.getStaticMethodSignatures().equal_range(methodName);
+    if (first == last) return false;
+
+    const std::string written = typeListText(definition.getParameterTypes());
+    const std::string defined = spelledTypes(definition.getParameterTypes(), type, definition.getLocation().value_or(elementLocation{}),
+                                             definition.getFileName());
+    return std::any_of(first, last, [&](const auto& declaration) {
+        return typeListText(declaration.second) == written ||
+               spelledTypes(declaration.second, type, type.getLocations().front(), type.getPartFileNames().front()) == defined;
+    });
+}
+
+// Gets the text of the parameter types of a C++ signature at a place of a file, where each name of an alias gives way to the type
+// that the alias stands for, as (constint&) of (const Count&) after typedef int Count;
+// A name after the qualifier of a definition outside its type resolves in the scope of the type, as a name in the type does
+//
+std::string stereotypesAnalyzer::spelledTypes(std::vector<writtenType> parameterTypes, const typeModel& type, const elementLocation& place,
+                                              const std::string& fileName) const {
+    typeReference signature = referenceOf({}, "C++", pathOf(type), place.unitNumber, fileName);
+    signature.position = place.path;
+    for (writtenType& parameterType : parameterTypes) parameterType = typeNames.withoutAliases(parameterType, signature);
+    return typeListText(parameterTypes);
 }
 
 // Finds the type of the archive that a type name written in the code of a type refers to, such as the type of a field of the type,
@@ -369,10 +409,10 @@ void stereotypesAnalyzer::addAncestorStaticHolders() {
     for (functionModel& function : freeFunctions) function.addStaticHolders(ancestorsOf(function.getUnitLanguage(), function.getStaticHolders()));
 }
 
-// Tells whether the reports and the srcML output show the labels of a type, which for an interface needs -i
+// Tells whether the reports and the srcML output show the labels of a type, which for an interface needs -i and for an enum -e
 //
 bool stereotypesAnalyzer::isLabeled(const typeModel& type) const {
-    return settings.interfaces || type.getStructure() != "interface";
+    return (settings.interfaces || type.getStructure() != "interface") && (settings.enums || type.getStructure() != "enum");
 }
 
 // Tells whether a C++ definition belongs to a class that only the C markup of a header holds

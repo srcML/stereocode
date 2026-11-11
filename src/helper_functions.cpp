@@ -9,7 +9,7 @@
 
 
 #include "helper_functions.hpp"
-#include "qualified_name.hpp"
+#include "model/qualified_name.hpp"
 
 #include <algorithm>
 #include <cctype>

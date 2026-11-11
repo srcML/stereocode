@@ -323,7 +323,7 @@ PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionPr
 PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1523	function	get	predicate collaborator
 PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1560	function	DisposeCancelOperation	command collaborator
 PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1579	function	get	get collaborator
-PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1584	function	set	set collaborator
+PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1584	function	set	command collaborator
 PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1633	function	Dispose	command
 PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1651	function	Dispose	command collaborator
 PowerShell-7.5.4/src/Microsoft.Management.Infrastructure.CimCmdlets/CimSessionProxy.cs	1675	function	get	predicate
@@ -2325,8 +2325,8 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	492	
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	534	function	ConnectToDataSource	property non-void-command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	555	function	ConnectToDataSource	property non-void-command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	571	function	ConnectToDataSource	property non-void-command
-PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	589	function	OpenQuery	property wrapper
-PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	601	function	OpenLogForWriting	property wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	589	function	OpenQuery	property set collaborator
+PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	601	function	OpenLogForWriting	property set collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	620	function	SetQueryTimeRange	property controller
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	646	function	EnumBlgFilesMachines	property controller
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Diagnostics/PdhHelper.cs	674	function	EnumObjects	property controller
@@ -2605,7 +2605,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdleti
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	34	constructor	CimQuery	constructor
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	42	function	AddWqlCondition	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	51	function	ObjectToWqlLiteral	property wrapper
-PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	111	function	WildcardToWqlLikeOperand	property wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	111	function	WildcardToWqlLikeOperand	property command
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	120	function	GetMatchConditionForEqualityOperator	property wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	157	function	GetMatchConditionForLikeOperator	property wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Management/cimSupport/cmdletization/cim/cimQuery.cs	173	function	GetMatchCondition	property command
@@ -5113,8 +5113,8 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebC
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	85	constructor	ConvertToJsonContext	constructor
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	102	class	DuplicateMemberHashSet	empty
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	104	constructor	DuplicateMemberHashSet	constructor
-PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	120	function	ConvertFromJson	property wrapper
-PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	136	function	ConvertFromJson	property wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	120	function	ConvertFromJson	property command
+PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	136	function	ConvertFromJson	property command
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	169	function	ConvertFromJson	property command
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	248	function	PopulateFromJDictionary	property command factory
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/JsonObject.cs	332	function	PopulateFromJArray	property command factory
@@ -5154,7 +5154,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebC
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebCmdletElementCollection.cs	17	constructor	WebCmdletElementCollection	constructor
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebCmdletElementCollection.cs	42	function	Find	property collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebRequestSession.cs	20	class	WebRequestSession	commander boundary
-PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebRequestSession.cs	93	function	set	set collaborator
+PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebRequestSession.cs	93	function	set	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebRequestSession.cs	121	constructor	WebRequestSession	constructor
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebRequestSession.cs	153	function	set	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.Commands.Utility/commands/utility/WebCmdlet/WebRequestSession.cs	167	function	AddCertificate	command collaborator
@@ -5493,8 +5493,8 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	2897	function	SetConsoleCursorInfo	command
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	2926	function	CreateHostException	property factory wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	2939	function	MimicKeyPress	wrapper
-PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	3061	function	WriteConsole	predicate wrapper
-PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	3105	function	ReadConsole	predicate wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	3061	function	WriteConsole	predicate command
+PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleControl.cs	3105	function	ReadConsole	predicate command
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHost.cs	41	class	ConsoleHost	boundary
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHost.cs	105	function	Start	property global-command wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHost.cs	364	function	ParseCommandLine	global-command wrapper
@@ -5739,7 +5739,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserIn
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	13	class	ConsoleHostUserInterface	commander boundary
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	20	function	ResetProgress	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	65	function	HandleIncomingProgressRecord	command collaborator
-PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	131	function	ProgressPaneUpdateTimerElapsed	wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	131	function	ProgressPaneUpdateTimerElapsed	set collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	138	function	PreWrite	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	145	function	PostWrite	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/ConsoleHostUserInterfaceProgress.cs	152	function	PostWrite	command collaborator
@@ -5788,7 +5788,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	122	c
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	124	constructor	PipelineFinishedWaitHandle	constructor
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	129	function	Wait	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	134	function	PipelineStateChangedHandler	command collaborator
-PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	148	function	ExecuteCommandAsync	command collaborator
+PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	148	function	ExecuteCommandAsync	void-accessor command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	170	function	ExecuteCommandAsyncHelper	void-accessor command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	275	function	CreatePipeline	property non-void-command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.ConsoleHost/host/msh/Executor.cs	287	function	CreatePipeline	property non-void-command collaborator
@@ -5921,7 +5921,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/E
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	13	class	EventProvider	entity boundary
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	48	struct	EventData	empty
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	76	constructor	EventProvider	constructor
-PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	95	function	EtwRegister	set collaborator
+PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	95	function	EtwRegister	command collaborator
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	115	function	Dispose	command
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	121	function	Dispose	command
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	157	function	Close	command
@@ -5941,7 +5941,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/E
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	600	function	WriteTransferEvent	predicate wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	735	function	WriteTransferEvent	predicate wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	762	function	GetActivityId	unclassified
-PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	768	function	SetActivityId	global-command wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	768	function	SetActivityId	global-command command
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProvider.cs	775	function	CreateActivityId	factory literal wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProviderTraceListener.cs	10	class	EventProviderTraceListener	boundary
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/EventProviderTraceListener.cs	36	function	get	get
@@ -5987,7 +5987,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/R
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	56	function	ThrowEventLogException	unclassified
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	93	function	EvtQuery	property wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	107	function	EvtSeek	wrapper
-PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	121	function	EvtNext	predicate wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	121	function	EvtNext	predicate command
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	137	function	EvtCancel	wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	147	function	EvtClose	wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	157	function	EvtOpenProviderMetadata	property wrapper
@@ -6004,7 +6004,7 @@ PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/R
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	294	function	EvtClearLog	wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	308	function	EvtCreateRenderContext	property wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	321	function	EvtRender	command
-PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	350	function	EvtOpenSession	property wrapper
+PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	350	function	EvtOpenSession	property command
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	360	function	EvtCreateBookmark	property wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	370	function	EvtUpdateBookmark	wrapper
 PowerShell-7.5.4/src/Microsoft.PowerShell.CoreCLR.Eventing/DotNetCode/Eventing/Reader/NativeWrapper.cs	379	function	EvtGetEventInfo	property wrapper
@@ -7601,11 +7601,11 @@ PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	303
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3056	function	ProcessMembers	command
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3101	function	ImportKeywordsFromAssembly	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3141	function	ProcessMofForDynamicKeywords	command
-PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3181	function	ImportCimKeywordsFromModule	predicate wrapper
-PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3194	function	ImportCimKeywordsFromModule	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3181	function	ImportCimKeywordsFromModule	predicate command
+PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3194	function	ImportCimKeywordsFromModule	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3208	function	ImportCimKeywordsFromModule	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3294	function	ClearImplicitlyImportedFlagFromResourceInClassCache	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3309	function	ImportScriptKeywordsFromModule	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3309	function	ImportScriptKeywordsFromModule	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3321	function	ImportScriptKeywordsFromModule	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3364	function	GetBadlyFormedRequiredResourceIdErrorRecord	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/DscSupport/CimDSCParser.cs	3379	function	GetBadlyFormedExclusiveResourceIdErrorRecord	property wrapper
@@ -8389,7 +8389,7 @@ PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/Display
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayDescriptionData_Wide.cs	313	function	EndWideControl	get collaborator
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	12	class	DisplayResourceManagerCache	boundary
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	18	function	GetTextTokenString	property non-void-command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	30	function	VerifyResource	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	30	function	VerifyResource	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	35	function	GetString	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	42	function	GetStringHelper	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/displayResourceManagerCache.cs	126	function	LoadAssemblyFromResourceReference	property non-void-command collaborator
@@ -8410,8 +8410,8 @@ PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/Display
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	380	function	LoadFromFileHelper	property global-command command factory
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	457	function	LoadFormatDataHelper	command
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	488	function	GetBuiltin	property factory
-PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	493	function	ProcessBuiltin	predicate wrapper
-PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	529	function	ProcessBuiltinFormatViewDefinitions	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	493	function	ProcessBuiltin	predicate global-command command
+PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	529	function	ProcessBuiltinFormatViewDefinitions	command
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	548	function	AddPreLoadIntrinsics	empty
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataManager.cs	557	function	AddPostLoadIntrinsics	command
 PowerShell-7.5.4/src/System.Management.Automation/FormatAndOutput/common/DisplayDatabase/typeDataQuery.cs	16	function	Evaluate	predicate command
@@ -10455,7 +10455,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderCo
 PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4475	function	set	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4485	function	Remove	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4508	function	Clear	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4523	function	CheckKeyIsValid	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4523	function	CheckKeyIsValid	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4577	function	GetValueToken	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/CmdletParameterBinderController.cs	4639	function	SkipWhiteSpace	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/CodeMethods.cs	25	function	PropertyValueCollection	property wrapper
@@ -10539,16 +10539,16 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeAct
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeAction.cs	23	function	FallbackInvoke	controller stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeAction.cs	47	class	SplatInvokeBinder	pure-controller degenerate small-class
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeAction.cs	52	function	Bind	controller stateless
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	15	class	ComInvokeBinder	data-provider boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	15	class	ComInvokeBinder	boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	42	constructor	ComInvokeBinder	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	75	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	80	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	85	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	90	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	95	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	100	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	105	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	110	function	get	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	75	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	80	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	85	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	90	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	95	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	100	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	105	function	get	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	110	function	get	property set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	115	function	get	get set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	122	function	EnsureVariable	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComInvokeBinder.cs	131	function	MarshalType	property wrapper
@@ -10597,8 +10597,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHe
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	257	function	GetTypeAttrForTypeLib	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	278	function	CreateComEvent	property factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	283	function	CreateDispCallable	property factory
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	299	function	ConvertInt32ByrefToPtr	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	304	function	ConvertVariantByrefToPtr	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	299	function	ConvertInt32ByrefToPtr	property command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	304	function	ConvertVariantByrefToPtr	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	309	function	GetVariantForObject	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	320	function	InitVariantForObject	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComRuntimeHelpers.cs	337	function	GetObjectForVariant	property wrapper
@@ -10625,8 +10625,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	122	function	AddPutRef	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	131	function	TryGetEvent	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	137	function	GetMemberNames	property controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	203	function	EnsureGetItem	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	210	function	EnsureSetItem	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	203	function	EnsureGetItem	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeDesc.cs	210	function	EnsureSetItem	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeEnumDesc.cs	13	class	ComTypeEnumDesc	entity data-provider
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeEnumDesc.cs	20	constructor	ComTypeEnumDesc	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ComTypeEnumDesc.cs	58	function	IDynamicMetaObjectProvider.GetMetaObject	factory collaborator stateless
@@ -10667,11 +10667,11 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallable
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallable.cs	32	function	GetMetaObject	factory collaborator stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallable.cs	37	function	Equals	predicate collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallable.cs	42	function	GetHashCode	property collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	12	class	DispCallableMetaObject	controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	12	class	DispCallableMetaObject	unclassified
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	16	constructor	DispCallableMetaObject	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	22	function	BindGetIndex	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	28	function	BindInvoke	property non-void-command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	34	function	BindGetOrInvoke	property controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	34	function	BindGetOrInvoke	property set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	51	function	BindSetIndex	property non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	88	function	BindComInvoke	property factory controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/DispCallableMetaObject.cs	117	function	DispCallableRestrictions	property controller
@@ -10697,10 +10697,10 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Errors.cs	89
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Errors.cs	97	function	UnsupportedHandlerType	factory literal
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Errors.cs	105	function	CouldNotGetDispId	property factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Errors.cs	113	function	AmbiguousConversion	property factory wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ExcepInfo.cs	15	struct	ExcepInfo	factory controller data-struct small-struct
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ExcepInfo.cs	15	struct	ExcepInfo	factory controller small-struct
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ExcepInfo.cs	29	constructor	ExcepInfo	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ExcepInfo.cs	35	function	ConvertAndFreeBstr	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ExcepInfo.cs	48	function	GetException	property set factory collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/ExcepInfo.cs	48	function	GetException	property non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Helpers.cs	15	function	Convert	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Helpers.cs	38	function	NotNull	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Helpers.cs	44	function	Condition	unclassified
@@ -10772,10 +10772,10 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServi
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/ComEventsSink.cs	125	function	GetVariant	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/ComEventsSink.cs	143	function	IDispatch.Invoke	controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/ComEventsSink.cs	237	function	ICustomQueryInterface.GetInterface	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/ComEventsSink.cs	249	function	Advise	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/ComEventsSink.cs	249	function	Advise	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/ComEventsSink.cs	263	function	Unadvise	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/IDispatch.cs	9	interface	IDispatch	empty
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/Variant.cs	16	struct	Variant	commander boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/Variant.cs	16	struct	Variant	boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/Variant.cs	20	constructor	Variant	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/Variant.cs	45	struct	TypeUnion	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/InteropServices/Variant.cs	56	struct	Record	empty
@@ -10883,32 +10883,32 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/VarEnumSelec
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/VarEnumSelector.cs	434	function	GetVariantBuilder	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/VarEnumSelector.cs	480	function	GetByValArgBuilder	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/VarEnumSelector.cs	503	function	GetSimpleArgBuilder	property factory wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	13	struct	Variant	commander boundary
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	17	function	SetAsByrefI1	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	24	function	SetAsByrefI2	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	31	function	SetAsByrefI4	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	38	function	SetAsByrefI8	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	45	function	SetAsByrefUi1	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	52	function	SetAsByrefUi2	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	59	function	SetAsByrefUi4	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	66	function	SetAsByrefUi8	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	73	function	SetAsByrefInt	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	80	function	SetAsByrefUint	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	87	function	SetAsByrefBool	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	94	function	SetAsByrefError	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	101	function	SetAsByrefR4	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	108	function	SetAsByrefR8	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	115	function	SetAsByrefDecimal	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	122	function	SetAsByrefCy	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	129	function	SetAsByrefDate	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	136	function	SetAsByrefBstr	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	143	function	SetAsByrefUnknown	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	150	function	SetAsByrefDispatch	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	159	function	get	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	164	function	set	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	174	function	SetAsByrefVariant	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	180	function	SetAsByrefVariantIndirect	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	207	function	SetAsByref<T>	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	13	struct	Variant	boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	17	function	SetAsByrefI1	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	24	function	SetAsByrefI2	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	31	function	SetAsByrefI4	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	38	function	SetAsByrefI8	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	45	function	SetAsByrefUi1	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	52	function	SetAsByrefUi2	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	59	function	SetAsByrefUi4	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	66	function	SetAsByrefUi8	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	73	function	SetAsByrefInt	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	80	function	SetAsByrefUint	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	87	function	SetAsByrefBool	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	94	function	SetAsByrefError	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	101	function	SetAsByrefR4	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	108	function	SetAsByrefR8	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	115	function	SetAsByrefDecimal	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	122	function	SetAsByrefCy	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	129	function	SetAsByrefDate	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	136	function	SetAsByrefBstr	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	143	function	SetAsByrefUnknown	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	150	function	SetAsByrefDispatch	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	159	function	get	property non-void-command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	164	function	set	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	174	function	SetAsByrefVariant	void-accessor command
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	180	function	SetAsByrefVariantIndirect	void-accessor command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	207	function	SetAsByref<T>	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	214	function	GetAccessor	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	249	function	GetByrefSetter	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/ComInterop/Variant.Extended.cs	287	function	SetAsIConvertible	command collaborator
@@ -11021,7 +11021,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/Compl
 PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1590	function	GetResultForEnum	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1605	function	GetResultForEnumPropertyValueOfDSCResource	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1772	function	GetResultForString	property command factory
-PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1831	function	GetAncestorConfigurationAstAndKeywordAst	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1831	function	GetAncestorConfigurationAstAndKeywordAst	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1867	function	GetResultForIdentifierInConfiguration	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	1933	function	GetResultForIdentifier	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/CommandCompletion/CompletionAnalysis.cs	2314	function	GetResultForAttributeArgument	property command factory
@@ -11752,7 +11752,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1401	fun
 PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1671	function	EffectiveArgumentType	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1704	function	GetObjectType	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1714	function	SetReferences	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1751	function	GetBestMethodAndArguments	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1751	function	GetBestMethodAndArguments	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1760	function	GetBestMethodAndArguments	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1795	function	GetMethodArgumentsBase	property factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/CoreAdapter.cs	1888	function	SetNewArgument	command
@@ -11980,8 +11980,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapter.cs	725
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapter.cs	743	function	operator <	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapter.cs	781	function	operator >	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapter.cs	814	function	GetHashCode	non-void-command
-PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapter.cs	821	function	GetNotePropertyForProviderCmdlets	get wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	22	class	ProviderInfo	data-provider boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapter.cs	821	function	GetNotePropertyForProviderCmdlets	get set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	22	class	ProviderInfo	boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	52	function	get	get property non-void-command
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	54	function	GetFullName	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	101	function	get	property collaborator
@@ -12001,7 +12001,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvide
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	523	function	IsPSSnapinNameMatch	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	546	function	CreateInstance	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	643	function	GetOutputTypes	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	677	function	GetNotePropertyForProviderCmdlets	get wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/DataStoreAdapterProvider.cs	677	function	GetNotePropertyForProviderCmdlets	get set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/DefaultCommandRuntime.cs	15	class	DefaultCommandRuntime	degenerate
 PowerShell-7.5.4/src/System.Management.Automation/engine/DefaultCommandRuntime.cs	22	constructor	DefaultCommandRuntime	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/DefaultCommandRuntime.cs	39	function	WriteDebug	empty
@@ -12852,7 +12852,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/FindExe
 PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/FindFirstFile.cs	21	struct	FILE_TIME	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/FindFirstFile.cs	27	struct	WIN32_FIND_DATA	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/FindFirstFile.cs	45	constructor	SafeFindHandle	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/FindFirstFile.cs	58	function	FindFirstFile	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/FindFirstFile.cs	58	function	FindFirstFile	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/NtQueryInformationProcess.cs	12	struct	PROCESS_BASIC_INFORMATION	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/QueryDosDevice.cs	19	function	GetDosDeviceForNetworkPath	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Interop/Windows/SHGetFileInfo.cs	15	struct	SHFILEINFO	empty
@@ -12974,8 +12974,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	7
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	743	function	Compare	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	761	function	Compare	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	780	function	Compare	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	866	function	TryCompare	predicate wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	880	function	TryCompare	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	866	function	TryCompare	predicate command
+PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	880	function	TryCompare	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	896	function	TryCompare	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	980	function	IsTrue	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1020	function	IsTrue	predicate
@@ -13008,7 +13008,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1759	function	ConvertTo<T>	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1778	function	TryConvertTo<T>	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1799	function	TryConvertTo<T>	predicate command
-PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1822	function	TryConvertTo	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1822	function	TryConvertTo	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1839	function	TryConvertTo	predicate global-command command
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1876	class	EnumMultipleTypeConverter	boundary degenerate small-class
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	1878	function	ConvertFrom	wrapper stateless
@@ -13084,7 +13084,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3648	function	ConvertEnumerableToEnum	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3689	class	PSMethodToDelegateConverter	controller small-class
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3698	constructor	PSMethodToDelegateConverter	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3703	function	GetConverter	property factory wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3703	function	GetConverter	property global-command factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3719	function	Convert	property controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3749	class	ConvertViaParseMethod	boundary small-class
 PowerShell-7.5.4/src/System.Management.Automation/engine/LanguagePrimitives.cs	3754	function	ConvertWithCulture	property non-void-command collaborator
@@ -13232,7 +13232,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	195	function	ModuleAnalysisViaGetModuleRequired	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	240	function	CheckModulesTypesInManifestAgainstExportedCommands	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	272	function	AddPsd1EntryToResult	predicate command
-PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	299	function	AddPsd1EntryToResult	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	299	function	AddPsd1EntryToResult	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	325	function	AnalyzeScriptModule	property global-command factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	409	function	AnalyzeCdxmlModule	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/AnalysisCache.cs	414	function	AnalyzeDllModule	property wrapper
@@ -13409,7 +13409,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBas
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4820	function	GetResolvedPath	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4857	function	GetResolvedPathCollection	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4894	function	GetWindowsPowerShellCompatRemotingSession	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4910	function	CreateWindowsPowerShellCompatResources	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4910	function	CreateWindowsPowerShellCompatResources	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4935	function	CleanupWindowsPowerShellCompatResources	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4956	function	SyncCurrentLocationHandler	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleCmdletBase.cs	4971	function	ImportModulesUsingWinCompat	collaborator stateless
@@ -13477,7 +13477,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsic
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	920	function	IsPowerShellModuleExtension	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	938	function	GetModuleName	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	965	function	GetPersonalModulePath	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	979	function	GetPSHomeModulePath	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	979	function	GetPSHomeModulePath	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	1015	function	GetSharedModulePath	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	1037	function	GetWindowsPowerShellPSHomeModulePath	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Modules/ModuleIntrinsics.cs	1053	function	CombineSystemModulePaths	literal wrapper
@@ -14095,7 +14095,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	3965	f
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	3979	function	IEnumerable.GetEnumerator	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	3988	function	GetEnumerator	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	4009	class	PSMemberInfoInternalCollection<T>	boundary
-PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	4020	function	get	get wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	4020	function	get	get set
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	4034	constructor	PSMemberInfoInternalCollection	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	4041	constructor	PSMemberInfoInternalCollection	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshMemberInfo.cs	4046	function	Replace	command collaborator
@@ -14183,7 +14183,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	803	functi
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	822	function	get	get property set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	851	function	get	get set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	879	function	GetTypeNames	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	894	function	HasInstanceTypeName	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	894	function	HasInstanceTypeName	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	902	function	HasInstanceMembers	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	935	function	operator PSObject	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/MshObject.cs	944	function	operator PSObject	property wrapper
@@ -14859,12 +14859,12 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/ScopedItemSearcher.cs	4
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScopedItemSearcher.cs	446	constructor	DriveScopeItemSearcher	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScopedItemSearcher.cs	468	function	GetScopeItem	controller stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommand.cs	11	class	ScriptCommand	empty
-PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	19	class	ScriptCommandProcessorBase	unclassified
+PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	19	class	ScriptCommandProcessorBase	boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	21	constructor	ScriptCommandProcessorBase	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	30	constructor	ScriptCommandProcessorBase	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	73	function	get	get non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	93	function	CommonInitialization	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	136	function	IsHelpRequested	predicate controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	136	function	IsHelpRequested	predicate set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	232	class	DlrScriptCommandProcessor	commander boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	243	constructor	DlrScriptCommandProcessor	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/ScriptCommandProcessor.cs	250	constructor	DlrScriptCommandProcessor	constructor
@@ -14976,7 +14976,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1302	function	GetChildItems	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1559	function	GetChildItems	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1621	function	IsPathContainer	predicate non-void-command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1688	function	ProcessPathItems	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1688	function	ProcessPathItems	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1740	function	ProcessPathItems	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	1983	function	GetChildItemsDynamicParameters	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/SessionStateContainer.cs	2062	function	HasGetChildItemDynamicParameters	predicate wrapper
@@ -15788,7 +15788,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4517	funct
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4589	function	UpdateWithModuleContents	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4618	function	AddType	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4644	function	RemoveType	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4684	function	Update	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4684	function	Update	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4728	function	ProcessIsBuiltIn	wrapper stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable.cs	4759	function	Update	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_GetEvent_Types_Ps1Xml.cs	11	class	TypeTable	pure-controller degenerate
@@ -15796,7 +15796,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_GetEvent_Type
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_TypesV3_Ps1Xml.cs	11	class	TypeTable	pure-controller degenerate
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_TypesV3_Ps1Xml.cs	13	function	Process_TypesV3_Ps1Xml	controller stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_Types_Ps1Xml.cs	12	class	TypeTable	pure-controller degenerate
-PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_Types_Ps1Xml.cs	18	function	GetValueFactoryBasedOnInitCapacity	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_Types_Ps1Xml.cs	18	function	GetValueFactoryBasedOnInitCapacity	property global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_Types_Ps1Xml.cs	40	function	CreateValueFactory	property
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_Types_Ps1Xml.cs	46	function	GetMethodInfo	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/TypeTable_Types_Ps1Xml.cs	51	function	GetScriptBlock	property wrapper
@@ -15838,10 +15838,10 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	354	function	C
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	368	function	CheckSecureStringArg	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	376	function	GetStringFromSecureString	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	403	function	GetTypeTableFromExecutionContextTLS	literal wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	420	function	GetApplicationBaseFromRegistry	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	420	function	GetApplicationBaseFromRegistry	property global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	453	function	GetWindowsPowerShellVersionFromRegistry	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	483	function	GetApplicationBase	literal wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	492	function	GetProductFolderDirectories	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	492	function	GetProductFolderDirectories	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	528	function	IsUnderProductFolder	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	547	function	IsRunningFromSysWOW64	literal wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/Utils.cs	555	function	IsWinPEHost	literal wrapper
@@ -16084,7 +16084,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	12
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1304	function	AddVariableBreakpoint	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1318	function	UpdateBreakpoints	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1344	function	OnBreakpointUpdated	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1359	function	RemoveLineBreakpoint	predicate controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1359	function	RemoveLineBreakpoint	predicate set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1389	function	CheckCommand	predicate non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1419	function	CheckVariableRead	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	1428	function	CheckVariableWrite	command collaborator
@@ -16184,7 +16184,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	38
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3844	function	HandleActiveRunspaceDebuggerStop	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3871	function	IsRunningRSDebugger	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3887	function	SetUpDebuggerOnRunspace	predicate controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3933	function	StartRunspaceForDebugQueueProcessing	controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3933	function	StartRunspaceForDebugQueueProcessing	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3945	function	DebuggerQueueThreadProc	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	3983	function	ProcessRunspaceDebugInternally	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/debugger/debugger.cs	4015	function	WaitForReadyDebug	wrapper
@@ -16339,13 +16339,13 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	329	constructor	RunspaceStateEventArgs	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	391	class	RunspaceAvailabilityEventArgs	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	393	constructor	RunspaceAvailabilityEventArgs	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	450	class	Runspace	boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	450	class	Runspace	commander boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	466	constructor	Runspace	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	484	constructor	Runspace	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	508	function	get	unclassified
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	513	function	set	global-command
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	533	function	get	unclassified
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	538	function	set	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	538	function	set	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	568	function	get	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	600	function	get	get collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	605	function	set	set collaborator
@@ -16374,7 +16374,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1635	function	SetBaseTransaction	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1643	function	ClearBaseTransaction	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1652	function	ResetRunspaceState	stateless
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1661	function	GeneratePipelineId	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1661	function	GeneratePipelineId	property set
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1671	class	SessionStateProxy	data-provider boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1673	constructor	SessionStateProxy	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/Connection.cs	1679	constructor	SessionStateProxy	constructor
@@ -16669,7 +16669,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHost
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostRawUserInterface.cs	560	function	LengthInBufferCells	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostRawUserInterface.cs	579	function	LengthInBufferCells	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostRawUserInterface.cs	600	function	LengthInBufferCells	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	15	class	InternalHostUserInterface	commander boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	15	class	InternalHostUserInterface	boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	18	constructor	InternalHostUserInterface	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	45	function	ThrowNotInteractive	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	52	function	ThrowPromptNotInteractive	wrapper
@@ -16685,7 +16685,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHost
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	292	function	WriteLine	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	316	function	WriteDebugLine	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	325	function	WriteDebugRecord	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	357	function	WriteDebugLine	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	357	function	WriteDebugLine	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	419	function	SetInformationalMessageBuffers	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	428	function	GetInformationalMessageBuffers	get collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/InternalHostUserInterface.cs	433	function	WriteDebugLineHelper	command
@@ -16927,9 +16927,9 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserI
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	418	function	TranscribeCommand	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	462	function	ShouldIgnoreCommand	predicate non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	513	function	IgnoreCommand	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	540	class	TranscribeOnlyCookie	commander boundary data-class small-class
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	540	class	TranscribeOnlyCookie	commander boundary small-class
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	545	constructor	TranscribeOnlyCookie	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	551	function	Dispose	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	551	function	Dispose	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	569	function	get	predicate non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	576	function	CheckSystemTranscript	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/MshHostUserInterface.cs	591	function	StartTranscribing	command collaborator
@@ -17347,8 +17347,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5737	function	FromPSObjectForRemoting	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5801	function	ToPSObjectForRemoting	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5834	function	CommandsAsListOfPSObjects	property factory wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5852	function	SuspendIncomingData	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5865	function	ResumeIncomingData	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5852	function	SuspendIncomingData	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5865	function	ResumeIncomingData	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5880	function	WaitForServicingComplete	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5904	function	AsPSPowerShellPipeline	property controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/PowerShell.cs	5959	class	PSDataStreams	boundary
@@ -17519,7 +17519,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/RunspacePool
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/RunspacePoolInternal.cs	1620	function	AssertIfStateIsBeforeOpen	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/RunspacePoolInternal.cs	1641	function	OnForwardEvent	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/RunspacePoolInternal.cs	1649	function	OnRunspaceForwardEvent	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/internalHostuserInterfacesecurity.cs	11	class	InternalHostUserInterface	commander boundary
+PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/internalHostuserInterfacesecurity.cs	11	class	InternalHostUserInterface	boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/internalHostuserInterfacesecurity.cs	17	function	PromptForCredential	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/internalHostuserInterfacesecurity.cs	36	function	PromptForCredential	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/hostifaces/pipelinebase.cs	20	class	PipelineBase	boundary
@@ -19017,7 +19017,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	775	function	GetStorageInfo	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	780	function	GetStorageInfo	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	803	function	RetryOrCreateStorageInfo	property non-void-command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	824	function	CreateStorageInfo	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	824	function	CreateStorageInfo	property set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	885	class	StorageInfo	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	891	constructor	StorageInfo	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/interpreter/Utilities.cs	906	function	get	literal wrapper
@@ -19050,11 +19050,11 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParseE
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParseError.cs	32	constructor	PSParseError	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	64	class	PSParser	controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	73	constructor	PSParser	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	82	function	Parse	controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	82	function	Parse	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	99	function	get	property factory controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	118	function	get	property factory controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	148	function	Tokenize	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	175	function	Tokenize	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSParser.cs	175	function	Tokenize	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSToken.cs	28	class	PSToken	data-provider boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSToken.cs	30	constructor	PSToken	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/lang/interface/PSToken.cs	44	constructor	PSToken	constructor
@@ -19380,7 +19380,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1180
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1190	function	CombineTypeConstraintForMethodResolution	property factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1205	function	ConvertValue	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1230	function	ConvertValue	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1248	function	GetParameterMetaData	property factory wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1248	function	GetParameterMetaData	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1285	function	GetAttributeGenerator	property global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1331	function	CheckNoPositionalArgs	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1347	function	CheckNoNamedArgs	wrapper
@@ -19397,8 +19397,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1719
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1784	function	GetAttribute	property factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1805	function	GetRuntimeDefinedParameter	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1895	function	TryGetDefaultParameterValue	predicate command
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1931	class	DefaultValueExpressionWrapper	data-provider boundary small-class
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1939	function	GetValue	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1931	class	DefaultValueExpressionWrapper	boundary small-class
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1939	function	GetValue	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	1960	function	Compile	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	2065	function	CompileTree	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Compiler.cs	2085	function	GetExpressionValue	property wrapper
@@ -19623,9 +19623,9 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	90	function	Dedent	set
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	94	function	NewLine	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	98	function	GetId<T>	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	115	function	GetLambdaId	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	120	function	GetParamId	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	125	function	GetLabelTargetId	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	115	function	GetLambdaId	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	120	function	GetParamId	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	125	function	GetLabelTargetId	property set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	133	function	WriteTo	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	140	function	WriteTo	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	162	function	Out	command
@@ -19682,7 +19682,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1153	function	DumpLabel	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1157	function	GetLabelTargetName	wrapper stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1166	function	WriteLambda	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1181	function	GetLambdaName	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1181	function	GetLambdaName	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1193	function	ContainsWhiteSpace	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1203	function	QuoteName	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/DebugViewWriter.cs	1207	function	GetDisplayName	property wrapper
@@ -19705,14 +19705,14 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	777	fu
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	816	function	MethodExistsOnBaseClassAndFinal	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	830	function	DefineMethod	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	906	function	DefineConstructor	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	935	function	GetMetaDataName	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	935	function	GetMetaDataName	property global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	942	function	DefineMethodBody	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1021	class	DefineEnumHelper	commander boundary small-class
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1028	constructor	DefineEnumHelper	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1036	function	Sort	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1166	function	DefineEnum	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1293	function	GetAssemblyAttributeBuilders	property factory wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1314	function	DefineTypes	property command
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1314	function	DefineTypes	property global-command command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1415	function	GetClassNameInAssembly	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1456	function	EmitLdc	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1473	function	EmitLdarg	command
@@ -19721,7 +19721,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/PSType.cs	1495	c
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	36	class	Parser	unclassified
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	52	constructor	Parser	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	66	function	ParseFile	property command factory
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	131	function	ParseInput	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	131	function	ParseInput	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	144	function	ParseInput	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	164	function	Parse	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/Parser.cs	176	function	ParseTask	property non-void-command collaborator
@@ -20106,7 +20106,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.c
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1193	function	CheckMemberAccess	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1211	function	MarkAstParentsAsSuspicious	unclassified
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1524	function	CheckType	command
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1620	function	LookupRequiredMembers	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1620	function	LookupRequiredMembers	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1673	function	CheckGet	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1717	function	CheckTest	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/SemanticChecks.cs	1734	function	CheckSet	command
@@ -20326,7 +20326,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	233	function	CallResolveTypeNameWorkerHelper	property global-command command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	284	function	ResolveAssemblyQualifiedTypeName	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	311	function	ResolveTypeNameWithContext	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	451	function	ResolveTypeName	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	451	function	ResolveTypeName	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	456	function	TryResolveType	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	463	function	ResolveITypeName	property command
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/TypeResolver.cs	490	function	ResolveType	property command
@@ -20909,9 +20909,9 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8494	func
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8504	function	get	incidental
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8509	function	get	incidental
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8514	function	get	get collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8516	function	HasDefaultCtor	predicate controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8558	function	GetReflectionType	get property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8593	function	GetReflectionAttributeType	property controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8516	function	HasDefaultCtor	predicate non-void-command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8558	function	GetReflectionType	get property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8593	function	GetReflectionAttributeType	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8609	function	SetTypeDefinition	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8619	function	ToString	get
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8625	function	Equals	predicate collaborator
@@ -20919,9 +20919,9 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8643	func
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8662	function	IsType	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8678	function	get	get collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8680	function	set	set collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8687	class	GenericTypeName	unclassified
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8687	class	GenericTypeName	data-provider boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8709	constructor	GenericTypeName	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8736	function	get	get controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8736	function	get	get set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8776	function	get	property controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8802	function	get	property collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8807	function	get	incidental
@@ -20937,7 +20937,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8981	func
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	8988	class	ArrayTypeName	data-provider boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9005	constructor	ArrayTypeName	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9022	function	GetName	property controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9060	function	get	get wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9060	function	get	get set
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9076	function	get	property
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9082	function	get	property collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/ast.cs	9087	function	get	incidental
@@ -21229,7 +21229,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	348
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	3494	function	ScanDecimalDigits	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	3509	function	ScanBinaryDigits	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	3520	function	ScanExponent	void-accessor command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	3539	function	ScanNumberAfterDot	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	3539	function	ScanNumberAfterDot	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/parser/tokenizer.cs	3555	function	TryGetNumberValue	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/engine/pipeline.cs	28	class	PipelineProcessor	commander boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/pipeline.cs	70	function	Dispose	command
@@ -21454,7 +21454,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	740	function	WriteError	void-accessor controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	753	function	GetExceptionFromErrorRecord	property
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	770	function	WriteError	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	786	function	WriteError	command collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	786	function	WriteError	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	798	function	WriteWarning	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	804	function	WriteVerbose	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Job.cs	810	function	WriteDebug	command collaborator
@@ -21933,8 +21933,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Remotin
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	984	class	ClientPowerShellDataStructureHandler	commander boundary
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1075	function	Start	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1082	function	HandleDelayStreamRequestProcessed	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1088	function	HandleReconnectCompleted	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1096	function	HandleConnectCompleted	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1088	function	HandleReconnectCompleted	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1096	function	HandleConnectCompleted	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1109	function	HandleTransportError	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1122	function	SendStopPowerShellMessage	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1133	function	OnSignalCompleted	wrapper
@@ -21945,8 +21945,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/Remotin
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1363	function	SetStateToStopped	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1374	function	CloseConnectionAsync	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1404	function	RaiseRemoveAssociationEvent	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1413	function	ProcessDisconnect	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1434	function	ReconnectAsync	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1413	function	ProcessDisconnect	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1434	function	ReconnectAsync	set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1449	function	ConnectAsync	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1464	function	ProcessRobustConnectionNotification	wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/RemotingProtocol2.cs	1492	constructor	ClientPowerShellDataStructureHandler	constructor
@@ -22229,7 +22229,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoter
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2685	function	ProcessDebuggerStopEventProc	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2756	function	HandleForwardedDebuggerBreakpointUpdatedEvent	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2768	function	GetNestedPowerShell	property controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2777	function	CheckForValidateState	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2777	function	CheckForValidateState	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2807	function	SetRemoteDebug	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2838	function	UpdateBreakpointCount	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspace.cs	2844	function	SetIsActive	set collaborator
@@ -22264,9 +22264,9 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoter
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	250	constructor	PSSession	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	320	function	GetTransportName	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	352	function	GetDisplayShellName	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	372	function	Create	property factory wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	372	function	Create	property command factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	397	function	GenerateRunspaceName	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	408	function	GenerateRunspaceId	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remoterunspaceinfo.cs	408	function	GenerateRunspaceId	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remotingprotocol.cs	10	class	BaseSessionDataStructureHandler	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remotingprotocol.cs	15	class	ClientRemoteSessionDataStructureHandler	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/client/remotingprotocolimplementation.cs	16	class	ClientRemoteSessionDSHandlerImpl	commander boundary
@@ -23294,7 +23294,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/AsyncOb
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/AsyncObject.cs	53	constructor	AsyncObject	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	14	class	ServerDispatchTable	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	31	class	DispatchTable<T>	boundary
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	51	function	CreateNewCallId	property set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	51	function	CreateNewCallId	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	68	function	GetResponseAsyncObject	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	86	function	GetResponse	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/DispatchTable.cs	118	function	SetResponse	wrapper
@@ -23517,7 +23517,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/Runspac
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2435	function	OpenStream	property factory
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2446	function	CopyEnvVariables	property
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2461	function	ParseArgv	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2498	function	CreateProcess	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2498	function	CreateProcess	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2534	function	AllocNullTerminatedArray	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2565	function	FreeArray	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/RunspaceConnectionInfo.cs	2601	function	StartSSHProcessImpl	property command
@@ -23782,7 +23782,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmen
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	681	function	Read	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	754	function	WriteCurrentFragmentAndReset	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	830	function	EnqueueWriteStream	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	846	function	GetObjectId	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	846	function	GetObjectId	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	855	function	Dispose	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	891	function	get	incidental
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/common/fragmentor.cs	895	function	get	incidental
@@ -24341,8 +24341,8 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNat
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2320	struct	WSManKeyStruct	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2417	function	WSManSetSessionOption	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2455	function	WSManGetSessionOptionAsString	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2535	function	WSManCreateShellEx	wrapper
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2705	function	WSManSendShellInputEx	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2535	function	WSManCreateShellEx	command
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2705	function	WSManSendShellInputEx	command
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	2802	function	WSManGetErrorMessage	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	3019	interface	IWSManNativeApiFacade	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManNativeAPI.cs	3057	class	WSManNativeApiFacade	boundary degenerate
@@ -24475,7 +24475,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTra
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	307	class	CompletionEventArgs	empty
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	309	constructor	CompletionEventArgs	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	369	function	ProcessShellData	set collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	460	function	GetNextSessionTMHandleId	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	460	function	GetNextSessionTMHandleId	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	467	function	AddSessionTransportManager	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	476	function	RemoveSessionTransportManager	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	486	function	TryGetSessionTransportManager	predicate command
@@ -24518,7 +24518,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTra
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2387	function	OnRemoteSessionDataReceived	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2466	function	SendOneItem	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2478	function	OnDataAvailableCallback	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2486	function	SendData	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2486	function	SendData	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2542	function	Dispose	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2567	function	CloseSessionAndClearResources	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	2620	function	DisposeWSManAPIDataAsync	set collaborator
@@ -24555,10 +24555,10 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTra
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	3852	function	OnRemoteCmdSignalCompleted	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	3938	function	SendOneItem	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	3987	function	OnDataAvailableCallback	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4003	function	SendData	set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4003	function	SendData	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4055	function	StartReceivingData	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4093	function	Dispose	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4135	function	GetNextCmdTMHandleId	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4135	function	GetNextCmdTMHandleId	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4142	function	AddCmdTransportManager	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4151	function	RemoveCmdTransportManager	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/remoting/fanin/WSManTransportManager.cs	4161	function	TryGetCmdTransportManager	predicate command
@@ -25053,7 +25053,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2118	class	PSBinaryOperationBinder	controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2125	function	Get	property global-command factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2145	constructor	PSBinaryOperationBinder	constructor
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2159	function	GetScalarCompareDelegate	get controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2159	function	GetScalarCompareDelegate	get set collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2178	function	FallbackBinaryOperation	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2241	function	ToString	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2251	function	InvalidateCache	unclassified
@@ -25080,18 +25080,18 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2934	function	BinaryBitwiseOr	wrapper stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2939	function	BinaryBitwiseAnd	wrapper stateless
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	2944	function	BinaryBitwiseOp	factory controller stateless
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3045	function	CompareEQ	property factory controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3068	function	CompareNE	property factory controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3045	function	CompareEQ	property non-void-command factory collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3068	function	CompareNE	property non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3090	function	BinaryEqualityComparison	property factory controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3180	function	CompareWithZero	property command
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3185	function	CompareLT	property factory controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3205	function	CompareLE	property factory controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3225	function	CompareGT	property factory controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3247	function	CompareGE	property factory controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3185	function	CompareLT	property non-void-command factory collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3205	function	CompareLE	property non-void-command factory collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3225	function	CompareGT	property non-void-command factory collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3247	function	CompareGE	property non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3269	function	BinaryComparison	property factory controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3377	function	BinaryComparisonCommon	property factory controller
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3377	function	BinaryComparisonCommon	property non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3426	class	PSUnaryOperationBinder	factory controller
-PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3435	function	Get	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3435	function	Get	property global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3468	constructor	PSUnaryOperationBinder	constructor
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3472	function	FallbackUnaryOperation	property non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/runtime/Binding/Binders.cs	3503	function	ToString	wrapper stateless
@@ -26113,7 +26113,7 @@ PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5789	f
 PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5795	function	ContainsKey	predicate collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5802	function	get	property factory controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5818	function	Remove	predicate non-void-command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5823	function	TryGetValue	predicate collaborator
+PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5823	function	TryGetValue	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5831	function	get	property collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5839	function	get	get collaborator
 PowerShell-7.5.4/src/System.Management.Automation/engine/serialization.cs	5844	function	set	command collaborator
@@ -26857,7 +26857,7 @@ PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	941	function
 PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	960	function	NeedToLogProviderHealthEvent	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	978	function	NeedToLogProviderLifecycleEvent	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	996	function	NeedToLogSettingsEvent	predicate command
-PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	1018	function	get	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	1018	function	get	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/logging/MshLog.cs	1053	class	LogContextCache	empty
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/AliasProvider.cs	18	class	AliasProvider	boundary
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/AliasProvider.cs	37	constructor	AliasProvider	constructor
@@ -27080,7 +27080,7 @@ PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	7906	function	IsReparsePointLikeSymlink	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	7951	function	IsSameFileSystemItem	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	7961	function	WinIsSameFileSystemItem	predicate wrapper
-PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	7986	function	GetInodeData	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	7986	function	GetInodeData	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	7997	function	WinGetInodeData	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	8025	function	WinIsHardLink	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/FileSystemProvider.cs	8033	function	CreateJunction	predicate wrapper
@@ -27295,7 +27295,7 @@ PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	165
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1672	function	WriteInformation	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1697	function	WriteObject	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1726	function	WriteObject	command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1756	function	WrapOutputInPSObject	property factory controller
+PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1756	function	WrapOutputInPSObject	property non-void-command factory collaborator
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1883	function	WriteItemObject	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1912	function	WritePropertyObject	command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/ProviderBase.cs	1940	function	WriteSecurityDescriptorObject	command collaborator
@@ -27578,13 +27578,13 @@ PowerShell-7.5.4/src/System.Management.Automation/namespaces/VariableProvider.cs
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/VariableProvider.cs	210	function	CanRenameItem	predicate collaborator
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/Win32Native.cs	79	struct	SID_AND_ATTRIBUTES	empty
 PowerShell-7.5.4/src/System.Management.Automation/namespaces/Win32Native.cs	86	struct	TOKEN_USER	empty
-PowerShell-7.5.4/src/System.Management.Automation/namespaces/Win32Native.cs	120	function	LookupAccountSid	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/namespaces/Win32Native.cs	120	function	LookupAccountSid	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	99	function	SignFile	property global-command factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	278	function	GetSignature	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	303	function	GetSignatureFromMSSecurityExtensions	property global-command factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	378	function	GetErrorFromSignatureState	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	401	function	GetSignatureFromWinVerifyTrust	property global-command factory wrapper
-PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	446	function	GetWinTrustData	property command
+PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	446	function	GetWinTrustData	property global-command command
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	501	function	GetCertFromChain	property factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	518	function	GetSignatureFromWintrustData	property global-command factory wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/Authenticode.cs	563	function	TryGetProviderSigner	predicate command
@@ -27692,7 +27692,7 @@ PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	10
 PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1125	function	ResolveFromPath	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1205	function	ResolveFromStoreById	void-accessor command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1249	function	ProcessResolvedCertificates	void-accessor command collaborator
-PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1360	function	Init	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1360	function	Init	global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1393	function	ScanContent	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1402	function	WinScanContent	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/security/SecuritySupport.cs	1492	function	ReportContent	predicate wrapper
@@ -28372,7 +28372,7 @@ PowerShell-7.5.4/src/System.Management.Automation/utils/ParserException.cs	203	c
 PowerShell-7.5.4/src/System.Management.Automation/utils/ParserException.cs	216	constructor	IncompleteParseException	constructor
 PowerShell-7.5.4/src/System.Management.Automation/utils/ParserException.cs	229	constructor	IncompleteParseException	constructor
 PowerShell-7.5.4/src/System.Management.Automation/utils/ParserException.cs	242	constructor	IncompleteParseException	constructor
-PowerShell-7.5.4/src/System.Management.Automation/utils/PathUtils.cs	37	function	MasterStreamOpen	wrapper
+PowerShell-7.5.4/src/System.Management.Automation/utils/PathUtils.cs	37	function	MasterStreamOpen	command
 PowerShell-7.5.4/src/System.Management.Automation/utils/PathUtils.cs	71	function	MasterStreamOpen	command
 PowerShell-7.5.4/src/System.Management.Automation/utils/PathUtils.cs	158	function	MasterStreamOpen	command
 PowerShell-7.5.4/src/System.Management.Automation/utils/PathUtils.cs	230	function	AddFileOpenErrorRecord	command
@@ -28412,7 +28412,7 @@ PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	112	c
 PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	117	constructor	SafeLocalMemHandle	constructor
 PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	126	function	ReleaseHandle	wrapper stateless
 PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	276	function	EnableTokenPrivilege	predicate command
-PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	356	function	RestoreTokenPrivilege	predicate wrapper
+PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	356	function	RestoreTokenPrivilege	predicate command
 PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	451	struct	TOKEN_PRIVILEGE	empty
 PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	458	struct	LUID	empty
 PowerShell-7.5.4/src/System.Management.Automation/utils/PlatformInvokes.cs	465	struct	LUID_AND_ATTRIBUTES	empty
@@ -28595,8 +28595,8 @@ PowerShell-7.5.4/src/System.Management.Automation/utils/SessionStateExceptions.c
 PowerShell-7.5.4/src/System.Management.Automation/utils/SessionStateExceptions.cs	951	constructor	ItemNotFoundException	constructor
 PowerShell-7.5.4/src/System.Management.Automation/utils/SessionStateExceptions.cs	963	constructor	ItemNotFoundException	constructor
 PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	29	function	TruncateToBufferCellWidth	property command
-PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	64	function	Padding	property wrapper
-PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	84	function	DashPadding	property wrapper
+PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	64	function	Padding	property global-command wrapper
+PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	84	function	DashPadding	property global-command wrapper
 PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	109	function	VtSubstring	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	123	function	VtSubstring	property wrapper
 PowerShell-7.5.4/src/System.Management.Automation/utils/StringUtil.cs	138	function	VtSubstring	property wrapper
@@ -28664,8 +28664,8 @@ PowerShell-7.5.4/src/System.Management.Automation/utils/StructuredTraceSource.cs
 PowerShell-7.5.4/src/System.Management.Automation/utils/StructuredTraceSource.cs	1828	class	MonadTraceSource	degenerate small-class
 PowerShell-7.5.4/src/System.Management.Automation/utils/StructuredTraceSource.cs	1830	constructor	MonadTraceSource	constructor
 PowerShell-7.5.4/src/System.Management.Automation/utils/StructuredTraceSource.cs	1843	function	GetSupportedAttributes	incidental
-PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	98	class	NameObscurerTelemetryInitializer	boundary data-class small-class
-PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	107	function	Initialize	void-accessor set collaborator
+PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	98	class	NameObscurerTelemetryInitializer	pure-controller degenerate small-class
+PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	107	function	Initialize	controller stateless
 PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	658	function	GetEnvironmentVariableAsBool	predicate wrapper
 PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	725	function	SendModuleTelemetryMetric	global-command command
 PowerShell-7.5.4/src/System.Management.Automation/utils/Telemetry.cs	760	function	SendModuleTelemetryMetric	global-command wrapper
@@ -28735,7 +28735,7 @@ PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCount
 PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	59	function	get	global-command
 PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	65	function	GetCounterSetInstanceName	wrapper stateless
 PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	76	function	IsCounterSetRegistered	predicate controller
-PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	93	function	IsCounterSetRegistered	predicate collaborator
+PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	93	function	IsCounterSetRegistered	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	101	function	AddCounterSetInstance	predicate non-void-command collaborator
 PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	165	function	UpdateCounterByValue	predicate controller
 PowerShell-7.5.4/src/System.Management.Automation/utils/perfCounters/PSPerfCountersMgr.cs	196	function	UpdateCounterByValue	predicate controller
@@ -29230,8 +29230,8 @@ PowerShell-7.5.4/test/tools/WebListener/Controllers/MultipartController.cs	91	fu
 PowerShell-7.5.4/test/tools/WebListener/Controllers/RedirectController.cs	20	class	RedirectController	boundary lazy-class small-class
 PowerShell-7.5.4/test/tools/WebListener/Controllers/RedirectController.cs	22	function	Index	property set collaborator
 PowerShell-7.5.4/test/tools/WebListener/Controllers/RedirectController.cs	64	function	Error	collaborator incidental
-PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseController.cs	22	class	ResponseController	boundary lazy-class small-class
-PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseController.cs	24	function	Index	property set collaborator
+PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseController.cs	22	class	ResponseController	degenerate small-class
+PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseController.cs	24	function	Index	controller stateless
 PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseController.cs	97	function	Error	collaborator incidental
 PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseController.cs	102	function	GetSingleOrArray<T>	property command factory
 PowerShell-7.5.4/test/tools/WebListener/Controllers/ResponseHeadersController.cs	19	class	ResponseHeadersController	degenerate small-class

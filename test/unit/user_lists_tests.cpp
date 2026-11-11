@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "user_lists.hpp"
+#include "rules/user_lists.hpp"
 
 #include <algorithm>
 #include <sstream>

@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "calls.hpp"
+#include "rules/calls.hpp"
 
 #include <sstream>
 #include <string>

@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "output_names.hpp"
+#include "output/output_names.hpp"
 
 TEST_CASE("The default srcML output archive sits beside the input archive") {
     CHECK(defaultOutputFile("code.xml") == "code.stereotypes.xml");

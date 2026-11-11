@@ -5,10 +5,21 @@
 #
 # This file is part of the Stereocode application.
 #
-# Integration checks of the kinds of types, with nested, anonymous, and typedef types, C# properties, and large classes
+# Integration checks of the kinds of types, with nested, anonymous, and typedef types, Java enums without -e, C# properties, large classes,
+# and the macros of C++ return types
 # test/CMakeLists.txt registers each function check_<name> as the test integration/types/<name>
 
 include(${CMAKE_CURRENT_LIST_DIR}/run_and_check.cmake)
+
+# Fails unless the srcML output of the last run labels the given number of elements
+function(expect_labeled_elements expected)
+    file(READ "${WORK_DIR}/input.stereotypes.xml" output)
+    string(REGEX MATCHALL "st:stereotype=\"" labels "${output}")
+    list(LENGTH labels labelCount)
+    if(NOT labelCount EQUAL expected)
+        message(FATAL_ERROR "Expected ${expected} labeled elements, got ${labelCount}:\n${output}")
+    endif()
+endfunction()
 
 # A nested named type is a type of its own, which the CSV report names with the types around it,
 # while local and anonymous types and their methods get no stereotype
@@ -72,11 +83,82 @@ type_name,type_stereotype,function_name,function_stereotype
     expect_file_content("${WORK_DIR}/input.stereotypes.csv" "${EXPECTED_CSV}")
 
     # Outer, getX, Inner, its get, and run in C++, and Holder, Node, its get, and walk in Java
-    file(READ "${WORK_DIR}/input.stereotypes.xml" output)
-    string(REGEX MATCHALL "st:stereotype=\"" labels "${output}")
-    list(LENGTH labels labelCount)
-    if(NOT labelCount EQUAL 9)
-        message(FATAL_ERROR "Expected 9 labeled elements, got ${labelCount}:\n${output}")
+    expect_labeled_elements(9)
+endfunction()
+
+# Only -e gives a Java enum and its methods stereotypes and rows in the reports, while the other types take in the enum
+# either way: its inner class counts its fields as data members, and a call on a field of the enum counts by the called method
+#
+# The Java file:
+#   enum Level {
+#       LOW;
+#       private int weight;
+#       int weight() { return weight; }
+#       class Probe {
+#           int weight() { return weight; }
+#           void raise() { weight++; }
+#       }
+#   }
+#
+#   class Gauge {
+#       private Level level;
+#       int read() { return level.weight(); }
+#   }
+function(check_unlabeled_enums)
+    set(INPUT [=[
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0" language="Java" filename="Level.java"><enum>enum <name>Level</name> <block>{
+    <decl><name>LOW</name></decl>;
+
+    <decl_stmt><decl><type><specifier>private</specifier> <name>int</name></type> <name>weight</name></decl>;</decl_stmt>
+
+    <function><type><name>int</name></type> <name>weight</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>weight</name></expr>;</return> </block_content>}</block></function>
+
+    <class>class <name>Probe</name> <block>{
+        <function><type><name>int</name></type> <name>weight</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>weight</name></expr>;</return> </block_content>}</block></function>
+        <function><type><name>void</name></type> <name>raise</name><parameter_list>()</parameter_list> <block>{<block_content> <expr_stmt><expr><name>weight</name><operator>++</operator></expr>;</expr_stmt> </block_content>}</block></function>
+    }</block></class>
+}</block></enum>
+
+<class>class <name>Gauge</name> <block>{
+    <decl_stmt><decl><type><specifier>private</specifier> <name>Level</name></type> <name>level</name></decl>;</decl_stmt>
+
+    <function><type><name>int</name></type> <name>read</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><call><name><name>level</name><operator>.</operator><name>weight</name></name><argument_list>()</argument_list></call></expr>;</return> </block_content>}</block></function>
+}</block></class>
+</unit>
+]=])
+
+    set(HEADER "type_name,type_stereotype,function_name,function_stereotype\n")
+    set(ENUM_ROWS [=[
+"Level","data-provider data-enum small-enum","weight","get"
+]=])
+    # weight of Probe returns the field of the enum, raise changes it, and read calls an accessor of the enum on its field
+    set(OTHER_ROWS [=[
+"Level.Probe","data-class small-class","weight","get"
+"Level.Probe","data-class small-class","raise","set"
+"Gauge","data-provider boundary small-class","read","property collaborator"
+]=])
+
+    file(WRITE "${WORK_DIR}/input.xml" "${INPUT}")
+
+    # Probe, its two methods, Gauge, and read, also with every other option that adds a kind of type or function
+    run_stereocode(input.xml -r -x -f -i -t -u)
+    expect_exit(0)
+    expect_file_content("${WORK_DIR}/input.stereotypes.csv" "${HEADER}${OTHER_ROWS}")
+    expect_labeled_elements(5)
+    file(READ "${WORK_DIR}/input.stereotypes.txt" report)
+    if(report MATCHES "\nLevel ")
+        message(FATAL_ERROR "The text report names the enum without -e:\n${report}")
+    endif()
+
+    # With -e, the enum and its method weight as well
+    run_stereocode(input.xml -r -x -f -i -t -u -e)
+    expect_exit(0)
+    expect_file_content("${WORK_DIR}/input.stereotypes.csv" "${HEADER}${ENUM_ROWS}${OTHER_ROWS}")
+    expect_labeled_elements(7)
+    file(READ "${WORK_DIR}/input.stereotypes.txt" report)
+    if(NOT report MATCHES "\nLevel +data-provider data-enum small-enum\n")
+        message(FATAL_ERROR "The text report lacks the row of the enum with -e:\n${report}")
     endif()
 endfunction()
 
@@ -109,12 +191,7 @@ type_name,type_stereotype,function_name,function_stereotype
     expect_file_content("${WORK_DIR}/input.free_functions.stereotypes.csv" "${EXPECTED_FREE_FUNCTIONS_CSV}")
 
     # Only setAnon carries a stereotype
-    file(READ "${WORK_DIR}/input.stereotypes.xml" output)
-    string(REGEX MATCHALL "st:stereotype=\"" labels "${output}")
-    list(LENGTH labels labelCount)
-    if(NOT labelCount EQUAL 1)
-        message(FATAL_ERROR "Expected 1 labeled element, got ${labelCount}:\n${output}")
-    endif()
+    expect_labeled_elements(1)
 endfunction()
 
 # A C++ class, struct, or union without a name takes the first name of its typedef that names the type itself, while a type that
@@ -164,12 +241,7 @@ type_name,type_stereotype,function_name,function_stereotype
     expect_file_content("${WORK_DIR}/input.free_functions.stereotypes.csv" "${EXPECTED_FREE_FUNCTIONS_CSV}")
 
     # The six types, the three methods, and the free function, while the struct of Handle and its method stay unlabeled
-    file(READ "${WORK_DIR}/input.stereotypes.xml" output)
-    string(REGEX MATCHALL "st:stereotype=\"" labels "${output}")
-    list(LENGTH labels labelCount)
-    if(NOT labelCount EQUAL 10)
-        message(FATAL_ERROR "Expected 10 labeled elements, got ${labelCount}:\n${output}")
-    endif()
+    expect_labeled_elements(10)
 endfunction()
 
 # The get accessor of a C# property returns the type of the property, which a separate query of the property finds
@@ -339,6 +411,75 @@ function(check_large_class_threshold)
         message(FATAL_ERROR "A run without -b names the threshold:\n${RUN_ERROR}")
     endif()
     expect_mix("large-class")
+endfunction()
+
+# A name after the first of a C++ return type in capital letters, digits, and underscores is a macro that leaves the type, as SCI_METHOD is,
+# unless a type or an alias of the archive has the name, whatever the options: an alias such as POINT, an enum, a typedef of an enum
+# without a name, a struct without -t, a union without -u, or a class that the archive only declares
+# A specifiers file that removes the export macro LEXER_API leaves such a name as the whole return type, which makes the method a collaborator
+#
+# The C++ file:
+#   struct Point { int x; int y; };
+#   typedef Point POINT;
+#   enum MODE_T { LOW, HIGH };
+#   typedef enum { NEAR, FAR } RANGE_T;
+#   struct SIZE_T { int width; };
+#   union VALUE_U { int i; float f; };
+#   class HANDLE_C;
+#
+#   class Lexer {
+#       int count;
+#   public:
+#       LEXER_API POINT Origin() const { return {}; }
+#       LEXER_API int SCI_METHOD Count() const { return count; }
+#       LEXER_API MODE_T Mode() const { return LOW; }
+#       LEXER_API RANGE_T Range() const { return NEAR; }
+#       LEXER_API SIZE_T Size() const { return {}; }
+#       LEXER_API VALUE_U Value() const { return {}; }
+#       LEXER_API HANDLE_C* Handle() const { return 0; }
+#   };
+function(check_return_type_macros)
+    set(INPUT [=[
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0" language="C++" filename="lexer.cpp"><struct>struct <name>Point</name> <block>{<public type="default"> <decl_stmt><decl><type><name>int</name></type> <name>x</name></decl>;</decl_stmt> <decl_stmt><decl><type><name>int</name></type> <name>y</name></decl>;</decl_stmt> </public>}</block>;</struct>
+<typedef>typedef <type><name>Point</name></type> <name>POINT</name>;</typedef>
+<enum>enum <name>MODE_T</name> <block>{ <decl><name>LOW</name></decl>, <decl><name>HIGH</name></decl> }</block>;</enum>
+<typedef>typedef <type><enum>enum <block>{ <decl><name>NEAR</name></decl>, <decl><name>FAR</name></decl> }</block></enum></type> <name>RANGE_T</name>;</typedef>
+<struct>struct <name>SIZE_T</name> <block>{<public type="default"> <decl_stmt><decl><type><name>int</name></type> <name>width</name></decl>;</decl_stmt> </public>}</block>;</struct>
+<union>union <name>VALUE_U</name> <block>{<public type="default"> <decl_stmt><decl><type><name>int</name></type> <name>i</name></decl>;</decl_stmt> <decl_stmt><decl><type><name>float</name></type> <name>f</name></decl>;</decl_stmt> </public>}</block>;</union>
+<class_decl>class <name>HANDLE_C</name>;</class_decl>
+
+<class>class <name>Lexer</name> <block>{<private type="default">
+    <decl_stmt><decl><type><name>int</name></type> <name>count</name></decl>;</decl_stmt>
+</private><public>public:
+    <function><type><name>LEXER_API</name> <name>POINT</name></type> <name>Origin</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><block>{}</block></expr>;</return> </block_content>}</block></function>
+    <function><type><name>LEXER_API</name> <name>int</name> <name>SCI_METHOD</name></type> <name>Count</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><name>count</name></expr>;</return> </block_content>}</block></function>
+    <function><type><name>LEXER_API</name> <name>MODE_T</name></type> <name>Mode</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><name>LOW</name></expr>;</return> </block_content>}</block></function>
+    <function><type><name>LEXER_API</name> <name>RANGE_T</name></type> <name>Range</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><name>NEAR</name></expr>;</return> </block_content>}</block></function>
+    <function><type><name>LEXER_API</name> <name>SIZE_T</name></type> <name>Size</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><block>{}</block></expr>;</return> </block_content>}</block></function>
+    <function><type><name>LEXER_API</name> <name>VALUE_U</name></type> <name>Value</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><block>{}</block></expr>;</return> </block_content>}</block></function>
+    <function><type><name>LEXER_API</name> <name>HANDLE_C</name><modifier>*</modifier></type> <name>Handle</name><parameter_list>()</parameter_list> <specifier>const</specifier> <block>{<block_content> <return>return <expr><literal type="number">0</literal></expr>;</return> </block_content>}</block></function>
+</public>}</block>;</class>
+</unit>
+]=])
+
+    set(EXPECTED_CSV [=[
+type_name,type_stereotype,function_name,function_stereotype
+"Lexer","data-provider boundary lazy-class degenerate","Origin","collaborator incidental"
+"Lexer","data-provider boundary lazy-class degenerate","Count","get"
+"Lexer","data-provider boundary lazy-class degenerate","Mode","collaborator incidental"
+"Lexer","data-provider boundary lazy-class degenerate","Range","collaborator incidental"
+"Lexer","data-provider boundary lazy-class degenerate","Size","collaborator incidental"
+"Lexer","data-provider boundary lazy-class degenerate","Value","collaborator incidental"
+"Lexer","data-provider boundary lazy-class degenerate","Handle","collaborator incidental"
+]=])
+
+    file(WRITE "${WORK_DIR}/input.xml" "${INPUT}")
+    file(WRITE "${WORK_DIR}/specifiers.txt" "LEXER_API\n")
+
+    run_stereocode(input.xml -s specifiers.txt -r)
+    expect_exit(0)
+    expect_file_content("${WORK_DIR}/input.stereotypes.csv" "${EXPECTED_CSV}")
 endfunction()
 
 run_check()

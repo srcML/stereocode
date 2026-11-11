@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "stereotype_attributes.hpp"
+#include "output/stereotype_attributes.hpp"
 
 #include <stdexcept>
 #include <string>

@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "stereotype_labels.hpp"
+#include "rules/stereotype_labels.hpp"
 
 #include <set>
 #include <string>

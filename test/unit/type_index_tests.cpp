@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "type_index.hpp"
+#include "model/type_index.hpp"
 
 #include <optional>
 #include <string>
@@ -91,6 +91,36 @@ namespace {
         alias.target  = nameIn(language, std::move(target), scope, unitNumber, fileName);
         alias.pointee = nameIn(language, std::move(pointee), scope, unitNumber, fileName);
         return alias;
+    }
+
+    // Gets a type as written from its text, where each name of a type stands in brackets, as const[Count]& of const Count&
+    //
+    writtenType writtenFrom(const std::string& text) {
+        writtenType type;
+        for (std::size_t start = 0; start < text.size();) {
+            const std::size_t open = text.find('[', start);
+            addText(type, text.substr(start, open == std::string::npos ? std::string::npos : open - start));
+            if (open == std::string::npos) break;
+            const std::size_t close = text.find(']', open);
+            type.push_back({text.substr(open + 1, close - open - 1), true});
+            start = close + 1;
+        }
+        return type;
+    }
+
+    // Gets a C++ alias at a path, declared in a unit, with the named type of its target and the type that it stands for as written
+    //
+    indexedAlias spelledAliasAt(std::vector<std::string> path, int unitNumber, const std::string& fileName, std::vector<std::string> target,
+                                const std::string& spelled) {
+        indexedAlias alias = aliasAt("C++", std::move(path), unitNumber, fileName, std::move(target));
+        alias.spelledType = writtenFrom(spelled);
+        return alias;
+    }
+
+    // Gets the text of a type written at the place of a name, in which the names of aliases give way to their types
+    //
+    std::string spelledAt(const typeIndex& index, const std::string& written, const typeReference& place) {
+        return typeText(index.withoutAliases(writtenFrom(written), place));
     }
 }
 
@@ -267,6 +297,62 @@ TEST_CASE("a cycle of aliases and an alias of a type outside the archive lead to
 
     CHECK_FALSE(index.findThroughAliases(nameIn("C++", {"Loop"}, {}, 1, "ring.hpp"), false));
     CHECK_FALSE(index.findThroughAliases(nameIn("C++", {"XYPOSITION"}, {}, 1, "ring.hpp"), false));
+}
+
+TEST_CASE("a name of an alias in a written type gives way to the type that the alias stands for, also through other aliases and in template arguments") {
+    typeIndex index;
+    index.addAlias(spelledAliasAt({"Count"}, 1, "count.hpp", {"int"}, "[int]"));
+    index.addAlias(spelledAliasAt({"Total"}, 1, "count.hpp", {"Count"}, "[Count]"));
+    index.addAlias(spelledAliasAt({"Size"}, 1, "count.hpp", {"std", "size_t"}, "[std::size_t]"));
+    index.addAlias(spelledAliasAt({"CountPtr"}, 1, "count.hpp", {"int"}, "[int]*"));
+    index.addAlias(spelledAliasAt({"TotalCPtr"}, 1, "count.hpp", {"Total"}, "const[Total]*"));
+    index.addAlias(spelledAliasAt({"Byte"}, 1, "count.hpp", {}, "[unsigned][char]"));
+    const typeReference meter = nameIn("C++", {}, {"Meter"}, 2, "meter.cpp");
+
+    CHECK(spelledAt(index, "const[Total]&", meter) == "constint&");
+    CHECK(spelledAt(index, "[Size]", meter) == "std::size_t");
+    CHECK(spelledAt(index, "[CountPtr]", meter) == "int*");
+    CHECK(spelledAt(index, "[TotalCPtr]", meter) == "constint*");
+    CHECK(spelledAt(index, "[Byte]", meter) == "unsignedchar");
+    CHECK(spelledAt(index, "std::map<[Count],[Byte]>", meter) == "std::map<int,unsignedchar>");
+    CHECK(spelledAt(index, "[unsigned][int]", meter) == "unsignedint");
+}
+
+TEST_CASE("a name after const or volatile keeps an alias of a pointer or a reference, unlike an alias of a template of pointers") {
+    typeIndex index;
+    index.addAlias(spelledAliasAt({"CountPtr"}, 1, "count.hpp", {"int"}, "[int]*"));
+    index.addAlias(spelledAliasAt({"CountRef"}, 1, "count.hpp", {"int"}, "[int]&"));
+    index.addAlias(spelledAliasAt({"Counts"}, 1, "count.hpp", {"std", "vector"}, "std::vector<[int]*>"));
+    const typeReference meter = nameIn("C++", {}, {"Meter"}, 2, "meter.cpp");
+
+    CHECK(spelledAt(index, "const[CountPtr]", meter) == "constCountPtr");
+    CHECK(spelledAt(index, "volatile[CountRef]", meter) == "volatileCountRef");
+    CHECK(spelledAt(index, "[CountPtr]const", meter) == "int*const");
+    CHECK(spelledAt(index, "const[Counts]&", meter) == "conststd::vector<int*>&");
+}
+
+TEST_CASE("an alias that a type declares stands for its type in the names in the scope of the type and in the names that write the type") {
+    typeIndex index;
+    indexedAlias offset = spelledAliasAt({"Buffer", "Offset"}, 1, "buffer.hpp", {"long"}, "[long]");
+    offset.enclosingTypes = 1;
+    index.addAlias(offset);
+
+    CHECK(spelledAt(index, "[Offset]", nameIn("C++", {}, {"Buffer"}, 2, "buffer.cpp")) == "long");
+    CHECK(spelledAt(index, "[Buffer::Offset]", nameIn("C++", {}, {"Buffer"}, 2, "buffer.cpp")) == "long");
+    CHECK(spelledAt(index, "[Offset]", nameIn("C++", {}, {"Stream"}, 2, "stream.cpp")) == "Offset");
+}
+
+TEST_CASE("the names of a cycle of aliases stay as written, as does a name of an alias that a type of the same or a nearer scope hides") {
+    typeIndex index;
+    index.add(typeAt("C++", {"plant", "Pump"}, 1, "plant.hpp"));
+    index.addAlias(spelledAliasAt({"Loop"}, 1, "ring.hpp", {"Ring"}, "[Ring]"));
+    index.addAlias(spelledAliasAt({"Ring"}, 1, "ring.hpp", {"Loop"}, "[Loop]"));
+    index.addAlias(spelledAliasAt({"Pump"}, 1, "plant.hpp", {"Engine"}, "[Engine]"));
+
+    CHECK(spelledAt(index, "[Loop]", nameIn("C++", {}, {}, 1, "ring.hpp")) == "Loop");
+    CHECK(spelledAt(index, "[Ring]", nameIn("C++", {}, {}, 1, "ring.hpp")) == "Ring");
+    CHECK(spelledAt(index, "[Pump]", nameIn("C++", {}, {"plant", "Station"}, 1, "plant.hpp")) == "Pump");
+    CHECK(spelledAt(index, "[Pump]", nameIn("C++", {}, {"depot"}, 1, "plant.hpp")) == "Engine");
 }
 
 TEST_CASE("an alias that takes the name of the type that it names leads to that type") {
