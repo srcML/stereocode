@@ -1,5 +1,5 @@
 # Builds the Docker image of Stereocode with the newest srcML release and the newest Ubuntu packages,
-# runs the tests of Stereocode and a small project in the image, and publishes the image of the newest release
+# runs the tests of Stereocode and a small project in the image, and publishes the image of the newest release on Docker Hub
 name: Docker
 
 on:
@@ -16,8 +16,14 @@ permissions:
   contents: read
   packages: write
 
+# The runs that publish wait for each other, since they share the staging images
+concurrency:
+  group: ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') && 'docker-publish' || format('docker-{0}', github.ref) }}
+  cancel-in-progress: false
+
 env:
-  IMAGE: ghcr.io/srcml/stereocode
+  # The private package of GitHub holds the image of each architecture until the publish joins them on Docker Hub
+  STAGING: ghcr.io/srcml/stereocode
 
 jobs:
   versions:
@@ -39,11 +45,11 @@ jobs:
         run: |
           srcml=$(gh api repos/srcML/srcML/releases/latest --jq '.tag_name')
           newest=$(git tag --list 'v*' --sort=-version:refname | head -n 1)
-          # A release tag, the weekly run, and a manual run publish a release, while branches and pull requests only test
+          # A release tag, a push to main, the weekly run, and a manual run publish a release, while develop and pull requests only test
           case "$GITHUB_EVENT_NAME/$GITHUB_REF" in
-            push/refs/tags/v*)              ref=$GITHUB_REF_NAME publish=true ;;
-            schedule/*|workflow_dispatch/*) ref=$newest publish=true ;;
-            *)                              ref=$GITHUB_SHA publish=false ;;
+            push/refs/tags/v*)                                   ref=$GITHUB_REF_NAME publish=true ;;
+            push/refs/heads/main|schedule/*|workflow_dispatch/*) ref=$newest publish=true ;;
+            *)                                                   ref=$GITHUB_SHA publish=false ;;
           esac
           {
             echo "ref=$ref"
@@ -92,32 +98,36 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          docker tag stereocode:test "$IMAGE:build-${{ matrix.arch }}"
-          docker push "$IMAGE:build-${{ matrix.arch }}"
+          docker tag stereocode:test "$STAGING:build-${{ matrix.arch }}"
+          docker push "$STAGING:build-${{ matrix.arch }}"
 
   publish:
     needs: [versions, image]
     if: needs.versions.outputs.publish == 'true'
     runs-on: ubuntu-24.04
     steps:
-      - name: Publish the image of both architectures under its tags
+      - name: Publish the image of both architectures on Docker Hub under its tags
         env:
           GITHUB_TOKEN: ${{ github.token }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           VERSION: ${{ needs.versions.outputs.version }}
           SRCML: ${{ needs.versions.outputs.srcml }}
           NEWEST: ${{ needs.versions.outputs.newest }}
         run: |
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          tags=(--tag "$IMAGE:$VERSION")
+          echo "$DOCKERHUB_TOKEN" | docker login docker.io -u "$DOCKERHUB_USERNAME" --password-stdin
+          image="docker.io/$DOCKERHUB_USERNAME/stereocode"
+          tags=(--tag "$image:$VERSION")
           # The tag of a release with one srcML release keeps its first build
-          pinned="$IMAGE:$VERSION-srcml$SRCML"
+          pinned="$image:$VERSION-srcml$SRCML"
           if ! docker buildx imagetools inspect "$pinned" > /dev/null 2>&1; then
             tags+=(--tag "$pinned")
           fi
           if [ "$NEWEST" = true ]; then
-            tags+=(--tag "$IMAGE:latest")
+            tags+=(--tag "$image:latest")
           fi
-          docker buildx imagetools create "${tags[@]}" "$IMAGE:build-amd64" "$IMAGE:build-arm64"
+          docker buildx imagetools create "${tags[@]}" "$STAGING:build-amd64" "$STAGING:build-arm64"
 
   keepalive:
     # GitHub stops the schedule of a public repository after 60 days without activity, while enabling it again restarts that count
