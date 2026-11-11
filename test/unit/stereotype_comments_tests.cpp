@@ -8,23 +8,29 @@
  */
 
 #include "doctest.h"
-#include "stereotype_comments.hpp"
+#include "output/stereotype_comments.hpp"
 
 #include <stdexcept>
 #include <string>
 
 namespace {
-    const std::string unitStart =
-        R"(<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0" language="C++" filename="a.cpp">)";
+    // Gets the start tag of a unit of a language
+    std::string unitStartIn(const std::string& language) {
+        return R"(<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0" language=")" + language +
+               R"(" filename="a">)";
+    }
 
-    // Gets the content of the unit element after the insertion of the comments into a unit with the given content
-    std::string commented(const std::string& content) {
-        const std::string srcml = withStereotypeComments("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" + unitStart + content + "</unit>\n");
-        const std::size_t start = srcml.find("<unit");
+    const std::string unitStart = unitStartIn("C++");
+
+    // Gets the content of the unit element after the insertion of the comments into a unit of a language with the given content
+    std::string commented(const std::string& content, const std::string& language = "C++") {
+        const std::string start = unitStartIn(language);
+        const std::string srcml = withStereotypeComments("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" + start + content + "</unit>\n");
+        const std::size_t first = srcml.find("<unit");
         const std::size_t end = srcml.rfind("</unit>");
-        REQUIRE(start != std::string::npos);
+        REQUIRE(first != std::string::npos);
         REQUIRE(end != std::string::npos);
-        return srcml.substr(start + unitStart.size(), end - start - unitStart.size());
+        return srcml.substr(first + start.size(), end - first - start.size());
     }
 }
 
@@ -51,13 +57,33 @@ TEST_CASE("The comment keeps the tabs of the indentation") {
           "<block>{\n\t\t<comment type=\"line\">// @stereotype set</comment>\n\t\t<function st:stereotype=\"set\"><name>f</name></function>\n}</block>\n");
 }
 
-TEST_CASE("An element after code on its line moves to a line of its own at the indentation of that line") {
+TEST_CASE("An element after code on its line moves below its comment, and the comment and the element take the indentation of that line") {
     const std::string get = "<function st:stereotype=\"get\"><name>get</name> <block>{ <return>return <expr><name>x</name></expr>;</return> }</block></function>";
     const std::string set = "<function st:stereotype=\"set\"><name>set</name> <block>{ <expr_stmt><expr><name>x</name> <operator>=</operator> <name>value</name></expr>;</expr_stmt> }</block></function>";
 
     CHECK(commented("<block>{\n    <property>int <name>X</name> {" + get + " " + set + " }</property>\n}</block>\n") ==
-          "<block>{\n    <property>int <name>X</name> { <comment type=\"line\">// @stereotype get</comment>\n    " + get +
-          " <comment type=\"line\">// @stereotype set</comment>\n    " + set + " }</property>\n}</block>\n");
+          "<block>{\n    <property>int <name>X</name> {\n    <comment type=\"line\">// @stereotype get</comment>\n    " + get +
+          "\n    <comment type=\"line\">// @stereotype set</comment>\n    " + set + " }</property>\n}</block>\n");
+}
+
+TEST_CASE("The blanks between the code and an element that moves below its comment leave the line of the code") {
+    CHECK(commented("<block>{\n\t<decl_stmt><decl><type><name>int</name></type> <name>x</name></decl>;</decl_stmt> \t <function st:stereotype=\"get\"><name>getX</name></function>\n}</block>\n") ==
+          "<block>{\n\t<decl_stmt><decl><type><name>int</name></type> <name>x</name></decl>;</decl_stmt>\n"
+          "\t<comment type=\"line\">// @stereotype get</comment>\n\t<function st:stereotype=\"get\"><name>getX</name></function>\n}</block>\n");
+    CHECK(commented("<decl_stmt><decl><type><name>int</name></type> <name>a</name></decl>;</decl_stmt> <typedef>typedef <type><struct st:stereotype=\"empty\">struct <block>{}</block></struct></type> <name>S</name>;</typedef>\n") ==
+          "<decl_stmt><decl><type><name>int</name></type> <name>a</name></decl>;</decl_stmt> <typedef>typedef<type>\n"
+          "<comment type=\"line\">// @stereotype empty</comment>\n<struct st:stereotype=\"empty\">struct <block>{}</block></struct></type> <name>S</name>;</typedef>\n");
+}
+
+TEST_CASE("An element after code on the first line of the unit moves below its comment without indentation") {
+    CHECK(commented("<decl_stmt><decl><type><name>int</name></type> <name>counter</name></decl>;</decl_stmt> <function st:stereotype=\"global-command\"><name>next</name></function>\n") ==
+          "<decl_stmt><decl><type><name>int</name></type> <name>counter</name></decl>;</decl_stmt>\n"
+          "<comment type=\"line\">// @stereotype global-command</comment>\n<function st:stereotype=\"global-command\"><name>next</name></function>\n");
+}
+
+TEST_CASE("An element that starts its line after a line break inside an earlier element gets its comment at the start of that line") {
+    CHECK(commented("<macro><name>M</name>\n  </macro><function st:stereotype=\"get\"><name>f</name></function>\n") ==
+          "<macro><name>M</name>\n  </macro><comment type=\"line\">// @stereotype get</comment>\n  <function st:stereotype=\"get\"><name>f</name></function>\n");
 }
 
 TEST_CASE("Specifiers that srcML leaves before an element keep their line below the comment") {
@@ -71,14 +97,14 @@ TEST_CASE("An element after an earlier member on its line moves to a line of its
     const std::string content = "<public>public:\n  <function st:stereotype=\"get\"><name>getY</name></function> <function st:stereotype=\"set\"><name>setY</name></function>\n</public>\n";
     const std::string once = commented(content);
 
-    CHECK(once == "<public>public:\n  <comment type=\"line\">// @stereotype get</comment>\n  <function st:stereotype=\"get\"><name>getY</name></function> "
-                  "<comment type=\"line\">// @stereotype set</comment>\n  <function st:stereotype=\"set\"><name>setY</name></function>\n</public>\n");
+    CHECK(once == "<public>public:\n  <comment type=\"line\">// @stereotype get</comment>\n  <function st:stereotype=\"get\"><name>getY</name></function>\n"
+                  "  <comment type=\"line\">// @stereotype set</comment>\n  <function st:stereotype=\"set\"><name>setY</name></function>\n</public>\n");
     CHECK(commented(once) == once);
 }
 
 TEST_CASE("The comment of an element after a block comment that ends on its line never goes into the block comment") {
     CHECK(commented("<comment type=\"block\">/* a\n b */</comment><function st:stereotype=\"get\"><name>f</name></function>\n") ==
-          "<comment type=\"block\">/* a\n b */</comment> <comment type=\"line\">// @stereotype get</comment>\n <function st:stereotype=\"get\"><name>f</name></function>\n");
+          "<comment type=\"block\">/* a\n b */</comment>\n <comment type=\"line\">// @stereotype get</comment>\n <function st:stereotype=\"get\"><name>f</name></function>\n");
 }
 
 TEST_CASE("A friend function gets its comment before the keyword friend") {
@@ -124,9 +150,112 @@ TEST_CASE("The declaration of the stereotype namespace stays the only one, whate
     }
 }
 
-TEST_CASE("A unit without labeled elements keeps its srcML") {
+TEST_CASE("A unit without labeled elements keeps a stereotype comment that stands above no element") {
     const std::string content = "<function><name>f</name><block>{\n  <comment type=\"line\">// @stereotype get</comment>\n}</block></function>\n";
     CHECK(commented(content) == content);
+}
+
+TEST_CASE("A stereotype comment on the line before an element without stereotypes goes with its line, while other comments stay") {
+    CHECK(commented("<block>{\n  <comment type=\"line\">// Returns x</comment>\n  <comment type=\"line\">// @stereotype get</comment>\n"
+                    "  <function><name>getX</name></function>\n}</block>\n") ==
+          "<block>{\n  <comment type=\"line\">// Returns x</comment>\n  <function><name>getX</name></function>\n}</block>\n");
+}
+
+TEST_CASE("A stereotype comment after code on the line before an element without stereotypes goes, while the code keeps its line") {
+    CHECK(commented("<public>public: <comment type=\"line\">// @stereotype get</comment>\n  <function><name>getY</name></function>\n</public>\n") ==
+          "<public>public:\n  <function><name>getY</name></function>\n</public>\n");
+}
+
+TEST_CASE("A stereotype comment on the first line of a unit before a type without stereotypes goes with its line") {
+    CHECK(commented("  <comment type=\"line\">// @stereotype data-class</comment>\n  <class>class <name>A</name> <block>{}</block>;</class>\n") ==
+          "  <class>class <name>A</name> <block>{}</block>;</class>\n");
+}
+
+TEST_CASE("A unit of a language that stereocode does not analyze keeps its stereotype comments") {
+    const std::string content = "<comment type=\"line\">// @stereotype get</comment>\n"
+                                "<function>function <name>size</name><parameter_list>()</parameter_list> <block>{}</block></function>\n";
+    CHECK(commented(content, "JavaScript") == content);
+}
+
+TEST_CASE("A stereotype comment stays above an enum of C++ or C# and a static class of C#, which get no stereotypes, and goes above a Java enum") {
+    const std::string comment = "<comment type=\"line\">// @stereotype data-enum</comment>\n";
+    const std::string colors  = "<enum>enum <name>Color</name> <block>{ <decl><name>Red</name></decl> }</block></enum>\n";
+    const std::string tools   = "<class><specifier>static</specifier> class <name>Tools</name> <block>{ }</block></class>\n";
+    CHECK(commented(comment + colors) == comment + colors);
+    CHECK(commented(comment + colors, "C#") == comment + colors);
+    CHECK(commented(comment + tools, "C#") == comment + tools);
+    CHECK(commented(comment + colors, "Java") == colors);
+}
+
+TEST_CASE("A stereotype comment stays above a local type, its methods, a local function, and a type without a name, also one that a typedef names only through a pointer") {
+    const std::string local =
+        "<function><type><name>int</name></type> <name>outer</name><parameter_list>()</parameter_list> <block>{<block_content>\n"
+        "    <comment type=\"line\">// @stereotype data-class</comment>\n"
+        "    <struct>struct <name>Local</name> <block>{<public type=\"default\">\n"
+        "        <comment type=\"line\">// @stereotype get</comment>\n"
+        "        <function><type><name>int</name></type> <name>get</name><parameter_list>()</parameter_list> <block>{}</block></function>\n"
+        "    </public>}</block>;</struct>\n"
+        "</block_content>}</block></function>\n"
+        "<comment type=\"line\">// @stereotype empty</comment>\n"
+        "<struct>struct <block>{<public type=\"default\">\n"
+        "    <comment type=\"line\">// @stereotype get</comment>\n"
+        "    <function><type><name>int</name></type> <name>get</name><parameter_list>()</parameter_list> <block>{}</block></function>\n"
+        "</public>}</block> <decl><name>anonymous</name></decl>;</struct>\n"
+        "<comment type=\"line\">// @stereotype empty</comment>\n"
+        "<typedef>typedef <type><struct>struct <block>{<public type=\"default\">\n"
+        "    <comment type=\"line\">// @stereotype get</comment>\n"
+        "    <function><type><name>int</name></type> <name>get</name><parameter_list>()</parameter_list> <block>{}</block></function>\n"
+        "</public>}</block></struct></type> *<name>PointPtr</name>;</typedef>\n";
+    CHECK(commented("<comment type=\"line\">// @stereotype global-command</comment>\n" + local) == local);
+
+    const std::string shop =
+        "<class>class <name>Shop</name> <block>{\n"
+        "    <function><type><name>int</name></type> <name>Size</name><parameter_list>()</parameter_list> <block>{<block_content>\n"
+        "        <comment type=\"line\">// @stereotype get</comment>\n"
+        "        <function><type><name>int</name></type> <name>Count</name><parameter_list>()</parameter_list> <block>{}</block></function>\n"
+        "    </block_content>}</block></function>\n"
+        "}</block></class>\n";
+    CHECK(commented(shop, "C#") == shop);
+}
+
+TEST_CASE("A stereotype comment stays above a C# or Java function outside every type, which stereocode does not analyze") {
+    const std::string helper = "<comment type=\"line\">// @stereotype get</comment>\n"
+                               "<function><type><name>int</name></type> <name>Helper</name><parameter_list>()</parameter_list> <block>{}</block></function>\n";
+    CHECK(commented(helper, "C#") == helper);
+    CHECK(commented(helper, "Java") == helper);
+}
+
+TEST_CASE("Stacked stereotype comments before a labeled element give way to one comment with its stereotypes") {
+    CHECK(commented("<block>{\n  <comment type=\"line\">// @stereotype command</comment>\n  <comment type=\"line\">// @stereotype set</comment>\n"
+                    "  <function st:stereotype=\"get\"><name>getX</name></function>\n}</block>\n") ==
+          "<block>{\n  <comment type=\"line\">// @stereotype get</comment>\n  <function st:stereotype=\"get\"><name>getX</name></function>\n}</block>\n");
+}
+
+TEST_CASE("Stereotype comments above a declaration or an empty line and comments that only start like one stay") {
+    const std::string content =
+        "<block>{\n  <comment type=\"line\">// @stereotype get</comment>\n  <decl_stmt><decl><type><name>int</name></type> <name>x</name></decl>;</decl_stmt>\n"
+        "  <comment type=\"line\">// @stereotype set</comment>\n\n  <function><name>f</name></function>\n"
+        "  <comment type=\"line\">// @stereotypes follow</comment>\n  <function><name>g</name></function>\n}</block>\n";
+    CHECK(commented(content) == content);
+}
+
+TEST_CASE("Earlier comments give way in one run, and a second run keeps its output") {
+    const std::string content =
+        "<comment type=\"line\">// @stereotype data-class</comment>\n<class st:stereotype=\"empty\">class <name>B</name> <block>{<public>public: "
+        "<comment type=\"line\">// @stereotype command</comment>\n<comment type=\"line\">// @stereotype set</comment>\n"
+        "<function st:stereotype=\"get\"><name>getY</name></function> <comment type=\"line\">// @stereotype get</comment>\n"
+        "<friend>friend <function><name>f</name></function></friend>\n</public>}</block>;</class>\n";
+    const std::string once = commented(content);
+
+    CHECK(once == "<comment type=\"line\">// @stereotype empty</comment>\n<class st:stereotype=\"empty\">class <name>B</name> <block>{<public>public:\n"
+                  "<comment type=\"line\">// @stereotype get</comment>\n<function st:stereotype=\"get\"><name>getY</name></function>\n"
+                  "<friend>friend <function><name>f</name></function></friend>\n</public>}</block>;</class>\n");
+    CHECK(commented(once) == once);
+}
+
+TEST_CASE("Only srcML that holds the text // @stereotype may hold stereotype comments") {
+    CHECK(mayHoldStereotypeComments(unitStart + "<comment type=\"line\">// @stereotype get</comment></unit>"));
+    CHECK_FALSE(mayHoldStereotypeComments(unitStart + "<comment type=\"line\">// Returns x</comment></unit>"));
 }
 
 TEST_CASE("srcML that is not well formed stops the insertion with an error") {

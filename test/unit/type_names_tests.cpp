@@ -8,9 +8,9 @@
  */
 
 #include "doctest.h"
-#include "primitives.hpp"
-#include "specifier_pattern.hpp"
-#include "specifiers.hpp"
+#include "rules/primitives.hpp"
+#include "rules/specifier_pattern.hpp"
+#include "rules/specifiers.hpp"
 
 #include <sstream>
 #include <string>
@@ -99,6 +99,18 @@ TEST_CASE("the defaults hold the string types of C++, Java Boolean, and the coll
     CHECK(tables.facts("Collection<Integer>", "Java", "Calc") == std::pair<bool, bool>{false, false});
     CHECK(tables.facts("IEnumerable<int>", "C#", "Calc") == std::pair<bool, bool>{false, false});
     CHECK(tables.facts("IEnumerable", "C#", "Calc") == std::pair<bool, bool>{true, true});
+}
+
+TEST_CASE("the calling conventions of Windows are C++ specifiers, which leave the names of a type") {
+    const typeTables tables;
+    for (const std::string convention : {"__stdcall", "__cdecl", "__fastcall", "__thiscall", "__vectorcall", "__clrcall", "WINAPI", "WINAPIV",
+                                         "APIENTRY", "CALLBACK", "PASCAL", "STDMETHODCALLTYPE", "STDAPICALLTYPE"}) {
+        CAPTURE(convention);
+        CHECK(tables.typeSpecifiers.typeNames("int " + convention, "C++") == names{"int"});
+    }
+    CHECK(tables.typeSpecifiers.typeNames("LRESULT CALLBACK", "C++") == names{"LRESULT"});
+    CHECK(tables.facts("int WINAPI", "C++", "Window") == std::pair<bool, bool>{false, false});
+    CHECK(tables.typeSpecifiers.typeNames("int WINAPI", "C#") == names{"intWINAPI"});
 }
 
 TEST_CASE("user files add primitives and specifiers whatever their line ends") {

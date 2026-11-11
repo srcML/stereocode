@@ -6953,7 +6953,7 @@ notepad-plus-plus-8.9/lexilla/access/LexillaAccess.cxx	275	function	Lexilla::Lib
 notepad-plus-plus-8.9/lexilla/access/LexillaAccess.cxx	279	function	Lexilla::SetProperty	wrapper
 notepad-plus-plus-8.9/lexilla/examples/CheckLexilla/CheckLexilla.c	66	function	FindSymbol	property wrapper
 notepad-plus-plus-8.9/lexilla/examples/CheckLexilla/CheckLexilla.c	74	function	main	main
-notepad-plus-plus-8.9/lexilla/examples/SimpleLexer/SimpleLexer.cxx	50	class	LexerSimple	degenerate
+notepad-plus-plus-8.9/lexilla/examples/SimpleLexer/SimpleLexer.cxx	50	class	LexerSimple	pure-controller degenerate
 notepad-plus-plus-8.9/lexilla/examples/SimpleLexer/SimpleLexer.cxx	52	constructor	LexerSimple	constructor
 notepad-plus-plus-8.9/lexilla/examples/SimpleLexer/SimpleLexer.cxx	54	function	Lex	controller
 notepad-plus-plus-8.9/lexilla/examples/SimpleLexer/SimpleLexer.cxx	70	function	Fold	empty
@@ -7046,8 +7046,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	92	struct	OptionSetAsm	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	93	constructor	OptionSetAsm	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	128	class	LexerAsm	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	141	constructor	LexerAsm	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	145	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	148	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	145	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	148	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	151	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	154	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	157	function	DescribeProperty	property collaborator
@@ -7058,7 +7058,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	175	function	LexerFactoryAsm	fac
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	179	function	LexerFactoryAs	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	184	function	LexerAsm::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	191	function	LexerAsm::WordListSet	property controller
-notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	230	function	LexerAsm::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	230	function	LexerAsm::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexAsm.cxx	380	function	LexerAsm::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexAsn1.cxx	32	function	isAsn1Number	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexAsn1.cxx	37	function	isAsn1Letter	predicate
@@ -7087,8 +7087,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	379	function	Contains	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	386	class	LexerBaan	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	399	constructor	LexerBaan	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	402	destructor	~LexerBaan	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	405	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	409	function	Release	collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	405	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	409	function	Release	unclassified
 notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	413	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	417	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBaan.cxx	421	function	DescribeProperty	property collaborator
@@ -7126,8 +7126,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	351	function	Expand	void-access
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	401	function	Escape	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	476	class	LexerBash	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	488	constructor	LexerBash	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	496	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	499	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	496	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	499	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	502	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	505	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	508	function	DescribeProperty	property collaborator
@@ -7138,11 +7138,11 @@ notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	526	function	AllocateSubStyles	
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	529	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	532	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	535	function	StyleFromSubStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	539	function	PrimaryStyleFromStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	542	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	545	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	548	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	551	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	539	function	PrimaryStyleFromStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	542	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	545	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	548	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	551	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	555	function	IsTestOperator	predicate controller
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	560	function	LexerFactoryBash	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexBash.cxx	565	function	LexerBash::PropertySet	property non-void-command collaborator
@@ -7167,8 +7167,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	205	constructor	OptionSetBasic
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	231	class	LexerBasic	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	238	constructor	LexerBasic	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	245	destructor	~LexerBasic	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	247	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	250	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	247	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	250	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	253	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	256	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	259	function	DescribeProperty	property collaborator
@@ -7181,7 +7181,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	282	function	LexerFactoryFreeB
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	287	function	LexerBasic::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	294	function	LexerBasic::WordListSet	property controller
 notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	322	function	LexerBasic::Lex	controller
-notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	481	function	LexerBasic::Fold	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexBasic.cxx	481	function	LexerBasic::Fold	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexBatch.cxx	35	function	Is0To9	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexBatch.cxx	39	function	IsAlphabetic	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexBatch.cxx	43	function	AtEOL	predicate command
@@ -7211,16 +7211,16 @@ notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	84	constructor	OptionSetCIL	cons
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	114	class	LexerCIL	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	120	constructor	LexerCIL	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	122	destructor	~LexerCIL	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	124	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	128	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	124	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	128	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	132	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	136	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	140	function	DescribeProperty	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	146	function	PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	150	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	159	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	163	function	LineEndTypesSupported	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	167	function	PrimaryStyleFromStyle	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	163	function	LineEndTypesSupported	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	167	function	PrimaryStyleFromStyle	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	171	function	LexerFactoryCIL	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	176	function	LexerCIL::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCIL.cxx	184	function	LexerCIL::WordListSet	property controller
@@ -7293,36 +7293,36 @@ notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	553	struct	SymbolValue	entity sm
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	557	constructor	SymbolValue	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	559	function	operator =	command
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	564	function	IsMacro	predicate
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	593	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	596	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	593	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	596	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	599	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	602	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	605	function	DescribeProperty	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	609	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	616	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	620	function	LineEndTypesSupported	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	620	function	LineEndTypesSupported	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	624	function	AllocateSubStyles	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	627	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	630	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	633	function	StyleFromSubStyle	property wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	638	function	PrimaryStyleFromStyle	wrapper stateless
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	641	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	644	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	647	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	650	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	641	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	644	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	647	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	650	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	653	function	NamedStyles	property wrapper
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	658	function	NameOfStyle	property collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	658	function	NameOfStyle	property
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	666	function	TagsOfStyle	property non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	698	function	DescriptionOfStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	708	function	GetName	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	711	function	GetIdentifier	property collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	698	function	DescriptionOfStyle	property
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	708	function	GetName	property
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	711	function	GetIdentifier	property
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	716	function	LexerFactoryCPP	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	719	function	LexerFactoryCPPInsensitive	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	722	function	MaskActive	property
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	730	function	LexerCPP::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	743	function	LexerCPP::PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	747	function	LexerCPP::WordListSet	property non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	788	function	LexerCPP::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	788	function	LexerCPP::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	1492	function	LexerCPP::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	1603	function	LexerCPP::EvaluateTokens	void-accessor command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexCPP.cxx	1787	function	LexerCPP::Tokenize	property controller
@@ -7371,8 +7371,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	116	constructor	OptionSetD	constru
 notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	150	class	LexerD	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	162	constructor	LexerD	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	166	destructor	~LexerD	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	168	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	171	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	168	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	171	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	174	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	177	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexD.cxx	180	function	DescribeProperty	property collaborator
@@ -7389,22 +7389,22 @@ notepad-plus-plus-8.9/lexilla/lexers/LexDMAP.cxx	45	function	IsAWordStart	predic
 notepad-plus-plus-8.9/lexilla/lexers/LexDMAP.cxx	49	function	ColouriseDMAPDoc	command
 notepad-plus-plus-8.9/lexilla/lexers/LexDMAP.cxx	152	function	classifyFoldPointDMAP	property wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexDMAP.cxx	162	function	FoldDMAPDoc	command
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	43	class	LexerDMIS	boundary degenerate
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	61	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	65	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	69	function	PropertyNames	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	73	function	PropertyType	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	77	function	DescribeProperty	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	43	class	LexerDMIS	degenerate
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	61	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	65	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	69	function	PropertyNames	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	73	function	PropertyType	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	77	function	DescribeProperty	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	81	function	PropertySet	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	85	function	PropertyGet	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	85	function	PropertyGet	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	91	function	PrivateCall	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	95	function	LexerFactoryDMIS	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	105	function	LexerDMIS::UpperCase	wrapper stateless
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	118	function	LexerDMIS::InitWordListSets	set collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	118	function	LexerDMIS::InitWordListSets	set
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	139	constructor	LexerDMIS::LexerDMIS	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	150	destructor	LexerDMIS::~LexerDMIS	destructor
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	154	function	LexerDMIS::WordListSet	property non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	189	function	LexerDMIS::DescribeWordListSets	get collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	189	function	LexerDMIS::DescribeWordListSets	get
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	194	function	LexerDMIS::Lex	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexDMIS.cxx	296	function	LexerDMIS::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	37	function	IsEOLChar	predicate
@@ -7433,8 +7433,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	169	struct	OptionSetDart	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	170	constructor	OptionSetDart	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	210	class	LexerDart	unclassified
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	218	constructor	LexerDart	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	228	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	231	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	228	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	231	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	234	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	237	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexDart.cxx	240	function	DescribeProperty	property collaborator
@@ -7474,14 +7474,14 @@ notepad-plus-plus-8.9/lexilla/lexers/LexECL.cxx	408	function	FoldEclDoc	command
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	30	class	LexerEDIFACT	boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	34	destructor	~LexerEDIFACT	destructor
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	36	function	Factory	factory literal
-notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	40	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	44	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	49	function	PropertyNames	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	53	function	PropertyType	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	40	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	44	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	49	function	PropertyNames	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	53	function	PropertyType	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	57	function	DescribeProperty	wrapper stateless
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	66	function	PropertySet	property non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	81	function	PropertyGet	property set collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	95	function	DescribeWordListSets	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	81	function	PropertyGet	property set
+notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	95	function	DescribeWordListSets	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	99	function	WordListSet	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	105	function	PrivateCall	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexEDIFACT.cxx	139	constructor	LexerEDIFACT::LexerEDIFACT	constructor
@@ -7550,11 +7550,11 @@ notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	267	class	LexerFSharp	data-pr
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	280	constructor	LexerFSharp	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	293	function	LexerFactoryFSharp	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	296	destructor	~LexerFSharp	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	298	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	301	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	304	function	GetName	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	307	function	GetIdentifier	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	310	function	LineEndTypesSupported	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	298	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	301	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	304	function	GetName	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	307	function	GetIdentifier	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	310	function	LineEndTypesSupported	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	313	function	PrivateCall	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	316	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	319	function	PropertyNames	property collaborator
@@ -7565,7 +7565,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	331	function	PropertySet	prop
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	342	function	IsNumber	predicate controller
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	347	function	IsFloat	predicate controller
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	357	function	LexerFSharp::WordListSet	property controller
-notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	370	function	LexerFSharp::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	370	function	LexerFSharp::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	648	function	LexerFSharp::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	743	function	LineContains	predicate command
 notepad-plus-plus-8.9/lexilla/lexers/LexFSharp.cxx	755	function	FoldLexicalGroup	command
@@ -7616,24 +7616,24 @@ notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	178	constructor	OptionSetGD
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	237	class	LexerGDScript	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	245	constructor	LexerGDScript	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	248	destructor	~LexerGDScript	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	250	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	253	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	250	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	253	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	256	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	259	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	262	function	DescribeProperty	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	266	function	PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	269	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	276	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	280	function	LineEndTypesSupported	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	280	function	LineEndTypesSupported	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	284	function	AllocateSubStyles	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	287	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	290	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	293	function	StyleFromSubStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	297	function	PrimaryStyleFromStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	300	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	303	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	306	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	309	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	297	function	PrimaryStyleFromStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	300	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	303	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	306	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	309	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	313	function	LexerFactoryGDScript	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	321	function	LexerGDScript::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexGDScript.cxx	328	function	LexerGDScript::WordListSet	property controller
@@ -7737,8 +7737,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	353	function	LineContainsImp
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	380	function	IndentAmountWithOffset	property wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	388	function	IndentLevelRemoveIndentOffset	property
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	401	destructor	~LexerHaskell	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	403	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	407	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	403	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	407	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	411	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	415	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	419	function	DescribeProperty	property collaborator
@@ -7749,8 +7749,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	443	function	LexerFactoryHas
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	447	function	LexerFactoryLiterateHaskell	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	452	function	LexerHaskell::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	459	function	LexerHaskell::WordListSet	property controller
-notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	484	function	LexerHaskell::Lex	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	972	function	LexerHaskell::Fold	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	484	function	LexerHaskell::Lex	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexHaskell.cxx	972	function	LexerHaskell::Fold	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHex.cxx	162	function	IsNewline	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexHex.cxx	167	function	GetHexaNibble	property
 notepad-plus-plus-8.9/lexilla/lexers/LexHex.cxx	184	function	GetHexaChar	property
@@ -7799,8 +7799,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	244	constructor	OptionSetH
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	251	class	LexerHollywood	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	257	constructor	LexerHollywood	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	262	destructor	~LexerHollywood	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	264	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	267	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	264	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	267	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	270	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	273	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	276	function	DescribeProperty	property collaborator
@@ -7811,7 +7811,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	293	function	LexerFactoryH
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	298	function	LexerHollywood::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	305	function	LexerHollywood::WordListSet	property controller
 notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	333	function	LexerHollywood::Lex	controller
-notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	447	function	LexerHollywood::Fold	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexHollywood.cxx	447	function	LexerHollywood::Fold	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexIndent.cxx	30	function	ColouriseIndentDoc	command
 notepad-plus-plus-8.9/lexilla/lexers/LexIndent.cxx	40	function	FoldIndentDoc	command
 notepad-plus-plus-8.9/lexilla/lexers/LexInno.cxx	32	function	innoIsBlank	predicate
@@ -7838,8 +7838,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	171	function	AtPropertyName	pre
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	191	function	IsNextWordInList	predicate command
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	209	constructor	LexerJSON	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	216	destructor	~LexerJSON	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	217	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	220	function	Release	collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	217	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	220	function	Release	unclassified
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	223	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	226	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	229	function	DescribeProperty	property collaborator
@@ -7849,7 +7849,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	241	function	WordListSet	proper
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	259	function	PrivateCall	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	262	function	LexerFactoryJSON	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	265	function	DescribeWordListSets	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	278	function	LexerJSON::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	278	function	LexerJSON::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexJSON.cxx	456	function	LexerJSON::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	46	struct	OptionsJulia	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	54	constructor	OptionsJulia	constructor
@@ -7858,8 +7858,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	74	constructor	OptionSetJulia	
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	123	class	LexerJulia	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	131	constructor	LexerJulia	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	134	destructor	~LexerJulia	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	136	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	139	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	136	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	139	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	142	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	145	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexJulia.cxx	148	function	DescribeProperty	property collaborator
@@ -7914,8 +7914,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	75	function	setSave	command co
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	79	function	getSave	void-accessor controller
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	86	function	truncSaves	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	91	function	LexerFactoryLaTeX	factory literal
-notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	98	function	GetName	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	101	function	GetIdentifier	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	98	function	GetName	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	101	function	GetIdentifier	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	106	function	latexIsSpecial	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	111	function	latexIsBlank	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	115	function	latexIsBlankAndNL	predicate
@@ -7925,9 +7925,9 @@ notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	143	function	latexNextNotBlank
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	158	function	latexLastWordIs	predicate command
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	173	function	latexLastWordIsMathEnv	predicate command
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	195	function	latexStateReset	command
-notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	205	function	LexerLaTeX::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	205	function	LexerLaTeX::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	487	function	latexFoldSaveToInt	property
-notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	496	function	LexerLaTeX::Fold	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexLaTeX.cxx	496	function	LexerLaTeX::Fold	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLisp.cxx	36	function	isLispoperator	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexLisp.cxx	44	function	isLispwordstart	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexLisp.cxx	50	function	classifyWordLisp	command
@@ -7943,8 +7943,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	95	struct	OptionSetLua	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	96	constructor	OptionSetLua	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	103	class	LexerLua	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	116	constructor	LexerLua	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	124	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	127	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	124	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	127	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	130	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	133	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	136	function	DescribeProperty	property collaborator
@@ -7954,11 +7954,11 @@ notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	150	function	AllocateSubStyles	p
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	153	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	156	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	159	function	StyleFromSubStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	163	function	PrimaryStyleFromStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	166	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	169	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	172	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	175	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	163	function	PrimaryStyleFromStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	166	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	169	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	172	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	175	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	179	function	LexerFactoryLua	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	184	function	LexerLua::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexLua.cxx	191	function	LexerLua::WordListSet	property controller
@@ -8073,16 +8073,16 @@ notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	188	constructor	OptionSetNim	con
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	223	class	LexerNim	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	230	constructor	LexerNim	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	234	destructor	~LexerNim	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	236	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	240	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	236	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	240	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	244	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	248	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	252	function	DescribeProperty	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	258	function	PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	262	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	271	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	275	function	LineEndTypesSupported	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	279	function	PrimaryStyleFromStyle	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	275	function	LineEndTypesSupported	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	279	function	PrimaryStyleFromStyle	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	283	function	LexerFactoryNim	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	288	function	LexerNim::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNim.cxx	296	function	LexerNim::WordListSet	property controller
@@ -8116,8 +8116,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	126	struct	OptionSetNix	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	127	constructor	OptionSetNix	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	156	class	LexerNix	boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	164	constructor	LexerNix	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	174	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	177	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	174	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	177	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	180	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	183	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexNix.cxx	186	function	DescribeProperty	property collaborator
@@ -8237,8 +8237,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	398	constructor	OptionSetPerl	c
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	470	class	LexerPerl	boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	479	constructor	LexerPerl	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	486	destructor	~LexerPerl	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	488	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	491	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	488	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	491	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	494	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	497	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	500	function	DescribeProperty	property collaborator
@@ -8250,7 +8250,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	525	function	LexerPerl::Propert
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	532	function	LexerPerl::WordListSet	property controller
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	548	function	LexerPerl::InputSymbolScan	controller stateless
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	563	function	LexerPerl::InterpolateSegment	controller
-notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	651	function	LexerPerl::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	651	function	LexerPerl::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPerl.cxx	1724	function	LexerPerl::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexPowerPro.cxx	51	function	IsStreamCommentStyle	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexPowerPro.cxx	55	function	IsLineEndChar	predicate
@@ -8273,15 +8273,15 @@ notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	105	constructor	OptionSetAB
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	124	class	LexerABL	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	138	constructor	LexerABL	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	146	destructor	~LexerABL	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	148	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	151	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	148	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	151	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	154	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	157	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	160	function	DescribeProperty	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	164	function	PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	168	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	175	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	178	function	LineEndTypesSupported	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	178	function	LineEndTypesSupported	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	181	function	LexerFactoryABL	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	186	function	LexerABL::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexProgress.cxx	193	function	LexerABL::WordListSet	property controller
@@ -8316,29 +8316,29 @@ notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	327	struct	OptionSetPython	em
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	328	constructor	OptionSetPython	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	410	class	LexerPython	boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	419	constructor	LexerPython	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	422	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	425	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	422	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	425	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	428	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	431	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	434	function	DescribeProperty	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	438	function	PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	441	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	448	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	452	function	LineEndTypesSupported	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	452	function	LineEndTypesSupported	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	456	function	AllocateSubStyles	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	459	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	462	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	465	function	StyleFromSubStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	469	function	PrimaryStyleFromStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	472	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	475	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	478	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	481	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	469	function	PrimaryStyleFromStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	472	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	475	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	478	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	481	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	485	function	LexerFactoryPython	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	493	function	LexerPython::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	500	function	LexerPython::WordListSet	property controller
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	521	function	LexerPython::ProcessLineEnd	void-accessor command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	565	function	LexerPython::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	565	function	LexerPython::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	935	function	IsCommentLine	predicate command
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	948	function	IsQuoteLine	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexPython.cxx	954	function	LexerPython::Fold	controller
@@ -8384,8 +8384,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	618	function	GetRelativeString	
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	633	class	LexerRaku	boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	652	constructor	LexerRaku	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	666	destructor	~LexerRaku	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	668	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	671	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	668	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	671	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	674	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	677	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	680	function	DescribeProperty	property collaborator
@@ -8402,7 +8402,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	864	function	LexerRaku::Process
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	892	function	LexerRaku::ProcessStringVars	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	912	function	LexerRaku::ProcessValidRegQlangStart	controller stateless
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	1010	function	LexerRaku::LengthToNonWordChar	property controller
-notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	1031	function	LexerRaku::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	1031	function	LexerRaku::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRaku.cxx	1506	function	LexerRaku::Fold	controller
 notepad-plus-plus-8.9/lexilla/lexers/LexRebol.cxx	37	function	IsAWordChar	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexRebol.cxx	41	function	IsAWordStart	predicate wrapper
@@ -8423,8 +8423,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	121	function	AtKeyPathEnd	p
 notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	137	function	AtGUID	predicate command
 notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	164	constructor	LexerRegistry	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	165	destructor	~LexerRegistry	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	166	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	169	function	Release	collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	166	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	169	function	Release	unclassified
 notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	172	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	175	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRegistry.cxx	178	function	DescribeProperty	property collaborator
@@ -8461,11 +8461,11 @@ notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	194	function	AllocateSubStyles	
 notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	197	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	200	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	203	function	StyleFromSubStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	207	function	PrimaryStyleFromStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	210	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	213	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	216	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	219	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	207	function	PrimaryStyleFromStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	210	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	213	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	216	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	219	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	223	function	LexerFactoryRuby	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	228	function	LexerRuby::PropertySet	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRuby.cxx	235	function	LexerRuby::WordListSet	property controller
@@ -8503,8 +8503,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	100	constructor	OptionSetRust	c
 notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	164	class	LexerRust	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	169	constructor	LexerRust	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	171	destructor	~LexerRust	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	173	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	176	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	173	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	176	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	179	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	182	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexRust.cxx	185	function	DescribeProperty	property collaborator
@@ -8591,8 +8591,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	279	constructor	OptionSetSQL	con
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	309	class	LexerSQL	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	311	constructor	LexerSQL	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	313	destructor	~LexerSQL	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	315	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	319	function	Release	collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	315	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	319	function	Release	unclassified
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	323	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	327	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	331	function	DescribeProperty	property collaborator
@@ -8606,7 +8606,7 @@ notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	369	function	IsCommentStyle	inci
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	383	function	IsCommentLine	controller stateless
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	411	function	LexerSQL::WordListSet	property controller
 notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	447	function	LexerSQL::Lex	controller
-notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	635	function	LexerSQL::Fold	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexSQL.cxx	635	function	LexerSQL::Fold	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexSTTXT.cxx	32	function	ClassifySTTXTWord	command
 notepad-plus-plus-8.9/lexilla/lexers/LexSTTXT.cxx	64	function	ColouriseSTTXTDoc	wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexSTTXT.cxx	203	function	IsCommentLine	predicate command
@@ -8807,8 +8807,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	76	struct	OptionSetVB	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	77	constructor	OptionSetVB	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	104	class	LexerVB	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	113	constructor	LexerVB	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	123	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	126	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	123	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	126	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	129	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	132	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVB.cxx	135	function	DescribeProperty	property collaborator
@@ -8856,8 +8856,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	194	constructor	SymbolValue	
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	196	function	operator =	command
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	201	function	IsMacro	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	226	destructor	~LexerVerilog	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	227	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	230	function	Release	collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	227	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	230	function	Release	unclassified
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	233	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	236	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	239	function	DescribeProperty	property collaborator
@@ -8865,16 +8865,16 @@ notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	242	function	PropertySet	pro
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	245	function	PropertyGet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	248	function	DescribeWordListSets	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	254	function	PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	257	function	LineEndTypesSupported	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	257	function	LineEndTypesSupported	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	260	function	AllocateSubStyles	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	263	function	SubStylesStart	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	266	function	SubStylesLength	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	269	function	StyleFromSubStyle	property wrapper
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	274	function	PrimaryStyleFromStyle	wrapper stateless
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	277	function	FreeSubStyles	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	280	function	SetIdentifiers	non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	283	function	DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	286	function	GetSubStyleBases	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	277	function	FreeSubStyles	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	280	function	SetIdentifiers	command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	283	function	DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	286	function	GetSubStyleBases	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	289	function	LexerFactoryVerilog	factory literal
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	292	function	MaskActive	property
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	298	function	LexerVerilog::WordListSet	property non-void-command collaborator
@@ -8886,10 +8886,10 @@ notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	377	constructor	After	constr
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	378	function	operator()	predicate collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	383	function	GetRestOfLine	property command
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	400	function	IsSpaceOrTab	predicate
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	404	function	LexerVerilog::Lex	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	404	function	LexerVerilog::Lex	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	775	function	IsStreamCommentStyle	predicate
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	779	function	IsCommentLine	predicate command
-notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	799	function	LexerVerilog::Fold	non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	799	function	LexerVerilog::Fold	command collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVerilog.cxx	1049	function	LexerVerilog::Tokenize	property controller
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	51	struct	OptionsVisualProlog	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	54	constructor	OptionsVisualProlog	constructor
@@ -8899,8 +8899,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	101	function	getLexical
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	111	class	LexerVisualProlog	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	119	constructor	LexerVisualProlog	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	121	destructor	~LexerVisualProlog	destructor
-notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	123	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	126	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	123	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	126	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	129	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	132	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	135	function	DescribeProperty	property collaborator
@@ -8934,14 +8934,14 @@ notepad-plus-plus-8.9/lexilla/lexers/LexVisualProlog.cxx	639	function	LexerVisua
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	31	class	LexerX12	boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	35	destructor	~LexerX12	destructor
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	37	function	Factory	factory literal
-notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	41	function	Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	45	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	50	function	PropertyNames	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	54	function	PropertyType	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	41	function	Version	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	45	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	50	function	PropertyNames	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	54	function	PropertyType	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	58	function	DescribeProperty	wrapper stateless
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	65	function	PropertySet	property set collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	74	function	PropertyGet	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	77	function	DescribeWordListSets	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	74	function	PropertyGet	incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	77	function	DescribeWordListSets	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	81	function	WordListSet	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	87	function	PrivateCall	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexX12.cxx	93	struct	Terminator	empty
@@ -8979,8 +8979,8 @@ notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	138	struct	OptionSetZig	empty
 notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	139	constructor	OptionSetZig	constructor
 notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	169	class	LexerZig	data-provider boundary
 notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	177	constructor	LexerZig	constructor
-notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	187	function	Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	190	function	Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	187	function	Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	190	function	Version	incidental
 notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	193	function	PropertyNames	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	196	function	PropertyType	property collaborator
 notepad-plus-plus-8.9/lexilla/lexers/LexZig.cxx	199	function	DescribeProperty	property collaborator
@@ -9052,34 +9052,34 @@ notepad-plus-plus-8.9/lexilla/lexlib/CharacterSet.h	173	function	MakeUpperCase	p
 notepad-plus-plus-8.9/lexilla/lexlib/CharacterSet.h	181	function	MakeLowerCase	property
 notepad-plus-plus-8.9/lexilla/lexlib/CharacterSet.h	193	function	StartsWith	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	30	constructor	DefaultLexer::DefaultLexer	constructor
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	40	function	DefaultLexer::Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	44	function	DefaultLexer::Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	48	function	DefaultLexer::PropertyNames	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	52	function	DefaultLexer::PropertyType	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	56	function	DefaultLexer::DescribeProperty	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	40	function	DefaultLexer::Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	44	function	DefaultLexer::Version	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	48	function	DefaultLexer::PropertyNames	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	52	function	DefaultLexer::PropertyType	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	56	function	DefaultLexer::DescribeProperty	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	60	function	DefaultLexer::PropertySet	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	64	function	DefaultLexer::DescribeWordListSets	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	64	function	DefaultLexer::DescribeWordListSets	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	68	function	DefaultLexer::WordListSet	collaborator incidental
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	72	function	DefaultLexer::Fold	empty
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	75	function	DefaultLexer::PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	79	function	DefaultLexer::LineEndTypesSupported	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	83	function	DefaultLexer::AllocateSubStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	87	function	DefaultLexer::SubStylesStart	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	91	function	DefaultLexer::SubStylesLength	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	95	function	DefaultLexer::StyleFromSubStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	99	function	DefaultLexer::PrimaryStyleFromStyle	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	79	function	DefaultLexer::LineEndTypesSupported	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	83	function	DefaultLexer::AllocateSubStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	87	function	DefaultLexer::SubStylesStart	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	91	function	DefaultLexer::SubStylesLength	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	95	function	DefaultLexer::StyleFromSubStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	99	function	DefaultLexer::PrimaryStyleFromStyle	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	103	function	DefaultLexer::FreeSubStyles	empty
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	106	function	DefaultLexer::SetIdentifiers	empty
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	109	function	DefaultLexer::DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	113	function	DefaultLexer::GetSubStyleBases	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	117	function	DefaultLexer::NamedStyles	property collaborator
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	109	function	DefaultLexer::DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	113	function	DefaultLexer::GetSubStyleBases	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	117	function	DefaultLexer::NamedStyles	property
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	121	function	DefaultLexer::NameOfStyle	property collaborator
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	125	function	DefaultLexer::TagsOfStyle	property collaborator
 notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	129	function	DefaultLexer::DescriptionOfStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	134	function	DefaultLexer::GetName	get collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	138	function	DefaultLexer::GetIdentifier	get collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	142	function	DefaultLexer::PropertyGet	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.h	16	class	DefaultLexer	data-provider boundary lazy-class degenerate
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	134	function	DefaultLexer::GetName	get
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	138	function	DefaultLexer::GetIdentifier	get
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.cxx	142	function	DefaultLexer::PropertyGet	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/DefaultLexer.h	16	class	DefaultLexer	data-provider lazy-class degenerate
 notepad-plus-plus-8.9/lexilla/lexlib/InList.cxx	19	function	InList	predicate
 notepad-plus-plus-8.9/lexilla/lexlib/InList.cxx	28	function	InListCaseInsensitive	predicate wrapper
 notepad-plus-plus-8.9/lexilla/lexlib/LexAccessor.cxx	23	function	LexAccessor::MatchIgnoreCase	predicate non-void-command collaborator
@@ -9122,33 +9122,33 @@ notepad-plus-plus-8.9/lexilla/lexlib/LexAccessor.h	233	function	FoldLevelForCurr
 notepad-plus-plus-8.9/lexilla/lexlib/LexAccessor.h	237	function	FoldLevelForCurrent	property wrapper
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	30	constructor	LexerBase::LexerBase	constructor
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	37	destructor	LexerBase::~LexerBase	destructor
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	45	function	LexerBase::Release	collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	49	function	LexerBase::Version	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	53	function	LexerBase::PropertyNames	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	57	function	LexerBase::PropertyType	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	61	function	LexerBase::DescribeProperty	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	45	function	LexerBase::Release	unclassified
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	49	function	LexerBase::Version	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	53	function	LexerBase::PropertyNames	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	57	function	LexerBase::PropertyType	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	61	function	LexerBase::DescribeProperty	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	65	function	LexerBase::PropertySet	property collaborator
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	73	function	LexerBase::PropertyGet	property collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	77	function	LexerBase::DescribeWordListSets	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	77	function	LexerBase::DescribeWordListSets	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	81	function	LexerBase::WordListSet	property controller
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	90	function	LexerBase::PrivateCall	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	94	function	LexerBase::LineEndTypesSupported	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	98	function	LexerBase::AllocateSubStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	102	function	LexerBase::SubStylesStart	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	106	function	LexerBase::SubStylesLength	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	110	function	LexerBase::StyleFromSubStyle	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	114	function	LexerBase::PrimaryStyleFromStyle	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	94	function	LexerBase::LineEndTypesSupported	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	98	function	LexerBase::AllocateSubStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	102	function	LexerBase::SubStylesStart	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	106	function	LexerBase::SubStylesLength	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	110	function	LexerBase::StyleFromSubStyle	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	114	function	LexerBase::PrimaryStyleFromStyle	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	118	function	LexerBase::FreeSubStyles	empty
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	121	function	LexerBase::SetIdentifiers	empty
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	124	function	LexerBase::DistanceToSecondaryStyles	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	128	function	LexerBase::GetSubStyleBases	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	132	function	LexerBase::NamedStyles	property collaborator
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	124	function	LexerBase::DistanceToSecondaryStyles	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	128	function	LexerBase::GetSubStyleBases	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	132	function	LexerBase::NamedStyles	property
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	136	function	LexerBase::NameOfStyle	property collaborator
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	140	function	LexerBase::TagsOfStyle	property collaborator
 notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	144	function	LexerBase::DescriptionOfStyle	property collaborator
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	150	function	LexerBase::GetName	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	154	function	LexerBase::GetIdentifier	collaborator incidental
-notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.h	14	class	LexerBase	data-provider boundary degenerate
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	150	function	LexerBase::GetName	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.cxx	154	function	LexerBase::GetIdentifier	incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerBase.h	14	class	LexerBase	data-provider degenerate
 notepad-plus-plus-8.9/lexilla/lexlib/LexerModule.cxx	28	constructor	LexerModule::LexerModule	constructor
 notepad-plus-plus-8.9/lexilla/lexlib/LexerModule.cxx	45	constructor	LexerModule::LexerModule	constructor
 notepad-plus-plus-8.9/lexilla/lexlib/LexerModule.cxx	59	function	LexerModule::GetLanguage	get
@@ -9165,7 +9165,7 @@ notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	28	constructor	LexerSimple:
 notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	38	function	LexerSimple::DescribeWordListSets	controller stateless
 notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	42	function	LexerSimple::Lex	controller
 notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	48	function	LexerSimple::Fold	controller
-notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	56	function	LexerSimple::GetName	collaborator incidental
+notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	56	function	LexerSimple::GetName	incidental
 notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.cxx	60	function	LexerSimple::GetIdentifier	controller stateless
 notepad-plus-plus-8.9/lexilla/lexlib/LexerSimple.h	14	class	LexerSimple	empty
 notepad-plus-plus-8.9/lexilla/lexlib/OptionSet.h	15	class	OptionSet	entity boundary
@@ -9286,7 +9286,7 @@ notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	60	function	TrailByteValue	p
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	67	function	UTF32FromUTF8	property wrapper
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	112	function	TestDocument::Set	command collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	135	function	TestDocument::MaxLine	property collaborator
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	139	function	TestDocument::Version	collaborator incidental
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	139	function	TestDocument::Version	incidental
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	143	function	TestDocument::SetErrorStatus	empty
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	146	function	TestDocument::Length	property collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	150	function	TestDocument::GetCharRange	collaborator
@@ -9298,19 +9298,19 @@ notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	187	function	TestDocument::S
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	194	function	TestDocument::GetLineState	property collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	198	function	TestDocument::SetLineState	property non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	202	function	TestDocument::StartStyling	set collaborator
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	206	function	TestDocument::SetStyleFor	property non-void-command collaborator
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	214	function	TestDocument::SetStyles	property non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	206	function	TestDocument::SetStyleFor	predicate non-void-command collaborator
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	214	function	TestDocument::SetStyles	predicate non-void-command collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	223	function	TestDocument::DecorationSetCurrentIndicator	empty
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	227	function	TestDocument::DecorationFillRange	empty
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	231	function	TestDocument::ChangeLexerState	empty
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	235	function	TestDocument::CodePage	collaborator incidental
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	240	function	TestDocument::IsDBCSLeadByte	collaborator incidental
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	245	function	TestDocument::BufferPointer	property collaborator
-notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	249	function	TestDocument::GetLineIndentation	collaborator incidental
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	235	function	TestDocument::CodePage	incidental
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	240	function	TestDocument::IsDBCSLeadByte	incidental
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	245	function	TestDocument::BufferPointer	property
+notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	249	function	TestDocument::GetLineIndentation	incidental
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	254	function	TestDocument::LineEnd	property collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	269	function	TestDocument::GetRelativePosition	property collaborator
 notepad-plus-plus-8.9/lexilla/test/TestDocument.cxx	303	function	TestDocument::GetCharacterAndWidth	property collaborator
-notepad-plus-plus-8.9/lexilla/test/TestDocument.h	13	class	TestDocument	data-provider boundary
+notepad-plus-plus-8.9/lexilla/test/TestDocument.h	13	class	TestDocument	entity data-provider boundary
 notepad-plus-plus-8.9/lexilla/test/TestLexers.cxx	32	function	MakeLowerCase	property
 notepad-plus-plus-8.9/lexilla/test/TestLexers.cxx	40	function	LowerCaseAZ	command
 notepad-plus-plus-8.9/lexilla/test/TestLexers.cxx	44	function	IntFromString	property wrapper
@@ -13115,8 +13115,8 @@ notepad-plus-plus-8.9/scintilla/src/Document.cxx	132	function	ActionDuration::Ac
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	139	constructor	CharacterExtracted::CharacterExtracted	constructor
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	151	constructor	Document::Document	constructor
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	188	destructor	Document::~Document	destructor
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	195	function	Document::AddRef	property set collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	201	function	Document::Release	property set collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	195	function	Document::AddRef	property set
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	201	function	Document::Release	property set
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	208	function	Document::Init	controller
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	215	function	Document::InsertLine	controller
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	222	function	Document::InsertLines	controller
@@ -13160,7 +13160,7 @@ notepad-plus-plus-8.9/scintilla/src/Document.cxx	506	function	Document::LineStar
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	510	function	Document::LineRange	property collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	514	function	Document::IsLineStartPosition	predicate collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	518	function	Document::LineEnd	property collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	522	function	Document::DEVersion	collaborator incidental
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	522	function	Document::DEVersion	incidental
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	526	function	Document::SetErrorStatus	controller
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	533	function	Document::LineFromPosition	property collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	537	function	Document::SciLineFromPosition	property collaborator
@@ -13192,8 +13192,8 @@ notepad-plus-plus-8.9/scintilla/src/Document.cxx	983	function	Document::Characte
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	1019	function	Document::GetRelativePosition	property collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	1038	function	Document::GetRelativePositionUTF16	property wrapper
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	1059	function	Document::GetCharacterAndWidth	property wrapper
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	1093	function	Document::CodePage	get collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	1097	function	Document::IsDBCSLeadByte	property collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	1093	function	Document::CodePage	get
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	1097	function	Document::IsDBCSLeadByte	predicate
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	1108	function	Document::IsDBCSLeadByteNoExcept	predicate
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	1137	function	Document::IsDBCSTrailByteNoExcept	predicate
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	1168	function	Document::DBCSMinTrailByte	property
@@ -13266,8 +13266,8 @@ notepad-plus-plus-8.9/scintilla/src/Document.cxx	2546	function	Document::GetChar
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2550	function	Document::SetCharacterCategoryOptimization	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2554	function	Document::CharacterCategoryOptimization	property collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2558	function	Document::StartStyling	set collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	2562	function	Document::SetStyleFor	property non-void-command collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	2578	function	Document::SetStyles	property non-void-command collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	2562	function	Document::SetStyleFor	predicate non-void-command collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	2578	function	Document::SetStyles	predicate non-void-command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2605	function	Document::EnsureStyledTo	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2621	function	Document::StyleToAdjustingLineDuration	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2628	function	Document::GetLexInterface	property collaborator
@@ -13278,7 +13278,7 @@ notepad-plus-plus-8.9/scintilla/src/Document.cxx	2656	function	Document::Truncat
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2662	function	Document::SetLineState	property non-void-command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2672	function	Document::GetLineState	property controller
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2676	function	Document::GetMaxLineState	property controller
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	2680	function	Document::ChangeLexerState	non-void-command collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	2680	function	Document::ChangeLexerState	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2686	function	Document::MarginStyledText	property controller
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2692	function	Document::MarginSetText	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2699	function	Document::MarginSetStyle	command collaborator
@@ -13295,8 +13295,8 @@ notepad-plus-plus-8.9/scintilla/src/Document.cxx	2773	function	Document::EOLAnno
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2782	function	Document::EOLAnnotationSetStyle	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2791	function	Document::EOLAnnotationClearAll	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2802	function	Document::IncrementStyleClock	set
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	2806	function	Document::DecorationSetCurrentIndicator	non-void-command collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.cxx	2810	function	Document::DecorationFillRange	non-void-command collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	2806	function	Document::DecorationSetCurrentIndicator	command collaborator
+notepad-plus-plus-8.9/scintilla/src/Document.cxx	2810	function	Document::DecorationFillRange	command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2820	function	Document::AddWatcher	predicate non-void-command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2830	function	Document::RemoveWatcher	predicate non-void-command collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.cxx	2846	function	Document::NotifyModifyAttempt	controller
@@ -13397,7 +13397,7 @@ notepad-plus-plus-8.9/scintilla/src/Document.h	287	constructor	WatcherWithUserDa
 notepad-plus-plus-8.9/scintilla/src/Document.h	290	function	operator==	predicate collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.h	362	function	GetLineEndTypesAllowed	property collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.h	364	function	GetLineEndTypesActive	property collaborator
-notepad-plus-plus-8.9/scintilla/src/Document.h	366	function	Version	collaborator incidental
+notepad-plus-plus-8.9/scintilla/src/Document.h	366	function	Version	incidental
 notepad-plus-plus-8.9/scintilla/src/Document.h	376	function	ContainsLineEnd	predicate collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.h	411	function	CanUndo	predicate collaborator
 notepad-plus-plus-8.9/scintilla/src/Document.h	412	function	CanRedo	predicate collaborator
@@ -13814,8 +13814,8 @@ notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6157	function	Editor::SetSelectio
 notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6199	function	SelTypeFromMode	property
 notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6213	function	SPtrFromPtr	property
 notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6219	function	Editor::SetSelectionMode	command collaborator
-notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6238	function	Editor::StringResult	wrapper stateless
-notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6250	function	Editor::BytesResult	wrapper stateless
+notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6238	function	Editor::StringResult	property wrapper
+notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6250	function	Editor::BytesResult	property wrapper
 notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6262	function	Editor::BytesResult	property wrapper
 notepad-plus-plus-8.9/scintilla/src/Editor.cxx	6271	function	Editor::WndProc	get property non-void-command collaborator
 notepad-plus-plus-8.9/scintilla/src/Editor.h	15	class	Timer	empty
@@ -16456,7 +16456,7 @@ notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	750	function	ListBoxX::Allocat
 notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	790	function	ListBoxX::ListProc	property non-void-command collaborator
 notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	834	function	ListBoxX::ControlWndProc	property wrapper
 notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	841	function	ListBoxX::WndProc	property non-void-command collaborator
-notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	952	function	ListBoxX::StaticWndProc	property wrapper
+notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	952	function	ListBoxX::StaticWndProc	wrapper
 notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	967	function	ListBoxX_Register	wrapper
 notepad-plus-plus-8.9/scintilla/win32/ListBox.cxx	983	function	ListBoxX_Unregister	wrapper
 notepad-plus-plus-8.9/scintilla/win32/PlatWin.cxx	77	function	PointerFromWindow	property wrapper

@@ -10,7 +10,7 @@
 #ifndef JOINED_NAMES_HPP
 #define JOINED_NAMES_HPP
 
-#include "stereotype_labels.hpp"
+#include "rules/stereotype_labels.hpp"
 
 #include <string>
 

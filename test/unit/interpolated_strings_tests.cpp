@@ -8,9 +8,9 @@
  */
 
 #include "doctest.h"
-#include "interpolated_strings.hpp"
-#include "node_text.hpp"
-#include "srcml_elements.hpp"
+#include "model/interpolated_strings.hpp"
+#include "archive/node_text.hpp"
+#include "archive/srcml_elements.hpp"
 
 #include <libxml/parser.h>
 

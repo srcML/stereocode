@@ -11,10 +11,10 @@
 #define STEREOTYPES_ANALYZER_HPP
 
 #include "options.hpp"
-#include "global_variables.hpp"
-#include "language_tables.hpp"
-#include "stereotype_rules.hpp"
-#include "type_index.hpp"
+#include "model/global_variables.hpp"
+#include "rules/language_tables.hpp"
+#include "rules/stereotype_rules.hpp"
+#include "model/type_index.hpp"
 
 #include <cstddef>
 #include <optional>
@@ -52,14 +52,18 @@ private:
     std::unordered_set<std::string>                     globalStaticImports; // Types of the C# static imports that hold for every unit
     std::unordered_set<std::string>                     valueTypes;         // Names of the C# structs and enums, whose values a parameter copies
     std::unordered_set<std::string>                     cClassNames;        // Classes that the C markup of C++ headers hides
+    std::unordered_set<std::string>                     declaredTypeNames;  // Names of the C++ types and aliases of every unit, whatever the options
     std::vector<functionModel>                          cClassMethods;      // Definitions of the methods of these classes, which are unclassified
 
     int                  findModels                     (srcml_archive*);
     void                 mergeModels                    (unitModels);
     void                 indexTypes                     ();
+    void                 confirmReturnTypeMacros        ();
     void                 findInheritedDataMembers       (std::size_t, std::vector<inheritance>&, std::vector<std::vector<std::size_t>>&);
     std::optional<std::size_t> findParentType           (std::size_t, std::size_t) const;
     std::optional<std::size_t> findDefinitionType       (const functionModel&, const std::vector<std::string>&, const std::vector<usingDirective>&) const;
+    bool                 declaresStaticMethod           (std::size_t, const std::string&, const functionModel&) const;
+    std::string          spelledTypes                   (std::vector<writtenType>, const typeModel&, const elementLocation&, const std::string&) const;
     std::optional<std::size_t> findWrittenType          (std::size_t, const std::string&, int, bool) const;
     bool                 isCClassMethod                 (const functionModel&) const;
     bool                 isLabeled                      (const typeModel&) const;

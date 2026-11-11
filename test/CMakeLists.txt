@@ -1,7 +1,7 @@
 # @file CMakeLists.txt
 # Every test of Stereocode, with the label of its kind: unit, integration, stereotypes, or systems
 
-# The unit tests of the library in one program, with doctest 2.4.11 from https://github.com/doctest/doctest/releases/tag/v2.4.11
+# The unit tests of the library in one program, with doctest 2.5.3 from https://github.com/doctest/doctest/releases/tag/v2.5.3
 file(GLOB UNIT_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp")
 add_executable(unit_tests ${UNIT_TEST_SOURCES})
 target_link_libraries(unit_tests PRIVATE stereocode_lib)
@@ -36,7 +36,8 @@ add_script_checks(integration input CHECKS no_filename no_language invalid_input
                                            escape_in_expression declaration_pairs long_expression labeled_input)
 add_script_checks(integration output CHECKS output_is_input unwritable_output position_archive destructor_position)
 add_script_checks(integration reports CHECKS free_function_csv csv_without_srcml_output csv_beside_output csv_type_rows verbose_csv txt_report)
-add_script_checks(integration types CHECKS nested_types anonymous_class_objects typedef_types csharp_property large_class_threshold)
+add_script_checks(integration types CHECKS nested_types unlabeled_enums anonymous_class_objects typedef_types csharp_property large_class_threshold
+                                           return_type_macros)
 add_script_checks(integration threads CHECKS thread_counts)
 
 # The preloaded library makes std::thread::hardware_concurrency() return 0, which glibc allows
@@ -51,7 +52,9 @@ find_program(SRCML_EXECUTABLE srcml HINTS "$ENV{SystemDrive}/srcML/bin" "/usr/lo
 
 add_script_checks(integration comments CHECKS stereotype_comments)
 if(SRCML_EXECUTABLE)
-    add_script_checks(integration comments CHECKS round_trip_cpp round_trip_csharp round_trip_java DEFINE -DSRCML=${SRCML_EXECUTABLE})
+    add_script_checks(integration comments CHECKS round_trip_cpp round_trip_csharp round_trip_java stale_comments unit_without_labels
+                                                  after_code_cpp after_code_csharp after_code_java
+                      DEFINE -DSRCML=${SRCML_EXECUTABLE})
 endif()
 add_script_checks(stereotypes check_stereotypes CHECKS comments table DEFINE -DCHECK_STEREOTYPES=$<TARGET_FILE:check_stereotypes>)
 

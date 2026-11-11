@@ -55,8 +55,8 @@ public:
   auto isEmptyC() const -> bool { return m_size == 0; }
   // @stereotype predicate
   explicit operator bool() const { return m_size != 0; }
-  // void* is no void return and no object of another class
-  // @stereotype get non-void-command @defect rules-B15
+  // void* is no void return, while the collaborator rule counts a returned void*
+  // @stereotype get non-void-command collaborator
   void* take() { m_a = 0; m_b = 0; return m_buf; }
 };
 

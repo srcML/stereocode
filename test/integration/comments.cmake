@@ -128,10 +128,29 @@ function(run_step)
     set(COMMAND_OUTPUT "${standardOutput}" PARENT_SCOPE)
 endfunction()
 
+# Converts the source file <folder>/<fileName> of the work folder with srcml, runs stereocode -m with the given options on it, and sets
+# COMMAND_OUTPUT to the source of the srcML output archive from srcml --output-src
+# A second run of stereocode -m on the output archive must give the same archive
+function(run_comments folder fileName)
+    run_step("${SRCML}" "${folder}/${fileName}" -o "${folder}/case.xml")
+    run_step("${STEREOCODE}" "${folder}/case.xml" -o "${folder}/case.stereotypes.xml" -m ${ARGN})
+    run_step("${STEREOCODE}" "${folder}/case.stereotypes.xml" -o "${folder}/case.twice.xml" -m ${ARGN})
+    file(READ "${WORK_DIR}/${folder}/case.stereotypes.xml" once)
+    file(READ "${WORK_DIR}/${folder}/case.twice.xml" twice)
+    if(NOT twice STREQUAL once)
+        message(FATAL_ERROR "A second run of stereocode -m changes its output ${WORK_DIR}/${folder}/case.stereotypes.xml:\n${twice}")
+    endif()
+    run_step("${SRCML}" --output-src "${folder}/case.stereotypes.xml")
+    set(COMMAND_OUTPUT "${COMMAND_OUTPUT}" PARENT_SCOPE)
+endfunction()
+
 # The comments of stereocode -m give back a labeled case of test/stereotypes in which every labeled element has its "// @stereotype" comment
-# The check converts the case with srcml, runs stereocode -m -f -i -t -e -u, and converts the srcML output archive back with
-# srcml --output-src, which must give the case, once for the case without its comment lines and once for the case as it is
-# The second run shows that each comment takes the place of the comment before its element instead of adding a second comment
+# The check converts a source with srcml, runs stereocode -m -f -i -t -e -u, and converts the srcML output archive back with
+# srcml --output-src, which must give the case for the case without its comment lines, for the case as it is, for the case with
+# a comment of an earlier run stacked above each of its comments, and for a source given after the case, whose elements follow
+# other code on their lines
+# The runs on the case as it is and on the stacked case show that the comment of each element takes the place of the comments
+# before it instead of adding another
 function(expect_round_trip caseFile)
     get_filename_component(CASE "${CMAKE_CURRENT_LIST_DIR}/../stereotypes/${caseFile}" ABSOLUTE)
     get_filename_component(CASE_FILE "${CASE}" NAME)
@@ -143,19 +162,22 @@ function(expect_round_trip caseFile)
     if(UNLABELED STREQUAL LABELED)
         message(FATAL_ERROR "${CASE} has no \"// @stereotype\" comment")
     endif()
+    string(REGEX REPLACE "\n([ \t]*)// @stereotype" "\n\\1// @stereotype command\n\\1// @stereotype" STACKED "\n${LABELED}")
+    string(SUBSTRING "${STACKED}" 1 -1 STACKED)
 
-    foreach(variant unlabeled labeled)
+    set(variants unlabeled labeled stacked)
+    if(ARGC GREATER 1)
+        set(JOINED "${ARGV1}")
+        list(APPEND variants joined)
+    endif()
+
+    # Each variant writes the source of the variable with its name in capitals
+    foreach(variant IN LISTS variants)
+        string(TOUPPER "${variant}" SOURCE)
         file(MAKE_DIRECTORY "${WORK_DIR}/${variant}")
-        if(variant STREQUAL "unlabeled")
-            file(WRITE "${WORK_DIR}/${variant}/${CASE_FILE}" "${UNLABELED}")
-        else()
-            file(WRITE "${WORK_DIR}/${variant}/${CASE_FILE}" "${LABELED}")
-        endif()
+        file(WRITE "${WORK_DIR}/${variant}/${CASE_FILE}" "${${SOURCE}}")
 
-        run_step("${SRCML}" "${variant}/${CASE_FILE}" -o "${variant}/case.xml")
-        run_step("${STEREOCODE}" "${variant}/case.xml" -o "${variant}/case.stereotypes.xml" -m -f -i -t -e -u)
-        run_step("${SRCML}" --output-src "${variant}/case.stereotypes.xml")
-
+        run_comments(${variant} "${CASE_FILE}" -f -i -t -e -u)
         if(NOT COMMAND_OUTPUT STREQUAL LABELED)
             file(WRITE "${WORK_DIR}/${variant}/commented.${CASE_FILE}" "${COMMAND_OUTPUT}")
             message(FATAL_ERROR "For the ${variant} case, the source of the output of stereocode -m differs from ${CASE}:\n${COMMAND_OUTPUT}")
@@ -176,6 +198,102 @@ endfunction()
 # The comments of -m give back the Java case stereotypes/java/comment_output.java
 function(check_round_trip_java)
     expect_round_trip(java/comment_output.java)
+endfunction()
+
+# Without -f and -t, stereocode -m labels neither the free functions twice and square of the C++ case stereotypes/cpp/comment_output.cpp
+# nor its struct Size with the method getWidth, so their comments of a run with every option go
+# The class Account and its methods keep their stereotypes and their comments, since a friend function is no method of the class
+function(check_stale_comments)
+    get_filename_component(CASE "${CMAKE_CURRENT_LIST_DIR}/../stereotypes/cpp/comment_output.cpp" ABSOLUTE)
+    file(READ "${CASE}" LABELED)
+    string(REGEX REPLACE "[ \t]*// @stereotype [^\n]*\n([ \t]*(friend int twice|int square|typedef struct|int getWidth))" "\\1" EXPECTED "${LABELED}")
+
+    file(WRITE "${WORK_DIR}/stale/comment_output.cpp" "${LABELED}")
+    run_comments(stale comment_output.cpp)
+    if(NOT COMMAND_OUTPUT STREQUAL EXPECTED)
+        message(FATAL_ERROR "Without -f and -t, the source of the output of stereocode -m differs from the expected source:\n${COMMAND_OUTPUT}")
+    endif()
+endfunction()
+
+# Without -f, stereocode -m labels no element of a unit that holds only free functions and a variable, so the stereotype comment directly
+# above a function goes, while a comment of another kind and the stereotype comments above the variable and above an empty line stay
+function(check_unit_without_labels)
+    file(WRITE "${WORK_DIR}/plain/square.cpp" [=[
+// @stereotype data-provider
+int calls;
+
+// Squares a value
+// @stereotype property
+int square(int value) { return value * value; }
+
+// @stereotype property
+
+int cube(int value) { return value * value * value; }
+]=])
+    set(EXPECTED [=[
+// @stereotype data-provider
+int calls;
+
+// Squares a value
+int square(int value) { return value * value; }
+
+// @stereotype property
+
+int cube(int value) { return value * value * value; }
+]=])
+
+    run_comments(plain square.cpp)
+    if(NOT COMMAND_OUTPUT STREQUAL EXPECTED)
+        message(FATAL_ERROR "The source of the output of stereocode -m for a unit without labels differs from the expected source:\n${COMMAND_OUTPUT}")
+    endif()
+endfunction()
+
+# The comments of -m give the C++ case stereotypes/cpp/comment_after_code.cpp from a source whose methods and functions follow other code
+# on their lines, such as a field, an earlier method, or a block comment
+function(check_after_code_cpp)
+    expect_round_trip(cpp/comment_after_code.cpp [=[
+// stereocode -m moves each element after other code on its line below its "// @stereotype" comment, as in this file
+
+class Point {
+    int x; int y;
+public:
+    int getX() const { return x; } int getY() const { return y; }
+    /* Sets x
+       to a value */ void setX(int value) { x = value; }
+};
+
+struct Size { int width; int getWidth() const { return width; } };
+
+int counter; int next() { return ++counter; }
+]=])
+endfunction()
+
+# The comments of -m give the C# case stereotypes/csharp/comment_after_code.cs from a source whose accessors and methods follow other code
+# on their lines
+function(check_after_code_csharp)
+    expect_round_trip(csharp/comment_after_code.cs [=[
+// stereocode -m moves each element after other code on its line below its "// @stereotype" comment, as in this file
+
+public class Account
+{
+    private int balance; private int limit;
+    public int Balance { get { return balance; } set { balance = value; } }
+    public int GetLimit() { return limit; } public void SetLimit(int value) { limit = value; }
+}
+]=])
+endfunction()
+
+# The comments of -m give the Java case stereotypes/java/comment_after_code.java from a source whose methods follow other code on their lines
+function(check_after_code_java)
+    expect_round_trip(java/comment_after_code.java [=[
+// stereocode -m moves each element after other code on its line below its "// @stereotype" comment, as in this file
+
+class Outer {
+    private int a;
+    static class Nested { int b; int getB() { return b; } }
+    int getA() { return a; } void setA(int value) { a = value; }
+}
+]=])
 endfunction()
 
 run_check()

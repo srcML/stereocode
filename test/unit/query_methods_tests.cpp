@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "query_methods.hpp"
+#include "rules/query_methods.hpp"
 
 #include <sstream>
 

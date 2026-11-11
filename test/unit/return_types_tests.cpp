@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "return_types.hpp"
+#include "rules/return_types.hpp"
 
 TEST_CASE("Boolean return types are the Boolean types of each language") {
     CHECK(isBooleanType("C++", "bool"));
@@ -58,4 +58,18 @@ TEST_CASE("a return type is non-void unless it is void and the declared type is 
     CHECK_FALSE(isNonVoidType("C++", "void", "void"));
     CHECK_FALSE(isNonVoidType("Java", "Void", "Void"));
     CHECK_FALSE(isNonVoidType("C#", "void", "void"));
+}
+
+TEST_CASE("a name is spelled as a macro when it holds only capital letters, digits, and underscores") {
+    CHECK(isSpelledAsMacro("SCI_METHOD"));
+    CHECK(isSpelledAsMacro("WINAPI"));
+    CHECK(isSpelledAsMacro("CATCH_INTERNAL_CDECL"));
+    CHECK(isSpelledAsMacro("D2D1_API2"));
+
+    CHECK_FALSE(isSpelledAsMacro(""));
+    CHECK_FALSE(isSpelledAsMacro("fastcall"));
+    CHECK_FALSE(isSpelledAsMacro("__stdcall"));
+    CHECK_FALSE(isSpelledAsMacro("Sci_Position"));
+    CHECK_FALSE(isSpelledAsMacro("Sci::POSITION"));
+    CHECK_FALSE(isSpelledAsMacro("VECTOR<INT>"));
 }

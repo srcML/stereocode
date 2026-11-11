@@ -8,12 +8,14 @@
  */
 
 #include "doctest.h"
-#include "srcml_elements.hpp"
+#include "archive/srcml_elements.hpp"
+#include "archive/node_text.hpp"
 
 #include <libxml/parser.h>
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace {
     // A parsed srcML unit that frees its document
@@ -33,6 +35,14 @@ namespace {
         return firstChildElement(xmlDocGetRootElement(unit.get()), "parameter_list");
     }
 
+    // Gets the text of a written type, where each name of a type stands in brackets, as const[Count]& of const Count&
+    //
+    std::string bracketed(const writtenType& type) {
+        std::string text;
+        for (const typePart& part : type) text += part.isName ? "[" + part.text + "]" : part.text;
+        return text;
+    }
+
     // Gets the type of the C++ declaration of a parsed unit
     //
     const xmlNode* declaredTypeOf(const document& unit) {
@@ -46,6 +56,34 @@ namespace {
 
         const xmlNode*  type() const { return declaredTypeOf(unit); }
         const xmlNode*  name() const { return firstChildElement(type(), "name"); }
+
+        document        unit;
+    };
+
+    // Gets the first element below an element that meets a condition, in document order
+    //
+    template <typename condition>
+    const xmlNode* firstBelow(const xmlNode* element, condition meets) {
+        for (const xmlNode* child = xmlFirstElementChild(const_cast<xmlNode*>(element)); child; child = xmlNextElementSibling(const_cast<xmlNode*>(child))) {
+            if (meets(child)) return child;
+            if (const xmlNode* found = firstBelow(child, meets)) return found;
+        }
+        return nullptr;
+    }
+
+    // Parses the srcML of a C# expression statement and gets its calls and names by their text
+    //
+    struct parsedStatement {
+        explicit parsedStatement(const std::string& statement) : unit{parsedList("C#", statement)} {}
+
+        const xmlNode*  call(const std::string& name) const {
+            return firstBelow(xmlDocGetRootElement(unit.get()), [&name](const xmlNode* node) {
+                return isSrcElement(node, "call") && sourceOf(firstChildElement(node, "name")) == name;
+            });
+        }
+        const xmlNode*  name(const std::string& text) const {
+            return firstBelow(xmlDocGetRootElement(unit.get()), [&text](const xmlNode* node) { return isSrcElement(node, "name") && sourceOf(node) == text; });
+        }
 
         document        unit;
     };
@@ -95,6 +133,30 @@ TEST_CASE("the parameter types that tell overloads apart keep the specifiers, un
         R"(<parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Node</name><modifier>*</modifier></type> <name>node</name></decl></parameter>)</parameter_list>)");
     CHECK(parameterTypesOf(listOf(cpp)) == "(constNode*)");
     CHECK(signatureTypesOf(listOf(cpp)) == "(Node*)");
+}
+
+TEST_CASE("a written parameter type keeps each name of a type without template arguments apart, and the parts join to the text of the parameter types") {
+    const document cpp = parsedList("C++",
+        R"(<parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Count</name><modifier>&amp;</modifier></type> <name>c</name></decl></parameter>, )"
+        R"(<parameter><decl><type><name><name>std</name><operator>::</operator><name>size_t</name></name></type> <name>n</name></decl></parameter>, )"
+        R"(<parameter><decl><type><name>Count</name> <specifier>const</specifier><modifier>*</modifier></type> <name>p</name></decl></parameter>, )"
+        R"(<parameter><decl><type><name>unsigned</name> <name>int</name></type> <name>u</name></decl></parameter>, )"
+        R"(<parameter><function_decl><type><name>int</name></type> (<modifier>*</modifier><name>g</name>)<parameter_list>(<parameter><decl><type><name>Count</name></type></decl></parameter>)</parameter_list></function_decl></parameter>, )"
+        R"(<parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>vector</name><argument_list type="generic">&lt;<argument><expr><name>Count</name></expr></argument>&gt;</argument_list></name><modifier>&amp;</modifier></type> <name>v</name></decl></parameter>, )"
+        R"(<parameter><decl><type><name><name><name>Grid</name><argument_list type="generic">&lt;<argument><expr><specifier>const</specifier> <name>Count</name><modifier>*</modifier></expr></argument>&gt;</argument_list></name><operator>::</operator><name>Row</name></name></type> <name>r</name></decl></parameter>)</parameter_list>)");
+    const std::vector<writtenType> types = writtenTypesOf(listOf(cpp));
+    REQUIRE(types.size() == 7);
+    CHECK(bracketed(types[0]) == "const[Count]&");
+    CHECK(bracketed(types[1]) == "[std::size_t]");
+    CHECK(bracketed(types[2]) == "[Count]const*");
+    CHECK(bracketed(types[3]) == "[unsigned][int]");
+    CHECK(bracketed(types[4]) == "int(*g)(Count)");
+    CHECK(bracketed(types[5]) == "conststd::vector<[Count]>&");
+    CHECK(bracketed(types[6]) == "Grid<const[Count]*>::Row");
+    CHECK(parameterTypesOf(listOf(cpp)) == "(constCount&,std::size_t,Countconst*,unsignedint,int(*g)(Count),conststd::vector<Count>&,Grid<constCount*>::Row)");
+
+    const document empty = parsedList("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
+    CHECK(writtenTypesOf(listOf(empty)).empty());
 }
 
 TEST_CASE("a parameter list takes its parameters without default values up to all its parameters") {
@@ -170,4 +232,56 @@ TEST_CASE("-> reaches no named object through a type that is no raw pointer, std
     CHECK(pointeeTypeOf(parsedType(R"(<type><name><name>boost</name><operator>::</operator><name>shared_ptr</name><argument_list type="generic">&lt;<argument><expr><name>Engine</name></expr></argument>&gt;</argument_list></name></type>)").type()).empty());
     CHECK(pointeeTypeOf(parsedType(R"(<type><name><operator>::</operator><name>std</name><operator>::</operator><name>weak_ptr</name><argument_list type="generic">&lt;<argument><expr><name>Engine</name></expr></argument>&gt;</argument_list></name></type>)").type()).empty());
     CHECK(pointeeTypeOf(parsedType(R"(<type><name><name>std</name><operator>::</operator><name>unique_ptr</name><argument_list type="generic">&lt;<argument><expr><name><name>Engine</name><index>[]</index></name></expr></argument>&gt;</argument_list></name></type>)").type()).empty());
+}
+
+TEST_CASE("a call after a C# null-conditional chain of names is a call on the names, each with a dot after it, as after a chain of dots") {
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr>;</expr_stmt>)").call("Z")) == "x.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>y</name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")) == "x.y.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>y</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>w</name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")) == "x.y.w.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><operator>.</operator><call><name><name>y</name><operator>.</operator><name>Z</name></name><argument_list>()</argument_list></call></expr></then></ternary></expr>;</expr_stmt>)").call("y.Z")) == "x.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name><name>x</name><operator>.</operator><name>y</name></name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr>;</expr_stmt>)").call("Z")) == "x.y.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name><name>this</name><operator>.</operator><name>x</name></name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>y</name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")) == "this.x.y.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name><name>y</name><index>[<expr><literal type="number">0</literal></expr>]</index></name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")) == "x.y[0].");
+}
+
+TEST_CASE("a call before a later ?. of a C# null-conditional chain is a call on the names before it, as F() of x?.F()?.Z() is on x") {
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("F")) == "x.");
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>y</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("F")) == "x.y.");
+}
+
+TEST_CASE("a name of a C# null-conditional chain after the . or the index that opens the then of its ?. starts at that element") {
+    const parsedStatement member(R"(<expr_stmt><expr><ternary><condition><expr><name>part</name></expr>?</condition><then><expr><operator>.</operator><name>b</name> <operator>=</operator> <name>v</name></expr></then></ternary></expr>;</expr_stmt>)");
+    CHECK(sourceOf(nullConditionalStart(member.name("b"))) == ".");
+    CHECK_FALSE(nullConditionalStart(member.name("part")));
+    CHECK_FALSE(nullConditionalStart(member.name("v")));
+
+    const parsedStatement element(R"(<expr_stmt><expr><ternary><condition><expr><name>part</name></expr>?</condition><then><expr><index>[<expr><literal type="number">0</literal></expr>]</index><operator>.</operator><name>b</name> <operator>=</operator> <name>v</name></expr></then></ternary></expr>;</expr_stmt>)");
+    CHECK(sourceOf(nullConditionalStart(element.name("b"))) == "[0]");
+
+    const parsedStatement dot(R"(<expr_stmt><expr><name><name>part</name><operator>.</operator><name>b</name></name> <operator>=</operator> <name>v</name></expr>;</expr_stmt>)");
+    CHECK_FALSE(nullConditionalStart(dot.name("b")));
+}
+
+TEST_CASE("a C# null-conditional chain goes on after the condition of each ?. at the element that opens its then") {
+    const parsedStatement once(R"(<expr_stmt><expr><ternary><condition><expr><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><operator>.</operator><name>b</name> <operator>=</operator> <name>v</name></expr></then></ternary></expr>;</expr_stmt>)");
+    const xmlNode* next = nullConditionalNext(once.call("F"));
+    REQUIRE(next);
+    CHECK(sourceOf(next) == ".");
+    CHECK_FALSE(nullConditionalNext(once.name("b")));
+
+    const parsedStatement twice(R"(<expr_stmt><expr><ternary><condition><expr><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>c</name></expr>?</condition><then><expr><operator>.</operator><name>b</name> <operator>=</operator> <name>v</name></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)");
+    CHECK(nullConditionalNext(twice.call("F")) == xmlPreviousElementSibling(const_cast<xmlNode*>(twice.name("c"))));
+    CHECK(nullConditionalNext(twice.name("c")) == xmlPreviousElementSibling(const_cast<xmlNode*>(twice.name("b"))));
+
+    const parsedStatement dot(R"(<expr_stmt><expr><call><name>F</name><argument_list>()</argument_list></call><operator>.</operator><name>b</name> <operator>=</operator> <name>v</name></expr>;</expr_stmt>)");
+    CHECK_FALSE(nullConditionalNext(dot.call("F")));
+}
+
+TEST_CASE("a C# null-conditional chain that starts at or passes through more than a name gives no names, since its call is on a result") {
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr>;</expr_stmt>)").call("Z")).empty());
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><name>y</name></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")).empty());
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><operator>.</operator><call><name><name>y</name><operator>.</operator><name>Z</name></name><argument_list>()</argument_list></call></expr></then></ternary></expr>;</expr_stmt>)").call("y.Z")).empty());
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><operator>.</operator><call><name>F</name><argument_list>()</argument_list></call></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")).empty());
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><operator>(</operator><name>x</name> <operator>as</operator> <name>T</name><operator>)</operator></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr>;</expr_stmt>)").call("Z")).empty());
+    CHECK(nullConditionalObject(parsedStatement(R"(<expr_stmt><expr><ternary><condition><expr><name>x</name></expr>?</condition><then><expr><ternary><condition><expr><index>[<expr><literal type="number">0</literal></expr>]</index></expr>?</condition><then><expr><operator>.</operator><call><name>Z</name><argument_list>()</argument_list></call></expr></then></ternary></expr></then></ternary></expr>;</expr_stmt>)").call("Z")).empty());
 }

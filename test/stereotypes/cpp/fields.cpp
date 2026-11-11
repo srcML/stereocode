@@ -46,10 +46,9 @@ public:
     int dynamic0() const { return dynamic[0]; }
 };
 
-// The methods of an anonymous type are stereotyped like those of a named type
+// An anonymous type and its methods stay outside the analysis, while the same members in a named type get stereotypes
 struct {
     int x;
-    // @stereotype get @defect type-model-B23
     int get() const { return x; }
 } counter;
 class Named {

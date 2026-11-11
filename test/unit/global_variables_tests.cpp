@@ -8,7 +8,7 @@
  */
 
 #include "doctest.h"
-#include "global_variables.hpp"
+#include "model/global_variables.hpp"
 
 #include <string>
 
