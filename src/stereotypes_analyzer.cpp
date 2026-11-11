@@ -1,0 +1,477 @@
+// SPDX-License-Identifier: GPL-3.0-only
+/**
+ * @file stereotypes_analyzer.cpp
+ *
+ * @copyright Copyright (C) 2021-2025 srcML, LLC. (www.srcML.org)
+ *
+ * This file is part of the Stereocode application.
+ */
+
+
+#include "stereotypes_analyzer.hpp"
+#include "annotated_unit.hpp"
+#include "csv_report.hpp"
+#include "helper_functions.hpp"
+#include "input_archive.hpp"
+#include "ordered_pool.hpp"
+#include "output_archive.hpp"
+#include "qualified_name.hpp"
+#include "query_engine.hpp"
+#include "srcml_handles.hpp"
+#include "stereotype_labels.hpp"
+#include "txt_report.hpp"
+#include "unit_models.hpp"
+
+#include <algorithm>
+#include <future>
+#include <iostream>
+#include <iterator>
+#include <optional>
+#include <stdexcept>
+#include <string_view>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+namespace {
+    // Units per worker that wait for a worker or for their turn in the order of the units
+    // A slow unit then holds up the units after it but not the other workers, and few units wait in memory
+    constexpr std::size_t unitsPerWorker = 4;
+
+    // Gets the language whose XPaths apply to a unit (C units use the C++ XPaths), or an empty string when none apply
+    //
+    std::string analysisLanguage(srcml_unit* unit) {
+        // A unit without a language is not analyzed and is written without stereotypes
+        const char* language = srcml_unit_get_language(unit);
+        if (!language) return "";
+
+        std::string unitLanguage = language;
+        if (unitLanguage == "C") return "C++";
+        if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") return unitLanguage;
+        return "";
+    }
+
+    // Tells whether srcML parsed a unit as C
+    //
+    bool isCUnit(srcml_unit* unit) {
+        const char* language = srcml_unit_get_language(unit);
+        return language && std::string_view(language) == "C";
+    }
+
+    // Gets the srcML of a unit, which libsrcml may read from the archive at the first access, so the reading thread calls this function
+    //
+    const char* readSrcml(srcml_unit* unit, int unitNumber) {
+        const char* srcml = srcml_unit_get_srcml(unit);
+        if (!srcml) throw std::runtime_error("cannot read the srcML of unit " + std::to_string(unitNumber));
+        return srcml;
+    }
+
+    // Gets the key of a C# partial type, which its parts share: its namespaces, the types around it, its name, and its numbers of generic parameters
+    //
+    std::string partialTypeKey(const typeModel& type) {
+        std::string key;
+        for (const std::string& part : type.getScope()) key += part + ".";
+        return key + genericSkeleton(type.getName()[1]);
+    }
+
+    // Gets the path of a type, the namespaces or the package around it and then the parts of its name without generic arguments, outermost first,
+    // which is the scope of the names that its members write, where its nested types and member aliases come first
+    //
+    std::vector<std::string> pathOf(const typeModel& type) {
+        std::vector<std::string> path = type.getScope();
+        for (const std::string& part : splitQualifiedName(type.getName()[1], type.getUnitLanguage())) path.push_back(withoutGenericArguments(part));
+        return path;
+    }
+
+    // Gets the namespaces or the package and the types around a type, outermost first, in which the names of its parents are looked up
+    //
+    std::vector<std::string> lookupScope(const typeModel& type) {
+        std::vector<std::string> scope = pathOf(type);
+        scope.pop_back();
+        return scope;
+    }
+}
+
+// Prepares the XPaths and the lists of primitive types, ignorable calls, and specifiers
+//
+stereotypesAnalyzer::stereotypesAnalyzer(const options& settings_) : settings{settings_}, tables{settings_} {}
+
+// Computes the stereotypes of the input archive and writes the requested CSV reports and srcML output archive
+//
+void stereotypesAnalyzer::run() {
+    archivePtr input = openInputArchive(settings.inputFile);
+
+    // Created before the analysis, so that an output that cannot be written stops the run at once
+    std::optional<outputArchive> output;
+    if (!settings.disableSrcmlOutput) output.emplace(settings.outputFile, input.get());
+    std::optional<csvReports> reports;
+    if (settings.csvReport || settings.verboseReport) reports.emplace(settings.outputFile, settings.freeFunctions, settings.verboseReport);
+    std::optional<txtReports> textReports;
+    if (settings.txtReport) textReports.emplace(settings.outputFile, settings.freeFunctions);
+
+    // The check reads the whole input on a thread of its own, so that it delays no error before the analysis
+    std::future<void> wellFormed = std::async(std::launch::async, checkWellFormed, settings.inputFile);
+
+    // Verbose output
+    if (settings.verboseReport) {
+        tables.primitiveTypes.outputPrimitives();
+        tables.ignorableCalls.outputIgnorableCalls();
+        tables.typeSpecifiers.outputSpecifiers();
+        tables.fieldQueries.outputQueryMethods();
+    }
+
+    int analyzedUnits = 0;
+    try {
+        analyzedUnits = findModels(input.get());
+    }
+    catch (...) {
+        // Damage that the check finds explains a failed read better than the error of the read
+        wellFormed.get();
+        throw;
+    }
+    if (analyzedUnits == 0) std::cerr << "Warning: " << settings.inputFile << " holds no unit in C, C++, C#, or Java\n";
+    input.reset();
+    wellFormed.get();
+    indexTypes();
+
+    // Performed after the collection of all types and free functions
+    analyzeFreeFunctions();
+
+    // Build signatures for findInheritedDataMembers()
+    for (typeModel& type : types) type.buildMethodSignature();
+
+    // Finds unknown parents and inherited data members, with the types of the archive that each type names as parents
+    std::vector<inheritance> walk(types.size(), inheritance::pending);
+    std::vector<std::vector<std::size_t>> parentTypes(types.size());
+    for (std::size_t position = 0; position < types.size(); ++position) findInheritedDataMembers(position, walk, parentTypes);
+
+    // An enclosing type comes before its inner classes, so it holds the data members of its own enclosing instances by then
+    for (std::size_t position = 0; position < types.size(); ++position)
+        if (enclosingTypes[position]) types[position].appendEnclosingDataMembers(types[*enclosingTypes[position]]);
+
+    addGlobalStaticImports();
+    addAncestorStaticHolders();
+
+    // Analyze all methods for each type
+    for (typeModel& type : types) type.findDataAfterCollection(globals);
+    
+    // Compute method and type stereotypes, where the calls of each method reach the methods of its type, of its ancestors, and of the types of its fields
+    stereotypeRules stereotypes(settings.largeClassThreshold);
+    const calledMethods called(types, std::move(parentTypes),
+                               [this](std::size_t type, const std::string& name, int unitNumber, bool throughPointer) {
+                                   return findWrittenType(type, name, unitNumber, throughPointer);
+                               });
+    stereotypes.computeMethodStereotypes(types, called);
+
+    // Only the types that the run labels count toward the large-class threshold
+    std::vector<typeModel*> labeledTypes;
+    for (typeModel& type : types)
+        if (isLabeled(type)) labeledTypes.push_back(&type);
+    stereotypes.computeTypeStereotypes(labeledTypes);
+    if (settings.verboseReport) stereotypes.outputLargeClassThreshold();
+
+    // Analyze and compute stereotypes for free functions
+    if (settings.freeFunctions) {
+        for (auto& f : freeFunctions) f.findDataFreeFunctionAfterCollection(globals, valueTypes);
+        stereotypes.computeFreeFunctionStereotypes(freeFunctions);
+    }
+
+    if (reports) outputReport(*reports);
+    if (textReports) outputReport(*textReports);
+    if (output) {
+        outputStereotypes(*output);
+        output->close();
+    }
+    if (reports) reports->close();
+    if (textReports) textReports->close();
+
+    // Each output replaces its file only once every output is complete, and the reports go first, since -o may name the input
+    if (reports) reports->publish();
+    if (textReports) textReports->publish();
+    if (output) output->publish();
+}
+
+// Finds the types and free functions of every unit on the worker threads, merges them in the order of the units, and gives the number of analyzed units
+// The merged models are thus the same for any number of workers
+//
+int stereotypesAnalyzer::findModels(srcml_archive* input) {
+    // A compiled XPath is not read only, so each worker compiles an engine of its own at its first job
+    std::vector<std::optional<queryEngine>> engines(settings.threads);
+
+    // Besides the engine of its worker, a job reads only its unit and the tables
+    // The pool comes after the engines, so that its workers end before the engines
+    const languageTables& sharedTables = tables;
+    orderedPool<unitModels> pool(settings.threads);
+    int unitNumber = 0;
+    int analyzedUnits = 0;
+    for (unitPtr unit(srcml_archive_read_unit(input)); unit; unit.reset(srcml_archive_read_unit(input))) {
+        ++unitNumber;
+
+        const std::string unitLanguage = analysisLanguage(unit.get());
+        if (unitLanguage.empty()) continue;
+        ++analyzedUnits;
+
+        // The job owns the unit, which holds the srcML
+        const char* srcml = readSrcml(unit.get(), unitNumber);
+        const bool cUnit  = isCUnit(unit.get());
+        if (pool.pending() == unitsPerWorker * settings.threads) mergeModels(pool.next());
+        pool.submit([&engines, &sharedTables, srcmlOwner = std::move(unit), srcml, unitLanguage, cUnit, unitNumber](std::size_t worker) {
+            std::optional<queryEngine>& engine = engines[worker];
+            if (!engine) engine.emplace(sharedTables.queries);
+            return findUnitModels(*engine, sharedTables, srcml, unitLanguage, cUnit, unitNumber);
+        });
+    }
+    while (pool.pending() > 0) mergeModels(pool.next());
+    return analyzedUnits;
+}
+
+// Adds the types, free functions, globals, and aliases of the next unit, where the parts of a C# partial type in one namespace form one type
+//
+void stereotypesAnalyzer::mergeModels(unitModels models) {
+    std::vector<std::size_t> positions;
+    for (std::size_t i = 0; i < models.types.size(); ++i) {
+        typeModel& type = models.types[i];
+        if (type.isPartial()) {
+            const auto [part, added] = partialTypes.try_emplace(partialTypeKey(type), types.size());
+            if (!added) {
+                types[part->second].mergeData(type);
+                positions.push_back(part->second);
+                continue;
+            }
+        }
+        const std::optional<std::size_t> enclosing = models.enclosingTypes[i];
+        enclosingTypes.push_back(enclosing ? std::optional<std::size_t>(positions[*enclosing]) : std::nullopt);
+        positions.push_back(types.size());
+        types.push_back(std::move(type));
+    }
+    std::move(models.freeFunctions.begin(), models.freeFunctions.end(), std::back_inserter(freeFunctions));
+    std::move(models.freeFunctionScopes.begin(), models.freeFunctionScopes.end(), std::back_inserter(freeFunctionScopes));
+    std::move(models.freeFunctionDirectives.begin(), models.freeFunctionDirectives.end(), std::back_inserter(freeFunctionDirectives));
+    globals.merge(models.globals);
+    globalStaticImports.insert(models.globalStaticImports.begin(), models.globalStaticImports.end());
+    valueTypes.insert(models.valueTypes.begin(), models.valueTypes.end());
+    cClassNames.insert(models.cClassNames.begin(), models.cClassNames.end());
+    for (indexedAlias& alias : models.aliases) typeNames.addAlias(std::move(alias));
+    if (!models.warning.empty()) std::cerr << "Warning: " << models.warning << '\n';
+}
+
+// Indexes the names of the types, whose positions in the index are their positions in types
+//
+void stereotypesAnalyzer::indexTypes() {
+    for (const typeModel& type : types) {
+        const std::vector<std::string> parts = splitQualifiedName(type.getName()[1], type.getUnitLanguage());
+
+        indexedType entry;
+        entry.language   = type.getUnitLanguage();
+        entry.path       = pathOf(type);
+        entry.arguments  = genericArguments(parts.back());
+        entry.arity      = genericArity(parts.back());
+        entry.unitNumber = type.getLocations().front().unitNumber;
+        entry.fileName   = type.getPartFileNames().front();
+        entry.position   = type.getLocations().front().path;
+        typeNames.add(std::move(entry));
+    }
+}
+
+// Finds the type of a C++ method defined outside its type, as the qualifier of its name, the namespaces around the definition,
+// and the using directives in effect at the definition name it
+// The definition of a static method that the type declares stays a free function
+//
+std::optional<std::size_t> stereotypesAnalyzer::findDefinitionType(const functionModel& function, const std::vector<std::string>& scope,
+                                                                   const std::vector<usingDirective>& directives) const {
+    std::vector<std::string> qualifier = splitQualifiedName(function.getName()[1], "C++");
+    if (qualifier.size() < 2) return std::nullopt;
+    const std::string methodName = withoutGenericArguments(qualifier.back());
+    qualifier.pop_back();
+
+    const std::optional<elementLocation>& location = function.getLocation();
+    typeReference reference = referenceOf(qualifier, "C++", scope, location ? location->unitNumber : 0, function.getFileName());
+    reference.directives = directives;
+    if (location) reference.position = location->path;
+    const std::optional<std::size_t> type = typeNames.find(reference);
+    if (type && types[*type].isStaticMethod(methodName + function.getParameterTypes())) return std::nullopt;
+    return type;
+}
+
+// Finds the type of the archive that a type name written in the code of a type refers to, such as the type of a field of the type,
+// also through aliases, where a call through -> reaches the type that an alias of a smart pointer points to
+// The name is written in the part of the type in a unit, which for a C# partial type has the using alias directives of its own file,
+// and otherwise in the first part, as for the name of the type of an inherited field
+//
+std::optional<std::size_t> stereotypesAnalyzer::findWrittenType(std::size_t position, const std::string& typeName, int unitNumber, bool throughPointer) const {
+    const typeModel& type = types[position];
+    const std::vector<elementLocation>& locations = type.getLocations();
+    const auto inUnit = std::find_if(locations.begin(), locations.end(), [unitNumber](const elementLocation& part) { return part.unitNumber == unitNumber; });
+    const std::size_t part = inUnit == locations.end() ? 0 : static_cast<std::size_t>(inUnit - locations.begin());
+
+    const std::vector<std::string> parts = splitQualifiedName(typeName, type.getUnitLanguage());
+    typeReference reference = referenceOf(parts, type.getUnitLanguage(), pathOf(type), locations[part].unitNumber, type.getPartFileNames()[part]);
+    reference.position = locations[part].path;
+    return typeNames.findThroughAliases(reference, throughPointer);
+}
+
+// Moves the C++ methods, constructors, and destructors defined outside their types from the free functions to their types
+// The definitions for a class that only the C markup of a header holds are unclassified, and the constructors and destructors
+// of other types outside the archive get no stereotype
+//
+void stereotypesAnalyzer::analyzeFreeFunctions() {
+    std::vector<functionModel> remaining;
+    for (std::size_t i = 0; i < freeFunctions.size(); ++i) {
+        functionModel& function = freeFunctions[i];
+        if (function.getUnitLanguage() == "C++") {
+            if (const std::optional<std::size_t> type = findDefinitionType(function, freeFunctionScopes[i], freeFunctionDirectives[i])) {
+                types[*type].addMethod(std::move(function));
+                continue;
+            }
+            if (isCClassMethod(function)) {
+                function.setStereotype(std::string(stereotypeName(stereotype::unclassified)));
+                cClassMethods.push_back(std::move(function));
+                continue;
+            }
+        }
+        if (function.getConstructorOrDestructor().empty()) remaining.push_back(std::move(function));
+    }
+    freeFunctions = std::move(remaining);
+    freeFunctionScopes.clear();
+    freeFunctionDirectives.clear();
+}
+
+// Lets each C# type and free function reach, without their names, the static fields of the types of the global static imports of any unit
+//
+void stereotypesAnalyzer::addGlobalStaticImports() {
+    for (typeModel& type : types)
+        if (type.getUnitLanguage() == "C#") type.addStaticHolders(globalStaticImports);
+    for (functionModel& function : freeFunctions)
+        if (function.getUnitLanguage() == "C#") function.addStaticHolders(globalStaticImports);
+}
+
+// Lets each type and free function reach, without their names, the static fields of the ancestors of the types around it and of its static imports
+// These types are known only by name, so each takes the ancestors of every type of its language with that name
+//
+void stereotypesAnalyzer::addAncestorStaticHolders() {
+    std::unordered_map<std::string, std::unordered_set<std::string>> ancestors;
+    for (const typeModel& type : types) {
+        std::unordered_set<std::string>& names = ancestors[type.getUnitLanguage() + ' ' + type.getName()[3]];
+        for (const std::vector<std::string>& parent : type.getParentNames())          names.insert(parent[3]);
+        for (const std::vector<std::string>& parent : type.getInheritedParentNames()) names.insert(parent[3]);
+    }
+    auto ancestorsOf = [&ancestors](const std::string& language, const std::unordered_set<std::string>& holders) {
+        std::unordered_set<std::string> reached;
+        for (const std::string& holder : holders) {
+            const auto found = ancestors.find(language + ' ' + holder);
+            if (found != ancestors.end()) reached.insert(found->second.begin(), found->second.end());
+        }
+        return reached;
+    };
+
+    for (typeModel& type : types) type.addStaticHolders(ancestorsOf(type.getUnitLanguage(), type.getStaticHolders()));
+    for (functionModel& function : freeFunctions) function.addStaticHolders(ancestorsOf(function.getUnitLanguage(), function.getStaticHolders()));
+}
+
+// Tells whether the reports and the srcML output show the labels of a type, which for an interface needs -i
+//
+bool stereotypesAnalyzer::isLabeled(const typeModel& type) const {
+    return settings.interfaces || type.getStructure() != "interface";
+}
+
+// Tells whether a C++ definition belongs to a class that only the C markup of a header holds
+//
+bool stereotypesAnalyzer::isCClassMethod(const functionModel& function) const {
+    const std::vector<std::string> parts = splitQualifiedName(function.getName()[1], "C++");
+    return parts.size() > 1 && cClassNames.count(withoutGenericArguments(parts[parts.size() - 2])) > 0;
+}
+
+// Finds the type that a parent of a type refers to, which is never the type itself
+// Each part of a C# partial type resolves the parents that it names from its own file
+//
+std::optional<std::size_t> stereotypesAnalyzer::findParentType(std::size_t position, std::size_t parent) const {
+    const typeModel& type = types[position];
+    const std::size_t part = type.getParentParts()[parent];
+    const std::vector<std::string> parts = splitQualifiedName(type.getParentNames()[parent][1], type.getUnitLanguage());
+    const typeReference reference = referenceOf(parts, type.getUnitLanguage(), lookupScope(type), type.getLocations()[part].unitNumber, type.getPartFileNames()[part]);
+    return typeNames.find(reference, position);
+}
+
+// Finds inherited fields and methods
+// For C++, we do need to check which fields or methods are accessible in inheritance chain (e.g., using 'private' specifier for inheritance)
+//   this is because the first child (call it X) that inherits from the parent type will have access to all the parent's data members, including the private ones,
+//   and if 'private' specifier is used for inheritance, then everything inherited will simply become private in the child type, so the first child will still have access to all the parent's data members, 
+//   but any other later child that inherits from X will not have access to any of the X's data members since they are all private in X
+//   Therefore, we could just collect everything across the entire hierarchy and then during analysis, methods will only access data members that are not private in the parent type, 
+//   so even if these private data members are collected, they will simply not be accessed in the child type or any of its children anyway.
+//
+// A depth-first walk completes every parent before its child takes the parent's members, so the result is the same in any order of the types
+// A parent on the current path closes a cycle of names and gives the members it holds so far
+//
+void stereotypesAnalyzer::findInheritedDataMembers(std::size_t position, std::vector<inheritance>& walk, std::vector<std::vector<std::size_t>>& parentTypes) {
+    if (walk[position] != inheritance::pending) return;
+    walk[position] = inheritance::onPath;
+
+    for (std::size_t parentNumber = 0; parentNumber < types[position].getParentNames().size(); ++parentNumber) {
+        const std::optional<std::size_t> parent = findParentType(position, parentNumber);
+        if (!parent) {
+            types[position].setUnknownParent(true);
+            continue;
+        }
+        findInheritedDataMembers(*parent, walk, parentTypes);
+        types[position].appendInheritedDataMembers(types[*parent]);
+        parentTypes[position].push_back(*parent);
+    }
+    walk[position] = inheritance::done;
+}
+
+// Writes the rows of the types and, with free functions, the rows of the free functions to the CSV or text reports
+//
+template <typename report>
+void stereotypesAnalyzer::outputReport(report& reports) const {
+    std::vector<const typeModel*> labeledTypes;
+    for (const typeModel& type : types)
+        if (isLabeled(type)) labeledTypes.push_back(&type);
+
+    reports.writeTypes(labeledTypes);
+    if (settings.freeFunctions) {
+        reports.writeFreeFunctions(freeFunctions);
+        reports.writeFreeFunctions(cClassMethods);
+    }
+}
+
+// Writes every unit of the input archive, with the stereotype attributes of its labeled elements, to the output archive
+// The workers annotate the units, and the units go to the output archive in the order of the input archive
+//
+void stereotypesAnalyzer::outputStereotypes(outputArchive& output) const {
+    // Labels of the types, methods, and free functions by unit
+    std::unordered_map<int, std::vector<stereotypeAnnotation>> annotations;
+    auto addLabel = [&annotations](const elementLocation& location, const std::string& stereotypes) {
+        annotations[location.unitNumber].push_back({location.path, stereotypes});
+    };
+    for (const typeModel& type : types) {
+        if (!isLabeled(type)) continue;
+        for (const elementLocation& location : type.getLocations()) addLabel(location, type.getStereotypesString());
+        for (const functionModel& method : type.getMethods())
+            if (method.getLocation()) addLabel(*method.getLocation(), method.getStereotypesString());
+    }
+    for (const functionModel& method : cClassMethods)
+        if (method.getLocation()) addLabel(*method.getLocation(), method.getStereotypesString());
+    if (settings.freeFunctions) {
+        for (const functionModel& function : freeFunctions)
+            if (function.getLocation()) addLabel(*function.getLocation(), function.getStereotypesString());
+    }
+
+    archivePtr input = openInputArchive(settings.inputFile);
+    orderedPool<annotatedUnit> pool(settings.threads);
+    int unitNumber = 0;
+    for (unitPtr unit(srcml_archive_read_unit(input.get())); unit; unit.reset(srcml_archive_read_unit(input.get()))) {
+        readSrcml(unit.get(), ++unitNumber);
+
+        std::vector<stereotypeAnnotation> unitAnnotations;
+        const auto labeled = annotations.find(unitNumber);
+        if (labeled != annotations.end()) unitAnnotations = std::move(labeled->second);
+
+        if (pool.pending() == unitsPerWorker * settings.threads) output.write(pool.next());
+        pool.submit([inputUnit = std::move(unit), labels = std::move(unitAnnotations), comments = settings.comments](std::size_t) mutable {
+            return annotatedUnit(std::move(inputUnit), labels, comments);
+        });
+    }
+    while (pool.pending() > 0) output.write(pool.next());
+}
