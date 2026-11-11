@@ -118,3 +118,15 @@ jobs:
             tags+=(--tag "$IMAGE:latest")
           fi
           docker buildx imagetools create "${tags[@]}" "$IMAGE:build-amd64" "$IMAGE:build-arm64"
+
+  keepalive:
+    # GitHub stops the schedule of a public repository after 60 days without activity, while enabling it again restarts that count
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    steps:
+      - name: Keep the weekly build enabled
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh api --method PUT "repos/$GITHUB_REPOSITORY/actions/workflows/docker.yml/enable"
