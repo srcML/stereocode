@@ -30,11 +30,11 @@ The build writes the program `build/stereocode`.
 
 ## 🐳 Docker
 
-The image `ghcr.io/srcml/stereocode` holds srcML and Stereocode for Intel and ARM machines, ready to run without the requirements or the build. GitHub Actions rebuilds the image with each release of Stereocode and every week with the newest srcML release and Ubuntu packages.
+The image [`mightyali98/stereocode`](https://hub.docker.com/r/mightyali98/stereocode) on Docker Hub holds srcML and Stereocode for Intel and ARM machines, ready to run without the requirements or the build. GitHub Actions rebuilds the image with each release of Stereocode and every week with the newest srcML release and Ubuntu packages.
 
 ```bash
-docker pull ghcr.io/srcml/stereocode                                  # get or update the image
-alias run='docker run --rm -v "$PWD:/data" ghcr.io/srcml/stereocode'  # run commands in the image
+docker pull mightyali98/stereocode                                  # get or update the image
+alias run='docker run --rm -v "$PWD:/data" mightyali98/stereocode'  # run commands in the image
 ```
 
 The commands of the usage example then run in the image, on the files of the current folder.
