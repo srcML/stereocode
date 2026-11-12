@@ -67,7 +67,7 @@ function(check_stereotype_comments)
 
     run_stereocode(--help)
     expect_exit(0)
-    if(NOT RUN_OUTPUT MATCHES "\n  -m, +--comment +Insert the comment // @stereotype <labels> before each labeled")
+    if(NOT RUN_OUTPUT MATCHES "\n  -m, +--comment +Inserts a // @stereotype <labels> comment before each stereotyped")
         message(FATAL_ERROR "The help does not describe -m:\n${RUN_OUTPUT}")
     endif()
 
