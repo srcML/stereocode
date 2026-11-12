@@ -362,7 +362,7 @@ function(check_txt_report)
 
     run_stereocode(--help)
     expect_exit(0)
-    if(NOT RUN_OUTPUT MATCHES "\n  -x, +--txt-report +Write the text report of the types")
+    if(NOT RUN_OUTPUT MATCHES "\n  -x, +--txt-report +Writes a text report of the stereotypes")
         message(FATAL_ERROR "The help does not describe -x:\n${RUN_OUTPUT}")
     endif()
 

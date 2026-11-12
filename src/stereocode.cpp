@@ -43,29 +43,33 @@ int main (int argc, char const *argv[]) try {
     options settings;
     settings.threads = std::clamp(std::thread::hardware_concurrency(), 1u, maxThreads);
 
-    CLI::App app{"Stereocode: Determines function (method and free functions) and type (class, struct, interface, union, enum) stereotypes\nSupports C, C++, C#, and Java\n" };
+    CLI::App app{"Stereocode classifies methods, free functions, and types (e.g., classes) of C, C++, C#, and Java code by their stereotypes.\n"};
+    app.footer("The files of -p, -c, -s, and -q hold one entry per line. A line [C++], [C#], or [Java] limits the entries after it to that language. "
+               "A line that starts with # is a comment.");
 
+    // The descriptions follow the options table of README.md
     app.add_option("input-archive",            settings.inputFile,               "srcML archive to analyze, a file name that ends in .xml")->required()->check(CLI::ExistingFile);
-    app.add_option("-o,--output-file",         settings.outputFile,              "srcML output archive with the stereotypes (default <input>.stereotypes.xml), whose name the CSV and text reports share");
-    app.add_option("-p,--primitive-file",      settings.primitivesFile,          "File of primitive types to add to the default set, one per line, with optional [C++], [C#], and [Java] sections")->check(CLI::ExistingFile);
-    app.add_option("-c,--call-file",           settings.callsFile,               "File of calls to ignore in addition to the default set, one per line, with optional [C++], [C#], and [Java] sections")->check(CLI::ExistingFile);
-    app.add_option("-s,--specifier-file",      settings.specifiersFile,          "File of type specifiers to remove from types in addition to the default set, one per line, with optional [C++], [C#], and [Java] sections")->check(CLI::ExistingFile);
-    app.add_option("-q,--query-file",          settings.queryMethodsFile,        "File of query methods, whose calls on data members, parameters, and globals read them, in addition to the default set, one per line, with optional [C++], [C#], and [Java] sections")->check(CLI::ExistingFile);
-    app.add_option("-l,--large-class",         settings.largeClassThreshold,     "Number of methods that a large type exceeds (e.g., large-class) (default = mean plus standard deviation of the methods per class of the run)")
+    app.add_option("-o,--output-file",         settings.outputFile,              "Output archive (default <input>.stereotypes.xml)");
+    app.add_option("-p,--primitive-file",      settings.primitivesFile,          "File of extra types that count as primitive (e.g., a typedef of int)")->check(CLI::ExistingFile);
+    app.add_option("-c,--call-file",           settings.callsFile,               "File of extra calls to ignore (e.g., a logging function)")->check(CLI::ExistingFile);
+    app.add_option("-s,--specifier-file",      settings.specifiersFile,          "File of extra specifiers to strip from types (e.g., an export macro)")->check(CLI::ExistingFile);
+    app.add_option("-q,--query-file",          settings.queryMethodsFile,        "File of extra methods whose calls leave the object unchanged (e.g., size)")->check(CLI::ExistingFile);
+    app.add_option("-l,--large-class",         settings.largeClassThreshold,     "Method count above which a type can be a large-class (default mean plus standard deviation over all types)")
         ->check(countUpTo(std::numeric_limits<int>::max(), "POSITIVE"));
-    app.add_option("-j,--threads",             settings.threads,                 "Number of worker threads (default = as many as the machine has, at most 256)")
+    app.add_option("-j,--threads",             settings.threads,                 "Number of threads (default all available, at most 256)")
         ->check(countUpTo(maxThreads, "1 to 256"));
-    app.add_flag  ("-f,--free-function",       settings.freeFunctions,           "Identify stereotypes for free functions, including static methods (C, C++, C#, and Java)");
-    app.add_flag  ("-i,--interface",           settings.interfaces,              "Identify stereotypes for interfaces (C# and Java)");
-    app.add_flag  ("-u,--union",               settings.unions,                  "Identify stereotypes for unions (C and C++)");
-    app.add_flag  ("-e,--enum",                settings.enums,                   "Identify stereotypes for enums (Java)");
-    app.add_flag  ("-t,--struct",              settings.structs,                 "Identify stereotypes for structs (C, C++, and C#)");
-    app.add_flag  ("-r,--csv-report",          settings.csvReport,               "Write the CSV report of the types and, with -f, the CSV report of the free functions");
-    app.add_flag  ("-x,--txt-report",          settings.txtReport,               "Write the text report of the types and, with -f, the text report of the free functions, as in the ICSME 2024 paper");
-    app.add_flag  ("-b,--verbose",             settings.verboseReport,           "Write the CSV reports with the facts of each function, and print the large-class threshold, the primitive types, ignored calls, specifiers, and query methods (implies -r)");
-    app.add_flag  ("-d,--no-srcml-output,--srcmlOutput", settings.disableSrcmlOutput, "Write no srcML output archive (requires -r, -b, or -x)");
-    app.add_flag  ("-m,--comment",             settings.comments,                "Insert the comment // @stereotype <labels> before each labeled type, method, and free function of the srcML output archive, as in the ICSME 2024 paper (excludes -d)");
-    app.set_version_flag("-v,--version",       "Stereocode v" STEREOCODE_VERSION, "Display version information");
+    app.add_flag  ("-f,--free-function",       settings.freeFunctions,           "Stereotypes free functions and static methods");
+    app.add_flag  ("-i,--interface",           settings.interfaces,              "Stereotypes interfaces (C# and Java)");
+    app.add_flag  ("-u,--union",               settings.unions,                  "Stereotypes unions (C and C++)");
+    app.add_flag  ("-e,--enum",                settings.enums,                   "Stereotypes enums (Java)");
+    app.add_flag  ("-t,--struct",              settings.structs,                 "Stereotypes structs (C, C++, and C#)");
+    app.add_flag  ("-r,--csv-report",          settings.csvReport,               "Writes a CSV report of the stereotypes");
+    app.add_flag  ("-x,--txt-report",          settings.txtReport,               "Writes a text report of the stereotypes");
+    app.add_flag  ("-b,--verbose",             settings.verboseReport,           "Writes a detailed CSV report (e.g., the calls of each function) and prints the settings in use");
+    app.add_flag  ("-d,--no-srcml-output,--srcmlOutput", settings.disableSrcmlOutput, "Writes no output archive, only the reports of -r, -x, or -b");
+    app.add_flag  ("-m,--comment",             settings.comments,                "Inserts a // @stereotype <labels> comment before each stereotyped element");
+    app.set_version_flag("-v,--version",       "Stereocode v" STEREOCODE_VERSION, "Prints the version");
+    app.set_help_flag("-h,--help",             "Prints the options");
 
     CLI11_PARSE(app, argc, argv);
 

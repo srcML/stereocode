@@ -20,13 +20,11 @@ A stereotype is a short label for the role of a code element (e.g., a method or 
 ## 🔧 Installation
 
 ```bash
-git clone https://github.com/srcML/stereocode.git
-cd stereocode
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+git clone https://github.com/srcML/stereocode.git  # download the source code
+cd stereocode                                      # go into the source folder
+cmake -B build -DCMAKE_BUILD_TYPE=Release          # configure a release build
+cmake --build build                                # compile build/stereocode
 ```
-
-The build writes the program `build/stereocode`.
 
 ## 🐳 Docker
 
