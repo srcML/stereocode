@@ -26,9 +26,9 @@ struct methodCall {
 // Facts of a method that the method stereotype rules read
 //
 struct methodFacts {
-    std::string language;                                    // Unit language (C++, C#, or Java)
+    std::string language;                                    // Language of the analysis, where C units count as C++
     std::string constructorOrDestructor;                     // constructor, copy-constructor, or destructor. Empty for other methods
-    std::string returnType;                                  // Return type without specifiers and whitespace
+    std::string returnType;                                  // Return type without specifiers and whitespace, or a whole container
     std::string declaredReturnType;                          // Return type as declared, without whitespace
     int         fieldsModified{0};                           // Number of fields changed
     std::vector<methodCall> callsOnFields;                   // Calls on fields (e.g., a.foo() where a is a field), one per call
@@ -79,9 +79,9 @@ struct typeCounts {
 // Facts of a free function that the free-function stereotype rules read
 //
 struct freeFunctionFacts {
-    std::string language;                                    // Unit language (C++, C#, or Java)
+    std::string language;                                    // Language of the analysis, where C units count as C++
     std::string name;                                        // Name without whitespace
-    std::string returnType;                                  // Return type without specifiers and whitespace
+    std::string returnType;                                  // Return type without specifiers and whitespace, or a whole container
     std::string declaredReturnType;                          // Return type as declared, without whitespace
     int         calls{0};                                    // Number of calls, constructor calls with new excluded
     int         nonCommentStatements{0};                     // Number of statements other than comments

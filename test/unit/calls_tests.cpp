@@ -85,3 +85,49 @@ TEST_CASE("a call to ignore under a section header holds only for the units of i
     CHECK(ignored.isIgnored("logMessage", "Java"));
     CHECK(ignored.isIgnored("app::logMessage", "C++"));
 }
+
+TEST_CASE("a listed Python function without a module is ignored only as the whole call, since a call on an object may share its name") {
+    const calls ignored = defaultIgnoredCalls();
+
+    for (const char* call : {"print", "exit", "len", "isinstance", "str", "breakpoint"}) {
+        CAPTURE(call);
+        CHECK(ignored.isIgnored(call, "Python"));
+    }
+    for (const char* call : {"door.exit", "this.print", "parser.type", "text.str", "time.sleep"}) {
+        CAPTURE(call);
+        CHECK_FALSE(ignored.isIgnored(call, "Python"));
+    }
+}
+
+TEST_CASE("Python ignores the constructors of its built-in containers and the functions of a loop header, while another built-in function is a call") {
+    const calls ignored = defaultIgnoredCalls();
+
+    for (const char* call : {"list", "dict", "set", "tuple", "frozenset", "bytearray", "range", "enumerate", "zip", "reversed"}) {
+        CAPTURE(call);
+        CHECK(ignored.isIgnored(call, "Python"));
+    }
+    for (const char* call : {"sorted", "min", "max", "sum", "open", "cache.set", "this.range"}) {
+        CAPTURE(call);
+        CHECK_FALSE(ignored.isIgnored(call, "Python"));
+    }
+}
+
+TEST_CASE("a listed Python function with its module also ends a longer name") {
+    const calls ignored = defaultIgnoredCalls();
+    CHECK(ignored.isIgnored("sys.exit", "Python"));
+    CHECK(ignored.isIgnored("os.sys.exit", "Python"));
+    CHECK_FALSE(ignored.isIgnored("mysys.exit", "Python"));
+}
+
+TEST_CASE("the console and the exit of a process are ignored calls of JavaScript, unlike a call of another object of the same name") {
+    const calls ignored = defaultIgnoredCalls();
+
+    for (const char* call : {"console.log", "console.error", "process.exit", "alert", "require"}) {
+        CAPTURE(call);
+        CHECK(ignored.isIgnored(call, "JavaScript"));
+    }
+    for (const char* call : {"door.exit", "this.log", "logger.log", "console.log.bind"}) {
+        CAPTURE(call);
+        CHECK_FALSE(ignored.isIgnored(call, "JavaScript"));
+    }
+}

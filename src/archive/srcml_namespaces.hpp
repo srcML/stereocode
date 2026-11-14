@@ -13,6 +13,9 @@
 // Namespace of the srcML elements
 inline constexpr const char* srcNamespace        = "http://www.srcML.org/srcML/src";
 
+// Namespace of the TypeScript elements of a JavaScript unit, such as ts:interface and ts:type
+inline constexpr const char* typeScriptNamespace = "http://www.srcML.org/srcML/TypeScript";
+
 // Namespace of the stereotype attribute in the srcML output
 inline constexpr const char* stereotypeNamespace = "http://www.srcML.org/srcML/stereotype";
 

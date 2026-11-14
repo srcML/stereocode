@@ -11,6 +11,7 @@
 #include "ordered_pool.hpp"
 
 #include <chrono>
+#include <future>
 #include <stdexcept>
 #include <thread>
 
@@ -59,4 +60,46 @@ TEST_CASE("Taking a result without a pending job is an error") {
     pool.submit([](std::size_t) { return 1; });
     CHECK(pool.next() == 1);
     CHECK_THROWS_AS(pool.next(), std::logic_error);
+}
+
+TEST_CASE("The oldest result is ready only once its job has ended") {
+    orderedPool<int> pool(2);
+    CHECK_FALSE(pool.nextReady());
+
+    std::promise<void> gate;
+    const std::shared_future<void> opened = gate.get_future().share();
+    pool.submit([opened](std::size_t) { opened.wait(); return 1; });
+    pool.submit([](std::size_t) { return 2; });
+    CHECK_FALSE(pool.nextReady());
+
+    gate.set_value();
+    while (!pool.nextReady()) std::this_thread::yield();
+    CHECK(pool.next() == 1);
+    CHECK(pool.next() == 2);
+}
+
+TEST_CASE("Waiting for room returns once fewer jobs than the limit wait for a worker") {
+    orderedPool<int> pool(1);
+    std::promise<void> gate;
+    const std::shared_future<void> opened = gate.get_future().share();
+    pool.submit([opened](std::size_t) { opened.wait(); return 1; });
+    pool.submit([](std::size_t) { return 2; });
+    pool.submit([](std::size_t) { return 3; });
+
+    // The worker takes the first job while the gate is closed, which leaves two jobs that wait
+    pool.waitForRoom(3);
+    CHECK(opened.wait_for(std::chrono::seconds(0)) == std::future_status::timeout);
+
+    // The second job starts only after the first ends behind the gate
+    std::thread opener([&gate] {
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        gate.set_value();
+    });
+    pool.waitForRoom(2);
+    CHECK(opened.wait_for(std::chrono::seconds(0)) == std::future_status::ready);
+    opener.join();
+
+    CHECK(pool.next() == 1);
+    CHECK(pool.next() == 2);
+    CHECK(pool.next() == 3);
 }

@@ -55,3 +55,62 @@ enum Level {
         int weight() { return weight; }
     }
 }
+
+// A call without an object in an inner class names a method of the nearest type that has a method of the name: the inner class, one of
+// its parents, or the type of an enclosing instance, whose data members count as data members of the inner class
+class Ledger {
+    private int total;
+
+    // @stereotype set
+    void add(int amount) { total += amount; }
+
+    // @stereotype get
+    int total() { return total; }
+
+    // @stereotype literal
+    static int scale() { return 100; }
+
+    class Entry {
+        private int amount;
+
+        // @stereotype set
+        void addDirectly() { total += amount; }
+
+        // @stereotype command
+        void post() { add(amount); }
+
+        // @stereotype command
+        void postQualified() { Ledger.this.add(amount); }
+
+        // @stereotype property
+        int share() { return amount * 100 / total(); }
+
+        // A static method of the enclosing class is a free function
+        // @stereotype property wrapper
+        int scaled() { return amount * scale(); }
+
+        // The inner class defines a method total of its own, which hides the method of the enclosing class, whatever arguments the call passes
+        class Line {
+            private int cents;
+
+            // @stereotype property
+            int total(int factor) { return cents * factor; }
+
+            // @stereotype property
+            int twice() { return total(2); }
+
+            // @stereotype property
+            int outer() { return Ledger.this.total() + cents; }
+
+            // The method add of the outermost class is the nearest one of its name
+            // @stereotype command
+            void post() { add(cents); }
+        }
+    }
+
+    // A static nested class has no enclosing instance
+    static class Report {
+        // @stereotype wrapper stateless
+        int shown() { return scale(); }
+    }
+}

@@ -70,7 +70,8 @@ TEST_CASE("an entry keeps the spaces and the characters inside it") {
 }
 
 TEST_CASE("a section header gives the entries after it to its language, while the entries before the first header hold for every language") {
-    CHECK(entriesOf("QString\n[C++]\nQByteArray\n[C#]\nGuid\n[Java]\nUUID\n") == entries{"QString", "[C++] QByteArray", "[C#] Guid", "[Java] UUID"});
+    CHECK(entriesOf("QString\n[C++]\nQByteArray\n[C#]\nGuid\n[Java]\nUUID\n[Python]\nDecimal\n") ==
+          entries{"QString", "[C++] QByteArray", "[C#] Guid", "[Java] UUID", "[Python] Decimal"});
     CHECK(entriesOf("[Java]\nUUID\n[C++]\nqreal\n[Java]\nBigDecimal\n") == entries{"[Java] UUID", "[C++] qreal", "[Java] BigDecimal"});
 }
 
@@ -78,13 +79,13 @@ TEST_CASE("a section header stands on a line of its own, with blanks and a carri
     CHECK(entriesOf("  [C#] \r\nGuid\r\n# Money\n\nDecimal\n") == entries{"[C#] Guid", "[C#] Decimal"});
 }
 
-TEST_CASE("a line in brackets other than [C++], [C#], and [Java] is an entry") {
-    CHECK(entriesOf("[[nodiscard]]\n[C]\n[c#]\n[Python]\n[C#] Guid\n") == entries{"[[nodiscard]]", "[C]", "[c#]", "[Python]", "[C#] Guid"});
+TEST_CASE("a line in brackets other than [C++], [C#], [Java], and [Python] is an entry") {
+    CHECK(entriesOf("[[nodiscard]]\n[C]\n[c#]\n[Go]\n[C#] Guid\n") == entries{"[[nodiscard]]", "[C]", "[c#]", "[Go]", "[C#] Guid"});
 }
 
 TEST_CASE("a line in brackets that names a language of a header in another case is a header in another case") {
-    std::istringstream file("[c++]\n  [JAVA] \r\n[C#]\n[C]\n[c#]Guid\n[Python]\n[[nodiscard]]\n[C# ]\n# [java]\n[c#]\n");
-    CHECK(headersInOtherCase(file) == entries{"[c++]", "[JAVA]", "[c#]"});
+    std::istringstream file("[c++]\n  [JAVA] \r\n[C#]\n[C]\n[c#]Guid\n[Python]\n[[nodiscard]]\n[C# ]\n# [java]\n[c#]\n[python]\n");
+    CHECK(headersInOtherCase(file) == entries{"[c++]", "[JAVA]", "[c#]", "[python]"});
 }
 
 TEST_CASE("an entry before the first header holds for every language, and an entry of a section only for its language") {

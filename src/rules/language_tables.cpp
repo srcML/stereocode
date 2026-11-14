@@ -9,6 +9,7 @@
 
 #include "rules/language_tables.hpp"
 #include "rules/user_lists.hpp"
+#include "archive/source_language.hpp"
 
 #include <cerrno>
 #include <cstring>
@@ -34,7 +35,7 @@ namespace {
         in.seekg(0);
         for (const std::string& header : headersInOtherCase(in))
             std::cerr << "Warning: the line " << header << " of the " << description << " file " << fileName
-                      << " is an entry, since a section header is written [C++], [C#], or [Java]\n";
+                      << " is an entry, since a section header is written " << sectionHeadersText() << "\n";
     }
 }
 

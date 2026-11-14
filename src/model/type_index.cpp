@@ -142,12 +142,33 @@ namespace {
         return matches;
     }
 
+    // Gets the places that the imports of one type, or those of every type of a path, bring into scope under a written name,
+    // as the type shop.Meter of import shop.Meter; for Meter, from the first import that brings in a place
+    //
+    template <typename entry>
+    std::vector<std::size_t> imported(const std::vector<entry>& entries, const std::vector<std::size_t>& candidates, const typeReference& reference,
+                                      const std::vector<const std::vector<typeImport>*>& imports, bool everyType) {
+        std::vector<std::size_t> matches;
+        for (const std::vector<typeImport>* unitImports : imports) {
+            for (const typeImport& import : *unitImports) {
+                if (import.everyType != everyType || (!everyType && (import.path.empty() || import.path.back() != reference.path.front()))) continue;
+                std::vector<std::string> path = import.path;
+                path.insert(path.end(), reference.path.begin() + (everyType ? 0 : 1), reference.path.end());
+
+                for (std::size_t position : candidates)
+                    if (placeOf(entries[position]).path == path) matches.push_back(position);
+                if (!matches.empty()) return matches;
+            }
+        }
+        return matches;
+    }
+
     // Gets the places among the places of a name that a written name refers to, other than an excluded place
     // C# and Java tell types apart by their number of generic parameters, while a C++ name with template arguments may name the template itself
     //
     template <typename entry>
     scopedMatches matchesOf(const std::vector<entry>& entries, const std::vector<std::size_t>& named, const typeReference& reference,
-                            std::optional<std::size_t> excluded) {
+                            std::optional<std::size_t> excluded, const std::vector<const std::vector<typeImport>*>& imports = {}) {
         std::vector<std::size_t> candidates;
         for (std::size_t position : named) {
             if (excluded && position == *excluded) continue;
@@ -156,10 +177,21 @@ namespace {
         }
 
         scopedMatches matches = inScope(entries, candidates, reference.path, reference.scope);
+
+        // An import of one type hides the types of its name in the other units of the scope, as those of the package of a Java unit
+        const bool inUnit = std::any_of(matches.positions.begin(), matches.positions.end(),
+                                        [&](std::size_t position) { return placeOf(entries[position]).unitNumber == reference.unitNumber; });
+        if (!inUnit) {
+            const std::vector<std::size_t> ofImport = imported(entries, candidates, reference, imports, false);
+            if (!ofImport.empty()) return {ofImport, -1};
+        }
         if (!matches.positions.empty()) return matches;
 
         // C++ lookup through using directives accepts a name only when they bring in one type
         matches.positions = nominated(entries, candidates, reference);
+        if (!matches.positions.empty()) return matches;
+
+        matches.positions = imported(entries, candidates, reference, imports, true);
         if (!matches.positions.empty()) return matches;
 
         // A name that an import or a using directive that the index does not see, such as one in a header, brings into scope
@@ -170,10 +202,11 @@ namespace {
     }
 
     // Picks among places with the same path: a C++ specialization with the written template arguments, then the template itself,
-    // then a place of the unit of the name, then the place whose file shares the most folders with the file of the name
+    // then a place of the unit of the name, then the places whose files share the most folders with the file of the name,
+    // which are several where the folders of several platforms each define the type
     //
     template <typename entry>
-    std::size_t closest(const std::vector<entry>& entries, std::vector<std::size_t> matches, const typeReference& reference) {
+    std::vector<std::size_t> closest(const std::vector<entry>& entries, std::vector<std::size_t> matches, const typeReference& reference) {
         auto place = [&entries](std::size_t position) -> const indexedType& { return placeOf(entries[position]); };
 
         if (reference.language == "C++") {
@@ -182,21 +215,27 @@ namespace {
         }
         keepIfAny(matches, [&](std::size_t position) { return place(position).unitNumber == reference.unitNumber; });
 
-        std::size_t best = matches.front();
-        for (std::size_t position : matches)
-            if (sharedFolders(place(position).fileName, reference.fileName) > sharedFolders(place(best).fileName, reference.fileName)) best = position;
-        return best;
+        const auto shared = [&](std::size_t position) { return sharedFolders(place(position).fileName, reference.fileName); };
+        std::size_t most = 0;
+        for (std::size_t position : matches) most = std::max(most, shared(position));
+        keepIfAny(matches, [&](std::size_t position) { return shared(position) == most; });
+        return matches;
     }
 
-    // Picks the place that a written name refers to among its matches, or nothing when no place fits or the places
-    // that a using directive or an import brings into scope have several paths
+    // Picks the places that a written name refers to among its matches, the first of which is the place of the name where one place is needed,
+    // or nothing when no place fits or the places that a using directive or an import brings into scope have several paths
     //
     template <typename entry>
-    std::optional<std::size_t> pick(const std::vector<entry>& entries, const scopedMatches& matches, const typeReference& reference) {
-        if (matches.positions.empty()) return std::nullopt;
+    std::vector<std::size_t> pick(const std::vector<entry>& entries, const scopedMatches& matches, const typeReference& reference) {
         for (std::size_t position : matches.positions)
-            if (placeOf(entries[position]).path != placeOf(entries[matches.positions.front()]).path) return std::nullopt;
-        return closest(entries, matches.positions, reference);
+            if (placeOf(entries[position]).path != placeOf(entries[matches.positions.front()]).path) return {};
+        return matches.positions.empty() ? matches.positions : closest(entries, matches.positions, reference);
+    }
+
+    // Gets the first of some places, if any
+    //
+    std::optional<std::size_t> firstOf(const std::vector<std::size_t>& positions) {
+        return positions.empty() ? std::nullopt : std::optional<std::size_t>(positions.front());
     }
 
     // Gets a name that code writes at the place of another name, such as a name in the type that an alias stands for
@@ -262,30 +301,55 @@ void typeIndex::addAlias(indexedAlias alias) {
     aliases.push_back(std::move(alias));
 }
 
+// Adds an import of a unit
+//
+void typeIndex::addImport(typeImport import) {
+    imports[import.everyUnit ? -1 : import.unitNumber].push_back(std::move(import));
+}
+
+// Gets the imports that hold in a unit: its own and those of every unit
+//
+std::vector<const std::vector<typeImport>*> typeIndex::importsOf(int unitNumber) const {
+    std::vector<const std::vector<typeImport>*> held;
+    for (int unit : {unitNumber, -1}) {
+        const auto found = imports.find(unit);
+        if (found != imports.end()) held.push_back(&found->second);
+    }
+    return held;
+}
+
+// Finds the positions of the types that a written name refers to equally well, other than an excluded type, or nothing when no type fits
+// or the types that fit have several paths
+//
+std::vector<std::size_t> typeIndex::findEvery(const typeReference& reference, std::optional<std::size_t> excluded) const {
+    if (reference.path.empty()) return {};
+    const std::string key = nameKey(reference.language, reference.path.back());
+    return pick(types, matchesOf(types, positionsOf(byName, key), reference, excluded, importsOf(reference.unitNumber)), reference);
+}
+
 // Finds the position of the type that a written name refers to, other than an excluded type, or nothing when no type or several types fit
 //
 std::optional<std::size_t> typeIndex::find(const typeReference& reference, std::optional<std::size_t> excluded) const {
-    if (reference.path.empty()) return std::nullopt;
-    return pick(types, matchesOf(types, positionsOf(byName, nameKey(reference.language, reference.path.back())), reference, excluded), reference);
+    return firstOf(findEvery(reference, excluded));
 }
 
-// Finds the position of the type that a written name refers to, where the name may be an alias of the type, also through other aliases,
-// and for a call through -> an alias of a smart pointer to the type, or nothing for a cycle of aliases
+// Finds the positions of the types that a written name refers to equally well, where the name may be an alias of the type, also through
+// other aliases, and for a call through -> an alias of a smart pointer to the type, or nothing for a cycle of aliases
 //
-std::optional<std::size_t> typeIndex::findThroughAliases(typeReference reference, bool throughPointer) const {
+std::vector<std::size_t> typeIndex::findThroughAliases(typeReference reference, bool throughPointer) const {
     std::unordered_set<std::size_t> followed;
     std::optional<std::size_t> alias;
     while (!reference.path.empty()) {
         alias = aliasOf(reference, alias);
-        if (!alias) return find(reference);
-        if (!followed.insert(*alias).second) return std::nullopt;
+        if (!alias) return findEvery(reference);
+        if (!followed.insert(*alias).second) return {};
 
         // -> reaches the object that an alias of a pointer points to, after which the aliases lead to the types that they name
         const bool dereferenced = throughPointer && !aliases[*alias].pointee.path.empty();
         reference = dereferenced ? aliases[*alias].pointee : aliases[*alias].target;
         throughPointer = throughPointer && !dereferenced;
     }
-    return std::nullopt;
+    return {};
 }
 
 // Gets a type that code writes at the place of a name, where each name of an alias gives way to the type that the alias stands for,
@@ -325,7 +389,7 @@ writtenType typeIndex::replaceAliases(const writtenType& type, const typeReferen
 std::optional<std::size_t> typeIndex::aliasOf(const typeReference& reference, std::optional<std::size_t> excluded) const {
     if (reference.path.empty()) return std::nullopt;
     const std::string key = nameKey(reference.language, reference.path.back());
-    const scopedMatches typeMatches = matchesOf(types, positionsOf(byName, key), reference, std::nullopt);
+    const scopedMatches typeMatches = matchesOf(types, positionsOf(byName, key), reference, std::nullopt, importsOf(reference.unitNumber));
     const bool typed = !typeMatches.positions.empty();
 
     std::vector<std::size_t> candidates;
@@ -335,5 +399,5 @@ std::optional<std::size_t> typeIndex::aliasOf(const typeReference& reference, st
     // The name of an alias holds only after its declaration, so the target of the alias never names the alias itself
     const scopedMatches aliasMatches = matchesOf(aliases, candidates, reference, excluded);
     if (typed && aliasMatches.depth <= typeMatches.depth) return std::nullopt;
-    return pick(aliases, aliasMatches, reference);
+    return firstOf(pick(aliases, aliasMatches, reference));
 }

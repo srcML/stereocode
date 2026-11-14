@@ -11,25 +11,18 @@
 #include "model/interpolated_strings.hpp"
 #include "archive/node_text.hpp"
 #include "archive/srcml_elements.hpp"
+#include "parsed_srcml.hpp"
 
-#include <libxml/parser.h>
-
-#include <memory>
 #include <string>
 #include <vector>
 
 using names = std::vector<std::string>;
 
 namespace {
-    // A parsed srcML unit that frees its document
-    //
-    using document = std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)>;
-
     // Parses srcML into the children of a C# unit
     //
     document parsed(const std::string& children) {
-        const std::string srcml = R"(<unit xmlns="http://www.srcML.org/srcML/src" language="C#">)" + children + "</unit>";
-        return document(xmlReadMemory(srcml.c_str(), static_cast<int>(srcml.size()), nullptr, nullptr, 0), &xmlFreeDoc);
+        return parsedUnit("C#", children);
     }
 
     // Escapes the characters of a text that XML marks up
@@ -45,20 +38,10 @@ namespace {
         return escapedText;
     }
 
-    // Gets the first element with a name in a unit, in document order
-    //
-    const xmlNode* firstElement(const xmlNode* node, const std::string& name) {
-        for (; node; node = node->next) {
-            if (isSrcElement(node, name)) return node;
-            if (const xmlNode* found = firstElement(node->children, name)) return found;
-        }
-        return nullptr;
-    }
-
     // Reads the interpolated string of a unit, which starts at its first name
     //
     interpolatedString readFirst(const document& unit) {
-        return readInterpolatedString(firstElement(xmlDocGetRootElement(unit.get()), "name"));
+        return readInterpolatedString(firstElement(unit, "name"));
     }
 
     // Gets the names of the holes of an interpolated string, whose prefix srcML marks as a name before a literal with the rest of its text
@@ -109,7 +92,7 @@ TEST_CASE("a literal in a hole holds no name, while a nested interpolated string
 TEST_CASE("the closing quote of a string that srcML splits lies in the literal that ends the string, before the code after the string") {
     const document unit = parsed(R"(<expr><call><name>Wrap</name><argument_list>(<argument><expr><name>$</name><literal type="string">"{Join("</literal></expr></argument>, )"
                                  R"(<argument><expr><literal type="string">", xs)}"</literal> <operator>+</operator> <name>count</name></expr></argument>)</argument_list></call></expr>)");
-    const interpolatedString string = readInterpolatedString(firstElement(xmlDocGetRootElement(unit.get()), "argument")->children->children);
+    const interpolatedString string = readInterpolatedString(firstElement(unit, "argument")->children->children);
 
     CHECK(string.names == names{"xs"});
     REQUIRE(string.closingNode);

@@ -15,9 +15,8 @@
 #include <cctype>
 #include <utility>
 
-// Helper to escape CSV fields for CSV parsers
-// Outer quotes handle commas, newlines, carriage returns, etc.
-// Inner quotes handle inner quotes
+// Quotes a field of a CSV report, where the outer quotes hold commas and a doubled quote stands for a quote of the field,
+// and each run of whitespace, line breaks included, becomes one space
 //
 std::string HELPERS::escapeCSV(const std::string& data) {
     std::string result = "\""; // Outer

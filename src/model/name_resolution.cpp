@@ -11,6 +11,7 @@
 #include "helper_functions.hpp"
 #include "model/member_access.hpp"
 #include "model/qualified_name.hpp"
+#include "archive/source_language.hpp"
 
 #include <algorithm>
 #include <cctype>
@@ -32,6 +33,54 @@ namespace {
         }
     }
 
+    // Removes the casts before a name, as (T) of (T)this and (Node*) of (Node*)next, which leave the variable that the expression names
+    // A parenthesis before an access, as in (*this).a, is no cast
+    //
+    void removeLeadingCasts(std::string& expr) {
+        std::size_t casts = 0;
+        while (casts < expr.size() && expr[casts] == '(') {
+            const std::size_t close = expr.find(')', casts);
+            if (close == std::string::npos || expr.find('(', casts + 1) < close) return;
+            casts = close + 1;
+        }
+        if (casts < expr.size() && (std::isalpha(static_cast<unsigned char>(expr[casts])) || expr[casts] == '_')) expr.erase(0, casts);
+    }
+
+    // Removes the C# keyword ref before a variable that an expression passes by reference, as in return ref head;
+    //
+    void removeReferenceKeyword(std::string& expr) {
+        constexpr std::string_view keyword = "ref";
+        const std::size_t start = expr.find_first_not_of(" \t\r\n");
+        if (start != std::string::npos && expr.compare(start, keyword.size(), keyword) == 0 && expr.size() > start + keyword.size() &&
+            std::isspace(static_cast<unsigned char>(expr[start + keyword.size()])))
+            expr.erase(0, start + keyword.size());
+    }
+
+    // Removes the C# operator ! after a value that is not null, as in name! and node!.Name, from an expression without whitespace,
+    // where the ! of != stays
+    //
+    void removeNullForgiving(std::string& expr) {
+        for (std::size_t i = expr.size(); i-- > 1;) {
+            if (expr[i] != '!') continue;
+            const char before = expr[i - 1];
+            const bool afterValue = std::isalnum(static_cast<unsigned char>(before)) || before == '_' || before == ']' || before == ')';
+            const bool comparison = i + 1 < expr.size() && expr[i + 1] == '=' && (i + 2 >= expr.size() || expr[i + 2] != '=');
+            if (afterValue && !comparison) expr.erase(i, 1);
+        }
+    }
+
+    // Removes the symbols of an operator function at the end of a name, as () of handler.operator() and << of out.operator<<,
+    // which are no part of a variable
+    //
+    void removeOperatorSymbols(std::string& expr) {
+        constexpr std::string_view keyword = "operator";
+        const std::size_t start = expr.rfind(keyword);
+        if (start == std::string::npos || start == 0 || (expr[start - 1] != '.' && expr[start - 1] != '>')) return;
+
+        const std::size_t symbols = start + keyword.size();
+        if (symbols < expr.size() && !std::isalnum(static_cast<unsigned char>(expr[symbols])) && expr[symbols] != '_') expr.erase(symbols);
+    }
+
     // Removes the balanced index groups at the end of an expression, such as [i][j] of a[i][j], and tells whether it removed one
     //
     bool removeTrailingIndex(std::string& expr) {
@@ -50,10 +99,11 @@ namespace {
         return removed;
     }
 
-    // Tells whether a character can be part of a name, where Java allows $ and C# marks a keyword used as a name with @
+    // Tells whether a character can be part of a name, where Java and JavaScript allow $, C# marks a keyword used as a name with @,
+    // and a private member of JavaScript starts with #
     //
     bool isNameCharacter(char c) {
-        return std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '$' || c == '@';
+        return std::isalnum(static_cast<unsigned char>(c)) || c == '_' || c == '$' || c == '@' || c == '#';
     }
 
     // A name of an expression and whether the C++ scope operator :: follows it, which only a namespace or a type, never a variable, allows
@@ -123,7 +173,9 @@ nameResolution resolveName(const std::string& expression, const std::string& lan
     nameResolution resolution;
 
     std::string expr = expression;
+    if (language == "C#") removeReferenceKeyword(expr);
     HELPERS::removeWhitespace(expr);
+    if (language == "C#") removeNullForgiving(expr);
 
     // In Java, Outer.this.a reaches a data member of an enclosing instance, which counts as a data member of the inner class
     if (language == "Java") {
@@ -134,11 +186,14 @@ nameResolution resolveName(const std::string& expression, const std::string& lan
     }
 
     if (wholeExpression) {
+        // A language that declares the types of its variables casts a value by the type in parentheses before it
+        if (!languageOf(language).dynamic) removeLeadingCasts(expr);
         // An index inside the expression, such as arr[i] of arr[i] + x, makes it more than a variable
         removeEnclosingBrackets(expr, language);
         resolution.throughIndex = removeTrailingIndex(expr);
     }
     else {
+        removeOperatorSymbols(expr);
         const std::size_t indexStart = expr.find('[');
         if (indexStart != std::string::npos) {
             expr.erase(indexStart);
@@ -150,7 +205,7 @@ nameResolution resolveName(const std::string& expression, const std::string& lan
     // C# marks a null-conditional access, such as a?.b, with ? or ??
     if (language == "C#") expr.erase(std::remove(expr.begin(), expr.end(), '?'), expr.end());
 
-    if (language != "Java") {
+    if (language == "C++" || language == "C#") {
         const std::size_t asterisks = expr.find_first_not_of('*');
         resolution.dereferenced = asterisks != 0 && !expr.empty();
         expr.erase(0, asterisks == std::string::npos ? expr.size() : asterisks);
@@ -184,7 +239,9 @@ nameResolution resolveName(const std::string& expression, const std::string& lan
         }
 
         // In C# and Java, the type name qualifies static fields; in C++, any field
-        if (!access->object.empty() && !access->member.empty() && access->object.substr(0, access->object.find('<')) == typeName)
+        // In a dynamic language, it qualifies only the variables of the class, since only the object reaches a data member
+        if (!access->object.empty() && !access->member.empty() && access->object.substr(0, access->object.find('<')) == typeName &&
+            !languageOf(language).dynamic)
             candidates.push_back(access->member);
     }
 
@@ -192,7 +249,9 @@ nameResolution resolveName(const std::string& expression, const std::string& lan
     if (globalNamespace) candidates.clear();
     for (const std::string& candidate : candidates) {
         resolution.variable = candidate;
-        if (!ownMember) {
+        // The member that the name of the type qualifies, as count of Foo.count, is no local and no parameter of the same name
+        const bool typeQualified = &candidate != &candidates.front();
+        if (!ownMember && !typeQualified) {
             if (scopes.isLocal(candidate)) {
                 resolution.kind = variableKind::local;
                 return resolution;
@@ -202,7 +261,7 @@ nameResolution resolveName(const std::string& expression, const std::string& lan
                 return resolution;
             }
         }
-        if (scopes.isField(candidate)) {
+        if (ownMember ? scopes.isOwnMember(candidate) : scopes.isField(candidate)) {
             resolution.kind = variableKind::field;
             return resolution;
         }
@@ -242,6 +301,20 @@ bool writesThroughVariable(const nameResolution& write) {
     return write.throughMember || write.throughIndex || write.dereferenced;
 }
 
+// Gets the type that qualifies a C++ name, without its namespaces and generic arguments, as Base of lib::Base<T>::draw,
+// or an empty string for a name without a qualifier
+//
+std::string qualifyingType(const std::string& name) {
+    const std::size_t qualifierEnd = name.rfind("::");
+    if (qualifierEnd == std::string::npos) return "";
+
+    std::string qualifier = name.substr(0, qualifierEnd);
+    qualifier = qualifier.substr(0, qualifier.find('<'));
+    const std::size_t namespaceEnd = qualifier.rfind("::");
+    if (namespaceEnd != std::string::npos) qualifier.erase(0, namespaceEnd + 2);
+    return qualifier;
+}
+
 // Gets what a C++ call whose name has an operator calls a function on, given the names of the type of the method and of its parent types
 // The name has no whitespace, such as this->f, Base<T>::f, std::f, or a.b
 //
@@ -254,13 +327,6 @@ callReceiver cppCallReceiver(const std::string& callName, const std::unordered_s
         }
     }
 
-    const std::size_t qualifierEnd = name.rfind("::");
-    if (qualifierEnd == std::string::npos || name.find('.') != std::string::npos || name.find("->") != std::string::npos) return callReceiver::otherObject;
-
-    // The type that qualifies the function, without its namespaces and generic arguments
-    std::string qualifier = name.substr(0, qualifierEnd);
-    qualifier = qualifier.substr(0, qualifier.find('<'));
-    const std::size_t namespaceEnd = qualifier.rfind("::");
-    if (namespaceEnd != std::string::npos) qualifier.erase(0, namespaceEnd + 2);
-    return ownTypes.find(qualifier) != ownTypes.end() ? callReceiver::objectItself : callReceiver::noObject;
+    if (name.find("::") == std::string::npos || name.find('.') != std::string::npos || name.find("->") != std::string::npos) return callReceiver::otherObject;
+    return ownTypes.find(qualifyingType(name)) != ownTypes.end() ? callReceiver::objectItself : callReceiver::noObject;
 }

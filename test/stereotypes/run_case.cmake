@@ -1,4 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-only
 # @file run_case.cmake
+#
+# @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
+#
+# This file is part of the Stereocode application.
+#
 # Runs one stereotype case: srcml on the case, stereocode with -f -i -t -e -u, and check_stereotypes comments
 # Inputs: SRCML, STEREOCODE, CHECK_STEREOTYPES, CASE (a source file or a folder), SOURCE_DIR, WORK_DIR
 
@@ -8,7 +14,8 @@ file(MAKE_DIRECTORY "${WORK_DIR}")
 # The source files of a folder case go into one archive in sorted order; paths stay relative to the repository
 if(IS_DIRECTORY "${CASE}")
     file(GLOB_RECURSE CASE_FILES LIST_DIRECTORIES false RELATIVE "${SOURCE_DIR}" "${CASE}/*")
-    list(FILTER CASE_FILES INCLUDE REGEX "\\.(c|cc|cpp|cxx|h|hh|hpp|hxx|cs|java)$")
+    include("${CMAKE_CURRENT_LIST_DIR}/case_files.cmake")
+    list(FILTER CASE_FILES INCLUDE REGEX "${CASE_FILE}")
     list(SORT CASE_FILES)
 else()
     file(RELATIVE_PATH CASE_FILES "${SOURCE_DIR}" "${CASE}")

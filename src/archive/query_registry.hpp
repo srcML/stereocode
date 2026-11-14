@@ -20,22 +20,24 @@
 //
 enum class query {
     // On a unit
-    type, freeFunction, functionOutsideTypes, cClassName, globalVariable, staticImport, globalStaticImport, valueTypeName, usingDirective, typeAliasName,
+    type, freeFunction, functionOutsideTypes, staticMethodDeclaration, cClassName, globalVariable, importedName, staticImport, globalStaticImport, valueTypeName,
+    usingDirective, typeAliasName, typeImport, globalTypeImport,
     // On a type
-    structureType, partialType, parentName, fieldDeclaration, staticFieldName, method, functionDeclName, functionDeclParameters, staticDeclaration, property,
+    structureType, partialType, parentName, fieldDeclaration, staticFieldName, method, functionDeclName, functionDeclParameters, staticDeclaration,
+    staticMethodName, nestedTypeName, misreadMethodName, memberAliasName, property,
     // On a C# property
     propertyType, propertyMethod,
     // On a method or a free function
     methodName, methodParameterList, constructorOrDestructor, methodSpecifiers, methodAttributes, constMethod, returnType, returnTypeName,
-    parameterDeclaration, localDeclaration, returnExpression, newReturnExpression,
-    functionCall, methodCall, constructorCall, callOnResult, nullConditionalCall,
-    newAssignedVariable, nonCommentStatements, expressionName, expressionAssignment, interpolatedString,
+    parameterDeclaration, localDeclaration, expressionVariable, returnExpression, newReturnExpression,
+    functionCall, methodCall, constructorCall, callOnResult, nullConditionalCall, localFunction, selfOperator, shiftOperator,
+    newAssignedVariable, nonCommentStatements, expressionName, expressionAssignment, interpolatedString, globalName, objectParameter, classParameter,
     count // Number of queries
 };
 
 // The languages that have queries (C units use the C++ queries)
 //
-enum class queryLanguage { cpp, csharp, java, count };
+enum class queryLanguage { cpp, csharp, java, python, javascript, count };
 
 constexpr std::size_t queryCount    = static_cast<std::size_t>(query::count);
 constexpr std::size_t languageCount = static_cast<std::size_t>(queryLanguage::count);

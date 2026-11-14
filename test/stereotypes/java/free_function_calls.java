@@ -25,3 +25,11 @@ final class Lists {
     // @stereotype wrapper
     static String upper() { return PREFIX.toUpperCase(); }
 }
+
+// The fields of an interface are final without the word
+interface Names {
+    String SUFFIX = "s";
+
+    // @stereotype wrapper
+    static String lower() { return SUFFIX.toLowerCase(); }
+}

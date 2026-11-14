@@ -11,4 +11,12 @@ class Arr {
     static void paramCStyle(int a[]) { a[0] = 1; }
     // @stereotype command
     static void paramJavaStyle(int[] a) { a[0] = 1; }
+
+    // A variadic parameter takes its arguments as an array, which the caller may pass
+    // @stereotype command
+    static void paramVariadic(int... a) { a[0] = 1; }
+    // @stereotype void-accessor
+    void copyToArray(int[] out) { out[0] = x; }
+    // @stereotype void-accessor
+    void copyToVariadic(int... out) { out[0] = x; }
 }

@@ -22,12 +22,18 @@
 class queryMethods {
 public:
     bool                    isQuery                 (const std::string&, const std::string&) const;
+    bool                    isQuery                 (const std::string&, int, const std::string&) const;
+    bool                    isRootAccessor          (const std::string&, int, const std::string&) const;
+    bool                    isRootFunction          (const std::string&, int, const std::string&) const;
     void                    initializeQueryMethods  ();
     void                    outputQueryMethods      () const;
 
     friend std::istream&    operator>>              (std::istream&, queryMethods&);
 private:
     std::unordered_map<std::string, std::unordered_set<std::string>>   defaultMethods;     // Query methods of each language
+    std::unordered_map<std::string, std::unordered_map<std::string, int>> countedMethods;  // Methods of each language that are query methods only with a number of arguments
+    std::unordered_map<std::string, std::unordered_map<std::string, int>> rootAccessors;   // Accessors of the root class of each language, with their numbers of arguments
+    std::unordered_map<std::string, std::unordered_map<std::string, int>> rootFunctions;   // Static methods of the root class of each language, with their numbers of arguments
     userEntries                                                        userMethods;        // Query methods of the user, for every language or for the language of a section
 };
 

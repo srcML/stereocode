@@ -17,6 +17,8 @@ bool isBooleanType(const std::string& language, const std::string& type) {
     if (language == "C++")  return type == "bool" || type == "_Bool"; // C units run as C++, which brings the _Bool of C
     if (language == "C#")   return type == "bool" || type == "Boolean" || type == "System.Boolean";
     if (language == "Java") return type == "boolean" || type == "Boolean" || type == "java.lang.Boolean";
+    if (language == "Python") return type == "bool";
+    if (language == "JavaScript") return type == "boolean" || type == "Boolean";
     return false;
 }
 
@@ -25,13 +27,15 @@ bool isBooleanType(const std::string& language, const std::string& type) {
 bool isVoidType(const std::string& language, const std::string& type) {
     if (language == "C++")                      return type == "void";
     if (language == "C#" || language == "Java") return type == "void" || type == "Void";
+    if (language == "Python")                   return type == "None";
+    if (language == "JavaScript")               return type == "void" || type == "undefined" || type == "never";
     return false;
 }
 
 // Checks whether a declared return type, without whitespace, is a pointer to void (C++ and C#)
 //
 bool isVoidPointerType(const std::string& language, const std::string& declaredType) {
-    return language != "Java" && declaredType.find("void*") != std::string::npos;
+    return (language == "C++" || language == "C#") && declaredType.find("void*") != std::string::npos;
 }
 
 // Checks whether a function returns a value, given its return type without specifiers and whitespace and its declared type

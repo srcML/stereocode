@@ -11,8 +11,11 @@
 #include "helper_functions.hpp"
 #include "rules/language_tables.hpp"
 #include "archive/node_text.hpp"
+#include "model/javascript_elements.hpp"
+#include "model/python_elements.hpp"
 #include "model/qualified_name.hpp"
 #include "archive/query_engine.hpp"
+#include "archive/source_language.hpp"
 #include "archive/srcml_document.hpp"
 #include "archive/srcml_elements.hpp"
 
@@ -56,12 +59,10 @@ namespace {
         return scope;
     }
 
-    // Gets the C++ using directives of a unit at namespace scope, each with the namespaces around it and its place in the unit
+    // Gets the using directives of a unit at namespace scope, which only C++ has, each with the namespaces around it and its place in the unit
     //
     std::vector<usingDirective> usingDirectivesOf(const srcmlDocument& unit, const std::string& unitLanguage) {
         std::vector<usingDirective> directives;
-        if (unitLanguage != "C++") return directives;
-
         const nodeSet result = unit.select(query::usingDirective);
         for (int i = 0; i < result.size(); ++i) {
             usingDirective directive;
@@ -97,6 +98,22 @@ namespace {
         return withoutGenericArguments(splitQualifiedName(name, unitLanguage).back());
     }
 
+    // Gets the type that a C# extension method extends, the type of its first parameter with this, without qualifiers and with its generic
+    // arguments reduced to their commas, as Basket of IsEmpty(this Basket basket) and EventHandler<> of (this EventHandler<T> handler), or nothing
+    //
+    std::string extendedTypeOf(const xmlNode* function, const std::string& unitLanguage) {
+        const xmlNode* parameter = firstChildElement(firstChildElement(function, "parameter_list"), "parameter");
+        const xmlNode* type      = firstChildElement(firstChildElement(parameter, "decl"), "type");
+        const xmlNode* specifier = firstChildElement(type, "specifier");
+        const xmlNode* name      = firstChildElement(type, "name");
+        if (!specifier || sourceOf(specifier) != "this" || !name) return "";
+
+        for (const xmlNode* next = name; next; next = nextNamedSibling(next, "name")) name = next;
+        std::string written = sourceOf(name);
+        HELPERS::removeWhitespace(written);
+        return genericSkeleton(splitQualifiedName(written, unitLanguage).back());
+    }
+
     // Gets the names of the named types around an element, whose static fields the code of the element reaches without their names
     //
     std::unordered_set<std::string> typesAround(const xmlNode* element, const std::string& unitLanguage) {
@@ -108,13 +125,21 @@ namespace {
         return names;
     }
 
-    // Gets the types of the static imports of a query in a C# or Java unit, such as Settings of using static Shop.Settings; or import static shop.Settings.level;
+    // Gets the name of the innermost named type around an element, or an empty string
+    //
+    std::string innermostTypeName(const xmlNode* element, const std::string& unitLanguage) {
+        for (const xmlNode* node = element->parent; node && node->type == XML_ELEMENT_NODE; node = node->parent) {
+            const xmlNode* nameElement = isTypeElement(node) ? typeNameElement(node) : nullptr;
+            if (nameElement) return lastNameOf(nameElement, unitLanguage);
+        }
+        return "";
+    }
+
+    // Gets the types of the static imports of a query, which only C# and Java units have, such as Settings of using static Shop.Settings; or import static shop.Settings.level;
     // A Java import names a member of the type or *, while a C# import names the type
     //
     std::unordered_set<std::string> staticImportTypes(const srcmlDocument& unit, const std::string& unitLanguage, query imports) {
         std::unordered_set<std::string> types;
-        if (unitLanguage == "C++") return types;
-
         const nodeSet result = unit.select(imports);
         for (int i = 0; i < result.size(); ++i) {
             std::string name = result.src(i);
@@ -124,6 +149,25 @@ namespace {
             else if (parts.size() > 1)  types.insert(withoutGenericArguments(parts[parts.size() - 2]));
         }
         return types;
+    }
+
+    // Adds the imports of a query that bring types into a unit by their names, which only C# and Java units have
+    // A C# using directive names a namespace, and a Java import names one type or, with *, every type of a package or a type
+    //
+    void findTypeImports(const srcmlDocument& unit, const std::string& unitLanguage, int unitNumber, query imports, bool everyUnit, unitModels& models) {
+        const nodeSet result = unit.select(imports);
+        for (int i = 0; i < result.size(); ++i) {
+            std::string name = result.src(i);
+            HELPERS::removeWhitespace(name);
+
+            typeImport import;
+            import.path       = splitQualifiedName(name, unitLanguage);
+            import.everyType  = unitLanguage == "C#" || import.path.back() == "*";
+            import.unitNumber = unitNumber;
+            import.everyUnit  = everyUnit;
+            if (import.path.back() == "*") import.path.pop_back();
+            models.typeImports.push_back(std::move(import));
+        }
     }
 
     // The type or the namespace that holds a global, where the global namespace has an empty name
@@ -155,6 +199,7 @@ namespace {
         const std::string bare = withoutGenericArguments(name);
         for (std::size_t i = 0; i < bare.size(); ++i) {
             if (unitLanguage == "C++" && bare.compare(i, 2, "::") == 0) ++i;
+            else if (unitLanguage == "JavaScript" && i == 0 && bare[i] == '#') continue;
             else if (!std::isalnum(static_cast<unsigned char>(bare[i])) && bare[i] != '_' && bare[i] != '$' && bare[i] != '@') return false;
         }
         return true;
@@ -227,12 +272,29 @@ namespace {
         return false;
     }
 
-    // Tells whether no call changes a global: a C++ global whose object is const, a C# constant, or a C# readonly or Java final global
-    // of a primitive type or a string, where the fields of a Java interface are final
+    // Tells whether a JavaScript declaration is const and holds a primitive value, by its annotation or by a literal as its initializer
+    //
+    bool isConstantPrimitive(const xmlNode* declaration, const languageTables& tables) {
+        xmlChar* keyword = xmlGetProp(declaration, BAD_CAST "type");
+        const bool constant = keyword && xmlStrEqual(keyword, BAD_CAST "const");
+        xmlFree(keyword);
+        if (!constant) return false;
+
+        if (const xmlNode* annotation = typeAnnotationOf(declaration)) return tables.primitiveTypes.isPrimitive(javascriptTypeOf(annotation), "JavaScript");
+        const xmlNode* initializer = firstChildElement(declaration, "init");
+        const xmlNode* value       = initializer ? firstChildElement(initializer, "expr") : nullptr;
+        const xmlNode* first       = value ? xmlFirstElementChild(const_cast<xmlNode*>(value)) : nullptr;
+        return first && !xmlNextElementSibling(const_cast<xmlNode*>(first)) &&
+               (isSrcElement(first, "literal") || (isSrcElement(first, "name") && (sourceOf(first) == "true" || sourceOf(first) == "false")));
+    }
+
+    // Tells whether no call changes a global: a C++ global whose object is const, a C# constant, a C# readonly or Java final global
+    // of a primitive type or a string, where the fields of a Java interface are final, or a JavaScript const global of a primitive value
     //
     bool isImmutable(const xmlNode* nameElement, const languageTables& tables, const std::string& unitLanguage) {
         const xmlNode* declaration = nameElement->parent;
         if (!isSrcElement(declaration, "decl")) return false;
+        if (unitLanguage == "JavaScript") return isConstantPrimitive(declaration, tables);
 
         // A later declarator stands for the type of the first, as b of const int a, b; does
         const xmlNode* type = firstChildElement(declaration, "type");
@@ -252,9 +314,18 @@ namespace {
 
     // Finds the globals of a unit, each with its holder, which a C++ definition outside its scope, as int Registry::count = 0;, names in its qualifier
     // A primitive type names no variable, though srcML can mark one as a declared name in a declaration that it misreads
+    // A name that the file of a module imports names a module or a member of one, also where the file binds the name again,
+    // as ssl = None does once import ssl fails
     //
     void findGlobals(const srcmlDocument& unit, const languageTables& tables, const std::string& unitLanguage, int unitNumber, unitModels& models) {
         const bool sourceFile = unitLanguage == "C++" && isSourceFile(unit.fileName());
+        const bool module     = languageOf(unitLanguage).modules;
+        const std::string moduleName = module ? moduleNameOf(unit.fileName()) : "";
+
+        std::unordered_set<std::string> importedNames;
+        const nodeSet imports = unit.select(query::importedName);
+        for (int i = 0; i < imports.size(); ++i) importedNames.insert(imports.src(i));
+
         const nodeSet result = unit.select(query::globalVariable);
         for (int i = 0; i < result.size(); ++i) {
             std::string name = result.src(i);
@@ -266,7 +337,11 @@ namespace {
             const std::string variable = withoutGenericArguments(parts.back());
             if (variable.empty() || tables.primitiveTypes.isPrimitive(variable, unitLanguage)) continue;
 
-            const globalHolder holder = parts.size() > 1 ? globalHolder{withoutGenericArguments(parts[parts.size() - 2]), false} : holderOf(result.node(i), unitLanguage);
+            globalHolder holder = parts.size() > 1 ? globalHolder{withoutGenericArguments(parts[parts.size() - 2]), false} : holderOf(result.node(i), unitLanguage);
+
+            // The name of a module qualifies its globals for the code of other files, and a global statement in a function names a global of its module
+            if (module && (holder.name.empty() || isSrcElement(result.node(i)->parent, "global"))) holder = {moduleName, true};
+            if (holder.isNamespace && importedNames.count(variable) > 0) continue;
             const bool fileLocal = sourceFile && hasInternalLinkage(result.node(i), holder.isNamespace);
             models.globals.add({unitLanguage, variable, holder.name, unitNumber, holder.isNamespace, fileLocal, isImmutable(result.node(i), tables, unitLanguage)});
         }
@@ -301,8 +376,6 @@ namespace {
     // A typedef of a type that it defines, as typedef struct { } Point;, stands for no type that a signature writes
     //
     void findAliases(const srcmlDocument& unit, const std::string& unitLanguage, int unitNumber, unitModels& models) {
-        if (unitLanguage == "Java") return;
-
         const nodeSet result = unit.select(query::typeAliasName);
         for (int i = 0; i < result.size(); ++i) {
             const xmlNode* name        = result.node(i);
@@ -410,10 +483,21 @@ namespace {
                          ", so their methods are unclassified; convert C++ headers with srcml --register-ext h=C++";
     }
 
-    // Counts the functions of a C# or Java unit outside every type, which srcML leaves there only when it misparses the unit
+    // Counts the functions outside every type of a unit of C# or Java, where every function belongs to a type, which srcML leaves there only when it misparses the unit
+    // Each type of the unit may hold such a function, so a call without an object may name it
+    // A static function among them gets its stereotype as a free function, as every static method does
     //
     void findFunctionsOutsideTypes(const srcmlDocument& unit, unitModels& models) {
-        const int functions = unit.select(query::functionOutsideTypes).size();
+        const nodeSet outside = unit.select(query::functionOutsideTypes);
+        std::unordered_set<std::string> names;
+        int functions = 0;
+        for (int i = 0; i < outside.size(); ++i) {
+            names.insert(withoutGenericArguments(sourceOf(firstChildElement(outside.node(i), "name"))));
+            const xmlNode* type = firstChildElement(outside.node(i), "type");
+            if (!type || !declaresStatic(type)) ++functions;
+        }
+        for (typeModel& type : models.types) type.addMisreadMethods(names);
+
         if (functions > 0)
             models.warning = unit.fileName() + ": " + std::to_string(functions) +
                              (functions == 1 ? " function lies outside every type in the srcML markup and is not analyzed"
@@ -482,7 +566,7 @@ namespace {
             typeModel type(tables, unitLanguage, enclosingTypeNames(result.node(i), unitLanguage) + sourceOf(typeNameElement(result.node(i))));
             type.findData(typeUnit, unitNumber, scopeOf(result.node(i), unitLanguage));
             type.addStaticHolders(typesAround(result.node(i), unitLanguage));
-            type.addStaticHolders(staticImports);
+            type.addStaticImports(staticImports);
 
             std::optional<std::size_t> enclosing;
             if (unitLanguage == "Java" && type.getStructure() == "class") {
@@ -527,20 +611,44 @@ namespace {
             const std::string functionSrcml = result.srcml(i);
             const srcmlDocument functionUnit = unit.wrap(result.node(i));
 
-            const std::string qualifierType = qualifierTypeName(functionUnit, unitLanguage);
+            // A function in the body of a class of a dynamic language, as a static method of Python, compares the types of its variables with the class
+            const bool dynamic = languageOf(unitLanguage).dynamic;
+            const std::string qualifierType = dynamic ? innermostTypeName(result.node(i), unitLanguage) : qualifierTypeName(functionUnit, unitLanguage);
             functionModel function(tables, functionUnit, elementLocation{unitNumber, functionUnit.path()}, unitLanguage, qualifierType, "", "",
                                    HELPERS::extractFirstLineNumber(functionSrcml), false);
 
-            // The definition of a C++ static method outside its type, as Registry::count(), reaches the static fields of the type
-            std::unordered_set<std::string> holders = typesAround(result.node(i), unitLanguage);
-            if (!qualifierType.empty()) holders.insert(qualifierType);
-            holders.insert(staticImports.begin(), staticImports.end());
+            // The definition of a C++ static method outside its type, as Registry::count(), reaches the static fields of the type,
+            // while the code of a dynamic language reaches a variable of a class only through the name of the class
+            std::unordered_set<std::string> holders;
+            if (!dynamic) {
+                holders = typesAround(result.node(i), unitLanguage);
+                if (!qualifierType.empty()) holders.insert(qualifierType);
+                holders.insert(staticImports.begin(), staticImports.end());
+            }
             function.addStaticHolders(holders);
             if (!function.getName().empty()) {
+                // A function in a type is a static method of the type, which a call without an object names in the type
+                const std::string holder = dynamic ? "" : innermostTypeName(result.node(i), unitLanguage);
+                if (!holder.empty())
+                    models.staticMethods.push_back({unitLanguage + ' ' + holder, function.getName()[3], function.getArguments(), extendedTypeOf(result.node(i), unitLanguage)});
                 models.freeFunctions.push_back(std::move(function));
                 models.freeFunctionScopes.push_back(scopeOf(result.node(i), unitLanguage));
                 models.freeFunctionDirectives.push_back(qualifierType.empty() ? std::vector<usingDirective>{} : directives);
             }
+        }
+    }
+}
+
+namespace {
+    // Finds the static methods that the types of a unit declare without a body, as an extern method of C#, a native method of Java,
+    // and a C++ method defined outside its type
+    //
+    void findStaticMethodDeclarations(const srcmlDocument& unit, const std::string& unitLanguage, unitModels& models) {
+        const nodeSet declared = unit.select(query::staticMethodDeclaration);
+        for (int i = 0; i < declared.size(); ++i) {
+            const std::string name = withoutGenericArguments(sourceOf(firstChildElement(declared.node(i), "name")));
+            models.staticMethods.push_back({unitLanguage + ' ' + innermostTypeName(declared.node(i), unitLanguage), name,
+                                            argumentRangeOf(firstChildElement(declared.node(i), "parameter_list")), ""});
         }
     }
 }
@@ -556,14 +664,18 @@ unitModels findUnitModels(queryEngine& engine, const languageTables& tables, std
     if (unitLanguage == "C#") {
         models.globalStaticImports = staticImportTypes(unit, unitLanguage, query::globalStaticImport);
         const nodeSet valueTypes = unit.select(query::valueTypeName);
-        for (int i = 0; i < valueTypes.size(); ++i) models.valueTypes.insert(valueTypes.src(i));
+        // The lookup reads the type of a parameter without its generic arguments, as Slot of Slot<string>
+        for (int i = 0; i < valueTypes.size(); ++i) models.valueTypes.insert(withoutGenericArguments(valueTypes.src(i)));
     }
     findTypes(unit, tables, unitLanguage, unitNumber, staticImports, models);
     findFreeFunctions(unit, tables, unitLanguage, unitNumber, staticImports, models);
+    findStaticMethodDeclarations(unit, unitLanguage, models);
     findGlobals(unit, tables, unitLanguage, unitNumber, models);
     findAliases(unit, unitLanguage, unitNumber, models);
+    findTypeImports(unit, unitLanguage, unitNumber, query::typeImport, false, models);
+    findTypeImports(unit, unitLanguage, unitNumber, query::globalTypeImport, true, models);
     if (unitLanguage == "C++") findDeclaredTypeNames(unit, models);
     if (cUnit) findCClasses(unit, models);
-    else if (unitLanguage != "C++") findFunctionsOutsideTypes(unit, models);
+    else findFunctionsOutsideTypes(unit, models);
     return models;
 }

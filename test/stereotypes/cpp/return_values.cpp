@@ -71,3 +71,49 @@ public:
     // @stereotype get
     int at(int i) const { return arr[i]; }
 };
+
+// A return type of sign words alone, as unsigned, is an int
+class Tally {
+    unsigned count;
+public:
+    // @stereotype property
+    unsigned doubled() const { return 2 * count; }
+    // @stereotype property
+    signed negated() const { return -count; }
+    // @stereotype property
+    const unsigned& next() const { return count + 1; }
+};
+
+// @stereotype property
+unsigned twice(unsigned value) { return 2 * value; }
+
+// A cast before the returned object or data member is no computation
+class Gauge {
+    long m_level;
+    Gauge* m_next;
+public:
+    // @stereotype get
+    int level() const { return (int)m_level; }
+
+    // @stereotype get
+    Gauge* next() const { return (Gauge*)m_next; }
+
+    // @stereotype get
+    const Gauge* self() const { return (const Gauge*)this; }
+
+    // @stereotype property
+    int twice() const { return (int)m_level * 2; }
+};
+
+// A container of Boolean values returns the container, which is no Boolean
+using std::vector;
+
+class Switches {
+    vector<bool> m_states;
+    vector<bool> m_none;
+    int m_count;
+
+public:
+    // @stereotype property
+    vector<bool> active() const { return m_count > 0 ? m_states : m_none; }
+};

@@ -46,10 +46,15 @@ jobs:
           srcml=$(gh api repos/srcML/srcML/releases/latest --jq '.tag_name')
           newest=$(git tag --list 'v*' --sort=-version:refname | head -n 1)
           # A release tag, a push to main, the weekly run, and a manual run publish a release, while develop and pull requests only test
+          # A push to main whose commit carries a release tag only tests, since the run of the tag publishes that release
           case "$GITHUB_EVENT_NAME/$GITHUB_REF" in
-            push/refs/tags/v*)                                   ref=$GITHUB_REF_NAME publish=true ;;
-            push/refs/heads/main|schedule/*|workflow_dispatch/*) ref=$newest publish=true ;;
-            *)                                                   ref=$GITHUB_SHA publish=false ;;
+            push/refs/tags/v*)                    ref=$GITHUB_REF_NAME publish=true ;;
+            push/refs/heads/main)                 if [ -n "$(git tag --points-at "$GITHUB_SHA" --list 'v*')" ]
+                                                  then ref=$GITHUB_SHA publish=false
+                                                  else ref=$newest publish=true
+                                                  fi ;;
+            schedule/*|workflow_dispatch/*)       ref=$newest publish=true ;;
+            *)                                    ref=$GITHUB_SHA publish=false ;;
           esac
           {
             echo "ref=$ref"

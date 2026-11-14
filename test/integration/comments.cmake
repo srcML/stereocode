@@ -67,7 +67,7 @@ function(check_stereotype_comments)
 
     run_stereocode(--help)
     expect_exit(0)
-    if(NOT RUN_OUTPUT MATCHES "\n  -m, +--comment +Inserts a // @stereotype <labels> comment before each stereotyped")
+    if(NOT RUN_OUTPUT MATCHES "\n  -m, +--comment +Inserts a // @stereotype <labels> comment \\(# @stereotype <labels>[ \n]+in Python\\)[ \n]+before each stereotyped")
         message(FATAL_ERROR "The help does not describe -m:\n${RUN_OUTPUT}")
     endif()
 
@@ -144,7 +144,8 @@ function(run_comments folder fileName)
     set(COMMAND_OUTPUT "${COMMAND_OUTPUT}" PARENT_SCOPE)
 endfunction()
 
-# The comments of stereocode -m give back a labeled case of test/stereotypes in which every labeled element has its "// @stereotype" comment
+# The comments of stereocode -m give back a labeled case of test/stereotypes in which every labeled element has its "// @stereotype" comment,
+# which starts with # in a Python case
 # The check converts a source with srcml, runs stereocode -m -f -i -t -e -u, and converts the srcML output archive back with
 # srcml --output-src, which must give the case for the case without its comment lines, for the case as it is, for the case with
 # a comment of an earlier run stacked above each of its comments, and for a source given after the case, whose elements follow
@@ -156,13 +157,18 @@ function(expect_round_trip caseFile)
     get_filename_component(CASE_FILE "${CASE}" NAME)
     file(READ "${CASE}" LABELED)
 
+    set(COMMENT "// @stereotype")
+    if(CASE_FILE MATCHES "\\.py$")
+        set(COMMENT "# @stereotype")
+    endif()
+
     # The line break before each comment line goes with the comment, so a newline in front covers a comment on the first line
-    string(REGEX REPLACE "\n[ \t]*// @stereotype[^\n]*" "" UNLABELED "\n${LABELED}")
+    string(REGEX REPLACE "\n[ \t]*${COMMENT}[^\n]*" "" UNLABELED "\n${LABELED}")
     string(SUBSTRING "${UNLABELED}" 1 -1 UNLABELED)
     if(UNLABELED STREQUAL LABELED)
-        message(FATAL_ERROR "${CASE} has no \"// @stereotype\" comment")
+        message(FATAL_ERROR "${CASE} has no \"${COMMENT}\" comment")
     endif()
-    string(REGEX REPLACE "\n([ \t]*)// @stereotype" "\n\\1// @stereotype command\n\\1// @stereotype" STACKED "\n${LABELED}")
+    string(REGEX REPLACE "\n([ \t]*)${COMMENT}" "\n\\1${COMMENT} command\n\\1${COMMENT}" STACKED "\n${LABELED}")
     string(SUBSTRING "${STACKED}" 1 -1 STACKED)
 
     set(variants unlabeled labeled stacked)
@@ -198,6 +204,16 @@ endfunction()
 # The comments of -m give back the Java case stereotypes/java/comment_output.java
 function(check_round_trip_java)
     expect_round_trip(java/comment_output.java)
+endfunction()
+
+# The comments of -m give back the Python case stereotypes/python/comment_output.py
+function(check_round_trip_python)
+    expect_round_trip(python/comment_output.py)
+endfunction()
+
+# The comments of -m give back the TypeScript case stereotypes/javascript/comment_output.ts
+function(check_round_trip_javascript)
+    expect_round_trip(javascript/comment_output.ts)
 endfunction()
 
 # Without -f and -t, stereocode -m labels neither the free functions twice and square of the C++ case stereotypes/cpp/comment_output.cpp

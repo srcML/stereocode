@@ -49,3 +49,22 @@ class Thermometer extends Sensor {
     // @stereotype wrapper stateless
     double shifted() { return base() + 1; }
 }
+
+// A call that reaches the calling method itself counts by the stereotypes that the method has without the call
+class Limit {
+    private int limit;
+
+    // @stereotype predicate
+    boolean accepts(int value) { return value < limit; }
+
+    // The call with one argument reaches the two overloads, of which the other one only reads
+    // @stereotype predicate
+    boolean accepts(long value) { return accepts((int) value); }
+
+    // @stereotype property
+    int next(int level) { return level > limit ? level : next(level + 1); }
+
+    // A call of a method that changes the object to itself may change the object
+    // @stereotype command
+    void drain(int steps) { if (steps > 0) { limit--; drain(steps - 1); } }
+}

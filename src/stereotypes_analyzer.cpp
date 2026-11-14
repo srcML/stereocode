@@ -17,10 +17,10 @@
 #include "archive/output_archive.hpp"
 #include "model/qualified_name.hpp"
 #include "archive/query_engine.hpp"
+#include "archive/source_language.hpp"
 #include "archive/srcml_handles.hpp"
 #include "rules/stereotype_labels.hpp"
 #include "output/txt_report.hpp"
-#include "model/unit_models.hpp"
 
 #include <algorithm>
 #include <future>
@@ -35,9 +35,10 @@
 #include <vector>
 
 namespace {
-    // Units per worker that wait for a worker or for their turn in the order of the units
-    // A slow unit then holds up the units after it but not the other workers, and few units wait in memory
-    constexpr std::size_t unitsPerWorker = 4;
+    // Units per worker that wait for a worker, so that every worker finds a unit while few units wait in memory
+    constexpr std::size_t queuedPerWorker = 2;
+    // Annotated units per worker that wait for their turn in the order of the units, which bounds the memory of the output
+    constexpr std::size_t writesPerWorker = 8;
 
     // Gets the language whose XPaths apply to a unit (C units use the C++ XPaths), or an empty string when none apply
     //
@@ -46,10 +47,7 @@ namespace {
         const char* language = srcml_unit_get_language(unit);
         if (!language) return "";
 
-        std::string unitLanguage = language;
-        if (unitLanguage == "C") return "C++";
-        if (unitLanguage == "C++" || unitLanguage == "C#" || unitLanguage == "Java") return unitLanguage;
-        return "";
+        return analysisLanguageOf(language);
     }
 
     // Tells whether srcML parsed a unit as C
@@ -130,11 +128,12 @@ void stereotypesAnalyzer::run() {
         wellFormed.get();
         throw;
     }
-    if (analyzedUnits == 0) std::cerr << "Warning: " << settings.inputFile << " holds no unit in C, C++, C#, or Java\n";
+    if (analyzedUnits == 0) std::cerr << "Warning: " << settings.inputFile << " holds no unit in C, C++, C#, Java, or Python\n";
     input.reset();
     wellFormed.get();
     indexTypes();
     confirmReturnTypeMacros();
+    declareMethodMembers();
 
     // Performed after the collection of all types and free functions
     analyzeFreeFunctions();
@@ -153,16 +152,18 @@ void stereotypesAnalyzer::run() {
 
     addGlobalStaticImports();
     addAncestorStaticHolders();
+    findHolderFunctions();
 
     // Analyze all methods for each type
-    for (typeModel& type : types) type.findDataAfterCollection(globals);
+    findCreatedObjects();
+    for (typeModel& type : types) type.findDataAfterCollection(globals, archiveNames[type.getUnitLanguage()]);
     
     // Compute method and type stereotypes, where the calls of each method reach the methods of its type, of its ancestors, and of the types of its fields
     stereotypeRules stereotypes(settings.largeClassThreshold);
-    const calledMethods called(types, std::move(parentTypes),
+    const calledMethods called(types, std::move(parentTypes), enclosingTypes,
                                [this](std::size_t type, const std::string& name, int unitNumber, bool throughPointer) {
-                                   return findWrittenType(type, name, unitNumber, throughPointer);
-                               });
+                                   return findWrittenTypes(type, name, unitNumber, throughPointer);
+                               }, staticMethods, extensions);
     stereotypes.computeMethodStereotypes(types, called);
 
     // Only the types that the run labels count toward the large-class threshold
@@ -174,7 +175,7 @@ void stereotypesAnalyzer::run() {
 
     // Analyze and compute stereotypes for free functions
     if (settings.freeFunctions) {
-        for (auto& f : freeFunctions) f.findDataFreeFunctionAfterCollection(globals, valueTypes);
+        for (auto& f : freeFunctions) f.findDataFreeFunctionAfterCollection(globals, valueTypes, archiveNames[f.getUnitLanguage()]);
         stereotypes.computeFreeFunctionStereotypes(freeFunctions);
     }
 
@@ -216,7 +217,9 @@ int stereotypesAnalyzer::findModels(srcml_archive* input) {
         // The job owns the unit, which holds the srcML
         const char* srcml = readSrcml(unit.get(), unitNumber);
         const bool cUnit  = isCUnit(unit.get());
-        if (pool.pending() == unitsPerWorker * settings.threads) mergeModels(pool.next());
+        // The models merge in the order of the units once ready, so a slow unit holds up the merge but not the workers
+        while (pool.nextReady()) mergeModels(pool.next());
+        pool.waitForRoom(queuedPerWorker * settings.threads);
         pool.submit([&engines, &sharedTables, srcmlOwner = std::move(unit), srcml, unitLanguage, cUnit, unitNumber](std::size_t worker) {
             std::optional<queryEngine>& engine = engines[worker];
             if (!engine) engine.emplace(sharedTables.queries);
@@ -251,10 +254,19 @@ void stereotypesAnalyzer::mergeModels(unitModels models) {
     std::move(models.freeFunctionDirectives.begin(), models.freeFunctionDirectives.end(), std::back_inserter(freeFunctionDirectives));
     globals.merge(models.globals);
     globalStaticImports.insert(models.globalStaticImports.begin(), models.globalStaticImports.end());
+    for (const staticMethod& method : models.staticMethods) {
+        staticMethods[method.holder][method.name].push_back(method.arguments);
+        // A call on an object passes the object as the first argument
+        const argumentRange& arguments = method.arguments;
+        if (!method.extendedType.empty() && arguments.maximum > 0)
+            extensions[method.holder.substr(0, method.holder.find(' ') + 1) + method.name].push_back(
+                {method.extendedType, {std::max(arguments.minimum - 1, 0), arguments.maximum - 1, arguments.variadic}});
+    }
     valueTypes.insert(models.valueTypes.begin(), models.valueTypes.end());
     cClassNames.insert(models.cClassNames.begin(), models.cClassNames.end());
     declaredTypeNames.merge(models.declaredTypeNames);
     for (indexedAlias& alias : models.aliases) typeNames.addAlias(std::move(alias));
+    for (typeImport& import : models.typeImports) typeNames.addImport(std::move(import));
     if (!models.warning.empty()) std::cerr << "Warning: " << models.warning << '\n';
 }
 
@@ -284,6 +296,32 @@ void stereotypesAnalyzer::confirmReturnTypeMacros() {
     for (functionModel& function : freeFunctions) function.confirmReturnTypeMacros(declaredTypeNames);
 }
 
+// Finds the data members that the methods of each type of a dynamic language declare, some with the type of an object that a call creates,
+// where the names of the classes and the free functions of the archive tell a class from a function in a language without new
+// The parent types take over these data members, so the step comes before the inherited data members
+//
+void stereotypesAnalyzer::declareMethodMembers() {
+    for (const typeModel& type : types) archiveNames[type.getUnitLanguage()].classes.insert(type.getName()[3]);
+    for (const functionModel& function : freeFunctions)
+        if (languageOf(function.getUnitLanguage()).callsCreate) archiveNames[function.getUnitLanguage()].functions.insert(function.getName()[3]);
+
+    for (typeModel& type : types)
+        if (languageOf(type.getUnitLanguage()).dynamic) type.declareMethodMembers(archiveNames[type.getUnitLanguage()], globals);
+}
+
+// Finds the calls that create an object in a language without new, once each type knows the methods that it inherits,
+// since a call through the object names a method before it names a class
+//
+void stereotypesAnalyzer::findCreatedObjects() {
+    for (typeModel& type : types)
+        if (languageOf(type.getUnitLanguage()).callsCreate) type.findCreatedObjects(archiveNames[type.getUnitLanguage()], globals);
+
+    // A free function has no type, and so no method and no variable of a type
+    const std::unordered_set<std::string> none;
+    for (functionModel& function : freeFunctions)
+        if (languageOf(function.getUnitLanguage()).callsCreate) function.findCreatedObjects({archiveNames[function.getUnitLanguage()], globals, none, none});
+}
+
 // Finds the type of a C++ method defined outside its type, as the qualifier of its name, the namespaces around the definition,
 // and the using directives in effect at the definition name it
 // The definition of a static method that the type declares stays a free function
@@ -307,11 +345,13 @@ std::optional<std::size_t> stereotypesAnalyzer::findDefinitionType(const functio
 // Tells whether a C++ type declares a static method with the name and the parameter types of a definition outside the type,
 // where the two signatures write each type alike or one writes an alias in place of the type that the alias stands for
 // The files of a declaration and its definition may resolve the name of an alias apart, while a type written alike is the same type
+// A name that the type gives only to static methods names one, whatever srcML makes of the parameters of the definition
 //
 bool stereotypesAnalyzer::declaresStaticMethod(std::size_t position, const std::string& methodName, const functionModel& definition) const {
     const typeModel& type = types[position];
     const auto [first, last] = type.getStaticMethodSignatures().equal_range(methodName);
     if (first == last) return false;
+    if (!type.namesOwnMethod(methodName)) return true;
 
     const std::string written = typeListText(definition.getParameterTypes());
     const std::string defined = spelledTypes(definition.getParameterTypes(), type, definition.getLocation().value_or(elementLocation{}),
@@ -334,12 +374,12 @@ std::string stereotypesAnalyzer::spelledTypes(std::vector<writtenType> parameter
     return typeListText(parameterTypes);
 }
 
-// Finds the type of the archive that a type name written in the code of a type refers to, such as the type of a field of the type,
+// Finds the types of the archive that a type name written in the code of a type refers to equally well, such as the type of a field of the type,
 // also through aliases, where a call through -> reaches the type that an alias of a smart pointer points to
 // The name is written in the part of the type in a unit, which for a C# partial type has the using alias directives of its own file,
 // and otherwise in the first part, as for the name of the type of an inherited field
 //
-std::optional<std::size_t> stereotypesAnalyzer::findWrittenType(std::size_t position, const std::string& typeName, int unitNumber, bool throughPointer) const {
+std::vector<std::size_t> stereotypesAnalyzer::findWrittenTypes(std::size_t position, const std::string& typeName, int unitNumber, bool throughPointer) const {
     const typeModel& type = types[position];
     const std::vector<elementLocation>& locations = type.getLocations();
     const auto inUnit = std::find_if(locations.begin(), locations.end(), [unitNumber](const elementLocation& part) { return part.unitNumber == unitNumber; });
@@ -381,7 +421,7 @@ void stereotypesAnalyzer::analyzeFreeFunctions() {
 //
 void stereotypesAnalyzer::addGlobalStaticImports() {
     for (typeModel& type : types)
-        if (type.getUnitLanguage() == "C#") type.addStaticHolders(globalStaticImports);
+        if (type.getUnitLanguage() == "C#") type.addStaticImports(globalStaticImports);
     for (functionModel& function : freeFunctions)
         if (function.getUnitLanguage() == "C#") function.addStaticHolders(globalStaticImports);
 }
@@ -407,6 +447,44 @@ void stereotypesAnalyzer::addAncestorStaticHolders() {
 
     for (typeModel& type : types) type.addStaticHolders(ancestorsOf(type.getUnitLanguage(), type.getStaticHolders()));
     for (functionModel& function : freeFunctions) function.addStaticHolders(ancestorsOf(function.getUnitLanguage(), function.getStaticHolders()));
+}
+
+// Gives each type of a language without free functions the names that a call without an object may name besides its own methods, which are
+// the static methods of the type and its ancestors, their methods that srcML misreads, and the methods, static or not, of its static holders,
+// and tells whether one of its static imports names a type outside the archive
+// The holders are known only by name, so each stands for every type of its language with that name
+//
+void stereotypesAnalyzer::findHolderFunctions() {
+    std::unordered_map<std::string, std::unordered_set<std::string>> functions;
+    for (const auto& [holder, methods] : staticMethods)
+        for (const auto& method : methods) functions[holder].insert(method.first);
+    for (const typeModel& type : types) {
+        if (!languageOf(type.getUnitLanguage()).methodsOnly) continue;
+        std::unordered_set<std::string>& names = functions[type.getUnitLanguage() + ' ' + type.getName()[3]];
+        names.merge(type.methodNames());
+        names.insert(type.getMisreadMethods().begin(), type.getMisreadMethods().end());
+    }
+
+    for (typeModel& type : types) {
+        const std::string& language = type.getUnitLanguage();
+        if (!languageOf(language).methodsOnly) continue;
+
+        std::unordered_set<std::string> holders = type.getStaticHolders();
+        holders.insert(type.getName()[3]);
+        for (const auto* parents : {&type.getParentNames(), &type.getInheritedParentNames()})
+            for (const std::vector<std::string>& parent : *parents) holders.insert(parent[3]);
+
+        std::unordered_set<std::string> reached;
+        for (const std::string& holder : holders) {
+            const auto found = functions.find(language + ' ' + holder);
+            if (found != functions.end()) reached.insert(found->second.begin(), found->second.end());
+        }
+        const std::unordered_set<std::string>& imports = type.getStaticImports();
+        const bool outsideImport = std::any_of(imports.begin(), imports.end(), [&](const std::string& imported) {
+            return functions.count(language + ' ' + imported) == 0;
+        });
+        type.setHolderFunctions(std::move(reached), outsideImport);
+    }
 }
 
 // Tells whether the reports and the srcML output show the labels of a type, which for an interface needs -i and for an enum -e
@@ -508,7 +586,8 @@ void stereotypesAnalyzer::outputStereotypes(outputArchive& output) const {
         const auto labeled = annotations.find(unitNumber);
         if (labeled != annotations.end()) unitAnnotations = std::move(labeled->second);
 
-        if (pool.pending() == unitsPerWorker * settings.threads) output.write(pool.next());
+        while (pool.nextReady() || pool.pending() >= writesPerWorker * settings.threads) output.write(pool.next());
+        pool.waitForRoom(queuedPerWorker * settings.threads);
         pool.submit([inputUnit = std::move(unit), labels = std::move(unitAnnotations), comments = settings.comments](std::size_t) mutable {
             return annotatedUnit(std::move(inputUnit), labels, comments);
         });

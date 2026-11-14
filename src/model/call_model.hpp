@@ -26,6 +26,8 @@ public:
     int                                     getArgumentCount            () const                           { return argumentCount;           }
     bool                                    isResultWritten             () const                           { return resultWritten;           }
     bool                                    isThroughPointer            () const                           { return throughPointer;          }
+    bool                                    passesObjectFirst           () const                           { return objectFirst;             }
+    const std::string&                      getElementObject            () const                           { return elementObject;           }
 
     void                                    setName                     (const std::string& name_)         { name.push_back(name_);          }
     void                                    setSignature                (const std::string& signature_)    { signature = signature_;         }
@@ -35,17 +37,21 @@ public:
     void                                    setPosition                 (int position_)                    { position = position_;           }
     void                                    setArgumentCount            (int count)                        { argumentCount = count;          }
     void                                    setResultWritten            (bool written)                     { resultWritten = written;        }
+    void                                    setObjectFirst              (bool first)                       { objectFirst = first;            }
+    void                                    setElementObject            (const std::string& object)        { elementObject = object;         }
 
     friend std::istream&                    operator>>                  (std::istream&, callModel&);
 private:
     std::vector<std::string>   name;                    // Size = 4 containing: Original name | name without whitespaces | name without whitespaces, namespaces, and and in-between generic in ( <> ) | same as last but without ( <> )
     std::string                signature;               // Call signature
+    std::string                elementObject;           // Variable with its indexes and the access operator before a call on an element, as slots[i]. of slots[i].clear()
     std::string                receiverType;            // Named type of the object whose method the call names directly on a data member, such as Engine of m_engine.rpm(), or of m_engine->rpm() for a std::unique_ptr<Engine>
     int                        receiverUnit{0};         // Unit that declares the data member, where the name of its type is written
     int                        position{0};             // Position of the name of the call in its function, in document order
     int                        argumentCount{0};        // Number of arguments that the call passes
     bool                       resultWritten{false};    // The expression writes through the result of the call, as v.at(i) = x does
     bool                       throughPointer{false};   // The call names its method through -> on a data member of a type that is no pointer, as of an alias of a smart pointer
+    bool                       objectFirst{false};      // The first argument is the object itself, as in Base.reset(self) of Python
     bool                       internal{false};         // Whether it is a call to an internal method or an external
 };
 

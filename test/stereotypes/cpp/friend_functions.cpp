@@ -33,7 +33,7 @@ public:
     // @stereotype predicate
     friend bool operator==(const Pixel& a, const Pixel& b) { return a.x == b.x && a.y == b.y; }
     // In a friend function defined in a class, srcML 1.2 leaves a.x outside the expression of a.x = b.x, which hides the write
-    // @stereotype command @defect type-model-B6 pipeline-B8 xpath-B7 rules-B9
+    // @stereotype command @defect srcML leaves a.x outside the expression
     friend void swapX(Pixel& a, Pixel& b) { int t = a.x; a.x = b.x; b.x = t; }
     friend int norm1(const Pixel& p);
 };

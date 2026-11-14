@@ -29,5 +29,6 @@ using writtenType = std::vector<typePart>;
 void        addText         (writtenType&, std::string_view);
 std::string typeText        (const writtenType&);
 std::string typeListText    (const std::vector<writtenType>&);
+std::string withoutQualifiers (const std::string&);
 
 #endif

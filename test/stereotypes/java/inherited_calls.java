@@ -50,3 +50,29 @@ class QuietCounter extends Counter {
     // @stereotype property non-void-command
     int counted() { return super.count() * 2; }
 }
+
+// A call through super after the name of an interface names a default method of that interface
+interface Greeter {
+    String name();
+
+    // The abstract name has no stereotypes, so its call may change the object
+    // @stereotype non-void-command
+    default String greet() { return "Hello, " + name(); }
+
+    // @stereotype incidental
+    default int limit() { return 3; }
+}
+
+class Robot implements Greeter {
+    private String model;
+
+    // @stereotype get
+    public String name() { return model; }
+
+    // @stereotype non-void-command
+    public String greet() { return Greeter.super.greet() + "!"; }
+
+    // A call of a method without a use of the object counts as a call of a free function
+    // @stereotype wrapper stateless
+    public int limit() { return Greeter.super.limit() + 1; }
+}

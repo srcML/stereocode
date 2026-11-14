@@ -15,6 +15,7 @@
 #include "rules/language_tables.hpp"
 #include "rules/stereotype_rules.hpp"
 #include "model/type_index.hpp"
+#include "model/unit_models.hpp"
 
 #include <cstddef>
 #include <optional>
@@ -25,7 +26,6 @@
 
 class outputArchive;
 struct srcml_archive;
-struct unitModels;
 
 class stereotypesAnalyzer {
 public:
@@ -50,27 +50,33 @@ private:
     std::vector<std::vector<usingDirective>>            freeFunctionDirectives; // Using directives for each free function whose C++ name has a qualifier, until analyzeFreeFunctions()
     globalVariables                                     globals;            // Globals of every unit, since a unit may use a global of another unit
     std::unordered_set<std::string>                     globalStaticImports; // Types of the C# static imports that hold for every unit
+    staticOverloads                                     staticMethods;      // Numbers of arguments of the static methods of the types
+    extensionMethods                                    extensions;         // C# extension methods by the language and the name of the method
     std::unordered_set<std::string>                     valueTypes;         // Names of the C# structs and enums, whose values a parameter copies
     std::unordered_set<std::string>                     cClassNames;        // Classes that the C markup of C++ headers hides
     std::unordered_set<std::string>                     declaredTypeNames;  // Names of the C++ types and aliases of every unit, whatever the options
     std::vector<functionModel>                          cClassMethods;      // Definitions of the methods of these classes, which are unclassified
+    std::unordered_map<std::string, callableNames>      archiveNames;       // Classes of each language, and the free functions of each language in which a call of a class creates an object
 
     int                  findModels                     (srcml_archive*);
     void                 mergeModels                    (unitModels);
     void                 indexTypes                     ();
     void                 confirmReturnTypeMacros        ();
+    void                 declareMethodMembers           ();
+    void                 findCreatedObjects             ();
     void                 findInheritedDataMembers       (std::size_t, std::vector<inheritance>&, std::vector<std::vector<std::size_t>>&);
     std::optional<std::size_t> findParentType           (std::size_t, std::size_t) const;
     std::optional<std::size_t> findDefinitionType       (const functionModel&, const std::vector<std::string>&, const std::vector<usingDirective>&) const;
     bool                 declaresStaticMethod           (std::size_t, const std::string&, const functionModel&) const;
     std::string          spelledTypes                   (std::vector<writtenType>, const typeModel&, const elementLocation&, const std::string&) const;
-    std::optional<std::size_t> findWrittenType          (std::size_t, const std::string&, int, bool) const;
+    std::vector<std::size_t>   findWrittenTypes         (std::size_t, const std::string&, int, bool) const;
     bool                 isCClassMethod                 (const functionModel&) const;
     bool                 isLabeled                      (const typeModel&) const;
 
     void                 analyzeFreeFunctions           ();
     void                 addGlobalStaticImports         ();
     void                 addAncestorStaticHolders       ();
+    void                 findHolderFunctions            ();
 
     void                 outputStereotypes              (outputArchive&) const;
     template <typename report>

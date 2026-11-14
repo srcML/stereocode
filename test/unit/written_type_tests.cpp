@@ -30,3 +30,17 @@ TEST_CASE("the text of a parameter list joins the parts of each type, with a com
     CHECK(typeListText({{{"const", false}, {"Count", true}, {"&", false}}, {{"std::size_t", true}}, {{"unsigned", true}, {"int", true}}}) ==
           "(constCount&,std::size_t,unsignedint)");
 }
+
+TEST_CASE("the types of a parameter list lose the names that qualify them, since a declaration and a definition may qualify a type apart") {
+    CHECK(withoutQualifiers("(std::string&,int)") == "(string&,int)");
+    CHECK(withoutQualifiers("(::std::map<std::string,ns::inner::Count>*)") == "(map<string,Count>*)");
+    CHECK(withoutQualifiers("(java.util.List<java.lang.String>,long)") == "(List<String>,long)");
+    CHECK(withoutQualifiers("(System.Collections.Generic.IList<Outer.Inner>)") == "(IList<Inner>)");
+    CHECK(withoutQualifiers("()") == "()");
+
+    SUBCASE("the dots of a variadic parameter and of a number qualify nothing") {
+        CHECK(withoutQualifiers("(String...)") == "(String...)");
+        CHECK(withoutQualifiers("(java.lang.Object...)") == "(Object...)");
+        CHECK(withoutQualifiers("(Ratio<1.5>,...)") == "(Ratio<1.5>,...)");
+    }
+}

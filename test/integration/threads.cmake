@@ -10,15 +10,6 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/run_and_check.cmake)
 
-# Fails unless -j with the count stops the run with the message and writes no output
-function(expect_rejected_count count expectedMessage)
-    run_stereocode(input.xml -j ${count} -o rejected.xml)
-    if(RUN_EXIT STREQUAL "0" OR NOT RUN_ERROR MATCHES "${expectedMessage}")
-        message(FATAL_ERROR "Expected -j ${count} to fail with '${expectedMessage}'\nexit: ${RUN_EXIT}\nstderr: ${RUN_ERROR}")
-    endif()
-    expect_missing("${WORK_DIR}/rejected.xml")
-endfunction()
-
 # The srcML output and the CSV reports are the same for one, two, and three worker threads, and -j rejects a count outside 1 to 256
 # The first unit, big.cpp, takes longer than the others, so the workers finish the other units first
 # The labels of Derived::setY in c.cpp depend on the type Derived of b.cpp, which inherits from the type Base of a.cpp,
@@ -167,9 +158,9 @@ type_name,type_stereotype,function_name,function_stereotype
         expect_file_content("${WORK_DIR}/output.${threads}.free_functions.stereotypes.csv" "${EXPECTED_FREE_FUNCTION_REPORT}")
     endforeach()
 
-    expect_rejected_count(0 "0 is not from 1 to 256")
-    expect_rejected_count(257 "257 is not from 1 to 256")
-    expect_rejected_count(abc "abc is not a whole number")
+    expect_rejected_value(-j 0 "0 is not from 1 to 256")
+    expect_rejected_value(-j 257 "257 is not from 1 to 256")
+    expect_rejected_value(-j abc "abc is not a whole number")
 endfunction()
 
 # std::thread::hardware_concurrency() may return 0, and the run then uses one worker thread

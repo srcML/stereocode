@@ -22,13 +22,24 @@
 #include <utility>
 #include <vector>
 
+// The type of the elements of a variable, as Slot of Slot[], of Slot* and of std::vector<Slot>, with the number of accesses by an index
+// or by -> that lead from the variable to an object of that type
+//
+struct elementType {
+    std::string name;
+    int         depth{0};
+};
+
 // Navigation among the srcML elements of a parsed unit
 
 bool          isSrcElement            (const xmlNode*, std::string_view);
+bool          isTypeScriptElement     (const xmlNode*, std::string_view);
 bool          isTypeElement           (const xmlNode*);
+bool          isOperator              (const xmlNode*, std::string_view);
 xmlNode*      firstChildElement       (const xmlNode*, std::string_view);
 xmlNode*      nextNamedSibling        (const xmlNode*, std::string_view);
 xmlNode*      typeNameElement         (const xmlNode*);
+std::string   typeSourceOf            (const xmlNode*);
 bool          refersToPreviousType    (const xmlNode*);
 bool          declaresStatic          (const xmlNode*);
 int           countListItems          (const xmlNode*);
@@ -36,11 +47,13 @@ std::string   parameterTypesOf        (const xmlNode*);
 std::vector<writtenType> writtenTypesOf(const xmlNode*);
 writtenType   writtenTypeOf           (const xmlNode*);
 std::string   signatureTypesOf        (const xmlNode*);
+std::string   functionPointerTypeOf   (const xmlNode*);
 argumentRange argumentRangeOf         (const xmlNode*);
 std::string   namedTypeOf             (const xmlNode*);
 std::string   standardSmartPointer    (const xmlNode*);
 xmlNode*      smartPointerObject      (const xmlNode*);
 std::string   pointeeTypeOf           (const xmlNode*);
+elementType   elementTypeOf           (const xmlNode*, const xmlNode*);
 xmlNode*      scopeOf                 (const xmlNode*);
 std::string   nullConditionalObject   (const xmlNode*);
 const xmlNode* nullConditionalStart   (const xmlNode*);

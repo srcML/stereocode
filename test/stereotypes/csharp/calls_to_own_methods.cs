@@ -32,3 +32,23 @@ public class Thermometer
     // @stereotype command
     public void Restart() { Reset(); }
 }
+
+// A call that reaches the calling method itself counts by the stereotypes that the method has without the call
+public class Limit
+{
+    private int limit;
+
+    // @stereotype predicate
+    public bool Accepts(int value) { return value < limit; }
+
+    // The call with one argument reaches the two overloads, of which the other one only reads
+    // @stereotype predicate
+    public bool Accepts(long value) { return Accepts((int)value); }
+
+    // @stereotype property
+    public int Next(int level) { return level > limit ? level : Next(level + 1); }
+
+    // A call of a method that changes the object to itself may change the object
+    // @stereotype command
+    public void Drain(int steps) { if (steps > 0) { limit--; Drain(steps - 1); } }
+}

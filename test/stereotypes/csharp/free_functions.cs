@@ -29,6 +29,10 @@ public static class Program
     // @stereotype empty
     public static void Noop(int value) { }
 
+    // A parameter that the function calls is read, so the function is no literal
+    // @stereotype wrapper
+    public static void Run(System.Action action) { action(); }
+
     // @stereotype main
     public static void Main(string[] args) { Report(args.Length); }
 }

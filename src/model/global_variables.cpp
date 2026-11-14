@@ -46,6 +46,14 @@ bool globalVariables::holds(const std::string& language, const std::string& hold
     return (shared && shared->holders.count(holder) > 0) || (own && own->holders.count(holder) > 0);
 }
 
+// Tells whether the code of a unit reaches a global of a name in a type, as a static field, unlike a variable of a namespace or a module
+//
+bool globalVariables::heldByType(const std::string& language, const std::string& holder, const std::string& name, int unit) const {
+    const holdersOfName* shared = find(languageGlobals(language), name);
+    const holdersOfName* own    = find(unitGlobals(unit), name);
+    return (shared && shared->types.count(holder) > 0) || (own && own->types.count(holder) > 0);
+}
+
 // Tells whether no call changes the globals of a name that the code of a unit reaches, as for a const std::string or a final String
 //
 bool globalVariables::isImmutable(const std::string& language, const std::string& name, int unit) const {
@@ -59,6 +67,7 @@ bool globalVariables::isImmutable(const std::string& language, const std::string
 void globalVariables::addHolder(holdersByName& names, const globalDeclaration& global) {
     holdersOfName& holders = names[global.name];
     holders.holders.insert(global.holder);
+    if (!global.namespaceScope) holders.types.insert(global.holder);
     holders.namespaceScope = holders.namespaceScope || global.namespaceScope;
     holders.changeable     = holders.changeable || !global.immutable;
 }
@@ -69,6 +78,7 @@ void globalVariables::mergeNames(holdersByName& names, const holdersByName& othe
     for (const auto& [name, global] : other) {
         holdersOfName& merged = names[name];
         merged.holders.insert(global.holders.begin(), global.holders.end());
+        merged.types.insert(global.types.begin(), global.types.end());
         merged.namespaceScope = merged.namespaceScope || global.namespaceScope;
         merged.changeable     = merged.changeable || global.changeable;
     }

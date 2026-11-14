@@ -34,5 +34,9 @@ void report(int value) { log(value); }
 // @stereotype empty
 void noop(int value) { }
 
+// A parameter that the function calls is read, so the function is no literal
+// @stereotype wrapper
+void run(std::function<void()> callback) { callback(); }
+
 // @stereotype main
 int main(int argc, char* argv[]) { report(argc); return 0; }

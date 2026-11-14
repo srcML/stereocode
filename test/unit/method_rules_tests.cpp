@@ -631,18 +631,58 @@ TEST_CASE("a call to a method of the type that may change the object stays a cal
     }
 }
 
-TEST_CASE("the rounds end when the stereotypes of a method cycle") {
-    // A const method that changes a mutable field and calls itself is a property until the call counts as a read, which makes a set
-    methodFacts f = readingMethod("Java");
-    f.language        = "C++";
-    f.isConst         = true;
-    f.fieldsModified  = 1;
-    f.complexReturn   = true;
-    f.typeMethodCalls = {callReaching({0})};
-    CHECK(labelsOf(f) == "property");
+TEST_CASE("a call that reaches the calling method itself counts by the stereotypes that the method has without the call") {
+    methodFacts recursive = readingMethod("Java");
+    recursive.complexReturn   = true;
+    recursive.typeMethodCalls = {callReaching({0})};
+    CHECK(runLabelsOf({recursive}) == std::vector<std::string>{"property"});
 
-    const std::string labels = runLabelsOf({f}).front();
-    CHECK((labels == "property" || labels == "property set"));
+    SUBCASE("a call that also reaches an accessor reads the object") {
+        methodFacts getter = readingMethod("Java");
+        getter.simpleReturn = true;
+        methodFacts overload = readingMethod("Java");
+        overload.fieldUsed       = false;
+        overload.complexReturn   = true;
+        overload.typeMethodCalls = {callReaching({0, 1})};
+        CHECK(runLabelsOf({getter, overload}) == std::vector<std::string>{"get", "property"});
+    }
+    SUBCASE("a call that also reaches a set may change the object") {
+        methodFacts setter = readingMethod("Java");
+        setter.returnType = setter.declaredReturnType = "void";
+        setter.fieldsModified = 1;
+        methodFacts overload = readingMethod("Java");
+        overload.returnType = overload.declaredReturnType = "void";
+        overload.fieldUsed       = false;
+        overload.typeMethodCalls = {callReaching({0, 1})};
+        CHECK(runLabelsOf({setter, overload}) == std::vector<std::string>{"set", "command"});
+    }
+    SUBCASE("a method that changes a field and calls itself may change the object through the call") {
+        methodFacts draining = readingMethod("Java");
+        draining.returnType = draining.declaredReturnType = "void";
+        draining.fieldsModified  = 1;
+        draining.typeMethodCalls = {callReaching({0})};
+        CHECK(runLabelsOf({draining}) == std::vector<std::string>{"command"});
+    }
+    SUBCASE("a call on a field of the own type to the calling method reads the field when the method only reads") {
+        methodFacts counting = readingMethod("Java");
+        counting.complexReturn = true;
+        counting.callsOnFields = {callReaching({0})};
+        CHECK(runLabelsOf({counting}) == std::vector<std::string>{"property"});
+    }
+}
+
+TEST_CASE("the rounds end when the stereotypes of two methods cycle") {
+    // Two const methods that change a mutable field and call each other are properties until each call counts as a read, which makes a set
+    methodFacts first = readingMethod("C++");
+    first.isConst         = true;
+    first.fieldsModified  = 1;
+    first.complexReturn   = true;
+    first.typeMethodCalls = {callReaching({1})};
+    methodFacts second = first;
+    second.typeMethodCalls = {callReaching({0})};
+    CHECK(labelsOf(first) == "property");
+
+    for (const std::string& labels : runLabelsOf({first, second})) CHECK((labels == "property" || labels == "property set"));
 }
 
 TEST_CASE("a method that returns the object itself and changes no state is a get") {

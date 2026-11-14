@@ -10,6 +10,7 @@
 #ifndef OPTIONS_HPP
 #define OPTIONS_HPP
 
+#include <algorithm>
 #include <optional>
 #include <string>
 
@@ -35,5 +36,9 @@ struct options {
     bool        verboseReport{false};             // Print the lists and write the verbose CSV report
     bool        disableSrcmlOutput{false};        // Skip the srcML output archive
 };
+
+// Worker threads of a run without -j: every hardware thread up to 8, since the memory of a run grows with each worker
+//
+constexpr unsigned defaultThreads(unsigned hardwareThreads) { return std::clamp(hardwareThreads, 1u, 8u); }
 
 #endif

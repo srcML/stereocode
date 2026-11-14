@@ -8,6 +8,7 @@
  */
 
 #include "rules/calls.hpp"
+#include "archive/source_language.hpp"
 
 #include <iostream>
 
@@ -17,10 +18,15 @@
 // A user-defined call holds for all languages or for the language of its section
 //
 bool calls::isIgnored(const std::string& call, const std::string& unitLanguage) const {
-    auto listed = [this, &unitLanguage](const std::string& name) {
-        return ignoredCallsList.at(unitLanguage).find(name) != ignoredCallsList.at(unitLanguage).end() || userIgnoredCallsList.contains(name, unitLanguage);
+    const auto defaults = ignoredCallsList.find(unitLanguage);
+    auto listed = [this, &unitLanguage, defaults](const std::string& name) {
+        return (defaults != ignoredCallsList.end() && defaults->second.count(name) > 0) || userIgnoredCallsList.contains(name, unitLanguage);
     };
     if (listed(call)) return true;
+
+    // A dynamic language writes a call on an object as a call of a function of a module, so a listed name without a qualifier, such as print,
+    // names only the function itself, while a listed name with a qualifier, such as sys.exit, also ends a longer name
+    const bool qualifiedOnly = languageOf(unitLanguage).dynamic;
 
     std::size_t lastPart = 0;
     for (std::size_t i = 0; i < call.size(); ++i) {
@@ -29,8 +35,9 @@ bool calls::isIgnored(const std::string& call, const std::string& unitLanguage) 
         else if (call[i] == '.')                                                 separator = 1;
         if (separator == 0) continue;
 
-        lastPart = i + separator;
-        if (listed(call.substr(lastPart))) return true;
+        const std::string ending = call.substr(i + separator);
+        if (!qualifiedOnly) lastPart = i + separator;
+        if (listed(ending) && (!qualifiedOnly || ending.find('.') != std::string::npos)) return true;
         i += separator - 1;
     }
 
@@ -66,4 +73,11 @@ void calls::initializeIgnorableCalls() {
     ignoredCallsList.insert({"C++", {"assert","exit","abort"}});
     ignoredCallsList.insert({"C#", {"Console.WriteLine","Console.Write","Console.Error.WriteLine","Trace.WriteLine","Debug.Assert","Debug.WriteLine","Environment.Exit","nameof"}});
     ignoredCallsList.insert({"Java", {"System.out.println","System.out.print","System.out.printf","System.err.println","System.exit"}});
+    // Besides output and exit, the built-in functions that stand for an operator, a cast, or the header of a loop of the other languages,
+    // as len, isinstance, int, list, and range do
+    ignoredCallsList.insert({"Python", {"print","exit","quit","sys.exit","breakpoint","len","isinstance","issubclass","type","int","float","complex","bool","str","bytes","repr",
+                                        "list","dict","set","tuple","frozenset","bytearray","range","enumerate","zip","reversed"}});
+    // Besides output and exit, require() reads a module, as an import does
+    ignoredCallsList.insert({"JavaScript", {"console.log","console.error","console.warn","console.info","console.debug","console.trace","process.exit","alert",
+                                            "require"}});
 }

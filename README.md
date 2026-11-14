@@ -2,7 +2,7 @@
 
 [![Tests](https://github.com/srcML/stereocode/actions/workflows/tests.yml/badge.svg)](https://github.com/srcML/stereocode/actions/workflows/tests.yml) ![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus) [![Release](https://img.shields.io/github/v/release/srcML/stereocode)](https://github.com/srcML/stereocode/releases/latest) [![License](https://img.shields.io/github/license/srcML/stereocode)](LICENSE)
 
-**Stereocode** classifies methods, free functions, and types (e.g., classes) of **C, C++, C#, and Java** code by their **stereotypes**.
+**Stereocode** classifies methods, free functions, and types (e.g., classes) of **C, C++, C#, Java, Python, JavaScript, and TypeScript** code by their **stereotypes**.
 
 A stereotype is a short label for the role of a code element (e.g., a method or a class), such as `get` for a method that returns a field, `command` for a method that changes the state of the object, or `entity` for a class that keeps its data together with the methods that work on the data.
 
@@ -24,6 +24,7 @@ git clone https://github.com/srcML/stereocode.git  # download the source code
 cd stereocode                                      # go into the source folder
 cmake -B build -DCMAKE_BUILD_TYPE=Release          # configure a release build
 cmake --build build                                # compile build/stereocode
+cmake --install build                              # copy stereocode to the system (e.g., /usr/local/bin)
 ```
 
 ## 🐳 Docker
@@ -72,15 +73,15 @@ In the output archive `my_project.stereotypes.xml`, code elements (e.g., classes
 | `-o`, `--output-file` | Output archive (default `<input>.stereotypes.xml`) |
 | `-f`, `--free-function` | Stereotypes free functions and static methods |
 | `-t`, `--struct` | Stereotypes structs (C, C++, and C#) |
-| `-i`, `--interface` | Stereotypes interfaces (C# and Java) |
+| `-i`, `--interface` | Stereotypes interfaces (C#, Java, and TypeScript) |
 | `-u`, `--union` | Stereotypes unions (C and C++) |
 | `-e`, `--enum` | Stereotypes enums (Java) |
 | `-r`, `--csv-report` | Writes a CSV report of the stereotypes |
 | `-x`, `--txt-report` | Writes a text report of the stereotypes |
 | `-b`, `--verbose` | Writes a detailed CSV report (e.g., the calls of each function) and prints the settings in use |
-| `-m`, `--comment` | Inserts a `// @stereotype <labels>` comment before each stereotyped element |
+| `-m`, `--comment` | Inserts a `// @stereotype <labels>` comment (`# @stereotype <labels>` in Python) before each stereotyped element |
 | `-d`, `--no-srcml-output`, `--srcmlOutput` | Writes no output archive, only the reports of `-r`, `-x`, or `-b` |
-| `-j`, `--threads` | Number of threads (default all available, at most 256) |
+| `-j`, `--threads` | Number of threads (default all available up to 8, at most 256) |
 | `-l`, `--large-class` | Method count above which a type can be a `large-class` (default mean plus standard deviation over all types) |
 | `-p`, `--primitive-file` | File of extra types that count as primitive (e.g., a typedef of `int`) |
 | `-c`, `--call-file` | File of extra calls to ignore (e.g., a logging function) |
@@ -89,11 +90,11 @@ In the output archive `my_project.stereotypes.xml`, code elements (e.g., classes
 | `-v`, `--version` | Prints the version |
 | `-h`, `--help` | Prints the options |
 
-⚡ **Speed.** Stereocode takes about 2.5 s to annotate a srcML archive of 100 MB on 24 threads.
+⚡ **Speed.** Stereocode annotates the 231 MB srcML archive of PowerShell 7.5.4 in about 5 s on its default of eight threads.
 
 ### List files
 
-The options `-p`, `-c`, `-s`, and `-q` each read a text file that adds entries to a built-in list, one entry per line. A line `[C++]`, `[C#]`, or `[Java]` limits the entries after it to that language, while the entries before the first such line hold for every language. A line that starts with `#` is a comment.
+The options `-p`, `-c`, `-s`, and `-q` each read a text file that adds entries to a built-in list, one entry per line. A line `[C++]`, `[C#]`, `[Java]`, `[Python]`, or `[JavaScript]` limits the entries after it to that language, while the entries before the first such line hold for every language. The line `[JavaScript]` also covers TypeScript, which srcML marks as JavaScript. A line that starts with `#` is a comment.
 
 | List | Example entries | Description |
 |---|---|---|
@@ -123,8 +124,10 @@ Each test name starts with the folder of its files under `test/`.
 
 - **Unit tests** (`unit`) check the stereotype rules and the helper functions in one doctest program.
 - **Integration tests** (`integration`) run `stereocode` on small archives and check the exit code, the messages, and the output files.
-- **Stereotype cases** (`stereotypes`) are small C++, C#, and Java files whose expected stereotypes are written by hand in `// @stereotype` comments.
-- **System tests** (`systems`) compare every label of RxJava, PowerShell, and Notepad++ with a table recorded from earlier runs.
+- **Stereotype cases** (`stereotypes`) are small C, C++, C#, Java, Python, JavaScript, and TypeScript files whose expected stereotypes are written by hand in `@stereotype` comments.
+- **System tests** (`systems`) compare every label of Notepad++ (C++), Lua (C), PowerShell (C#), RxJava (Java), Rich (Python), Knex (JavaScript), and TypeORM (TypeScript) with a table recorded from earlier runs.
+
+The stereotype cases, the system tests, and the integration tests of the option `-m` convert source files to srcML with the `srcml` program. Without this program, the configuration skips these tests and names them in a status message. The system tests run one at a time, also under `ctest -j 8`, since each one runs on up to eight threads.
 
 ### Commands
 
@@ -133,8 +136,8 @@ Run these commands inside the build folder (`cd build`).
 | Command | Description |
 |---|---|
 | `ctest -j 8` | Every test |
-| `ctest -LE systems` | Every test but the three systems |
-| `ctest -L systems` | Only the three systems |
+| `ctest -LE systems` | Every test but the seven systems |
+| `ctest -L systems` | Only the seven systems |
 | `ctest -L stereotypes` | Only the stereotype cases and the helper checks |
 | `ctest -R stereotypes/java` | The stereotype cases of one language |
 | `ctest -L unit` | Only the unit tests |

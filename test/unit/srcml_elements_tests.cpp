@@ -10,25 +10,12 @@
 #include "doctest.h"
 #include "archive/srcml_elements.hpp"
 #include "archive/node_text.hpp"
+#include "parsed_srcml.hpp"
 
-#include <libxml/parser.h>
-
-#include <memory>
 #include <string>
 #include <vector>
 
 namespace {
-    // A parsed srcML unit that frees its document
-    //
-    using document = std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)>;
-
-    // Parses the srcML of a parameter list of a language into a unit
-    //
-    document parsedList(const std::string& language, const std::string& parameterList) {
-        const std::string srcml = R"(<unit xmlns="http://www.srcML.org/srcML/src" language=")" + language + R"(">)" + parameterList + "</unit>";
-        return document(xmlReadMemory(srcml.c_str(), static_cast<int>(srcml.size()), nullptr, nullptr, 0), &xmlFreeDoc);
-    }
-
     // Gets the parameter list of a parsed unit
     //
     const xmlNode* listOf(const document& unit) {
@@ -52,7 +39,7 @@ namespace {
     // Parses the srcML of the type of a C++ declaration and gets the type
     //
     struct parsedType {
-        explicit parsedType(const std::string& type) : unit{parsedList("C++", "<decl>" + type + R"( <name>a</name></decl>)")} {}
+        explicit parsedType(const std::string& type) : unit{parsedUnit("C++", "<decl>" + type + R"( <name>a</name></decl>)")} {}
 
         const xmlNode*  type() const { return declaredTypeOf(unit); }
         const xmlNode*  name() const { return firstChildElement(type(), "name"); }
@@ -74,7 +61,7 @@ namespace {
     // Parses the srcML of a C# expression statement and gets its calls and names by their text
     //
     struct parsedStatement {
-        explicit parsedStatement(const std::string& statement) : unit{parsedList("C#", statement)} {}
+        explicit parsedStatement(const std::string& statement) : unit{parsedUnit("C#", statement)} {}
 
         const xmlNode*  call(const std::string& name) const {
             return firstBelow(xmlDocGetRootElement(unit.get()), [&name](const xmlNode* node) {
@@ -90,27 +77,27 @@ namespace {
 }
 
 TEST_CASE("the parameter types of a signature leave out the names, specifiers, attributes, and default values") {
-    const document cpp = parsedList("C++",
+    const document cpp = parsedUnit("C++",
         R"(<parameter_list>(<parameter><decl><type><specifier>const</specifier> <name><name>std</name><operator>::</operator><name>string</name></name><modifier>&amp;</modifier></type> <name>name</name></decl></parameter>, )"
         R"(<parameter><decl><type><name>int</name></type> <name>x</name> <init>= <expr><literal type="number">5</literal></expr></init></decl></parameter>, )"
         R"(<parameter><decl><type><modifier>...</modifier></type></decl></parameter>)</parameter_list>)");
     CHECK(signatureTypesOf(listOf(cpp)) == "(std::string&,int,...)");
 
-    const document csharp = parsedList("C#",
+    const document csharp = parsedUnit("C#",
         R"(<parameter_list>(<parameter><decl><type><specifier>in</specifier> <name>Point</name></type> <name>p</name></decl></parameter>, )"
         R"(<parameter><decl><type><modifier>ref</modifier> <name>int</name></type> <name>a</name></decl></parameter>, )"
         R"(<parameter><decl><type><attribute>[<expr><name>NotNull</name></expr>]</attribute> <name>string</name></type> <name>s</name> <init>= <expr><literal type="null">null</literal></expr></init></decl></parameter>, )"
         R"(<parameter><decl><type><specifier>params</specifier> <name><name>int</name><index>[]</index></name></type> <name>rest</name></decl></parameter>)</parameter_list>)");
     CHECK(signatureTypesOf(listOf(csharp)) == "(in Point,ref int,string,int[])");
 
-    const document java = parsedList("Java",
+    const document java = parsedUnit("Java",
         R"(<parameter_list>(<parameter><decl><type><annotation>@<name>NonNull</name></annotation> <specifier>final</specifier> <name><name>List</name><argument_list type="generic">&lt;<argument><name>String</name></argument>&gt;</argument_list></name></type> <name>xs</name></decl></parameter>, )"
         R"(<parameter><decl><type><name>String</name><modifier>...</modifier></type> <name>rest</name></decl></parameter>)</parameter_list>)");
     CHECK(signatureTypesOf(listOf(java)) == "(List<String>,String...)");
 }
 
 TEST_CASE("the C# words ref, out, and in of a signature keep a space before the type, also inside a qualified type name") {
-    const document csharp = parsedList("C#",
+    const document csharp = parsedUnit("C#",
         R"(<parameter_list>(<parameter><decl><type><name><modifier>ref</modifier> <name>System</name><operator>.</operator><name>Drawing</name><operator>.</operator><name>Point</name></name></type> <name>q</name></decl></parameter>, )"
         R"(<parameter><decl><type><modifier>out</modifier> <name><name>List</name><argument_list type="generic">&lt;<argument><name>int</name></argument>&gt;</argument_list></name></type> <name>xs</name></decl></parameter>, )"
         R"(<parameter><decl><type><specifier>this</specifier> <name>string</name></type> <name>s</name></decl></parameter>)</parameter_list>)");
@@ -118,25 +105,25 @@ TEST_CASE("the C# words ref, out, and in of a signature keep a space before the 
 }
 
 TEST_CASE("the parameter types of a signature keep the array brackets after a name and the parameters of a function pointer") {
-    const document cpp = parsedList("C++",
+    const document cpp = parsedUnit("C++",
         R"(<parameter_list>(<parameter><decl><type><name>int</name></type> <name><name>a</name><index>[]</index></name></decl></parameter>, )"
         R"(<parameter><decl><type><name>A</name> <specifier>const</specifier><modifier>*</modifier></type> <name>c</name></decl></parameter>, )"
         R"(<parameter><function_decl><type><name>int</name></type> (<modifier>*</modifier><name>fp</name>)<parameter_list>(<parameter><decl><type><name>int</name></type></decl></parameter>)</parameter_list></function_decl></parameter>)</parameter_list>)");
     CHECK(signatureTypesOf(listOf(cpp)) == "(int[],A*,int(*)(int))");
 
-    const document empty = parsedList("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
+    const document empty = parsedUnit("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
     CHECK(signatureTypesOf(listOf(empty)) == "()");
 }
 
 TEST_CASE("the parameter types that tell overloads apart keep the specifiers, unlike those of a signature") {
-    const document cpp = parsedList("C++",
+    const document cpp = parsedUnit("C++",
         R"(<parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Node</name><modifier>*</modifier></type> <name>node</name></decl></parameter>)</parameter_list>)");
     CHECK(parameterTypesOf(listOf(cpp)) == "(constNode*)");
     CHECK(signatureTypesOf(listOf(cpp)) == "(Node*)");
 }
 
 TEST_CASE("a written parameter type keeps each name of a type without template arguments apart, and the parts join to the text of the parameter types") {
-    const document cpp = parsedList("C++",
+    const document cpp = parsedUnit("C++",
         R"(<parameter_list>(<parameter><decl><type><specifier>const</specifier> <name>Count</name><modifier>&amp;</modifier></type> <name>c</name></decl></parameter>, )"
         R"(<parameter><decl><type><name><name>std</name><operator>::</operator><name>size_t</name></name></type> <name>n</name></decl></parameter>, )"
         R"(<parameter><decl><type><name>Count</name> <specifier>const</specifier><modifier>*</modifier></type> <name>p</name></decl></parameter>, )"
@@ -155,12 +142,12 @@ TEST_CASE("a written parameter type keeps each name of a type without template a
     CHECK(bracketed(types[6]) == "Grid<const[Count]*>::Row");
     CHECK(parameterTypesOf(listOf(cpp)) == "(constCount&,std::size_t,Countconst*,unsignedint,int(*g)(Count),conststd::vector<Count>&,Grid<constCount*>::Row)");
 
-    const document empty = parsedList("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
+    const document empty = parsedUnit("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
     CHECK(writtenTypesOf(listOf(empty)).empty());
 }
 
 TEST_CASE("a parameter list takes its parameters without default values up to all its parameters") {
-    const document defaults = parsedList("C++",
+    const document defaults = parsedUnit("C++",
         R"(<parameter_list>(<parameter><decl><type><name>int</name></type> <name>a</name></decl></parameter>, )"
         R"(<parameter><decl><type><name>int</name></type> <name>b</name> <init>= <expr><literal type="number">5</literal></expr></init></decl></parameter>)</parameter_list>)");
     const argumentRange range = argumentRangeOf(listOf(defaults));
@@ -168,13 +155,13 @@ TEST_CASE("a parameter list takes its parameters without default values up to al
     CHECK(range.maximum == 2);
     CHECK_FALSE(range.variadic);
 
-    const document none = parsedList("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
+    const document none = parsedUnit("C", R"(<parameter_list>(<parameter><decl><type><name>void</name></type></decl></parameter>)</parameter_list>)");
     CHECK(argumentRangeOf(listOf(none)).maximum == 0);
 }
 
 TEST_CASE("a variadic parameter takes any number of arguments, also none") {
     SUBCASE("... of C and C++") {
-        const document cpp = parsedList("C++",
+        const document cpp = parsedUnit("C++",
             R"(<parameter_list>(<parameter><decl><type><name>int</name></type> <name>first</name></decl></parameter>, )"
             R"(<parameter><decl><type><modifier>...</modifier></type></decl></parameter>)</parameter_list>)");
         const argumentRange range = argumentRangeOf(listOf(cpp));
@@ -182,21 +169,21 @@ TEST_CASE("a variadic parameter takes any number of arguments, also none") {
         CHECK(range.variadic);
     }
     SUBCASE("a parameter pack of C++") {
-        const document cpp = parsedList("C++",
+        const document cpp = parsedUnit("C++",
             R"(<parameter_list>(<parameter><decl><type><name>Ts</name><modifier>&amp;&amp;</modifier><modifier>...</modifier></type> <name>args</name></decl></parameter>)</parameter_list>)");
         const argumentRange range = argumentRangeOf(listOf(cpp));
         CHECK(range.minimum == 0);
         CHECK(range.variadic);
     }
     SUBCASE("params of C#") {
-        const document csharp = parsedList("C#",
+        const document csharp = parsedUnit("C#",
             R"(<parameter_list>(<parameter><decl><type><specifier>params</specifier> <name><name>int</name><index>[]</index></name></type> <name>rest</name></decl></parameter>)</parameter_list>)");
         const argumentRange range = argumentRangeOf(listOf(csharp));
         CHECK(range.minimum == 0);
         CHECK(range.variadic);
     }
     SUBCASE("int... of Java") {
-        const document java = parsedList("Java",
+        const document java = parsedUnit("Java",
             R"(<parameter_list>(<parameter><decl><type><name>String</name></type> <name>a</name></decl></parameter>, )"
             R"(<parameter><decl><type><name>int</name><modifier>...</modifier></type> <name>rest</name></decl></parameter>)</parameter_list>)");
         const argumentRange range = argumentRangeOf(listOf(java));

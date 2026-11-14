@@ -73,3 +73,25 @@ TEST_CASE("a name is spelled as a macro when it holds only capital letters, digi
     CHECK_FALSE(isSpelledAsMacro("Sci::POSITION"));
     CHECK_FALSE(isSpelledAsMacro("VECTOR<INT>"));
 }
+
+TEST_CASE("Python has bool as its Boolean type and None as the type of a function without a value") {
+    CHECK(isBooleanType("Python", "bool"));
+    CHECK_FALSE(isBooleanType("Python", "Boolean"));
+    CHECK(isVoidType("Python", "None"));
+    CHECK_FALSE(isVoidType("Python", "void"));
+    CHECK_FALSE(isVoidType("Python", ""));
+
+    CHECK_FALSE(isNonVoidType("Python", "None", "None"));
+    CHECK(isNonVoidType("Python", "Any", "Any"));
+}
+
+TEST_CASE("the Boolean and the void return types of TypeScript are those of its annotations") {
+    CHECK(isBooleanType("JavaScript", "boolean"));
+    CHECK(isBooleanType("JavaScript", "Boolean"));
+    CHECK_FALSE(isBooleanType("JavaScript", "bool"));
+
+    CHECK(isVoidType("JavaScript", "void"));
+    CHECK(isVoidType("JavaScript", "undefined"));
+    CHECK(isVoidType("JavaScript", "never"));
+    CHECK_FALSE(isVoidType("JavaScript", "any"));
+}
