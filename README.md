@@ -125,7 +125,7 @@ Each test name starts with the folder of its files under `test/`.
 - **Unit tests** (`unit`) check the stereotype rules and the helper functions in one doctest program.
 - **Integration tests** (`integration`) run `stereocode` on small archives and check the exit code, the messages, and the output files.
 - **Stereotype cases** (`stereotypes`) are small C, C++, C#, Java, Python, JavaScript, and TypeScript files whose expected stereotypes are written by hand in `@stereotype` comments.
-- **System tests** (`systems`) compare every label of RxJava, PowerShell, and Notepad++ with a table recorded from earlier runs.
+- **System tests** (`systems`) compare every label of Notepad++ (C++), Lua (C), PowerShell (C#), RxJava (Java), Rich (Python), Knex (JavaScript), and TypeORM (TypeScript) with a table recorded from earlier runs.
 
 The stereotype cases, the system tests, and the integration tests of the option `-m` convert source files to srcML with the `srcml` program. Without this program, the configuration skips these tests and names them in a status message. The system tests run one at a time, also under `ctest -j 8`, since each one runs on every thread.
 
@@ -136,8 +136,8 @@ Run these commands inside the build folder (`cd build`).
 | Command | Description |
 |---|---|
 | `ctest -j 8` | Every test |
-| `ctest -LE systems` | Every test but the three systems |
-| `ctest -L systems` | Only the three systems |
+| `ctest -LE systems` | Every test but the seven systems |
+| `ctest -L systems` | Only the seven systems |
 | `ctest -L stereotypes` | Only the stereotype cases and the helper checks |
 | `ctest -R stereotypes/java` | The stereotype cases of one language |
 | `ctest -L unit` | Only the unit tests |

@@ -1,0 +1,1945 @@
+file	line	element	name	stereotypes
+knex-3.3.0/bin/cli.js	35	function	openKnexfile	property wrapper
+knex-3.3.0/bin/cli.js	59	function	initKnex	property command
+knex-3.3.0/bin/cli.js	100	function	invoke	wrapper
+knex-3.3.0/bin/knexfile-runtime-error.js	11	class	KnexfileRuntimeError	empty
+knex-3.3.0/bin/knexfile-runtime-error.js	12	constructor		constructor
+knex-3.3.0/bin/utils/cli-config-utils.js	11	function	parseConfigObj	property
+knex-3.3.0/bin/utils/cli-config-utils.js	33	function	mkConfigObj	property wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	49	function	resolveEnvironmentConfig	property wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	75	function	exit	wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	92	function	success	unclassified
+knex-3.3.0/bin/utils/cli-config-utils.js	97	function	checkLocalModule	wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	107	function	checkConfigurationOptions	unclassified
+knex-3.3.0/bin/utils/cli-config-utils.js	115	function	getMigrationExtension	property wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	133	function	getSeedExtension	property wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	151	function	getStubPath	property wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	172	function	findUpModulePath	property wrapper
+knex-3.3.0/bin/utils/cli-config-utils.js	192	function	findUpConfig	property wrapper
+knex-3.3.0/bin/utils/migrationsLister.js	5	function	listMigrations	wrapper
+knex-3.3.0/docs/.vitepress/badges.ts	16	function	renderBadges	property wrapper
+knex-3.3.0/docs/.vitepress/badges.ts	43	function	renderOnlyBadge	property
+knex-3.3.0/docs/.vitepress/badges.ts	60	function	renderUnsupportedBadge	property
+knex-3.3.0/docs/.vitepress/badges.ts	66	function	renderEmulatedBadge	property
+knex-3.3.0/docs/.vitepress/badges.ts	72	function	parseBadgeTokens	property wrapper
+knex-3.3.0/docs/.vitepress/badges.ts	113	function	dialectLabel	property
+knex-3.3.0/docs/.vitepress/config.mts	103	function	getGuideSidebar	wrapper
+knex-3.3.0/docs/.vitepress/config.mts	136	function	getFaqSidebar	wrapper
+knex-3.3.0/docs/.vitepress/config.mts	151	function	extractHeaders	property wrapper
+knex-3.3.0/docs/.vitepress/config.mts	240	function	uniqueSlug	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	54	function	knexDialects	wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	134	function	replaceBadgeTokens	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	179	function	safeLoadResolvedSnippets	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	209	function	replaceCodeFences	property command
+knex-3.3.0/docs/.vitepress/knexDialects.ts	244	function	findNearestHeadingId	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	281	function	renderResolvedOutputs	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	342	function	renderMissingSnippetGroup	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	365	function	renderSqlOutputs	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	436	function	toSqlStringsAsync	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	485	function	collectSqlEntries	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	508	function	toSqlStrings	property wrapper
+knex-3.3.0/docs/.vitepress/knexDialects.ts	552	function	renderPlainOutput	property wrapper
+knex-3.3.0/docs/.vitepress/slugify.ts	6	function	slugify	property wrapper
+knex-3.3.0/docs/.vitepress/theme/dialect.js	3	function	createDialect	property command
+knex-3.3.0/docs/.vitepress/theme/dialect.js	32	function	useDialect	literal wrapper
+knex-3.3.0/docs/.vitepress/theme/sidebarDialectErrors.js	1	function	syncDialectErrors	wrapper
+knex-3.3.0/docs/scripts/format-sql-bindings.mjs	15	function	hasQuestionBindings	predicate
+knex-3.3.0/docs/scripts/format-sql-bindings.mjs	33	function	getPlaceholderStyle	property wrapper
+knex-3.3.0/docs/scripts/format-sql-bindings.mjs	41	function	replaceNumberedPlaceholders	property wrapper
+knex-3.3.0/docs/scripts/format-sql-bindings.mjs	58	function	formatPositionalBindings	property wrapper
+knex-3.3.0/docs/scripts/format-sql-bindings.mjs	71	function	formatSqlWithBindings	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	109	function	main	main
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	170	function	logKnexVersion	literal
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	181	function	printHelp	wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	207	function	parseListFlag	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	223	function	parseMode	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	240	function	selectGroups	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	273	function	ensureOptionalModule	predicate wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	294	function	runResolver	wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	308	function	dockerUp	wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	329	function	dockerDown	wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	333	function	runCommand	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets-docker.mjs	350	function	shouldUseLiveDb	predicate wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	50	function	main	main
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	87	function	printHelp	wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	120	function	parseMode	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	138	function	parseDialectFilter	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	156	function	filterDialects	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	170	function	loadSnippets	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	205	function	loadExistingOutput	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	230	function	writeOutput	command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	236	function	createKnex	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	300	function	resolveDialect	wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	332	function	shouldUseLiveDb	predicate
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	342	function	runWithRetry	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	358	function	sleep	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	362	function	isOracleInitError	predicate wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	367	function	setupFixtureSchema	command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	445	function	resolveDialectSnippets	command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	502	function	resolveCaptureSql	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	544	function	resolveSchemaBuilder	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	556	function	resolveSchemaQuery	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	603	function	resolveOutputQuery	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	633	function	createCaptureRunner	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	673	function	shouldExecuteQuery	predicate wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	682	function	getSqlString	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	695	function	withConnection	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	704	function	withRawPatch	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	727	function	shouldPatchRaw	predicate wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	737	function	collectSqlFromValue	property command
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	793	function	mergeOutputSql	property wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	806	function	isSchemaBuilder	predicate
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	815	function	isDdlResult	predicate wrapper
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	824	function	isKnexBuilder	predicate
+knex-3.3.0/docs/scripts/resolve-schema-snippets.mjs	830	function	toSqlStrings	property command
+knex-3.3.0/docs/scripts/snippet-utils.mjs	3	function	normalizeError	property factory wrapper
+knex-3.3.0/docs/scripts/snippet-utils.mjs	10	function	normalizeCapture	property wrapper
+knex-3.3.0/docs/scripts/snippet-utils.mjs	22	function	formatSqlError	property wrapper
+knex-3.3.0/docs/scripts/snippet-utils.mjs	42	function	evaluateSnippet	property wrapper
+knex-3.3.0/docs/scripts/snippet-utils.mjs	89	function	instrumentMarkedStatements	property wrapper
+knex-3.3.0/docs/scripts/snippet-utils.mjs	163	function	findMarkerLines	property command
+knex-3.3.0/docs/scripts/snippet-utils.mjs	175	function	mapMarkersToStatements	property wrapper
+knex-3.3.0/docs/scripts/snippet-utils.mjs	196	function	applyInserts	property wrapper
+knex-3.3.0/docs/src/blog/blog.constants.ts	3	function	resolveBlogPageLink	property
+knex-3.3.0/docs/src/blog/date.ts	13	function	getPart	property wrapper
+knex-3.3.0/docs/src/blog/date.ts	20	function	formatUtcDate	property global-command wrapper
+knex-3.3.0/docs/src/blog/page/[page].paths.ts	9	function	listPostFiles	property wrapper
+knex-3.3.0/docs/src/blog/page/[page].paths.ts	31	function	isDraftPost	predicate wrapper
+knex-3.3.0/docs/src/blog/page/[page].paths.ts	41	function	countPublishedPosts	wrapper
+knex-3.3.0/docs/src/blog/posts.data.mts	13	function	toText	property wrapper
+knex-3.3.0/docs/src/blog/posts.data.mts	17	function	stripHtml	property wrapper
+knex-3.3.0/docs/src/blog/posts.data.mts	24	function	resolveTimestamp	property wrapper
+knex-3.3.0/docs/src/blog/posts.data.mts	34	function	resolveDraftFlag	predicate wrapper
+knex-3.3.0/lib/builder-interface-augmenter.js	7	function	augmentWithBuilderInterface	command
+knex-3.3.0/lib/client.js	39	function	preserveClassInstances	property wrapper
+knex-3.3.0/lib/client.js	53	class	Client	boundary large-class degenerate
+knex-3.3.0/lib/client.js	54	constructor		constructor
+knex-3.3.0/lib/client.js	115	function	formatter	factory collaborator stateless
+knex-3.3.0/lib/client.js	119	function	queryBuilder	factory collaborator stateless
+knex-3.3.0/lib/client.js	123	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/client.js	127	function	schemaBuilder	factory collaborator stateless
+knex-3.3.0/lib/client.js	131	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/client.js	135	function	tableBuilder	factory collaborator stateless
+knex-3.3.0/lib/client.js	139	function	viewBuilder	factory collaborator stateless
+knex-3.3.0/lib/client.js	143	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/client.js	147	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/client.js	151	function	columnBuilder	factory collaborator stateless
+knex-3.3.0/lib/client.js	155	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/client.js	159	function	runner	factory collaborator stateless
+knex-3.3.0/lib/client.js	163	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/client.js	167	function	raw	controller stateless
+knex-3.3.0/lib/client.js	171	function	ref	factory collaborator stateless
+knex-3.3.0/lib/client.js	174	function	query	property wrapper
+knex-3.3.0/lib/client.js	179	function	stream	property non-void-command
+knex-3.3.0/lib/client.js	184	function	prepBindings	incidental
+knex-3.3.0/lib/client.js	188	function	positionBindings	incidental
+knex-3.3.0/lib/client.js	192	function	postProcessResponse	property non-void-command
+knex-3.3.0/lib/client.js	199	function	wrapIdentifier	property non-void-command
+knex-3.3.0/lib/client.js	207	function	customWrapIdentifier	property non-void-command
+knex-3.3.0/lib/client.js	214	function	wrapIdentifierImpl	incidental
+knex-3.3.0/lib/client.js	218	function	initializeDriver	command collaborator
+knex-3.3.0/lib/client.js	229	function	poolDefaults	incidental
+knex-3.3.0/lib/client.js	233	function	getPoolSettings	property non-void-command collaborator
+knex-3.3.0/lib/client.js	408	function	initializePool	command collaborator
+knex-3.3.0/lib/client.js	429	function	initializeExternalPool	command collaborator
+knex-3.3.0/lib/client.js	446	function	wrapNativePool	unclassified
+knex-3.3.0/lib/client.js	455	function	validateConnection	incidental
+knex-3.3.0/lib/client.js	460	function	acquireConnection	property non-void-command collaborator
+knex-3.3.0/lib/client.js	505	function	releaseConnection	property non-void-command collaborator
+knex-3.3.0/lib/client.js	519	function	destroy	property non-void-command collaborator
+knex-3.3.0/lib/client.js	538	function	database	property
+knex-3.3.0/lib/client.js	542	function	toString	incidental
+knex-3.3.0/lib/client.js	546	function	assertCanCancelQuery	unclassified
+knex-3.3.0/lib/client.js	552	function	cancelQuery	stateless
+knex-3.3.0/lib/client.js	558	function	alias	incidental
+knex-3.3.0/lib/client.js	564	function	parameter	property wrapper
+knex-3.3.0/lib/client.js	578	function	parameterize	property wrapper
+knex-3.3.0/lib/client.js	608	function	values	property wrapper
+knex-3.3.0/lib/client.js	638	function	processPassedConnection	empty
+knex-3.3.0/lib/client.js	642	function	toPathForJson	incidental
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	5	class	Client_BetterSQLite3	controller degenerate
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	6	function	_driver	incidental
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	11	function	acquireRawConnection	property factory controller
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	29	function	destroyRawConnection	controller stateless
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	35	function	_query	controller stateless
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	67	function	_formatBindings	controller stateless
+knex-3.3.0/lib/dialects/better-sqlite3/index.js	84	function	_optSafeIntegers	incidental
+knex-3.3.0/lib/dialects/cockroachdb/crdb-columncompiler.js	3	class	ColumnCompiler_CRDB	entity small-class
+knex-3.3.0/lib/dialects/cockroachdb/crdb-columncompiler.js	4	function	uuid	property non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	8	class	QueryCompiler_CRDB	entity
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	9	function	truncate	property
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	13	function	upsert	property non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	24	function	_upsert	property non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	31	function	_groupOrder	non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	36	function	whereJsonPath	property wrapper
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	60	function	_jsonExtract	property non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-querycompiler.js	87	function	_onJsonPathEquals	property non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-tablecompiler.js	5	class	TableCompiler_CRDB	commander
+knex-3.3.0/lib/dialects/cockroachdb/crdb-tablecompiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/cockroachdb/crdb-tablecompiler.js	10	function	addColumns	command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-tablecompiler.js	29	function	dropUnique	command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-tablecompiler.js	36	function	dropUniqueIfExists	command
+knex-3.3.0/lib/dialects/cockroachdb/crdb-viewcompiler.js	3	class	ViewCompiler_CRDB	degenerate small-class
+knex-3.3.0/lib/dialects/cockroachdb/crdb-viewcompiler.js	4	function	renameColumn	stateless
+knex-3.3.0/lib/dialects/cockroachdb/crdb-viewcompiler.js	8	function	defaultTo	stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	14	class	Client_CockroachDB	controller degenerate
+knex-3.3.0/lib/dialects/cockroachdb/index.js	15	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	19	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	23	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	27	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	31	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	35	function	queryBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	39	function	_parseVersion	incidental
+knex-3.3.0/lib/dialects/cockroachdb/index.js	43	function	cancelQuery	property non-void-command
+knex-3.3.0/lib/dialects/cockroachdb/index.js	52	function	_wrappedCancelQueryCall	controller stateless
+knex-3.3.0/lib/dialects/cockroachdb/index.js	67	function	toArrayPathFromJsonPath	property non-void-command
+knex-3.3.0/lib/dialects/index.js	26	function	getDialectByNameOrAlias	property wrapper
+knex-3.3.0/lib/dialects/index.ts	25	function	getDialectByNameOrAlias	property wrapper
+knex-3.3.0/lib/dialects/mariadb/index.js	8	class	Client_MariaDB	degenerate
+knex-3.3.0/lib/dialects/mariadb/index.js	9	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/mariadb/index.js	13	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mariadb/index.js	17	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mariadb/index.js	21	function	_driver	incidental
+knex-3.3.0/lib/dialects/mariadb/index.js	25	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/mariadb/index.js	38	function	validateConnection	controller stateless
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	6	class	QueryCompiler_MariaDB	entity
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	10	function	onJsonPathEquals	property
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	26	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	36	function	update	property non-void-command
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	46	function	del	property non-void-command
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	56	function	_returning	property
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	60	function	_supportsReturning	predicate wrapper
+knex-3.3.0/lib/dialects/mariadb/query/mariadb-querycompiler.js	76	function	_returningCheck	command
+knex-3.3.0/lib/dialects/mariadb/schema/mariadb-columncompiler.js	5	class	ColumnCompiler_MariaDB	entity small-class
+knex-3.3.0/lib/dialects/mariadb/schema/mariadb-columncompiler.js	8	function	_check	property non-void-command
+knex-3.3.0/lib/dialects/mariadb/transaction.js	4	class	Transaction_MariaDB	entity small-class
+knex-3.3.0/lib/dialects/mariadb/transaction.js	5	function	query	property non-void-command
+knex-3.3.0/lib/dialects/mssql/index.js	24	class	Client_MSSQL	boundary degenerate
+knex-3.3.0/lib/dialects/mssql/index.js	25	constructor		constructor
+knex-3.3.0/lib/dialects/mssql/index.js	32	function	_generateConnection	property wrapper
+knex-3.3.0/lib/dialects/mssql/index.js	94	function	_driver	incidental
+knex-3.3.0/lib/dialects/mssql/index.js	100	function	formatter	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	104	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	108	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	112	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	116	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	120	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	123	function	queryBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	128	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mssql/index.js	132	function	wrapIdentifierImpl	incidental
+knex-3.3.0/lib/dialects/mssql/index.js	142	function	acquireRawConnection	property controller
+knex-3.3.0/lib/dialects/mssql/index.js	176	function	validateConnection	incidental
+knex-3.3.0/lib/dialects/mssql/index.js	182	function	destroyRawConnection	controller stateless
+knex-3.3.0/lib/dialects/mssql/index.js	195	function	positionBindings	controller stateless
+knex-3.3.0/lib/dialects/mssql/index.js	207	function	_chomp	command
+knex-3.3.0/lib/dialects/mssql/index.js	221	function	_enqueueRequest	command
+knex-3.3.0/lib/dialects/mssql/index.js	226	function	_makeRequest	property factory controller
+knex-3.3.0/lib/dialects/mssql/index.js	286	function	_stream	property non-void-command
+knex-3.3.0/lib/dialects/mssql/index.js	320	function	_assignBindings	command
+knex-3.3.0/lib/dialects/mssql/index.js	329	function	_scaleForBinding	stateless
+knex-3.3.0/lib/dialects/mssql/index.js	337	function	_typeForBinding	property non-void-command
+knex-3.3.0/lib/dialects/mssql/index.js	388	function	_query	property non-void-command
+knex-3.3.0/lib/dialects/mssql/index.js	414	function	_setReqInput	command
+knex-3.3.0/lib/dialects/mssql/index.js	440	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/mssql/mssql-formatter.js	3	class	MSSQL_Formatter	small-class
+knex-3.3.0/lib/dialects/mssql/mssql-formatter.js	5	function	columnizeWithPrefix	property
+knex-3.3.0/lib/dialects/mssql/mssql-formatter.js	29	function	escapingStringDelimiters	controller stateless
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	27	class	QueryCompiler_MSSQL	unclassified
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	28	constructor		constructor
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	63	function	select	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	72	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	83	function	insertWithTriggers	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	119	function	_buildInsertData	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	140	function	standardInsert	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	170	function	update	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	181	function	updateWithTriggers	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	208	function	_formatGroupsItemValue	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	223	function	standardUpdate	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	249	function	del	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	260	function	deleteWithTriggers	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	287	function	standardDelete	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	313	function	columns	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	352	function	_returning	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	372	function	_buildTempTable	property controller
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	397	function	_buildReturningSelect	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	423	function	truncate	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	427	function	forUpdate	incidental
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	433	function	forShare	incidental
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	439	function	columnInfo	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	481	function	top	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	488	function	limit	incidental
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	492	function	offset	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	507	function	whereLike	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	516	function	whereILike	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	525	function	jsonExtract	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	534	function	jsonSet	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	538	function	jsonInsert	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	542	function	jsonRemove	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	558	function	whereJsonPath	property
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	562	function	whereJsonSupersetOf	stateless
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	568	function	whereJsonSubsetOf	stateless
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	572	function	_getExtracts	property non-void-command
+knex-3.3.0/lib/dialects/mssql/query/mssql-querycompiler.js	594	function	onJsonPathEquals	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	8	class	ColumnCompiler_MSSQL	entity
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	9	constructor		constructor
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	18	function	double	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	22	function	floating	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	27	function	integer	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	32	function	tinyint	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	37	function	varchar	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	41	function	timestamp	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	45	function	bit	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	52	function	binary	incidental
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	59	function	first	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	64	function	after	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	69	function	defaultTo	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	97	function	comment	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	132	function	checkLength	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	143	function	checkRegex	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	152	function	increments	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-columncompiler.js	159	function	bigincrements	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	5	class	SchemaCompiler_MSSQL	commander
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	10	function	dropTableIfExists	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	17	function	dropViewIfExists	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	25	function	renameTable	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	35	function	renameView	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	46	function	hasTable	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	66	function	hasColumn	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-compiler.js	87	function	prefixedTableName	property
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	12	class	TableCompiler_MSSQL	entity commander
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	13	constructor		constructor
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	17	function	createQuery	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	45	function	comment	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	74	function	addColumns	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	90	function	alterColumns	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	133	function	dropColumn	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	166	function	changeType	empty
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	169	function	renameColumn	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	183	function	dropFKRefs	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	196	function	createFKRefs	property non-void-command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	226	function	index	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	251	function	primary	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	285	function	unique	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	335	function	dropIndex	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	343	function	dropForeign	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	352	function	dropForeignIfExists	stateless
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	357	function	dropPrimary	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	366	function	dropPrimaryIfExists	stateless
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	371	function	dropUnique	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-tablecompiler.js	378	function	dropUniqueIfExists	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-viewcompiler.js	8	class	ViewCompiler_MSSQL	commander
+knex-3.3.0/lib/dialects/mssql/schema/mssql-viewcompiler.js	9	constructor		constructor
+knex-3.3.0/lib/dialects/mssql/schema/mssql-viewcompiler.js	13	function	createQuery	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-viewcompiler.js	36	function	renameColumn	command
+knex-3.3.0/lib/dialects/mssql/schema/mssql-viewcompiler.js	50	function	createOrReplace	command
+knex-3.3.0/lib/dialects/mssql/transaction.js	4	class	Transaction_MSSQL	unclassified
+knex-3.3.0/lib/dialects/mssql/transaction.js	5	function	begin	property controller
+knex-3.3.0/lib/dialects/mssql/transaction.js	27	function	savepoint	property non-void-command
+knex-3.3.0/lib/dialects/mssql/transaction.js	57	function	commit	property set
+knex-3.3.0/lib/dialects/mssql/transaction.js	80	function	release	property wrapper
+knex-3.3.0/lib/dialects/mssql/transaction.js	84	function	rollback	property set
+knex-3.3.0/lib/dialects/mssql/transaction.js	137	function	rollbackTo	property non-void-command
+knex-3.3.0/lib/dialects/mssql/transaction.js	152	function	nameToIsolationLevelEnum	property wrapper
+knex-3.3.0/lib/dialects/mysql/index.js	23	class	Client_MySQL	boundary lazy-class degenerate
+knex-3.3.0/lib/dialects/mysql/index.js	24	function	_driver	incidental
+knex-3.3.0/lib/dialects/mysql/index.js	28	function	queryBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	32	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	36	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	40	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	44	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	48	function	viewBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	52	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	56	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql/index.js	60	function	wrapIdentifierImpl	incidental
+knex-3.3.0/lib/dialects/mysql/index.js	66	function	acquireRawConnection	property non-void-command collaborator
+knex-3.3.0/lib/dialects/mysql/index.js	95	function	destroyRawConnection	controller stateless
+knex-3.3.0/lib/dialects/mysql/index.js	107	function	validateConnection	incidental
+knex-3.3.0/lib/dialects/mysql/index.js	117	function	wrapNativePool	controller stateless
+knex-3.3.0/lib/dialects/mysql/index.js	156	function	_stream	controller stateless
+knex-3.3.0/lib/dialects/mysql/index.js	179	function	_query	controller stateless
+knex-3.3.0/lib/dialects/mysql/index.js	202	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/mysql/index.js	227	function	cancelQuery	property non-void-command collaborator
+knex-3.3.0/lib/dialects/mysql/index.js	239	function	_wrappedCancelQueryCall	wrapper stateless
+knex-3.3.0/lib/dialects/mysql/index.js	247	function	checkVersion	get non-void-command
+knex-3.3.0/lib/dialects/mysql/index.js	280	function	_resolveConfiguredVersion	property non-void-command
+knex-3.3.0/lib/dialects/mysql/index.js	291	function	_applyParsedVersion	get property non-void-command
+knex-3.3.0/lib/dialects/mysql/index.js	313	function	_assumeLatestVersion	get non-void-command collaborator
+knex-3.3.0/lib/dialects/mysql/index.js	324	function	_isLatestVersionString	controller stateless
+knex-3.3.0/lib/dialects/mysql/index.js	331	function	_parseVersion	controller stateless
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	17	class	QueryCompiler_MySQL	unclassified
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	18	constructor		constructor
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	25	function	del	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	37	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	58	function	upsert	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	66	function	_merge	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	101	function	update	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	122	function	forUpdate	incidental
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	126	function	forShare	incidental
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	131	function	skipLocked	incidental
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	136	function	noWait	incidental
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	141	function	columnInfo	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	168	function	limit	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	181	function	whereBasic	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	190	function	whereRaw	property controller
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	200	function	whereLike	property
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	207	function	whereILike	property
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	215	function	jsonExtract	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	219	function	jsonSet	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	223	function	jsonInsert	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	227	function	jsonRemove	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	243	function	whereJsonObject	property wrapper
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	252	function	whereJsonPath	property
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	256	function	whereJsonSupersetOf	property wrapper
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	269	function	whereJsonSubsetOf	property wrapper
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	282	function	onJsonPathEquals	property non-void-command
+knex-3.3.0/lib/dialects/mysql/query/mysql-querycompiler.js	286	function	_returningCheck	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	9	class	ColumnCompiler_MySQL	entity degenerate
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	10	constructor		constructor
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	27	function	double	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	32	function	integer	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	37	function	tinyint	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	42	function	text	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	55	function	mediumtext	wrapper stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	59	function	longtext	wrapper stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	63	function	enu	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	67	function	datetime	wrapper stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	77	function	timestamp	wrapper stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	87	function	time	wrapper stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	95	function	bit	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	99	function	binary	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	103	function	json	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	107	function	jsonb	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	114	function	defaultTo	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	132	function	unsigned	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	136	function	comment	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	145	function	first	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	149	function	after	property
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	153	function	collate	incidental
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	157	function	checkRegex	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	166	function	increments	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-columncompiler.js	177	function	bigincrements	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-compiler.js	5	class	SchemaCompiler_MySQL	commander
+knex-3.3.0/lib/dialects/mysql/schema/mysql-compiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/mysql/schema/mysql-compiler.js	11	function	renameTable	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-compiler.js	19	function	renameView	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-compiler.js	24	function	hasTable	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-compiler.js	45	function	hasColumn	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	11	class	TableCompiler_MySQL	entity commander
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	12	constructor		constructor
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	16	function	createQuery	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	65	function	comment	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	69	function	changeType	empty
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	74	function	renameColumn	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	151	function	primaryKeys	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	187	function	getFKRefs	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	226	function	dropFKRefs	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	242	function	createFKRefs	property non-void-command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	278	function	index	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	303	function	primary	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	361	function	unique	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	386	function	dropIndex	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	394	function	dropForeign	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	403	function	dropForeignIfExists	stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	408	function	dropPrimary	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	412	function	dropPrimaryIfExists	stateless
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	417	function	dropUnique	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-tablecompiler.js	424	function	dropUniqueIfExists	command
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewbuilder.js	3	class	ViewBuilder_MySQL	commander data-class
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewbuilder.js	4	constructor		constructor
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewbuilder.js	8	function	checkOption	set
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewbuilder.js	12	function	localCheckOption	set
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewbuilder.js	16	function	cascadedCheckOption	set
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewcompiler.js	5	class	ViewCompiler_MySQL	commander small-class
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewcompiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/mysql/schema/mysql-viewcompiler.js	10	function	createOrReplace	command
+knex-3.3.0/lib/dialects/mysql/transaction.js	6	class	Transaction_MySQL	entity small-class
+knex-3.3.0/lib/dialects/mysql/transaction.js	7	function	query	property non-void-command
+knex-3.3.0/lib/dialects/mysql2/index.js	9	class	Client_MySQL2	boundary degenerate
+knex-3.3.0/lib/dialects/mysql2/index.js	10	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/mysql2/index.js	14	function	_driver	incidental
+knex-3.3.0/lib/dialects/mysql2/index.js	18	function	initializeDriver	command collaborator
+knex-3.3.0/lib/dialects/mysql2/index.js	39	function	wrapNativePool	wrapper stateless
+knex-3.3.0/lib/dialects/mysql2/index.js	44	function	validateConnection	incidental
+knex-3.3.0/lib/dialects/mysql2/transaction.js	4	class	Transaction_MySQL2	entity small-class
+knex-3.3.0/lib/dialects/mysql2/transaction.js	5	function	query	property non-void-command
+knex-3.3.0/lib/dialects/oracle/index.js	14	class	Client_Oracle	boundary degenerate
+knex-3.3.0/lib/dialects/oracle/index.js	15	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracle/index.js	19	function	columnBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracle/index.js	23	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracle/index.js	27	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracle/index.js	32	function	database	property
+knex-3.3.0/lib/dialects/oracle/index.js	37	function	positionBindings	controller stateless
+knex-3.3.0/lib/dialects/oracle/index.js	45	function	_stream	controller stateless
+knex-3.3.0/lib/dialects/oracle/index.js	71	function	alias	incidental
+knex-3.3.0/lib/dialects/oracle/index.js	75	function	parameter	property
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	32	class	QueryCompiler_Oracle	entity
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	33	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	49	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	193	function	update	property non-void-command
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	216	function	truncate	property
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	220	function	forUpdate	incidental
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	224	function	forShare	property non-void-command
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	234	function	columnInfo	property non-void-command
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	272	function	select	property non-void-command
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	281	function	aggregate	property
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	286	function	_addReturningToSqlAndConvert	property non-void-command collaborator
+knex-3.3.0/lib/dialects/oracle/query/oracle-querycompiler.js	309	function	_surroundQueryWithLimitAndOffset	property non-void-command
+knex-3.3.0/lib/dialects/oracle/schema/internal/incrementUtils.js	4	function	createAutoIncrementTriggerAndSequence	command
+knex-3.3.0/lib/dialects/oracle/schema/internal/trigger.js	3	class	Trigger	data-provider boundary
+knex-3.3.0/lib/dialects/oracle/schema/internal/trigger.js	4	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/schema/internal/trigger.js	8	function	renameColumnTrigger	property collaborator
+knex-3.3.0/lib/dialects/oracle/schema/internal/trigger.js	54	function	createAutoIncrementTrigger	property collaborator
+knex-3.3.0/lib/dialects/oracle/schema/internal/trigger.js	99	function	renameTableAndAutoIncrementTrigger	property collaborator
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columnbuilder.js	4	class	ColumnBuilder_Oracle	commander data-class small-class
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columnbuilder.js	5	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columnbuilder.js	11	function	checkIn	set
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	12	class	ColumnCompiler_Oracle	degenerate
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	13	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	18	function	increments	property non-void-command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	26	function	bigincrements	property non-void-command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	34	function	floating	wrapper stateless
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	39	function	double	incidental
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	44	function	decimal	incidental
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	49	function	integer	incidental
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	53	function	enu	property set
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	66	function	datetime	incidental
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	70	function	timestamp	incidental
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	74	function	bool	property set
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	80	function	varchar	incidental
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	87	function	comment	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-columncompiler.js	101	function	checkIn	property controller
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	7	class	SchemaCompiler_Oracle	entity commander
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	8	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	13	function	renameTable	command collaborator
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	24	function	hasTable	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	36	function	hasColumn	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	52	function	dropSequenceIfExists	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	62	function	_dropRelatedSequenceIfExists	command collaborator
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	73	function	dropTable	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	81	function	dropTableIfExists	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	85	function	dropViewIfExists	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	89	function	dropObject	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	107	function	refreshMaterializedView	property non-void-command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	115	function	dropMaterializedView	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-compiler.js	119	function	dropMaterializedViewIfExists	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	12	class	TableCompiler_Oracle	entity commander
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	13	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	17	function	addColumns	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	39	function	renameColumn	property non-void-command collaborator
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	48	function	compileAdd	property non-void-command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	57	function	createQuery	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	76	function	comment	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	80	function	dropColumn	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	89	function	_indexCommand	property non-void-command collaborator
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	101	function	primary	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	129	function	dropPrimary	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	138	function	index	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	150	function	dropIndex	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	157	function	unique	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	175	function	dropUnique	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	184	function	dropUniqueIfExists	stateless
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	189	function	dropForeign	command
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	198	function	dropForeignIfExists	stateless
+knex-3.3.0/lib/dialects/oracle/schema/oracle-tablecompiler.js	202	function	dropPrimaryIfExists	stateless
+knex-3.3.0/lib/dialects/oracle/utils.js	1	class	NameHelper	controller small-class
+knex-3.3.0/lib/dialects/oracle/utils.js	2	constructor		constructor
+knex-3.3.0/lib/dialects/oracle/utils.js	20	function	generateCombinedName	property controller
+knex-3.3.0/lib/dialects/oracle/utils.js	44	function	wrapSqlWithCatch	property
+knex-3.3.0/lib/dialects/oracle/utils.js	53	function	ReturningHelper	unclassified
+knex-3.3.0/lib/dialects/oracle/utils.js	63	function	isConnectionError	predicate command
+knex-3.3.0/lib/dialects/oracledb/index.js	26	class	Client_Oracledb	boundary degenerate
+knex-3.3.0/lib/dialects/oracledb/index.js	27	constructor		constructor
+knex-3.3.0/lib/dialects/oracledb/index.js	43	function	_driver	property non-void-command collaborator
+knex-3.3.0/lib/dialects/oracledb/index.js	69	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	73	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	77	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	81	function	viewBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	85	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	89	function	formatter	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	93	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	97	function	prepBindings	property wrapper
+knex-3.3.0/lib/dialects/oracledb/index.js	113	function	parameter	property controller
+knex-3.3.0/lib/dialects/oracledb/index.js	130	function	acquireRawConnection	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/index.js	172	function	destroyRawConnection	controller stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	180	function	wrapNativePool	property controller
+knex-3.3.0/lib/dialects/oracledb/index.js	220	function	acquireConnection	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/index.js	228	function	checkVersion	get property set
+knex-3.3.0/lib/dialects/oracledb/index.js	251	function	_query	controller stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	355	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/oracledb/index.js	383	function	processPassedConnection	command
+knex-3.3.0/lib/dialects/oracledb/index.js	391	function	parseVersion	property wrapper
+knex-3.3.0/lib/dialects/oracledb/index.js	407	function	resolveConnectString	property
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	13	class	Oracledb_Compiler	unclassified
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	16	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	230	function	_addReturningToSqlAndConvert	property controller
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	275	function	_prepOutbindings	controller stateless
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	318	function	_groupOrder	non-void-command
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	322	function	update	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	398	function	_jsonPathWrap	incidental
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	403	function	jsonExtract	non-void-command
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	410	function	jsonSet	property
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	427	function	jsonInsert	property
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	444	function	jsonRemove	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	460	function	whereJsonPath	non-void-command
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	464	function	whereJsonSupersetOf	stateless
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	470	function	whereJsonSubsetOf	stateless
+knex-3.3.0/lib/dialects/oracledb/query/oracledb-querycompiler.js	476	function	onJsonPathEquals	non-void-command
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	4	class	ColumnCompiler_Oracledb	entity
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	5	constructor		constructor
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	11	function	datetime	wrapper stateless
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	21	function	timestamp	wrapper stateless
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	31	function	checkRegex	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	40	function	json	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	48	function	jsonb	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-columncompiler.js	52	function	checkJson	incidental
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-tablecompiler.js	3	class	TableCompiler_Oracledb	entity small-class
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-tablecompiler.js	4	constructor		constructor
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-tablecompiler.js	8	function	_setNullableState	property non-void-command
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewbuilder.js	3	class	ViewBuilder_Oracledb	commander data-class small-class
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewbuilder.js	4	constructor		constructor
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewbuilder.js	8	function	checkOption	set
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewcompiler.js	5	class	ViewCompiler_Oracledb	commander small-class
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewcompiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewcompiler.js	10	function	createOrReplace	command
+knex-3.3.0/lib/dialects/oracledb/schema/oracledb-viewcompiler.js	14	function	createMaterializedView	command
+knex-3.3.0/lib/dialects/oracledb/utils.js	5	function	BlobHelper	unclassified
+knex-3.3.0/lib/dialects/oracledb/utils.js	19	function	readStream	property command
+knex-3.3.0/lib/dialects/oracledb/utils.js	70	function	monkeyPatchConnection	command
+knex-3.3.0/lib/dialects/pgnative/index.js	5	class	Client_PgNative	unclassified
+knex-3.3.0/lib/dialects/pgnative/index.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/pgnative/index.js	12	function	_driver	incidental
+knex-3.3.0/lib/dialects/pgnative/index.js	16	function	_stream	property controller
+knex-3.3.0/lib/dialects/pgnative/index.js	37	function	cancelQuery	property non-void-command collaborator
+knex-3.3.0/lib/dialects/pgnative/index.js	46	function	_wrappedCancelQueryCall	controller stateless
+knex-3.3.0/lib/dialects/postgres/execution/pg-transaction.js	3	class	Transaction_PG	entity small-class
+knex-3.3.0/lib/dialects/postgres/execution/pg-transaction.js	4	function	begin	property non-void-command
+knex-3.3.0/lib/dialects/postgres/index.js	20	class	Client_PG	controller degenerate
+knex-3.3.0/lib/dialects/postgres/index.js	21	constructor		constructor
+knex-3.3.0/lib/dialects/postgres/index.js	31	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	35	function	queryBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	39	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	43	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	47	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	51	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	55	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	59	function	viewBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/postgres/index.js	63	function	_driver	incidental
+knex-3.3.0/lib/dialects/postgres/index.js	67	function	wrapIdentifierImpl	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	81	function	_acquireOnlyConnection	property controller
+knex-3.3.0/lib/dialects/postgres/index.js	97	function	acquireRawConnection	property controller
+knex-3.3.0/lib/dialects/postgres/index.js	119	function	destroyRawConnection	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	125	function	wrapNativePool	property controller
+knex-3.3.0/lib/dialects/postgres/index.js	161	function	checkVersion	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	170	function	_parseVersion	incidental
+knex-3.3.0/lib/dialects/postgres/index.js	176	function	positionBindings	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	188	function	setSchemaSearchPath	property non-void-command collaborator
+knex-3.3.0/lib/dialects/postgres/index.js	225	function	_stream	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	266	function	_query	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	288	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	312	function	cancelQuery	property non-void-command collaborator
+knex-3.3.0/lib/dialects/postgres/index.js	323	function	_wrappedCancelQueryCall	wrapper stateless
+knex-3.3.0/lib/dialects/postgres/index.js	331	function	toPathForJson	controller stateless
+knex-3.3.0/lib/dialects/postgres/index.js	393	function	arrayString	property wrapper
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	9	class	ColumnCompiler_PG	entity
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	10	constructor		constructor
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	19	function	bit	incidental
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	25	function	enu	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	54	function	decimal	incidental
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	59	function	json	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	64	function	jsonb	property wrapper
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	68	function	checkRegex	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	77	function	datetime	property wrapper
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	99	function	timestamp	property
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	105	function	comment	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	120	function	increments	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	127	function	bigincrements	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	134	function	uuid	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-columncompiler.js	150	function	jsonColumn	property wrapper
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	6	class	SchemaCompiler_PG	entity commander
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	7	constructor		constructor
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	12	function	hasTable	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	33	function	hasColumn	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	54	function	qualifiedTableName	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	60	function	renameTable	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	68	function	createSchema	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	72	function	createSchemaIfNotExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	78	function	dropSchema	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	86	function	dropSchemaIfExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	94	function	dropExtension	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	98	function	dropExtensionIfExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	104	function	createExtension	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	108	function	createExtensionIfNotExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	114	function	renameView	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	121	function	refreshMaterializedView	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	129	function	dropMaterializedView	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-compiler.js	133	function	dropMaterializedViewIfExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	10	class	TableCompiler_PG	entity commander
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	11	constructor		constructor
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	16	function	renameColumn	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	24	function	_setNullableState	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	34	function	compileAdd	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	43	function	createQuery	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	71	function	primaryKeys	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	93	function	addColumns	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	105	function	_addColumn	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	163	function	comment	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	172	function	primary	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	190	function	unique	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	232	function	index	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	266	function	dropPrimary	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	275	function	dropPrimaryIfExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	284	function	dropIndex	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	294	function	dropUnique	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	303	function	dropUniqueIfExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	312	function	dropForeign	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-tablecompiler.js	321	function	dropForeignIfExists	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewbuilder.js	3	class	ViewBuilder_PG	commander data-class
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewbuilder.js	4	constructor		constructor
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewbuilder.js	8	function	checkOption	set
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewbuilder.js	12	function	localCheckOption	set
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewbuilder.js	16	function	cascadedCheckOption	set
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewcompiler.js	5	class	ViewCompiler_PG	entity
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewcompiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewcompiler.js	10	function	renameColumn	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewcompiler.js	18	function	defaultTo	property non-void-command
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewcompiler.js	26	function	createOrReplace	command
+knex-3.3.0/lib/dialects/postgres/schema/pg-viewcompiler.js	30	function	createMaterializedView	command
+knex-3.3.0/lib/dialects/redshift/index.js	14	class	Client_Redshift	factory controller degenerate
+knex-3.3.0/lib/dialects/redshift/index.js	15	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	19	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	23	function	columnBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	27	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	31	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	35	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	39	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/redshift/index.js	43	function	_driver	incidental
+knex-3.3.0/lib/dialects/redshift/index.js	48	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/redshift/index.js	67	function	toPathForJson	property controller
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	11	class	QueryCompiler_Redshift	entity
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	12	function	truncate	property
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	18	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	28	function	update	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	37	function	del	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	46	function	_slightReturn	command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	54	function	forUpdate	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	59	function	forShare	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	66	function	forNoKeyUpdate	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	71	function	forKeyShare	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	79	function	columnInfo	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	102	function	jsonExtract	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	129	function	jsonSet	stateless
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	133	function	jsonInsert	stateless
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	137	function	jsonRemove	stateless
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	141	function	whereJsonPath	property non-void-command
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	150	function	whereJsonSupersetOf	stateless
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	154	function	whereJsonSubsetOf	stateless
+knex-3.3.0/lib/dialects/redshift/query/redshift-querycompiler.js	158	function	onJsonPathEquals	non-void-command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columnbuilder.js	3	class	ColumnBuilder_Redshift	commander small-class
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columnbuilder.js	4	constructor		constructor
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columnbuilder.js	9	function	primary	non-void-command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columnbuilder.js	14	function	index	command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columncompiler.js	7	class	ColumnCompiler_Redshift	commander degenerate
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columncompiler.js	8	constructor		constructor
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columncompiler.js	15	function	bit	incidental
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columncompiler.js	19	function	datetime	incidental
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columncompiler.js	23	function	timestamp	incidental
+knex-3.3.0/lib/dialects/redshift/schema/redshift-columncompiler.js	29	function	comment	command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-compiler.js	8	class	SchemaCompiler_Redshift	empty
+knex-3.3.0/lib/dialects/redshift/schema/redshift-compiler.js	9	constructor		constructor
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	9	class	TableCompiler_Redshift	entity commander
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	10	constructor		constructor
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	14	function	index	command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	20	function	dropIndex	command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	26	function	dropPrimaryIfExists	stateless
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	30	function	dropForeignIfExists	stateless
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	34	function	dropUniqueIfExists	stateless
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	41	function	createQuery	command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	65	function	primary	property non-void-command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-tablecompiler.js	115	function	addColumns	command
+knex-3.3.0/lib/dialects/redshift/schema/redshift-viewcompiler.js	5	class	ViewCompiler_Redshift	empty
+knex-3.3.0/lib/dialects/redshift/schema/redshift-viewcompiler.js	6	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/execution/sqlite-transaction.js	9	class	Transaction_Sqlite	entity
+knex-3.3.0/lib/dialects/sqlite3/execution/sqlite-transaction.js	12	function	_setForeignCheck	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/execution/sqlite-transaction.js	32	function	_restoreForeignCheck	command
+knex-3.3.0/lib/dialects/sqlite3/execution/sqlite-transaction.js	42	function	_evaluateContainer	property non-void-command collaborator
+knex-3.3.0/lib/dialects/sqlite3/execution/sqlite-transaction.js	140	function	_logAndDispose	void-accessor command collaborator
+knex-3.3.0/lib/dialects/sqlite3/execution/sqlite-transaction.js	151	function	begin	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/index.js	20	class	Client_SQLite3	boundary controller degenerate
+knex-3.3.0/lib/dialects/sqlite3/index.js	21	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/index.js	43	function	_driver	incidental
+knex-3.3.0/lib/dialects/sqlite3/index.js	48	function	_strict	property controller
+knex-3.3.0/lib/dialects/sqlite3/index.js	58	function	schemaCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	62	function	transaction	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	66	function	queryCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	70	function	queryBuilder	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	74	function	viewCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	78	function	columnCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	82	function	tableCompiler	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	86	function	ddl	property factory collaborator
+knex-3.3.0/lib/dialects/sqlite3/index.js	90	function	wrapIdentifierImpl	incidental
+knex-3.3.0/lib/dialects/sqlite3/index.js	95	function	acquireRawConnection	property controller
+knex-3.3.0/lib/dialects/sqlite3/index.js	127	function	destroyRawConnection	controller stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	134	function	_query	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/index.js	170	function	_stream	property controller
+knex-3.3.0/lib/dialects/sqlite3/index.js	192	function	processResponse	controller stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	228	function	poolDefaults	wrapper stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	232	function	formatter	factory collaborator stateless
+knex-3.3.0/lib/dialects/sqlite3/index.js	236	function	values	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	19	class	QueryCompiler_SQLite3	entity
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	20	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	33	function	insert	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	157	function	update	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	173	function	_ignore	property
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	180	function	_merge	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	224	function	_returning	property
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	229	function	truncate	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	242	function	columnInfo	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	278	function	limit	property set
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	289	function	jsonExtract	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	293	function	jsonSet	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	297	function	jsonInsert	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	301	function	jsonRemove	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	317	function	whereJsonPath	property
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	321	function	whereJsonSupersetOf	stateless
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	327	function	whereJsonSubsetOf	stateless
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	333	function	onJsonPathEquals	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/query/sqlite-querycompiler.js	337	function	whereILike	property
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	28	class	SQLite3_DDL	unclassified
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	29	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	41	function	tableName	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	45	function	getTableSql	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	66	function	isForeignCheckEnabled	predicate non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	74	function	setForeignCheck	command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	78	function	renameTable	property controller
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	82	function	dropOriginal	property controller
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	86	function	copyData	property controller
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	90	function	alterColumn	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	128	function	dropColumn	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	186	function	dropForeign	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	220	function	dropPrimary	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	250	function	primary	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	282	function	foreign	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	307	function	setNullable	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	336	function	alter	command
+knex-3.3.0/lib/dialects/sqlite3/schema/ddl.js	356	function	generateAlterCommands	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	1	function	compileCreateTable	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	5	function	compileCreateIndex	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	9	function	createTable	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	19	function	temporary	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	23	function	rowid	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	27	function	columnDefinitionList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	31	function	columnDefinition	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	38	function	typeName	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	42	function	columnConstraintList	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	58	function	primaryColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	67	function	autoincrement	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	71	function	notnullColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	80	function	nullColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	86	function	uniqueColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	95	function	checkColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	104	function	defaultColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	114	function	collateColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	120	function	referencesColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	129	function	asColumnConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	139	function	tableConstraintList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	147	function	tableConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	160	function	primaryTableConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	167	function	uniqueTableConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	174	function	conflictClause	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	178	function	checkTableConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	185	function	foreignTableConstraint	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	192	function	foreignKeyClause	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	199	function	columnNameListOptional	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	203	function	columnNameList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	207	function	deleteUpdateMatchList	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	214	function	deleteReference	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	218	function	updateReference	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	222	function	matchReference	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	226	function	deferrable	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	234	function	constraintName	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	238	function	createIndex	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	248	function	unique	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	252	function	exists	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	256	function	schema	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	260	function	index	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	264	function	table	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	268	function	where	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	272	function	indexedColumnList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	282	function	indexedColumn	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	289	function	indexedColumnExpression	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	296	function	collation	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	300	function	order	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	304	function	indexedExpression	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	308	function	expression	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/compiler.js	320	function	identifier	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	2	function	s	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	23	function	a	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	43	function	m	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	67	function	o	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	85	function	l	property command
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	107	function	n	property command
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser-combinator.js	129	function	t	property command
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	16	function	parseCreateTable	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	31	function	parseCreateIndex	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	46	function	createTable	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	66	function	temporary	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	72	function	rowid	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	78	function	columnDefinitionList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	87	function	columnDefinition	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	94	function	typeName	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	123	function	columnConstraintList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	142	function	columnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	156	function	primaryColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	170	function	autoincrement	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	176	function	notnullColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	188	function	nullColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	195	function	uniqueColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	202	function	checkColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	215	function	defaultColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	233	function	collateColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	244	function	referencesColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	253	function	asColumnConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	272	function	tableConstraintList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	278	function	tableConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	287	function	primaryTableConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	303	function	uniqueTableConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	317	function	conflictClause	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	337	function	checkTableConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	350	function	foreignTableConstraint	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	366	function	foreignKeyClause	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	381	function	columnNameListOptional	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	388	function	columnNameList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	400	function	deleteReference	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	406	function	updateReference	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	412	function	matchReference	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	419	function	deferrable	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	438	function	constraintName	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	445	function	createIndex	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	466	function	unique	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	470	function	exists	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	477	function	schema	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	484	function	index	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	488	function	table	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	492	function	where	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	499	function	indexedColumnList	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	516	function	indexedColumn	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	527	function	indexedColumnExpression	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	538	function	collation	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	545	function	order	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	551	function	indexedExpression	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	576	function	expression	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	594	function	identifier	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	600	function	onAction	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	613	function	literalValue	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/parser.js	628	function	signedNumber	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	1	function	copyData	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	9	function	dropOriginal	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	13	function	renameTable	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	17	function	getTableSql	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	21	function	isForeignCheckEnabled	literal
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	25	function	setForeignCheck	property
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/sqlite-ddl-operations.js	29	function	executeForeignCheck	literal
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/tokenizer.js	1	function	tokenize	property wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/utils.js	1	function	isEqualId	predicate command
+knex-3.3.0/lib/dialects/sqlite3/schema/internal/utils.js	5	function	includesId	predicate wrapper
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-columncompiler.js	6	class	ColumnCompiler_SQLite3	entity
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-columncompiler.js	7	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-columncompiler.js	16	function	enu	property
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-columncompiler.js	22	function	_pushAlterCheckQuery	stateless
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-columncompiler.js	28	function	checkRegex	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-compiler.js	10	class	SchemaCompiler_SQLite3	entity commander
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-compiler.js	11	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-compiler.js	16	function	hasTable	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-compiler.js	28	function	hasColumn	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-compiler.js	43	function	renameTable	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-compiler.js	51	function	generateDdlCommands	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	9	class	TableCompiler_SQLite3	entity commander
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	10	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	15	function	createQuery	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	40	function	addColumns	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	82	function	dropUnique	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	90	function	dropUniqueIfExists	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	98	function	dropForeign	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	117	function	dropForeignIfExists	stateless
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	122	function	dropPrimary	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	137	function	dropPrimaryIfExists	stateless
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	141	function	dropIndex	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	149	function	unique	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	175	function	index	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	202	function	primary	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	247	function	foreign	void-accessor command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	279	function	primaryKeys	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	298	function	foreignKeys	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	319	function	createTableBlock	property non-void-command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	323	function	renameColumn	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	331	function	_setNullableState	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-tablecompiler.js	344	function	dropColumn	command
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-viewcompiler.js	8	class	ViewCompiler_SQLite3	commander small-class
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-viewcompiler.js	9	constructor		constructor
+knex-3.3.0/lib/dialects/sqlite3/schema/sqlite-viewcompiler.js	12	function	createOrReplace	command
+knex-3.3.0/lib/execution/batch-insert.js	6	function	batchInsert	property command
+knex-3.3.0/lib/execution/internal/ensure-connection-callback.js	1	function	ensureConnectionCallback	property command
+knex-3.3.0/lib/execution/internal/ensure-connection-callback.js	16	function	ensureConnectionStreamCallback	property command
+knex-3.3.0/lib/execution/internal/query-executioner.js	6	function	formatQuery	property command
+knex-3.3.0/lib/execution/internal/query-executioner.js	21	function	enrichQueryObject	property command
+knex-3.3.0/lib/execution/internal/query-executioner.js	36	function	executeQuery	property command
+knex-3.3.0/lib/execution/runner.js	13	class	Runner	entity
+knex-3.3.0/lib/execution/runner.js	14	constructor		constructor
+knex-3.3.0/lib/execution/runner.js	27	function	run	property non-void-command
+knex-3.3.0/lib/execution/runner.js	50	function	stream	property non-void-command factory collaborator
+knex-3.3.0/lib/execution/runner.js	128	function	pipe	property non-void-command
+knex-3.3.0/lib/execution/runner.js	135	function	query	property non-void-command
+knex-3.3.0/lib/execution/runner.js	236	function	queryArray	property non-void-command
+knex-3.3.0/lib/execution/runner.js	299	function	ensureConnection	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	18	function	DEFAULT_CONFIG	literal
+knex-3.3.0/lib/execution/transaction.js	43	class	Transaction	entity minimal-entity
+knex-3.3.0/lib/execution/transaction.js	44	constructor		constructor
+knex-3.3.0/lib/execution/transaction.js	95	function	isCompleted	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	101	function	begin	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	118	function	savepoint	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	122	function	commit	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	126	function	release	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	130	function	setIsolationLevel	set
+knex-3.3.0/lib/execution/transaction.js	142	function	rollback	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	153	function	rollbackTo	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	165	function	query	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	197	function	debug	set
+knex-3.3.0/lib/execution/transaction.js	202	function	_onAcquire	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	254	function	_evaluateContainer	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	263	function	acquireConnection	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	282	function	then	property non-void-command
+knex-3.3.0/lib/execution/transaction.js	290	function	asCallback	get wrapper
+knex-3.3.0/lib/execution/transaction.js	301	function	makeTransactor	property command
+knex-3.3.0/lib/execution/transaction.js	342	function	makeTxClient	property command
+knex-3.3.0/lib/execution/transaction.js	410	function	completedError	wrapper
+knex-3.3.0/lib/formatter.js	6	class	Formatter	data-provider boundary small-class
+knex-3.3.0/lib/formatter.js	7	constructor		constructor
+knex-3.3.0/lib/formatter.js	14	function	columnize	property wrapper
+knex-3.3.0/lib/formatter.js	20	function	wrap	property wrapper
+knex-3.3.0/lib/formatter/formatterUtils.js	4	function	compileCallback	property command
+knex-3.3.0/lib/formatter/formatterUtils.js	16	function	wrapAsIdentifier	property command
+knex-3.3.0/lib/formatter/formatterUtils.js	21	function	formatDefault	property command
+knex-3.3.0/lib/formatter/rawFormatter.js	3	function	replaceRawArrBindings	property command
+knex-3.3.0/lib/formatter/rawFormatter.js	37	function	replaceKeyBindings	property command
+knex-3.3.0/lib/formatter/wrappingFormatter.js	69	function	columnize	property wrapper
+knex-3.3.0/lib/formatter/wrappingFormatter.js	86	function	wrap	property wrapper
+knex-3.3.0/lib/formatter/wrappingFormatter.js	106	function	unwrapRaw	property command
+knex-3.3.0/lib/formatter/wrappingFormatter.js	134	function	operator	property wrapper
+knex-3.3.0/lib/formatter/wrappingFormatter.js	147	function	getAliasSeparatorIndex	property command
+knex-3.3.0/lib/formatter/wrappingFormatter.js	163	function	wrapString	property command
+knex-3.3.0/lib/formatter/wrappingFormatter.js	204	function	parseObject	property command
+knex-3.3.0/lib/formatter/wrappingFormatter.js	238	function	outputQuery	property command
+knex-3.3.0/lib/formatter/wrappingFormatter.js	263	function	rawOrFn	property wrapper
+knex-3.3.0/lib/formatter/wrappingFormatter.js	276	function	direction	property global-command wrapper
+knex-3.3.0/lib/knex-builder/FunctionHelper.js	5	class	FunctionHelper	unclassified
+knex-3.3.0/lib/knex-builder/FunctionHelper.js	6	constructor		constructor
+knex-3.3.0/lib/knex-builder/FunctionHelper.js	10	function	now	property non-void-command
+knex-3.3.0/lib/knex-builder/FunctionHelper.js	17	function	uuid	property non-void-command
+knex-3.3.0/lib/knex-builder/FunctionHelper.js	44	function	uuidToBin	controller stateless
+knex-3.3.0/lib/knex-builder/FunctionHelper.js	61	function	binToUuid	controller stateless
+knex-3.3.0/lib/knex-builder/Knex.js	14	function	knex	wrapper
+knex-3.3.0/lib/knex-builder/internal/config-resolver.js	7	function	resolveConfig	property wrapper
+knex-3.3.0/lib/knex-builder/internal/parse-connection.js	9	function	tryParse	property factory
+knex-3.3.0/lib/knex-builder/internal/parse-connection.js	45	function	connectionObject	property command
+knex-3.3.0/lib/knex-builder/make-knex.js	98	function	makeKnex	property wrapper
+knex-3.3.0/lib/knex-builder/make-knex.js	108	function	initContext	command
+knex-3.3.0/lib/knex-builder/make-knex.js	233	function	_copyEventListeners	command
+knex-3.3.0/lib/knex-builder/make-knex.js	240	function	redefineProperties	command
+knex-3.3.0/lib/knex-builder/make-knex.js	311	function	_addInternalListener	command
+knex-3.3.0/lib/knex-builder/make-knex.js	319	function	createQueryBuilder	property command
+knex-3.3.0/lib/knex-builder/make-knex.js	328	function	shallowCloneFunction	property wrapper
+knex-3.3.0/lib/logger.js	5	class	Logger	commander
+knex-3.3.0/lib/logger.js	6	constructor		constructor
+knex-3.3.0/lib/logger.js	25	function	_log	wrapper
+knex-3.3.0/lib/logger.js	45	function	debug	command
+knex-3.3.0/lib/logger.js	49	function	warn	command
+knex-3.3.0/lib/logger.js	53	function	error	command
+knex-3.3.0/lib/logger.js	57	function	deprecate	command
+knex-3.3.0/lib/logger.js	64	function	resolveIsEnabledColors	property
+knex-3.3.0/lib/migrations/common/MigrationsLoader.js	14	class	AbstractMigrationsLoader	boundary degenerate small-class
+knex-3.3.0/lib/migrations/common/MigrationsLoader.js	15	constructor		constructor
+knex-3.3.0/lib/migrations/common/MigrationsLoader.js	25	function	getFile	wrapper stateless
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	7	class	MigrationGenerator	data-provider
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	8	constructor		constructor
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	13	function	make	property set
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	27	function	_ensureFolder	property controller
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	35	function	_getStubPath	property wrapper
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	42	function	_getNewMigrationName	property controller
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	49	function	_getNewMigrationPath	property wrapper
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	58	function	_writeNewMigration	property wrapper
+knex-3.3.0/lib/migrations/migrate/MigrationGenerator.js	69	function	_absoluteConfigDirs	property controller
+knex-3.3.0/lib/migrations/migrate/Migrator.js	18	class	LockError	empty
+knex-3.3.0/lib/migrations/migrate/Migrator.js	19	constructor		constructor
+knex-3.3.0/lib/migrations/migrate/Migrator.js	28	class	Migrator	unclassified
+knex-3.3.0/lib/migrations/migrate/Migrator.js	29	constructor		constructor
+knex-3.3.0/lib/migrations/migrate/Migrator.js	59	function	latest	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	102	function	up	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	163	function	rollback	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	205	function	down	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	250	function	to	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	314	function	before	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	378	function	status	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	392	function	currentVersion	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	405	function	list	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	426	function	forceFreeMigrationsLock	command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	445	function	make	property non-void-command collaborator
+knex-3.3.0/lib/migrations/migrate/Migrator.js	449	function	_disableProcessing	command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	455	function	_lockMigrations	property controller
+knex-3.3.0/lib/migrations/migrate/Migrator.js	468	function	_getLock	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	477	function	_freeLock	property controller
+knex-3.3.0/lib/migrations/migrate/Migrator.js	485	function	_runBatch	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	581	function	_validateMigrationStructure	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	602	function	_getLastBatch	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	621	function	_latestBatchNumber	property controller
+knex-3.3.0/lib/migrations/migrate/Migrator.js	632	function	_useTransaction	wrapper stateless
+knex-3.3.0/lib/migrations/migrate/Migrator.js	644	function	_waterfallBatch	property non-void-command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	713	function	_transaction	controller stateless
+knex-3.3.0/lib/migrations/migrate/Migrator.js	728	function	validateMigrationList	wrapper
+knex-3.3.0/lib/migrations/migrate/Migrator.js	741	function	getMissingMigrations	property command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	747	function	getNewMigrations	property command
+knex-3.3.0/lib/migrations/migrate/Migrator.js	753	function	checkPromise	property command
+knex-3.3.0/lib/migrations/migrate/migration-list-resolver.js	5	function	listAll	property command
+knex-3.3.0/lib/migrations/migrate/migration-list-resolver.js	11	function	listCompleted	property command
+knex-3.3.0/lib/migrations/migrate/migration-list-resolver.js	22	function	listAllAndCompleted	property wrapper
+knex-3.3.0/lib/migrations/migrate/migrator-configuration-merger.js	17	function	getMergedConfig	property command
+knex-3.3.0/lib/migrations/migrate/sources/fs-migrations.js	7	class	FsMigrations	degenerate
+knex-3.3.0/lib/migrations/migrate/sources/fs-migrations.js	12	function	getMigrations	property controller
+knex-3.3.0/lib/migrations/migrate/sources/fs-migrations.js	55	function	getMigrationName	incidental
+knex-3.3.0/lib/migrations/migrate/sources/fs-migrations.js	59	function	getMigration	wrapper stateless
+knex-3.3.0/lib/migrations/migrate/sources/fs-migrations.js	64	function	filterMigrations	property command
+knex-3.3.0/lib/migrations/migrate/table-creator.js	8	function	ensureTable	property wrapper
+knex-3.3.0/lib/migrations/migrate/table-creator.js	33	function	_createMigrationTable	property wrapper
+knex-3.3.0/lib/migrations/migrate/table-creator.js	45	function	_createMigrationLockTable	property wrapper
+knex-3.3.0/lib/migrations/migrate/table-creator.js	55	function	_insertLockRowIfNeeded	property command
+knex-3.3.0/lib/migrations/migrate/table-creator.js	68	function	getSchemaBuilder	property command
+knex-3.3.0/lib/migrations/migrate/table-resolver.js	2	function	getTableName	property
+knex-3.3.0/lib/migrations/migrate/table-resolver.js	7	function	getTable	property wrapper
+knex-3.3.0/lib/migrations/migrate/table-resolver.js	12	function	getLockTableName	property
+knex-3.3.0/lib/migrations/migrate/table-resolver.js	16	function	getLockTableNameWithSchema	property wrapper
+knex-3.3.0/lib/migrations/seed/Seeder.js	13	class	Seeder	unclassified
+knex-3.3.0/lib/migrations/seed/Seeder.js	14	constructor		constructor
+knex-3.3.0/lib/migrations/seed/Seeder.js	20	function	run	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	27	function	make	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	38	function	_ensureFolder	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	47	function	_runSeeds	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	54	function	_validateSeedStructure	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	64	function	_getStubPath	property wrapper
+knex-3.3.0/lib/migrations/seed/Seeder.js	71	function	_getNewStubFileName	property controller
+knex-3.3.0/lib/migrations/seed/Seeder.js	81	function	_getNewStubFilePath	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	92	function	_writeNewSeed	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	103	function	_listAll	property non-void-command
+knex-3.3.0/lib/migrations/seed/Seeder.js	109	function	_waterfallBatch	property non-void-command collaborator
+knex-3.3.0/lib/migrations/seed/Seeder.js	132	function	resolveConfig	property wrapper
+knex-3.3.0/lib/migrations/seed/seeder-configuration-merger.js	16	function	getMergedConfig	property command
+knex-3.3.0/lib/migrations/seed/sources/fs-seeds.js	12	class	FsSeeds	unclassified
+knex-3.3.0/lib/migrations/seed/sources/fs-seeds.js	13	function	_getConfigDirectories	property controller
+knex-3.3.0/lib/migrations/seed/sources/fs-seeds.js	25	function	getSeeds	property controller
+knex-3.3.0/lib/migrations/seed/sources/fs-seeds.js	56	function	getSeed	wrapper stateless
+knex-3.3.0/lib/migrations/util/fs.js	14	function	existsSync	predicate wrapper
+knex-3.3.0/lib/migrations/util/fs.js	28	function	createTemp	wrapper
+knex-3.3.0/lib/migrations/util/fs.js	40	function	ensureDirectoryExists	property wrapper
+knex-3.3.0/lib/migrations/util/fs.js	58	function	getFilepathsInFolder	property wrapper
+knex-3.3.0/lib/migrations/util/timestamp.js	1	function	yyyymmddhhmmss	literal wrapper
+knex-3.3.0/lib/pool.js	3	class	KnexPool	empty
+knex-3.3.0/lib/pool.js	4	constructor		constructor
+knex-3.3.0/lib/pool.js	11	function	isTarnPool	predicate
+knex-3.3.0/lib/query/analytic.js	8	class	Analytic	commander small-class
+knex-3.3.0/lib/query/analytic.js	9	constructor		constructor
+knex-3.3.0/lib/query/analytic.js	21	function	partitionBy	command
+knex-3.3.0/lib/query/analytic.js	36	function	orderBy	command
+knex-3.3.0/lib/query/joinclause.js	6	function	getClauseFromArguments	property
+knex-3.3.0/lib/query/joinclause.js	39	class	JoinClause	entity
+knex-3.3.0/lib/query/joinclause.js	40	constructor		constructor
+knex-3.3.0/lib/query/joinclause.js	48	function	or	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	53	function	on	command
+knex-3.3.0/lib/query/joinclause.js	74	function	orOn	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	78	function	onJsonPathEquals	command
+knex-3.3.0/lib/query/joinclause.js	91	function	orOnJsonPathEquals	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	96	function	using	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	100	function	onVal	command
+knex-3.3.0/lib/query/joinclause.js	120	function	andOnVal	non-void-command
+knex-3.3.0/lib/query/joinclause.js	124	function	orOnVal	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	128	function	onBetween	command
+knex-3.3.0/lib/query/joinclause.js	147	function	onNotBetween	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	151	function	orOnBetween	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	155	function	orOnNotBetween	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	159	function	onIn	property command
+knex-3.3.0/lib/query/joinclause.js	171	function	onNotIn	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	175	function	orOnIn	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	179	function	orOnNotIn	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	183	function	onNull	command
+knex-3.3.0/lib/query/joinclause.js	193	function	orOnNull	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	197	function	onNotNull	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	201	function	orOnNotNull	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	205	function	onExists	command
+knex-3.3.0/lib/query/joinclause.js	215	function	orOnExists	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	219	function	onNotExists	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	223	function	orOnNotExists	property non-void-command
+knex-3.3.0/lib/query/joinclause.js	228	function	type	set
+knex-3.3.0/lib/query/joinclause.js	233	function	_bool	property set
+knex-3.3.0/lib/query/joinclause.js	243	function	_not	property set
+knex-3.3.0/lib/query/querybuilder.js	58	class	Builder	commander
+knex-3.3.0/lib/query/querybuilder.js	59	constructor		constructor
+knex-3.3.0/lib/query/querybuilder.js	78	function	toString	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	83	function	toSQL	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	88	function	clone	property factory wrapper
+knex-3.3.0/lib/query/querybuilder.js	110	function	timeout	command
+knex-3.3.0/lib/query/querybuilder.js	123	function	isValidStatementArg	incidental
+knex-3.3.0/lib/query/querybuilder.js	131	function	_validateWithArgs	controller stateless
+knex-3.3.0/lib/query/querybuilder.js	174	function	withMaterialized	stateless
+knex-3.3.0/lib/query/querybuilder.js	178	function	withNotMaterialized	stateless
+knex-3.3.0/lib/query/querybuilder.js	183	function	withWrapped	command
+knex-3.3.0/lib/query/querybuilder.js	205	function	withRecursive	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	220	function	withRecursiveWrapped	command
+knex-3.3.0/lib/query/querybuilder.js	231	function	columns	command
+knex-3.3.0/lib/query/querybuilder.js	241	function	comment	command
+knex-3.3.0/lib/query/querybuilder.js	257	function	as	set
+knex-3.3.0/lib/query/querybuilder.js	263	function	hintComment	command
+knex-3.3.0/lib/query/querybuilder.js	282	function	withSchema	set
+knex-3.3.0/lib/query/querybuilder.js	293	function	table	set
+knex-3.3.0/lib/query/querybuilder.js	300	function	distinct	command
+knex-3.3.0/lib/query/querybuilder.js	309	function	distinctOn	command
+knex-3.3.0/lib/query/querybuilder.js	323	function	join	command
+knex-3.3.0/lib/query/querybuilder.js	345	function	using	stateless
+knex-3.3.0/lib/query/querybuilder.js	352	function	innerJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	356	function	leftJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	360	function	leftOuterJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	364	function	rightJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	368	function	rightOuterJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	372	function	outerJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	376	function	fullOuterJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	380	function	crossJoin	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	384	function	joinRaw	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	389	function	or	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	393	function	not	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	400	function	where	property command
+knex-3.3.0/lib/query/querybuilder.js	475	function	whereColumn	command
+knex-3.3.0/lib/query/querybuilder.js	483	function	orWhere	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	496	function	orWhereColumn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	510	function	whereNot	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	521	function	whereNotColumn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	526	function	orWhereNot	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	530	function	orWhereNotColumn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	535	function	_objectWhere	command
+knex-3.3.0/lib/query/querybuilder.js	545	function	whereRaw	command
+knex-3.3.0/lib/query/querybuilder.js	558	function	orWhereRaw	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	563	function	whereWrapped	command
+knex-3.3.0/lib/query/querybuilder.js	575	function	whereExists	command
+knex-3.3.0/lib/query/querybuilder.js	587	function	orWhereExists	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	592	function	whereNotExists	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	597	function	orWhereNotExists	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	602	function	whereIn	property command
+knex-3.3.0/lib/query/querybuilder.js	617	function	orWhereIn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	622	function	whereNotIn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	627	function	orWhereNotIn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	632	function	whereNull	command
+knex-3.3.0/lib/query/querybuilder.js	644	function	orWhereNull	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	649	function	whereNotNull	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	654	function	orWhereNotNull	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	659	function	whereBetween	command
+knex-3.3.0/lib/query/querybuilder.js	680	function	whereNotBetween	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	685	function	orWhereBetween	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	690	function	orWhereNotBetween	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	694	function	_whereLike	command
+knex-3.3.0/lib/query/querybuilder.js	708	function	whereLike	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	713	function	orWhereLike	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	718	function	whereILike	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	723	function	orWhereILike	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	728	function	groupBy	property command
+knex-3.3.0/lib/query/querybuilder.js	741	function	groupByRaw	command
+knex-3.3.0/lib/query/querybuilder.js	752	function	orderBy	property command
+knex-3.3.0/lib/query/querybuilder.js	767	function	_orderByArray	command
+knex-3.3.0/lib/query/querybuilder.js	790	function	orderByRaw	command
+knex-3.3.0/lib/query/querybuilder.js	800	function	_union	command
+knex-3.3.0/lib/query/querybuilder.js	828	function	union	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	833	function	unionAll	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	837	function	intersect	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	841	function	except	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	846	function	having	property command
+knex-3.3.0/lib/query/querybuilder.js	869	function	orHaving	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	883	function	havingWrapped	command
+knex-3.3.0/lib/query/querybuilder.js	894	function	havingNull	command
+knex-3.3.0/lib/query/querybuilder.js	905	function	orHavingNull	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	909	function	havingNotNull	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	913	function	orHavingNotNull	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	917	function	havingExists	command
+knex-3.3.0/lib/query/querybuilder.js	928	function	orHavingExists	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	932	function	havingNotExists	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	936	function	orHavingNotExists	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	940	function	havingBetween	command
+knex-3.3.0/lib/query/querybuilder.js	960	function	orHavingBetween	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	964	function	havingNotBetween	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	968	function	orHavingNotBetween	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	972	function	havingIn	property command
+knex-3.3.0/lib/query/querybuilder.js	987	function	orHavingIn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	992	function	havingNotIn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	997	function	orHavingNotIn	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1002	function	havingRaw	command
+knex-3.3.0/lib/query/querybuilder.js	1014	function	orHavingRaw	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1019	function	_setSkipBinding	set
+knex-3.3.0/lib/query/querybuilder.js	1029	function	offset	command
+knex-3.3.0/lib/query/querybuilder.js	1048	function	limit	command
+knex-3.3.0/lib/query/querybuilder.js	1060	function	count	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1065	function	min	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1070	function	max	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1075	function	sum	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1080	function	avg	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1085	function	countDistinct	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1101	function	sumDistinct	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1106	function	avgDistinct	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1111	function	increment	property command
+knex-3.3.0/lib/query/querybuilder.js	1124	function	decrement	property command
+knex-3.3.0/lib/query/querybuilder.js	1137	function	clearCounters	set
+knex-3.3.0/lib/query/querybuilder.js	1144	function	first	command
+knex-3.3.0/lib/query/querybuilder.js	1157	function	connection	command
+knex-3.3.0/lib/query/querybuilder.js	1164	function	pluck	command
+knex-3.3.0/lib/query/querybuilder.js	1180	function	clearSelect	command
+knex-3.3.0/lib/query/querybuilder.js	1186	function	clearWhere	command
+knex-3.3.0/lib/query/querybuilder.js	1192	function	clearGroup	command
+knex-3.3.0/lib/query/querybuilder.js	1198	function	clearOrder	command
+knex-3.3.0/lib/query/querybuilder.js	1204	function	clearHaving	command
+knex-3.3.0/lib/query/querybuilder.js	1210	function	clear	property command
+knex-3.3.0/lib/query/querybuilder.js	1225	function	insert	command
+knex-3.3.0/lib/query/querybuilder.js	1234	function	update	command
+knex-3.3.0/lib/query/querybuilder.js	1264	function	returning	set
+knex-3.3.0/lib/query/querybuilder.js	1270	function	onConflict	factory collaborator stateless
+knex-3.3.0/lib/query/querybuilder.js	1281	function	delete	command
+knex-3.3.0/lib/query/querybuilder.js	1288	function	truncate	command
+knex-3.3.0/lib/query/querybuilder.js	1297	function	columnInfo	command
+knex-3.3.0/lib/query/querybuilder.js	1304	function	forUpdate	set
+knex-3.3.0/lib/query/querybuilder.js	1315	function	forShare	set
+knex-3.3.0/lib/query/querybuilder.js	1322	function	forNoKeyUpdate	set
+knex-3.3.0/lib/query/querybuilder.js	1329	function	forKeyShare	set
+knex-3.3.0/lib/query/querybuilder.js	1336	function	skipLocked	set
+knex-3.3.0/lib/query/querybuilder.js	1353	function	noWait	set
+knex-3.3.0/lib/query/querybuilder.js	1370	function	fromJS	command
+knex-3.3.0/lib/query/querybuilder.js	1384	function	fromRaw	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1391	function	modify	get controller
+knex-3.3.0/lib/query/querybuilder.js	1396	function	upsert	unclassified
+knex-3.3.0/lib/query/querybuilder.js	1403	function	_json	command
+knex-3.3.0/lib/query/querybuilder.js	1413	function	jsonExtract	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1449	function	jsonSet	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1458	function	jsonInsert	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1467	function	jsonRemove	non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1476	function	_isJsonObject	wrapper stateless
+knex-3.3.0/lib/query/querybuilder.js	1480	function	_whereJsonWrappedValue	command
+knex-3.3.0/lib/query/querybuilder.js	1499	function	whereJsonObject	command
+knex-3.3.0/lib/query/querybuilder.js	1504	function	orWhereJsonObject	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1508	function	whereNotJsonObject	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1512	function	orWhereNotJsonObject	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1516	function	whereJsonPath	command
+knex-3.3.0/lib/query/querybuilder.js	1521	function	orWhereJsonPath	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1526	function	whereJsonSupersetOf	command
+knex-3.3.0/lib/query/querybuilder.js	1531	function	whereJsonNotSupersetOf	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1535	function	orWhereJsonSupersetOf	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1539	function	orWhereJsonNotSupersetOf	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1544	function	whereJsonSubsetOf	command
+knex-3.3.0/lib/query/querybuilder.js	1549	function	whereJsonNotSubsetOf	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1553	function	orWhereJsonSubsetOf	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1557	function	orWhereJsonNotSubsetOf	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1561	function	whereJsonHasNone	command
+knex-3.3.0/lib/query/querybuilder.js	1568	function	_analytic	command
+knex-3.3.0/lib/query/querybuilder.js	1622	function	rank	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1626	function	denseRank	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1630	function	rowNumber	property non-void-command
+knex-3.3.0/lib/query/querybuilder.js	1637	function	_counter	command
+knex-3.3.0/lib/query/querybuilder.js	1650	function	_bool	property set
+knex-3.3.0/lib/query/querybuilder.js	1661	function	_not	property set
+knex-3.3.0/lib/query/querybuilder.js	1672	function	_joinType	property set
+knex-3.3.0/lib/query/querybuilder.js	1682	function	_analyticMethod	property set
+knex-3.3.0/lib/query/querybuilder.js	1691	function	_aggregate	command
+knex-3.3.0/lib/query/querybuilder.js	1704	function	_clearGrouping	command
+knex-3.3.0/lib/query/querybuilder.js	1713	function	_isSelectQuery	predicate wrapper
+knex-3.3.0/lib/query/querybuilder.js	1718	function	_hasLockMode	predicate wrapper
+knex-3.3.0/lib/query/querybuilder.js	1765	class	OnConflictBuilder	unclassified
+knex-3.3.0/lib/query/querybuilder.js	1766	constructor		constructor
+knex-3.3.0/lib/query/querybuilder.js	1772	function	ignore	get set
+knex-3.3.0/lib/query/querybuilder.js	1779	function	merge	get set
+knex-3.3.0/lib/query/querybuilder.js	1786	function	then	stateless
+knex-3.3.0/lib/query/querycompiler.js	59	class	QueryCompiler	data-provider
+knex-3.3.0/lib/query/querycompiler.js	60	constructor		constructor
+knex-3.3.0/lib/query/querycompiler.js	86	function	_preValidate	wrapper
+knex-3.3.0/lib/query/querycompiler.js	117	function	toSQL	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	175	function	select	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	230	function	pluck	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	243	function	insert	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	250	function	_onConflictClause	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	256	function	_buildInsertValues	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	271	function	_insertBody	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	303	function	update	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	318	function	_hintComments	property controller
+knex-3.3.0/lib/query/querycompiler.js	326	function	columns	property controller
+knex-3.3.0/lib/query/querycompiler.js	373	function	comments	property controller
+knex-3.3.0/lib/query/querycompiler.js	380	function	_aggregate	property controller
+knex-3.3.0/lib/query/querycompiler.js	443	function	aggregate	property
+knex-3.3.0/lib/query/querycompiler.js	447	function	aggregateRaw	property
+knex-3.3.0/lib/query/querycompiler.js	461	function	_joinTable	incidental
+knex-3.3.0/lib/query/querycompiler.js	469	function	join	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	515	function	onBetween	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	535	function	onNull	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	549	function	onExists	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	564	function	onIn	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	597	function	multiOnIn	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	619	function	where	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	646	function	group	property
+knex-3.3.0/lib/query/querycompiler.js	650	function	order	property
+knex-3.3.0/lib/query/querycompiler.js	655	function	having	property controller
+knex-3.3.0/lib/query/querycompiler.js	675	function	havingRaw	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	688	function	havingWrapped	property controller
+knex-3.3.0/lib/query/querycompiler.js	699	function	havingBasic	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	721	function	havingNull	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	735	function	havingExists	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	750	function	havingBetween	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	770	function	havingIn	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	793	function	multiHavingIn	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	798	function	union	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	826	function	onlyUnions	property
+knex-3.3.0/lib/query/querycompiler.js	834	function	_getValueOrParameterFromAttribute	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	847	function	onlyJson	property
+knex-3.3.0/lib/query/querycompiler.js	856	function	limit	property
+knex-3.3.0/lib/query/querycompiler.js	862	function	offset	property
+knex-3.3.0/lib/query/querycompiler.js	868	function	del	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	887	function	truncate	property
+knex-3.3.0/lib/query/querycompiler.js	892	function	lock	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	899	function	waitMode	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	906	function	skipLocked	stateless
+knex-3.3.0/lib/query/querycompiler.js	913	function	noWait	stateless
+knex-3.3.0/lib/query/querycompiler.js	919	function	distinctOn	stateless
+knex-3.3.0/lib/query/querycompiler.js	926	function	onWrapped	property controller
+knex-3.3.0/lib/query/querycompiler.js	951	function	onBasic	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	981	function	onVal	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1002	function	onRaw	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1012	function	onUsing	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1028	function	_valueClause	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1044	function	_columnClause	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1065	function	whereIn	property
+knex-3.3.0/lib/query/querycompiler.js	1075	function	whereLike	property
+knex-3.3.0/lib/query/querycompiler.js	1082	function	whereILike	property
+knex-3.3.0/lib/query/querycompiler.js	1089	function	whereNull	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1104	function	whereBasic	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1126	function	whereExists	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1141	function	whereWrapped	property controller
+knex-3.3.0/lib/query/querycompiler.js	1152	function	whereBetween	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1173	function	whereRaw	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1186	function	_jsonWrapValue	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1197	function	_jsonValueClause	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1202	function	whereJsonObject	property
+knex-3.3.0/lib/query/querycompiler.js	1208	function	wrap	controller stateless
+knex-3.3.0/lib/query/querycompiler.js	1213	function	json	wrapper stateless
+knex-3.3.0/lib/query/querycompiler.js	1217	function	analytic	property controller
+knex-3.3.0/lib/query/querycompiler.js	1273	function	withWrapped	property wrapper
+knex-3.3.0/lib/query/querycompiler.js	1316	function	_not	incidental
+knex-3.3.0/lib/query/querycompiler.js	1321	function	_prepInsert	property controller
+knex-3.3.0/lib/query/querycompiler.js	1363	function	_prepUpdate	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1428	function	_formatGroupsItemValue	property controller
+knex-3.3.0/lib/query/querycompiler.js	1454	function	_basicGroupOrder	property
+knex-3.3.0/lib/query/querycompiler.js	1468	function	_groupOrder	property
+knex-3.3.0/lib/query/querycompiler.js	1472	function	_groupOrderNulls	property
+knex-3.3.0/lib/query/querycompiler.js	1490	function	_groupsOrders	property controller
+knex-3.3.0/lib/query/querycompiler.js	1501	function	tableName	get set
+knex-3.3.0/lib/query/querycompiler.js	1531	function	_jsonPathWrap	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1540	function	_jsonExtract	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1569	function	_jsonSet	property non-void-command
+knex-3.3.0/lib/query/querycompiler.js	1589	function	_whereJsonPath	property
+knex-3.3.0/lib/query/querycompiler.js	1600	function	_onJsonPathEquals	property non-void-command
+knex-3.3.0/lib/raw.js	23	class	Raw	entity commander
+knex-3.3.0/lib/raw.js	24	constructor		constructor
+knex-3.3.0/lib/raw.js	40	function		command
+knex-3.3.0/lib/raw.js	50	function	timeout	command
+knex-3.3.0/lib/raw.js	62	function	wrap	command
+knex-3.3.0/lib/raw.js	69	function	toString	non-void-command
+knex-3.3.0/lib/raw.js	74	function	toSQL	property non-void-command
+knex-3.3.0/lib/ref.js	3	class	Ref	entity commander
+knex-3.3.0/lib/ref.js	4	constructor		constructor
+knex-3.3.0/lib/ref.js	12	function	withSchema	set
+knex-3.3.0/lib/ref.js	18	function	as	set
+knex-3.3.0/lib/ref.js	24	function	toSQL	property non-void-command
+knex-3.3.0/lib/schema/builder.js	14	class	SchemaBuilder	entity
+knex-3.3.0/lib/schema/builder.js	15	constructor		constructor
+knex-3.3.0/lib/schema/builder.js	26	function	withSchema	set
+knex-3.3.0/lib/schema/builder.js	31	function	toString	non-void-command
+knex-3.3.0/lib/schema/builder.js	35	function	toSQL	property non-void-command
+knex-3.3.0/lib/schema/builder.js	39	function	generateDdlCommands	property non-void-command
+knex-3.3.0/lib/schema/columnbuilder.js	7	class	ColumnBuilder	entity small-class
+knex-3.3.0/lib/schema/columnbuilder.js	8	constructor		constructor
+knex-3.3.0/lib/schema/columnbuilder.js	27	function	references	property non-void-command
+knex-3.3.0/lib/schema/columnbuilder.js	75	function	notNullable	literal wrapper
+knex-3.3.0/lib/schema/columncompiler.js	14	class	ColumnCompiler	entity
+knex-3.3.0/lib/schema/columncompiler.js	15	constructor		constructor
+knex-3.3.0/lib/schema/columncompiler.js	37	function	_addCheckModifiers	command
+knex-3.3.0/lib/schema/columncompiler.js	50	function	defaults	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	62	function	toSQL	get non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	71	function	compileColumn	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	81	function	getColumnName	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	86	function	getColumnType	get set
+knex-3.3.0/lib/schema/columncompiler.js	97	function	getModifiers	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	117	function	varchar	incidental
+knex-3.3.0/lib/schema/columncompiler.js	121	function	floating	incidental
+knex-3.3.0/lib/schema/columncompiler.js	125	function	decimal	stateless
+knex-3.3.0/lib/schema/columncompiler.js	135	function	specifictype	incidental
+knex-3.3.0/lib/schema/columncompiler.js	142	function	nullable	incidental
+knex-3.3.0/lib/schema/columncompiler.js	146	function	notNullable	wrapper stateless
+knex-3.3.0/lib/schema/columncompiler.js	150	function	defaultTo	property
+knex-3.3.0/lib/schema/columncompiler.js	154	function	increments	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	162	function	bigincrements	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	166	function	_pushAlterCheckQuery	command
+knex-3.3.0/lib/schema/columncompiler.js	184	function	_checkConstraintName	incidental
+knex-3.3.0/lib/schema/columncompiler.js	188	function	_check	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	198	function	checkPositive	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	209	function	checkNegative	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	220	function	_checkIn	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	229	function	checkIn	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	233	function	checkNotIn	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	237	function	checkBetween	property non-void-command
+knex-3.3.0/lib/schema/columncompiler.js	257	function	checkLength	property non-void-command
+knex-3.3.0/lib/schema/compiler.js	10	class	SchemaCompiler	entity commander
+knex-3.3.0/lib/schema/compiler.js	11	constructor		constructor
+knex-3.3.0/lib/schema/compiler.js	24	function	createSchema	wrapper stateless
+knex-3.3.0/lib/schema/compiler.js	28	function	createSchemaIfNotExists	wrapper stateless
+knex-3.3.0/lib/schema/compiler.js	32	function	dropSchema	wrapper stateless
+knex-3.3.0/lib/schema/compiler.js	36	function	dropSchemaIfExists	wrapper stateless
+knex-3.3.0/lib/schema/compiler.js	40	function	dropTable	command
+knex-3.3.0/lib/schema/compiler.js	47	function	dropTableIfExists	command
+knex-3.3.0/lib/schema/compiler.js	55	function	dropView	command
+knex-3.3.0/lib/schema/compiler.js	59	function	dropViewIfExists	command
+knex-3.3.0/lib/schema/compiler.js	63	function	dropMaterializedView	stateless
+knex-3.3.0/lib/schema/compiler.js	67	function	dropMaterializedViewIfExists	stateless
+knex-3.3.0/lib/schema/compiler.js	71	function	renameView	stateless
+knex-3.3.0/lib/schema/compiler.js	77	function	refreshMaterializedView	stateless
+knex-3.3.0/lib/schema/compiler.js	81	function	_dropView	command
+knex-3.3.0/lib/schema/compiler.js	89	function	raw	command
+knex-3.3.0/lib/schema/compiler.js	93	function	toSQL	get non-void-command
+knex-3.3.0/lib/schema/compiler.js	102	function	generateDdlCommands	property non-void-command
+knex-3.3.0/lib/schema/compiler.js	136	function	build	command
+knex-3.3.0/lib/schema/compiler.js	151	function	buildTable	property wrapper
+knex-3.3.0/lib/schema/compiler.js	170	function	buildView	property wrapper
+knex-3.3.0/lib/schema/compiler.js	177	function	prefixedTableName	property
+knex-3.3.0/lib/schema/compiler.js	181	function	throwOnlyPGError	unclassified
+knex-3.3.0/lib/schema/internal/helpers.js	6	function	pushQuery	command
+knex-3.3.0/lib/schema/internal/helpers.js	22	function	pushAdditional	wrapper
+knex-3.3.0/lib/schema/internal/helpers.js	36	function	unshiftQuery	command
+knex-3.3.0/lib/schema/tablebuilder.js	16	class	TableBuilder	entity commander
+knex-3.3.0/lib/schema/tablebuilder.js	17	constructor		constructor
+knex-3.3.0/lib/schema/tablebuilder.js	35	function	setSchema	set
+knex-3.3.0/lib/schema/tablebuilder.js	42	function	toSQL	property non-void-command
+knex-3.3.0/lib/schema/tablebuilder.js	55	function	timestamps	command
+knex-3.3.0/lib/schema/tablebuilder.js	72	function	comment	set
+knex-3.3.0/lib/schema/tablebuilder.js	82	function	foreign	property non-void-command
+knex-3.3.0/lib/schema/tablebuilder.js	151	function	check	command
+knex-3.3.0/lib/schema/tablecompiler.js	17	class	TableCompiler	unclassified
+knex-3.3.0/lib/schema/tablecompiler.js	18	constructor		constructor
+knex-3.3.0/lib/schema/tablecompiler.js	41	function	toSQL	get wrapper
+knex-3.3.0/lib/schema/tablecompiler.js	52	function	create	command
+knex-3.3.0/lib/schema/tablecompiler.js	66	function	createIfNot	command
+knex-3.3.0/lib/schema/tablecompiler.js	70	function	createLike	command
+knex-3.3.0/lib/schema/tablecompiler.js	74	function	createLikeIfNot	command
+knex-3.3.0/lib/schema/tablecompiler.js	81	function	alter	command
+knex-3.3.0/lib/schema/tablecompiler.js	96	function	foreign	command
+knex-3.3.0/lib/schema/tablecompiler.js	156	function	getColumnTypes	controller stateless
+knex-3.3.0/lib/schema/tablecompiler.js	169	function	columnQueries	command
+knex-3.3.0/lib/schema/tablecompiler.js	181	function	addColumns	command
+knex-3.3.0/lib/schema/tablecompiler.js	199	function	alterColumns	command
+knex-3.3.0/lib/schema/tablecompiler.js	206	function	getColumns	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	226	function	tableName	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	234	function	tableNameLike	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	243	function	alterTable	command
+knex-3.3.0/lib/schema/tablecompiler.js	258	function	alterTableForCreate	command
+knex-3.3.0/lib/schema/tablecompiler.js	282	function	dropIndex	command
+knex-3.3.0/lib/schema/tablecompiler.js	286	function	dropUnique	stateless
+knex-3.3.0/lib/schema/tablecompiler.js	289	function	dropUniqueIfExists	stateless
+knex-3.3.0/lib/schema/tablecompiler.js	293	function	dropForeign	stateless
+knex-3.3.0/lib/schema/tablecompiler.js	297	function	dropForeignIfExists	stateless
+knex-3.3.0/lib/schema/tablecompiler.js	301	function	dropPrimaryIfExists	stateless
+knex-3.3.0/lib/schema/tablecompiler.js	305	function	dropColumn	command
+knex-3.3.0/lib/schema/tablecompiler.js	322	function	_setNullableState	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	356	function	setNullable	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	360	function	dropNullable	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	364	function	dropChecks	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	374	function	check	command
+knex-3.3.0/lib/schema/tablecompiler.js	385	function	_addChecks	property controller
+knex-3.3.0/lib/schema/tablecompiler.js	404	function	_indexCommand	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	417	function	_getPrimaryKeys	property controller
+knex-3.3.0/lib/schema/tablecompiler.js	424	function	_canBeAddPrimaryKey	property non-void-command
+knex-3.3.0/lib/schema/tablecompiler.js	428	function	_getIncrementsColumnNames	property controller
+knex-3.3.0/lib/schema/tablecompiler.js	434	function	_getBigIncrementsColumnNames	property controller
+knex-3.3.0/lib/schema/viewbuilder.js	5	class	ViewBuilder	entity commander lazy-class
+knex-3.3.0/lib/schema/viewbuilder.js	6	constructor		constructor
+knex-3.3.0/lib/schema/viewbuilder.js	17	function	setSchema	set
+knex-3.3.0/lib/schema/viewbuilder.js	21	function	columns	set
+knex-3.3.0/lib/schema/viewbuilder.js	25	function	as	set
+knex-3.3.0/lib/schema/viewbuilder.js	29	function	checkOption	stateless
+knex-3.3.0/lib/schema/viewbuilder.js	35	function	localCheckOption	stateless
+knex-3.3.0/lib/schema/viewbuilder.js	41	function	cascadedCheckOption	stateless
+knex-3.3.0/lib/schema/viewbuilder.js	47	function	toSQL	property non-void-command
+knex-3.3.0/lib/schema/viewcompiler.js	9	class	ViewCompiler	entity commander
+knex-3.3.0/lib/schema/viewcompiler.js	10	constructor		constructor
+knex-3.3.0/lib/schema/viewcompiler.js	31	function	toSQL	get wrapper
+knex-3.3.0/lib/schema/viewcompiler.js	39	function	create	command
+knex-3.3.0/lib/schema/viewcompiler.js	43	function	createOrReplace	stateless
+knex-3.3.0/lib/schema/viewcompiler.js	47	function	createMaterializedView	stateless
+knex-3.3.0/lib/schema/viewcompiler.js	51	function	createQuery	command
+knex-3.3.0/lib/schema/viewcompiler.js	88	function	renameView	stateless
+knex-3.3.0/lib/schema/viewcompiler.js	94	function	refreshMaterializedView	stateless
+knex-3.3.0/lib/schema/viewcompiler.js	98	function	alter	command
+knex-3.3.0/lib/schema/viewcompiler.js	102	function	alterView	command
+knex-3.3.0/lib/schema/viewcompiler.js	117	function	renameColumn	stateless
+knex-3.3.0/lib/schema/viewcompiler.js	121	function	defaultTo	stateless
+knex-3.3.0/lib/schema/viewcompiler.js	127	function	viewName	property non-void-command
+knex-3.3.0/lib/util/helpers.js	8	function	normalizeArr	property wrapper
+knex-3.3.0/lib/util/helpers.js	16	function	containsUndefined	property wrapper
+knex-3.3.0/lib/util/helpers.js	44	function	getUndefinedIndices	property wrapper
+knex-3.3.0/lib/util/helpers.js	66	function	addQueryContext	command
+knex-3.3.0/lib/util/helpers.js	78	function	resolveClientNameWithAliases	property
+knex-3.3.0/lib/util/helpers.js	82	function	toNumber	property wrapper
+knex-3.3.0/lib/util/is.js	1	function	isString	predicate
+knex-3.3.0/lib/util/is.js	5	function	isNumber	predicate
+knex-3.3.0/lib/util/is.js	9	function	isBoolean	predicate
+knex-3.3.0/lib/util/is.js	13	function	isUndefined	predicate
+knex-3.3.0/lib/util/is.js	17	function	isObject	predicate
+knex-3.3.0/lib/util/is.js	21	function	isFunction	predicate
+knex-3.3.0/lib/util/nanoid.js	20	function	nanoid	property wrapper
+knex-3.3.0/lib/util/nanoid.js	31	function	nanonum	property wrapper
+knex-3.3.0/lib/util/security.js	13	function	setHiddenProperty	wrapper
+knex-3.3.0/lib/util/string.js	16	function	wrapEscape	property wrapper
+knex-3.3.0/lib/util/string.js	22	function	makeEscape	property wrapper
+knex-3.3.0/lib/util/string.js	56	function	escapeObject	property command
+knex-3.3.0/lib/util/string.js	64	function	arrayToList	property wrapper
+knex-3.3.0/lib/util/string.js	78	function	bufferToString	property wrapper
+knex-3.3.0/lib/util/string.js	82	function	escapeString	property global-command wrapper
+knex-3.3.0/lib/util/string.js	104	function	dateToString	property wrapper
+knex-3.3.0/lib/util/string.js	158	function	zeroPad	property wrapper
+knex-3.3.0/lib/util/string.js	166	function	convertTimezone	property wrapper
+knex-3.3.0/lib/util/timeout.js	1	class	KnexTimeoutError	empty
+knex-3.3.0/lib/util/timeout.js	2	constructor		constructor
+knex-3.3.0/lib/util/timeout.js	8	function	timeout	property command
+knex-3.3.0/scripts/clean.js	7	function	main	main
+knex-3.3.0/scripts/clean.js	24	function	doesDirectoryExist	property wrapper
+knex-3.3.0/scripts/stress-test/knex-stress-test.js	65	function	setQueryCounters	global-command command
+knex-3.3.0/scripts/stress-test/knex-stress-test.js	101	function	killConnectionsPg	property command
+knex-3.3.0/scripts/stress-test/knex-stress-test.js	108	function	killConnectionsMyslq	command
+knex-3.3.0/scripts/stress-test/knex-stress-test.js	113	function	killConnectionsMssql	global-command wrapper
+knex-3.3.0/scripts/stress-test/knex-stress-test.js	118	function	main	main
+knex-3.3.0/scripts/stress-test/mysql2-random-hanging-every-now-and-then.js	11	function	stdMysqlQuery	property command
+knex-3.3.0/scripts/stress-test/mysql2-random-hanging-every-now-and-then.js	35	function	mysql2Query	property global-command wrapper
+knex-3.3.0/scripts/stress-test/mysql2-random-hanging-every-now-and-then.js	58	function	setMysqlQueryCounters	global-command
+knex-3.3.0/scripts/stress-test/mysql2-random-hanging-every-now-and-then.js	84	function	recreateProxy	global-command wrapper
+knex-3.3.0/scripts/stress-test/mysql2-random-hanging-every-now-and-then.js	116	function	main	main
+knex-3.3.0/scripts/stress-test/mysql2-sudden-exit-without-error.js	12	function	recreateProxy	global-command wrapper
+knex-3.3.0/scripts/stress-test/mysql2-sudden-exit-without-error.js	28	function	insanelyParanoidQuery	command
+knex-3.3.0/scripts/stress-test/mysql2-sudden-exit-without-error.js	47	function	main	main
+knex-3.3.0/scripts/stress-test/reconnect-test-mysql-based-drivers.js	10	function	stdMysqlQuery	property command
+knex-3.3.0/scripts/stress-test/reconnect-test-mysql-based-drivers.js	38	function	mysqlQuery	property global-command wrapper
+knex-3.3.0/scripts/stress-test/reconnect-test-mysql-based-drivers.js	60	function	mysql2Query	property global-command wrapper
+knex-3.3.0/scripts/stress-test/reconnect-test-mysql-based-drivers.js	81	function	setMysqlQueryCounters	global-command
+knex-3.3.0/scripts/stress-test/reconnect-test-mysql-based-drivers.js	114	function	main	main
+knex-3.3.0/scripts/update-changelog.mjs	99	function	update	wrapper
+knex-3.3.0/test-tsd/common.ts	10	interface	User	empty
+knex-3.3.0/test-tsd/common.ts	18	interface	Department	empty
+knex-3.3.0/test-tsd/common.ts	23	interface	Article	empty
+knex-3.3.0/test-tsd/common.ts	30	interface	Ticket	empty
+knex-3.3.0/test-tsd/querybuilder.test-d.ts	13	interface	QueryBuilder	empty
+knex-3.3.0/test-tsd/tables.test-d.ts	17	interface	Tables	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	31	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	39	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	44	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	51	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	59	interface	ExtendsWitness<T1 extends T2, T2>	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	88	interface	Tables	empty
+knex-3.3.0/test-tsd/tsd-tests1.test-d.ts	345	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	30	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	38	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	43	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	50	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	58	interface	ExtendsWitness<T1 extends T2, T2>	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	87	interface	Tables	empty
+knex-3.3.0/test-tsd/tsd-tests2.test-d.ts	552	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests3.test-d.ts	30	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests3.test-d.ts	38	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests3.test-d.ts	43	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests3.test-d.ts	50	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests3.test-d.ts	58	interface	ExtendsWitness<T1 extends T2, T2>	empty
+knex-3.3.0/test-tsd/tsd-tests3.test-d.ts	503	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests4.test-d.ts	30	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests4.test-d.ts	38	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests4.test-d.ts	43	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests4.test-d.ts	50	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests4.test-d.ts	519	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests5.test-d.ts	29	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests5.test-d.ts	37	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests5.test-d.ts	42	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests5.test-d.ts	49	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests5.test-d.ts	499	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests6.test-d.ts	30	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests6.test-d.ts	38	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests6.test-d.ts	43	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests6.test-d.ts	50	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests6.test-d.ts	421	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests7.test-d.ts	30	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests7.test-d.ts	38	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests7.test-d.ts	43	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests7.test-d.ts	50	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests7.test-d.ts	656	class	ExcelClient	empty
+knex-3.3.0/test-tsd/tsd-tests8.test-d.ts	30	interface	User	empty
+knex-3.3.0/test-tsd/tsd-tests8.test-d.ts	38	interface	Department	empty
+knex-3.3.0/test-tsd/tsd-tests8.test-d.ts	43	interface	Article	empty
+knex-3.3.0/test-tsd/tsd-tests8.test-d.ts	50	interface	Ticket	empty
+knex-3.3.0/test-tsd/tsd-tests8.test-d.ts	688	class	ExcelClient	empty
+knex-3.3.0/test-tstyche/cjs-subpath-exports.tst.cts	18	interface	Registry	empty
+knex-3.3.0/test-tstyche/cjs-subpath-exports.tst.cts	29	interface	Tables	empty
+knex-3.3.0/test-tstyche/esm-subpath-exports.tst.ts	18	interface	Registry	empty
+knex-3.3.0/test-tstyche/esm-subpath-exports.tst.ts	29	interface	Tables	empty
+knex-3.3.0/test/cli/cli-config-utils.spec.js	13	function	exec	property wrapper
+knex-3.3.0/test/cli/cli-test-utils.js	7	function	migrationStubOptionSetup	property command
+knex-3.3.0/test/cli/cli-test-utils.js	32	function	seedStubOptionSetup	property command
+knex-3.3.0/test/cli/cli-test-utils.js	57	function	expectContentMatchesStub	command
+knex-3.3.0/test/cli/cli-test-utils.js	66	function	getRootDir	literal wrapper
+knex-3.3.0/test/cli/cli-test-utils.js	70	function	setupFileHelper	factory literal wrapper
+knex-3.3.0/test/cli/cli-test-utils.js	78	function	createTable	property command
+knex-3.3.0/test/cli/esm-interop.spec.js	738	function	getSchema	property command
+knex-3.3.0/test/cli/esm-interop.spec.js	747	function	closeDB	property command
+knex-3.3.0/test/cli/tempfiles.js	14	class	RmRfError	empty
+knex-3.3.0/test/cli/tempfiles.js	15	constructor		constructor
+knex-3.3.0/test/cli/tempfiles.js	39	function	assertCanDelete	property wrapper
+knex-3.3.0/test/cli/tempfiles.js	74	function	rmrf	global-command wrapper
+knex-3.3.0/test/cli/tempfiles.js	113	function	withTempDir	global-command wrapper
+knex-3.3.0/test/cli/tempfiles.js	171	function	migration	property
+knex-3.3.0/test/cli/tempfiles.js	196	function	migrate	property global-command wrapper
+knex-3.3.0/test/integration/helpers/knex-builder.js	9	function	getSqliteKnex	literal wrapper
+knex-3.3.0/test/integration2/dialects/mssql.spec.js	5	function	fetchDefaultConstraint	property command
+knex-3.3.0/test/integration2/pool/connection-pool.spec.js	11	function	dbIncluded	predicate wrapper
+knex-3.3.0/test/integration2/schema/misc.spec.js	27	function	mapObject	property wrapper
+knex-3.3.0/test/integration2/util/knex-instance-provider.js	35	function	getAllDbs	wrapper
+knex-3.3.0/test/integration2/util/knex-instance-provider.js	54	function	withDbs	wrapper
+knex-3.3.0/test/integration2/util/knex-instance-provider.js	266	function	getKnexForDb	property wrapper
+knex-3.3.0/test/integration2/util/knex-instance-provider.js	273	function	getKnexForSqlite	property wrapper
+knex-3.3.0/test/integration2/util/knex-instance-provider.js	289	function	getKnexForBetterSqlite	property wrapper
+knex-3.3.0/test/jake-util/helpers/migration-test-helper.js	8	function	assertExec	property wrapper
+knex-3.3.0/test/jake-util/helpers/migration-test-helper.js	18	function	assertExecError	property wrapper
+knex-3.3.0/test/jake-util/helpers/migration-test-helper.js	28	function	test	command
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile-with-directory.js	27	class	MigrationSource	degenerate
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile-with-directory.js	28	function	getMigrations	wrapper stateless
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile-with-directory.js	31	function	getMigrationName	incidental
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile-with-directory.js	34	function	getMigration	incidental
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile.js	27	class	MigrationSource	degenerate
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile.js	28	function	getMigrations	wrapper stateless
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile.js	31	function	getMigrationName	incidental
+knex-3.3.0/test/jake-util/knexfile-custom-migration-source/knexfile.js	34	function	getMigration	incidental
+knex-3.3.0/test/jake-util/knexfile-esm-module/migrations/one.js	4	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-esm-module/migrations/one.js	12	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-esm-module/seeds/one.js	4	function	seed	property wrapper
+knex-3.3.0/test/jake-util/knexfile-esm-package/migrations/one.js	4	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-esm-package/migrations/one.js	12	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-esm-package/seeds/one.js	4	function	seed	property wrapper
+knex-3.3.0/test/jake-util/knexfile-esm/migrations/one.js	4	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-esm/migrations/one.js	12	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-esm/seeds/one.js	4	function	seed	property wrapper
+knex-3.3.0/test/jake-util/knexfile-imports/cjs/migrations/one.cjs	1	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-imports/cjs/migrations/one.cjs	6	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-imports/esm/migrations/one.js	4	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-imports/esm/migrations/one.js	12	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-imports/esm/seeds/one.js	4	function	seed	property wrapper
+knex-3.3.0/test/jake-util/knexfile-imports/js/migrations/one.js	1	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-imports/js/migrations/one.js	6	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-imports/mjs/migrations/one.mjs	4	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-imports/mjs/migrations/one.mjs	12	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-imports/mjs/seeds/one.mjs	4	function	seed	property wrapper
+knex-3.3.0/test/jake-util/knexfile-mjs/migrations/one.mjs	4	function	up	property command
+knex-3.3.0/test/jake-util/knexfile-mjs/migrations/one.mjs	12	function	down	property command
+knex-3.3.0/test/jake-util/knexfile-mjs/seeds/one.mjs	4	function	seed	property wrapper
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112749_one.ts	3	function	up	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112749_one.ts	5	function	down	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112753_two.ts	3	function	up	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112753_two.ts	5	function	down	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112757_three.ts	3	function	up	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112757_three.ts	5	function	down	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112801_four.ts	3	function	up	empty
+knex-3.3.0/test/jake-util/knexfile-ts/knexfile_migrations/20200131112801_four.ts	5	function	down	empty
+knex-3.3.0/test/jake/jakelib/migrate-test.js	22	function	test	global-command wrapper
+knex-3.3.0/test/prep-db.js	8	function	prepCRDB	command
+knex-3.3.0/test/prep-db.js	18	function	prepDB	wrapper
+knex-3.3.0/test/tape/raw.js	16	function	raw	property wrapper
+knex-3.3.0/test/testInitializer.js	3	function	initTests	global-command wrapper
+knex-3.3.0/test/unit/client/connection-pool.js	9	class	TestClient	empty
+knex-3.3.0/test/unit/client/connection-pool.js	10	constructor		constructor
+knex-3.3.0/test/unit/client/pool-config.js	5	class	TestClient	degenerate small-class
+knex-3.3.0/test/unit/client/pool-config.js	6	constructor		constructor
+knex-3.3.0/test/unit/client/pool-config.js	11	function	validateConnection	incidental
+knex-3.3.0/test/unit/dialects/mysql-version.js	6	function	createConnection	property command
+knex-3.3.0/test/unit/query/builder.js	77	function	qb	global-command wrapper
+knex-3.3.0/test/unit/query/builder.js	81	function	raw	property global-command wrapper
+knex-3.3.0/test/unit/query/builder.js	85	function	ref	property global-command wrapper
+knex-3.3.0/test/unit/query/builder.js	89	function	verifySqlResult	wrapper
+knex-3.3.0/test/unit/query/builder.js	104	function	testsql	command
+knex-3.3.0/test/unit/query/builder.js	120	function	testNativeSql	command
+knex-3.3.0/test/unit/query/builder.js	131	function	testquery	command
+knex-3.3.0/test/unit/query/builder.js	142	function	testFailure	command
+knex-3.3.0/test/util/assertHelper.js	5	function	normalizePath	property wrapper
+knex-3.3.0/test/util/assertHelper.js	8	function	normalizePathArray	property wrapper
+knex-3.3.0/test/util/assertHelper.js	13	function	assertNumberArray	wrapper
+knex-3.3.0/test/util/assertHelper.js	24	function	assertNumberArrayStrict	wrapper
+knex-3.3.0/test/util/assertHelper.js	35	function	assertNumber	wrapper
+knex-3.3.0/test/util/assertHelper.js	44	function	stringifyJsonValues	property command
+knex-3.3.0/test/util/assertHelper.js	57	function	assertJsonEquals	wrapper
+knex-3.3.0/test/util/dataInsertHelper.js	3	function	insertTestTableTwoData	property wrapper
+knex-3.3.0/test/util/dataInsertHelper.js	28	function	insertAccounts	wrapper
+knex-3.3.0/test/util/dataInsertHelper.js	130	function	insertAccount	property wrapper
+knex-3.3.0/test/util/dataInsertHelper.js	148	function	insertCities	wrapper
+knex-3.3.0/test/util/dataInsertHelper.js	241	function	insertCountry	wrapper
+knex-3.3.0/test/util/db-helpers.js	4	function	getDriverName	property wrapper
+knex-3.3.0/test/util/db-helpers.js	8	function	isPostgreSQL	property wrapper
+knex-3.3.0/test/util/db-helpers.js	12	function	isPgNative	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	16	function	isPgBased	property wrapper
+knex-3.3.0/test/util/db-helpers.js	25	function	isPgBasedDriverName	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	34	function	isPgDriverName	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	38	function	isMssql	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	42	function	isOracle	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	46	function	isMysql	property wrapper
+knex-3.3.0/test/util/db-helpers.js	50	function	isMariaDB	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	54	function	isRedshift	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	58	function	isSQLite	property wrapper
+knex-3.3.0/test/util/db-helpers.js	62	function	isCockroachDB	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	66	function	isBetterSQLite3	predicate wrapper
+knex-3.3.0/test/util/db-helpers.js	75	function	isOneOfDbs	predicate wrapper
+knex-3.3.0/test/util/tableCreatorHelper.js	3	function	createDefaultTable	property command
+knex-3.3.0/test/util/tableCreatorHelper.js	15	function	createTestTableTwo	command
+knex-3.3.0/test/util/tableCreatorHelper.js	36	function	createUsers	command
+knex-3.3.0/test/util/tableCreatorHelper.js	44	function	createDataType	property command
+knex-3.3.0/test/util/tableCreatorHelper.js	51	function	createAccounts	command
+knex-3.3.0/test/util/tableCreatorHelper.js	78	function	createCompositeKeyTable	command
+knex-3.3.0/test/util/tableCreatorHelper.js	88	function	createParentAndChildTables	command
+knex-3.3.0/test/util/tableCreatorHelper.js	98	function	createCities	command
+knex-3.3.0/test/util/tableCreatorHelper.js	108	function	createCountry	command
+knex-3.3.0/test/util/tableCreatorHelper.js	115	function	dropTables	command
+knex-3.3.0/types/index.d.ts	71	interface	Boxed<T>	empty
+knex-3.3.0/types/index.d.ts	368	interface	PgTableOptions	empty
+knex-3.3.0/types/index.d.ts	372	interface	DMLOptions	empty
+knex-3.3.0/types/index.d.ts	376	interface	Knex<TRecord extends {} = any, TResult = any[]>	empty
+knex-3.3.0/types/index.d.ts	444	class	QueryBuilder	empty
+knex-3.3.0/types/index.d.ts	459	class	TableBuilder	empty
+knex-3.3.0/types/index.d.ts	465	class	ViewBuilder	empty
+knex-3.3.0/types/index.d.ts	471	class	SchemaBuilder	empty
+knex-3.3.0/types/index.d.ts	477	class	ColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	484	class	KnexTimeoutError	empty
+knex-3.3.0/types/index.d.ts	486	class	KnexPool<T = any>	empty
+knex-3.3.0/types/index.d.ts	515	interface	ValueDict	empty
+knex-3.3.0/types/index.d.ts	516	interface	AliasDict	empty
+knex-3.3.0/types/index.d.ts	574	interface	OnConflictQueryBuilder<TRecord extends {}, TResult>	empty
+knex-3.3.0/types/index.d.ts	607	interface	QueryInterface<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1233	interface	As<TRecord extends {}, TResult>	empty
+knex-3.3.0/types/index.d.ts	1250	interface	AliasQueryBuilder<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1312	interface	Select<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1334	interface	JsonExtraction	empty
+knex-3.3.0/types/index.d.ts	1341	interface	JsonExtract<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1354	interface	JsonSet<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1363	interface	JsonInsert<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1372	interface	JsonRemove<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1380	interface	Comment<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1384	interface	HintComment<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1389	interface	Table<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	1426	interface	Distinct<TRecord extends {}, TResult = {}[]>	empty
+knex-3.3.0/types/index.d.ts	1429	interface	DistinctOn<TRecord extends {}, TResult = {}[]>	empty
+knex-3.3.0/types/index.d.ts	1442	interface	JoinCallback	empty
+knex-3.3.0/types/index.d.ts	1446	interface	Join<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1575	interface	JoinClause	empty
+knex-3.3.0/types/index.d.ts	1642	interface	JoinRaw<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1649	interface	Using<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1653	interface	With<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1657	interface	WithRaw<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1677	interface	WithSchema<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1681	interface	WithWrapped<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1699	interface	Where<TRecord extends {} = any, TResult = unknown>	empty
+knex-3.3.0/types/index.d.ts	1763	interface	WhereRaw<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1768	interface	WhereWrapped<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1772	interface	WhereNull<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1777	interface	WhereBetween<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1788	interface	WhereExists<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1795	interface	WhereJsonObject<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1802	interface	WhereJsonPath<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1811	interface	WhereIn<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1852	interface	AsymmetricAggregation< TRecord extends {} = any, TResult = unknown[], TValue = any >	empty
+knex-3.3.0/types/index.d.ts	1888	interface	TypePreservingAggregation< TRecord extends {} = any, TResult = unknown[], TValue = any >	empty
+knex-3.3.0/types/index.d.ts	1939	interface	AnalyticFunction<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1965	interface	GroupBy<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	1969	interface	OrderBy<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2002	interface	PartitionBy<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2005	interface	Intersect<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2015	interface	Except<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2018	interface	Union<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2021	interface	Having<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2038	interface	HavingRange<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2049	interface	HavingNull<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2056	interface	ColumnNameQueryBuilder< TRecord extends {} = any, TResult = unknown[] >	empty
+knex-3.3.0/types/index.d.ts	2114	interface	RawQueryBuilder<TRecord extends {} = any, TResult = unknown[]>	empty
+knex-3.3.0/types/index.d.ts	2124	interface	Raw<TResult = any>	empty
+knex-3.3.0/types/index.d.ts	2134	interface	RawBuilder<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	2145	interface	Ref<TSrc extends string, TMapping extends {}>	empty
+knex-3.3.0/types/index.d.ts	2167	interface	RefBuilder	empty
+knex-3.3.0/types/index.d.ts	2171	interface	BatchInsertBuilder<TRecord extends {} = any, TResult = number[]>	empty
+knex-3.3.0/types/index.d.ts	2224	interface	QueryBuilder<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	2271	interface	Sql	empty
+knex-3.3.0/types/index.d.ts	2279	interface	SqlNative	empty
+knex-3.3.0/types/index.d.ts	2290	interface	StringTagSupport	empty
+knex-3.3.0/types/index.d.ts	2293	interface	ChainableInterface<T = any>	empty
+knex-3.3.0/types/index.d.ts	2329	interface	TransactionConfig	empty
+knex-3.3.0/types/index.d.ts	2339	interface	Transaction<TRecord extends {} = any, TResult = any[]>	empty
+knex-3.3.0/types/index.d.ts	2362	interface	SchemaBuilder	empty
+knex-3.3.0/types/index.d.ts	2436	interface	TableBuilder	empty
+knex-3.3.0/types/index.d.ts	2606	interface	ViewBuilder<TRecord extends {} = any, TResult = any>	empty
+knex-3.3.0/types/index.d.ts	2615	interface	CreateTableBuilder	empty
+knex-3.3.0/types/index.d.ts	2622	interface	AlterTableBuilder	empty
+knex-3.3.0/types/index.d.ts	2624	interface	AlterColumnView	empty
+knex-3.3.0/types/index.d.ts	2629	interface	AlterViewBuilder	empty
+knex-3.3.0/types/index.d.ts	2637	interface	ColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2689	interface	ForeignConstraintBuilder	empty
+knex-3.3.0/types/index.d.ts	2693	interface	MultikeyForeignConstraintBuilder	empty
+knex-3.3.0/types/index.d.ts	2697	interface	PostgreSqlColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2705	interface	SqlLiteColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2712	interface	MsSqlColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2719	interface	MySqlColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2743	interface	AlterColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2745	interface	MySqlAlterColumnBuilder	empty
+knex-3.3.0/types/index.d.ts	2754	interface	ColumnInfo	empty
+knex-3.3.0/types/index.d.ts	2761	interface	Config<SV extends {} = any>	empty
+knex-3.3.0/types/index.d.ts	2818	interface	ConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	2839	interface	MsSqlDefaultAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2843	interface	MsSqlAzureActiveDirectoryMsiAppServiceAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2863	interface	MsSqlAzureActiveDirectoryMsiVmAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2879	interface	MsSqlAzureActiveDirectoryAccessTokenAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2887	interface	MsSqlAzureActiveDirectoryPasswordAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2898	interface	MsSqlAzureActiveDirectoryServicePrincipalSecretConfig	empty
+knex-3.3.0/types/index.d.ts	2915	interface	MsSqlTokenCredential	empty
+knex-3.3.0/types/index.d.ts	2922	interface	MsSqlTokenCredentialAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2928	interface	MsSqlNtlmAuthenticationConfig	empty
+knex-3.3.0/types/index.d.ts	2951	interface	MsSqlConnectionConfigBase	empty
+knex-3.3.0/types/index.d.ts	3005	interface	MariaSqlConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3028	interface	MariaSslConfiguration	empty
+knex-3.3.0/types/index.d.ts	3039	interface	MySqlConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3068	interface	MySql2ConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3087	interface	OracleDbConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3101	interface	PgConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3125	interface	PgCustomTypesConfig	empty
+knex-3.3.0/types/index.d.ts	3132	interface	Sqlite3ConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3140	interface	BetterSqlite3ConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3149	interface	SocketConnectionConfig	empty
+knex-3.3.0/types/index.d.ts	3163	interface	PgPoolLike	empty
+knex-3.3.0/types/index.d.ts	3172	interface	MySQLPoolLike	empty
+knex-3.3.0/types/index.d.ts	3178	interface	OraclePoolLike	empty
+knex-3.3.0/types/index.d.ts	3184	interface	TarnPoolLike	empty
+knex-3.3.0/types/index.d.ts	3198	interface	PoolConfig	empty
+knex-3.3.0/types/index.d.ts	3223	interface	Logger	empty
+knex-3.3.0/types/index.d.ts	3232	interface	Migration	empty
+knex-3.3.0/types/index.d.ts	3237	interface	MigrationSource<TMigrationSpec>	empty
+knex-3.3.0/types/index.d.ts	3243	interface	MigratorConfig	empty
+knex-3.3.0/types/index.d.ts	3264	interface	MigratorConfigWithLifecycleHooks	empty
+knex-3.3.0/types/index.d.ts	3271	interface	Migrator	empty
+knex-3.3.0/types/index.d.ts	3288	interface	Seed	empty
+knex-3.3.0/types/index.d.ts	3292	interface	SeedSource<TSeedSpec>	empty
+knex-3.3.0/types/index.d.ts	3297	interface	SeederConfig<V extends {} = any>	empty
+knex-3.3.0/types/index.d.ts	3310	class	Seeder	empty
+knex-3.3.0/types/index.d.ts	3317	interface	FunctionHelper	empty
+knex-3.3.0/types/index.d.ts	3324	interface	EnumOptions	empty
+knex-3.3.0/types/index.d.ts	3331	interface	DefaultToOptions	empty
+knex-3.3.0/types/index.d.ts	3336	class	Client	empty
+knex-3.3.0/types/result.d.ts	16	interface	Registry	empty
+knex-3.3.0/types/tables.d.ts	4	interface	Tables	empty

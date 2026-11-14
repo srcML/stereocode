@@ -1,0 +1,1375 @@
+file	line	element	name	stereotypes
+lua-5.5.1/lapi.c	58	function	index2value	property wrapper
+lua-5.5.1/lapi.c	93	function	index2stack	property wrapper
+lua-5.5.1/lapi.c	109	function	lua_checkstack	property wrapper
+lua-5.5.1/lapi.c	126	function	lua_xmove	command
+lua-5.5.1/lapi.c	142	function	lua_atpanic	property wrapper
+lua-5.5.1/lapi.c	152	function	lua_version	property wrapper
+lua-5.5.1/lapi.c	167	function	lua_absindex	property wrapper
+lua-5.5.1/lapi.c	174	function	lua_gettop	property wrapper
+lua-5.5.1/lapi.c	179	function	lua_settop	command
+lua-5.5.1/lapi.c	206	function	lua_closeslot	wrapper
+lua-5.5.1/lapi.c	224	function	reverse	wrapper
+lua-5.5.1/lapi.c	238	function	lua_rotate	wrapper
+lua-5.5.1/lapi.c	253	function	lua_copy	wrapper
+lua-5.5.1/lapi.c	268	function	lua_pushvalue	wrapper
+lua-5.5.1/lapi.c	282	function	lua_type	property wrapper
+lua-5.5.1/lapi.c	288	function	lua_typename	property wrapper
+lua-5.5.1/lapi.c	295	function	lua_iscfunction	property wrapper
+lua-5.5.1/lapi.c	301	function	lua_isinteger	property wrapper
+lua-5.5.1/lapi.c	307	function	lua_isnumber	property wrapper
+lua-5.5.1/lapi.c	314	function	lua_isstring	property wrapper
+lua-5.5.1/lapi.c	320	function	lua_isuserdata	property wrapper
+lua-5.5.1/lapi.c	326	function	lua_rawequal	property wrapper
+lua-5.5.1/lapi.c	333	function	lua_arith	command
+lua-5.5.1/lapi.c	349	function	lua_compare	property wrapper
+lua-5.5.1/lapi.c	369	function	lua_numbertocstring	property command
+lua-5.5.1/lapi.c	381	function	lua_stringtonumber	property wrapper
+lua-5.5.1/lapi.c	389	function	lua_tonumberx	property command
+lua-5.5.1/lapi.c	399	function	lua_tointegerx	property command
+lua-5.5.1/lapi.c	409	function	lua_toboolean	property wrapper
+lua-5.5.1/lapi.c	415	function	lua_tolstring	property command
+lua-5.5.1/lapi.c	437	function	lua_rawlen	property wrapper
+lua-5.5.1/lapi.c	455	function	lua_tocfunction	property wrapper
+lua-5.5.1/lapi.c	464	function	touserdata	property wrapper
+lua-5.5.1/lapi.c	473	function	lua_touserdata	property wrapper
+lua-5.5.1/lapi.c	479	function	lua_tothread	property wrapper
+lua-5.5.1/lapi.c	492	function	lua_topointer	property wrapper
+lua-5.5.1/lapi.c	514	function	lua_pushnil	wrapper
+lua-5.5.1/lapi.c	522	function	lua_pushnumber	wrapper
+lua-5.5.1/lapi.c	530	function	lua_pushinteger	wrapper
+lua-5.5.1/lapi.c	543	function	lua_pushlstring	property wrapper
+lua-5.5.1/lapi.c	555	function	lua_pushexternalstring	property wrapper
+lua-5.5.1/lapi.c	570	function	lua_pushstring	property wrapper
+lua-5.5.1/lapi.c	587	function	lua_pushvfstring	property wrapper
+lua-5.5.1/lapi.c	598	function	lua_pushfstring	property wrapper
+lua-5.5.1/lapi.c	609	function	lua_pushcclosure	command
+lua-5.5.1/lapi.c	636	function	lua_pushboolean	wrapper
+lua-5.5.1/lapi.c	647	function	lua_pushlightuserdata	wrapper
+lua-5.5.1/lapi.c	655	function	lua_pushthread	property wrapper
+lua-5.5.1/lapi.c	670	function	auxgetstr	property wrapper
+lua-5.5.1/lapi.c	691	function	getGlobalTable	wrapper
+lua-5.5.1/lapi.c	699	function	lua_getglobal	property wrapper
+lua-5.5.1/lapi.c	707	function	lua_gettable	property wrapper
+lua-5.5.1/lapi.c	721	function	lua_getfield	property wrapper
+lua-5.5.1/lapi.c	727	function	lua_geti	property wrapper
+lua-5.5.1/lapi.c	744	function	finishrawget	property wrapper
+lua-5.5.1/lapi.c	753	function	gettable	property wrapper
+lua-5.5.1/lapi.c	760	function	lua_rawget	property command
+lua-5.5.1/lapi.c	772	function	lua_rawgeti	property wrapper
+lua-5.5.1/lapi.c	782	function	lua_rawgetp	property wrapper
+lua-5.5.1/lapi.c	792	function	lua_createtable	wrapper
+lua-5.5.1/lapi.c	805	function	lua_getmetatable	property wrapper
+lua-5.5.1/lapi.c	832	function	lua_getiuservalue	property wrapper
+lua-5.5.1/lapi.c	859	function	auxsetstr	command
+lua-5.5.1/lapi.c	878	function	lua_setglobal	wrapper
+lua-5.5.1/lapi.c	886	function	lua_settable	command
+lua-5.5.1/lapi.c	902	function	lua_setfield	wrapper
+lua-5.5.1/lapi.c	908	function	lua_seti	command
+lua-5.5.1/lapi.c	927	function	aux_rawset	command
+lua-5.5.1/lapi.c	940	function	lua_rawset	wrapper
+lua-5.5.1/lapi.c	945	function	lua_rawsetp	wrapper
+lua-5.5.1/lapi.c	952	function	lua_rawseti	command
+lua-5.5.1/lapi.c	964	function	lua_setmetatable	property command
+lua-5.5.1/lapi.c	1004	function	lua_setiuservalue	property command
+lua-5.5.1/lapi.c	1037	function	lua_callk	command
+lua-5.5.1/lapi.c	1063	struct	CallS	empty
+lua-5.5.1/lapi.c	1069	function	f_call	wrapper
+lua-5.5.1/lapi.c	1076	function	lua_pcallk	property command
+lua-5.5.1/lapi.c	1120	function	lua_load	property wrapper
+lua-5.5.1/lapi.c	1149	function	lua_dump	property command
+lua-5.5.1/lapi.c	1163	function	lua_status	property wrapper
+lua-5.5.1/lapi.c	1171	function	lua_gc	property wrapper
+lua-5.5.1/lapi.c	1258	function	lua_error	property wrapper
+lua-5.5.1/lapi.c	1273	function	lua_next	property command
+lua-5.5.1/lapi.c	1289	function	lua_toclose	command
+lua-5.5.1/lapi.c	1300	function	lua_concat	wrapper
+lua-5.5.1/lapi.c	1315	function	lua_len	wrapper
+lua-5.5.1/lapi.c	1325	function	lua_getallocf	property command
+lua-5.5.1/lapi.c	1335	function	lua_setallocf	wrapper
+lua-5.5.1/lapi.c	1343	function	lua_setwarnf	wrapper
+lua-5.5.1/lapi.c	1351	function	lua_warning	wrapper
+lua-5.5.1/lapi.c	1359	function	lua_newuserdatauv	property wrapper
+lua-5.5.1/lapi.c	1373	function	aux_upvalue	property command
+lua-5.5.1/lapi.c	1400	function	lua_getupvalue	property wrapper
+lua-5.5.1/lapi.c	1414	function	lua_setupvalue	property command
+lua-5.5.1/lapi.c	1433	function	getupvalref	property command
+lua-5.5.1/lapi.c	1447	function	lua_upvalueid	property wrapper
+lua-5.5.1/lapi.c	1469	function	lua_upvaluejoin	wrapper
+lua-5.5.1/lauxlib.c	47	function	findfield	property wrapper
+lua-5.5.1/lauxlib.c	74	function	pushglobalfuncname	property wrapper
+lua-5.5.1/lauxlib.c	96	function	pushfuncname	wrapper
+lua-5.5.1/lauxlib.c	112	function	lastlevel	property wrapper
+lua-5.5.1/lauxlib.c	127	function	luaL_traceback	wrapper
+lua-5.5.1/lauxlib.c	171	function	luaL_argerror	property wrapper
+lua-5.5.1/lauxlib.c	197	function	luaL_typeerror	property wrapper
+lua-5.5.1/lauxlib.c	211	function	tag_error	wrapper
+lua-5.5.1/lauxlib.c	220	function	luaL_where	wrapper
+lua-5.5.1/lauxlib.c	238	function	luaL_error	property wrapper
+lua-5.5.1/lauxlib.c	249	function	luaL_fileresult	property wrapper
+lua-5.5.1/lauxlib.c	291	function	luaL_execresult	property wrapper
+lua-5.5.1/lauxlib.c	317	function	luaL_newmetatable	property wrapper
+lua-5.5.1/lauxlib.c	330	function	luaL_setmetatable	wrapper
+lua-5.5.1/lauxlib.c	336	function	luaL_testudata	property wrapper
+lua-5.5.1/lauxlib.c	351	function	luaL_checkudata	property wrapper
+lua-5.5.1/lauxlib.c	366	function	luaL_checkoption	property wrapper
+lua-5.5.1/lauxlib.c	386	function	luaL_checkstack	wrapper
+lua-5.5.1/lauxlib.c	396	function	luaL_checktype	wrapper
+lua-5.5.1/lauxlib.c	402	function	luaL_checkany	wrapper
+lua-5.5.1/lauxlib.c	408	function	luaL_checklstring	property wrapper
+lua-5.5.1/lauxlib.c	415	function	luaL_optlstring	property command
+lua-5.5.1/lauxlib.c	426	function	luaL_checknumber	property wrapper
+lua-5.5.1/lauxlib.c	435	function	luaL_optnumber	property wrapper
+lua-5.5.1/lauxlib.c	440	function	interror	wrapper
+lua-5.5.1/lauxlib.c	448	function	luaL_checkinteger	property wrapper
+lua-5.5.1/lauxlib.c	458	function	luaL_optinteger	property wrapper
+lua-5.5.1/lauxlib.c	473	struct	UBox	empty
+lua-5.5.1/lauxlib.c	484	function	resizebox	property wrapper
+lua-5.5.1/lauxlib.c	503	function	boxgc	property wrapper
+lua-5.5.1/lauxlib.c	519	function	getBoxMT	wrapper
+lua-5.5.1/lauxlib.c	530	function	newbox	wrapper
+lua-5.5.1/lauxlib.c	559	function	newbuffsize	property wrapper
+lua-5.5.1/lauxlib.c	577	function	prepbuffsize	property command
+lua-5.5.1/lauxlib.c	605	function	luaL_prepbuffsize	property wrapper
+lua-5.5.1/lauxlib.c	610	function	luaL_addlstring	wrapper
+lua-5.5.1/lauxlib.c	619	function	luaL_addstring	wrapper
+lua-5.5.1/lauxlib.c	624	function	luaL_pushresult	wrapper
+lua-5.5.1/lauxlib.c	648	function	luaL_pushresultsize	wrapper
+lua-5.5.1/lauxlib.c	663	function	luaL_addvalue	wrapper
+lua-5.5.1/lauxlib.c	674	function	luaL_buffinit	command
+lua-5.5.1/lauxlib.c	683	function	luaL_buffinitsize	property wrapper
+lua-5.5.1/lauxlib.c	702	function	luaL_ref	property wrapper
+lua-5.5.1/lauxlib.c	729	function	luaL_unref	wrapper
+lua-5.5.1/lauxlib.c	749	struct	LoadF	empty
+lua-5.5.1/lauxlib.c	756	function	getF	property command
+lua-5.5.1/lauxlib.c	774	function	errfile	property wrapper
+lua-5.5.1/lauxlib.c	792	function	skipBOM	property wrapper
+lua-5.5.1/lauxlib.c	808	function	skipcomment	property command
+lua-5.5.1/lauxlib.c	821	function	luaL_loadfilex	property wrapper
+lua-5.5.1/lauxlib.c	864	struct	LoadS	empty
+lua-5.5.1/lauxlib.c	870	function	getS	property command
+lua-5.5.1/lauxlib.c	880	function	luaL_loadbufferx	property wrapper
+lua-5.5.1/lauxlib.c	889	function	luaL_loadstring	property wrapper
+lua-5.5.1/lauxlib.c	897	function	luaL_getmetafield	property wrapper
+lua-5.5.1/lauxlib.c	913	function	luaL_callmeta	property wrapper
+lua-5.5.1/lauxlib.c	923	function	luaL_len	property wrapper
+lua-5.5.1/lauxlib.c	935	function	luaL_tolstring	property wrapper
+lua-5.5.1/lauxlib.c	978	function	luaL_setfuncs	wrapper
+lua-5.5.1/lauxlib.c	999	function	luaL_getsubtable	property wrapper
+lua-5.5.1/lauxlib.c	1019	function	luaL_requiref	wrapper
+lua-5.5.1/lauxlib.c	1039	function	luaL_addgsub	wrapper
+lua-5.5.1/lauxlib.c	1052	function	luaL_gsub	property wrapper
+lua-5.5.1/lauxlib.c	1062	function	luaL_alloc	property wrapper
+lua-5.5.1/lauxlib.c	1077	function	panic	property wrapper
+lua-5.5.1/lauxlib.c	1102	function	checkcontrol	property wrapper
+lua-5.5.1/lauxlib.c	1115	function	warnfoff	wrapper
+lua-5.5.1/lauxlib.c	1124	function	warnfcont	wrapper
+lua-5.5.1/lauxlib.c	1136	function	warnfon	wrapper
+lua-5.5.1/lauxlib.c	1168	function	luai_makeseed	literal wrapper
+lua-5.5.1/lauxlib.c	1187	function	luaL_makeseed	property wrapper
+lua-5.5.1/lauxlib.c	1197	function	luaL_newstate	literal wrapper
+lua-5.5.1/lauxlib.c	1207	function	luaL_checkversion_	wrapper
+lua-5.5.1/lauxlib.h	38	struct	luaL_Reg	empty
+lua-5.5.1/lauxlib.h	185	struct	luaL_Buffer	empty
+lua-5.5.1/lauxlib.h	239	struct	luaL_Stream	empty
+lua-5.5.1/lbaselib.c	25	function	luaB_print	property wrapper
+lua-5.5.1/lbaselib.c	46	function	luaB_warn	property wrapper
+lua-5.5.1/lbaselib.c	61	function	b_str2int	property command
+lua-5.5.1/lbaselib.c	83	function	luaB_tonumber	property wrapper
+lua-5.5.1/lbaselib.c	116	function	luaB_error	property wrapper
+lua-5.5.1/lbaselib.c	128	function	luaB_getmetatable	property wrapper
+lua-5.5.1/lbaselib.c	139	function	luaB_setmetatable	property wrapper
+lua-5.5.1/lbaselib.c	151	function	luaB_rawequal	property wrapper
+lua-5.5.1/lbaselib.c	159	function	luaB_rawlen	property wrapper
+lua-5.5.1/lbaselib.c	168	function	luaB_rawget	property wrapper
+lua-5.5.1/lbaselib.c	176	function	luaB_rawset	property wrapper
+lua-5.5.1/lbaselib.c	186	function	pushmode	property wrapper
+lua-5.5.1/lbaselib.c	201	function	luaB_collectgarbage	property wrapper
+lua-5.5.1/lbaselib.c	260	function	luaB_type	property wrapper
+lua-5.5.1/lbaselib.c	268	function	luaB_next	property wrapper
+lua-5.5.1/lbaselib.c	280	function	pairscont	property
+lua-5.5.1/lbaselib.c	285	function	luaB_pairs	property wrapper
+lua-5.5.1/lbaselib.c	304	function	ipairsaux	property wrapper
+lua-5.5.1/lbaselib.c	316	function	luaB_ipairs	property wrapper
+lua-5.5.1/lbaselib.c	325	function	load_aux	property wrapper
+lua-5.5.1/lbaselib.c	342	function	getMode	property wrapper
+lua-5.5.1/lbaselib.c	352	function	luaB_loadfile	property wrapper
+lua-5.5.1/lbaselib.c	371	function	generic_reader	property command
+lua-5.5.1/lbaselib.c	390	function	luaB_load	property wrapper
+lua-5.5.1/lbaselib.c	412	function	dofilecont	property wrapper
+lua-5.5.1/lbaselib.c	418	function	luaB_dofile	property wrapper
+lua-5.5.1/lbaselib.c	428	function	luaB_assert	property wrapper
+lua-5.5.1/lbaselib.c	441	function	luaB_select	property wrapper
+lua-5.5.1/lbaselib.c	464	function	finishpcall	property wrapper
+lua-5.5.1/lbaselib.c	475	function	luaB_pcall	property wrapper
+lua-5.5.1/lbaselib.c	490	function	luaB_xpcall	property wrapper
+lua-5.5.1/lbaselib.c	502	function	luaB_tostring	property wrapper
+lua-5.5.1/lbaselib.c	540	function	luaopen_base	property wrapper
+lua-5.5.1/lcode.c	43	function	luaK_semerror	command
+lua-5.5.1/lcode.c	57	function	tonumeral	property wrapper
+lua-5.5.1/lcode.c	75	function	const2val	property wrapper
+lua-5.5.1/lcode.c	85	function	luaK_exp2const	property wrapper
+lua-5.5.1/lcode.c	117	function	previousinstruction	property wrapper
+lua-5.5.1/lcode.c	132	function	luaK_nil	wrapper
+lua-5.5.1/lcode.c	155	function	getjump	property wrapper
+lua-5.5.1/lcode.c	168	function	fixjump	wrapper
+lua-5.5.1/lcode.c	182	function	luaK_concat	command
+lua-5.5.1/lcode.c	200	function	luaK_jump	property wrapper
+lua-5.5.1/lcode.c	208	function	luaK_ret	wrapper
+lua-5.5.1/lcode.c	224	function	condjump	property wrapper
+lua-5.5.1/lcode.c	234	function	luaK_getlabel	property command
+lua-5.5.1/lcode.c	245	function	getjumpcontrol	property wrapper
+lua-5.5.1/lcode.c	261	function	patchtestreg	property wrapper
+lua-5.5.1/lcode.c	279	function	removevalues	wrapper
+lua-5.5.1/lcode.c	290	function	patchlistaux	wrapper
+lua-5.5.1/lcode.c	308	function	luaK_patchlist	wrapper
+lua-5.5.1/lcode.c	314	function	luaK_patchtohere	wrapper
+lua-5.5.1/lcode.c	331	function	savelineinfo	command
+lua-5.5.1/lcode.c	355	function	removelastlineinfo	command
+lua-5.5.1/lcode.c	374	function	removelastinstruction	command
+lua-5.5.1/lcode.c	384	function	luaK_code	property command
+lua-5.5.1/lcode.c	399	function	luaK_codeABCk	property wrapper
+lua-5.5.1/lcode.c	407	function	luaK_codevABCk	property wrapper
+lua-5.5.1/lcode.c	418	function	luaK_codeABx	property wrapper
+lua-5.5.1/lcode.c	428	function	codeAsBx	property wrapper
+lua-5.5.1/lcode.c	439	function	codesJ	property wrapper
+lua-5.5.1/lcode.c	450	function	codeextraarg	property wrapper
+lua-5.5.1/lcode.c	461	function	luaK_codek	property wrapper
+lua-5.5.1/lcode.c	476	function	luaK_checkstack	command
+lua-5.5.1/lcode.c	488	function	luaK_reserveregs	command
+lua-5.5.1/lcode.c	499	function	freereg	command
+lua-5.5.1/lcode.c	510	function	freeregs	wrapper
+lua-5.5.1/lcode.c	525	function	freeexp	wrapper
+lua-5.5.1/lcode.c	535	function	freeexps	wrapper
+lua-5.5.1/lcode.c	545	function	addk	property command
+lua-5.5.1/lcode.c	565	function	k2proto	property wrapper
+lua-5.5.1/lcode.c	589	function	stringK	property wrapper
+lua-5.5.1/lcode.c	599	function	luaK_intK	property wrapper
+lua-5.5.1/lcode.c	617	function	luaK_numberK	property wrapper
+lua-5.5.1/lcode.c	645	function	boolF	property wrapper
+lua-5.5.1/lcode.c	655	function	boolT	property wrapper
+lua-5.5.1/lcode.c	665	function	nilK	property wrapper
+lua-5.5.1/lcode.c	679	function	fitsC	property wrapper
+lua-5.5.1/lcode.c	687	function	fitsBx	property
+lua-5.5.1/lcode.c	692	function	luaK_int	wrapper
+lua-5.5.1/lcode.c	700	function	luaK_float	wrapper
+lua-5.5.1/lcode.c	715	function	luaK_codecheckglobal	wrapper
+lua-5.5.1/lcode.c	728	function	const2exp	command
+lua-5.5.1/lcode.c	757	function	luaK_setreturns	wrapper
+lua-5.5.1/lcode.c	774	function	str2K	property command
+lua-5.5.1/lcode.c	792	function	luaK_setoneret	command
+lua-5.5.1/lcode.c	808	function	luaK_vapar2local	command
+lua-5.5.1/lcode.c	819	function	luaK_dischargevars	command
+lua-5.5.1/lcode.c	882	function	discharge2reg	command
+lua-5.5.1/lcode.c	937	function	discharge2anyreg	wrapper
+lua-5.5.1/lcode.c	945	function	code_loadbool	property wrapper
+lua-5.5.1/lcode.c	955	function	need_value	property wrapper
+lua-5.5.1/lcode.c	971	function	exp2reg	command
+lua-5.5.1/lcode.c	999	function	luaK_exp2nextreg	wrapper
+lua-5.5.1/lcode.c	1011	function	luaK_exp2anyreg	property wrapper
+lua-5.5.1/lcode.c	1033	function	luaK_exp2anyregup	wrapper
+lua-5.5.1/lcode.c	1043	function	luaK_exp2val	wrapper
+lua-5.5.1/lcode.c	1055	function	luaK_exp2K	property command
+lua-5.5.1/lcode.c	1085	function	exp2RK	property wrapper
+lua-5.5.1/lcode.c	1095	function	codeABRK	wrapper
+lua-5.5.1/lcode.c	1105	function	luaK_storevar	wrapper
+lua-5.5.1/lcode.c	1146	function	negatecondition	wrapper
+lua-5.5.1/lcode.c	1160	function	jumponcond	property wrapper
+lua-5.5.1/lcode.c	1178	function	luaK_goiftrue	command
+lua-5.5.1/lcode.c	1205	function	luaK_goiffalse	command
+lua-5.5.1/lcode.c	1231	function	codenot	command
+lua-5.5.1/lcode.c	1265	function	isKstr	property wrapper
+lua-5.5.1/lcode.c	1273	function	isKint	property wrapper
+lua-5.5.1/lcode.c	1282	function	isCint	property wrapper
+lua-5.5.1/lcode.c	1291	function	isSCint	property wrapper
+lua-5.5.1/lcode.c	1300	function	isSCnumber	property command
+lua-5.5.1/lcode.c	1321	function	luaK_self	command
+lua-5.5.1/lcode.c	1345	function	fillidxk	command
+lua-5.5.1/lcode.c	1357	function	luaK_indexed	command
+lua-5.5.1/lcode.c	1400	function	validop	property wrapper
+lua-5.5.1/lcode.c	1419	function	constfolding	property command
+lua-5.5.1/lcode.c	1443	function	binopr2op	property wrapper
+lua-5.5.1/lcode.c	1454	function	unopr2op	property wrapper
+lua-5.5.1/lcode.c	1463	function	binopr2TM	property wrapper
+lua-5.5.1/lcode.c	1474	function	codeunexpval	command
+lua-5.5.1/lcode.c	1489	function	finishbinexpval	command
+lua-5.5.1/lcode.c	1507	function	codebinexpval	wrapper
+lua-5.5.1/lcode.c	1522	function	codebini	wrapper
+lua-5.5.1/lcode.c	1534	function	codebinK	wrapper
+lua-5.5.1/lcode.c	1546	function	finishbinexpneg	property wrapper
+lua-5.5.1/lcode.c	1565	function	swapexps	command
+lua-5.5.1/lcode.c	1573	function	codebinNoK	wrapper
+lua-5.5.1/lcode.c	1585	function	codearith	wrapper
+lua-5.5.1/lcode.c	1599	function	codecommutative	wrapper
+lua-5.5.1/lcode.c	1617	function	codebitwise	wrapper
+lua-5.5.1/lcode.c	1635	function	codeorder	command
+lua-5.5.1/lcode.c	1667	function	codeeq	command
+lua-5.5.1/lcode.c	1698	function	luaK_prefix	wrapper
+lua-5.5.1/lcode.c	1719	function	luaK_infix	wrapper
+lua-5.5.1/lcode.c	1768	function	codeconcat	wrapper
+lua-5.5.1/lcode.c	1788	function	luaK_posfix	command
+lua-5.5.1/lcode.c	1869	function	luaK_fixline	wrapper
+lua-5.5.1/lcode.c	1875	function	luaK_settablesize	wrapper
+lua-5.5.1/lcode.c	1893	function	luaK_setlist	command
+lua-5.5.1/lcode.c	1912	function	finaltarget	property wrapper
+lua-5.5.1/lcode.c	1930	function	luaK_finish	wrapper
+lua-5.5.1/lcorolib.c	22	function	getco	property wrapper
+lua-5.5.1/lcorolib.c	33	function	auxresume	property wrapper
+lua-5.5.1/lcorolib.c	57	function	luaB_coresume	property wrapper
+lua-5.5.1/lcorolib.c	74	function	luaB_auxwrap	property wrapper
+lua-5.5.1/lcorolib.c	96	function	luaB_cocreate	property wrapper
+lua-5.5.1/lcorolib.c	106	function	luaB_cowrap	property wrapper
+lua-5.5.1/lcorolib.c	113	function	luaB_yield	property wrapper
+lua-5.5.1/lcorolib.c	128	function	auxstatus	property wrapper
+lua-5.5.1/lcorolib.c	150	function	luaB_costatus	property wrapper
+lua-5.5.1/lcorolib.c	157	function	getoptco	property wrapper
+lua-5.5.1/lcorolib.c	162	function	luaB_yieldable	property wrapper
+lua-5.5.1/lcorolib.c	169	function	luaB_corunning	property wrapper
+lua-5.5.1/lcorolib.c	176	function	luaB_close	property wrapper
+lua-5.5.1/lcorolib.c	221	function	luaopen_coroutine	property wrapper
+lua-5.5.1/ldblib.c	36	function	checkstack	wrapper
+lua-5.5.1/ldblib.c	42	function	db_getregistry	property wrapper
+lua-5.5.1/ldblib.c	48	function	db_getmetatable	property wrapper
+lua-5.5.1/ldblib.c	57	function	db_setmetatable	property wrapper
+lua-5.5.1/ldblib.c	66	function	db_getuservalue	property wrapper
+lua-5.5.1/ldblib.c	78	function	db_setuservalue	property wrapper
+lua-5.5.1/ldblib.c	95	function	getthread	property command
+lua-5.5.1/ldblib.c	112	function	settabss	wrapper
+lua-5.5.1/ldblib.c	117	function	settabsi	wrapper
+lua-5.5.1/ldblib.c	122	function	settabsb	wrapper
+lua-5.5.1/ldblib.c	135	function	treatstackoption	wrapper
+lua-5.5.1/ldblib.c	150	function	db_getinfo	property wrapper
+lua-5.5.1/ldblib.c	206	function	db_getlocal	property wrapper
+lua-5.5.1/ldblib.c	237	function	db_setlocal	property wrapper
+lua-5.5.1/ldblib.c	261	function	auxupvalue	property wrapper
+lua-5.5.1/ldblib.c	273	function	db_getupvalue	property wrapper
+lua-5.5.1/ldblib.c	278	function	db_setupvalue	property wrapper
+lua-5.5.1/ldblib.c	288	function	checkupval	property command
+lua-5.5.1/ldblib.c	301	function	db_upvalueid	property wrapper
+lua-5.5.1/ldblib.c	311	function	db_upvaluejoin	property wrapper
+lua-5.5.1/ldblib.c	326	function	hookf	wrapper
+lua-5.5.1/ldblib.c	345	function	makemask	property wrapper
+lua-5.5.1/ldblib.c	358	function	unmakemask	property command
+lua-5.5.1/ldblib.c	368	function	db_sethook	property wrapper
+lua-5.5.1/ldblib.c	398	function	db_gethook	property wrapper
+lua-5.5.1/ldblib.c	423	function	db_debug	property wrapper
+lua-5.5.1/ldblib.c	438	function	db_traceback	property wrapper
+lua-5.5.1/ldblib.c	473	function	luaopen_debug	property wrapper
+lua-5.5.1/ldebug.c	43	function	currentpc	property wrapper
+lua-5.5.1/ldebug.c	62	function	getbaseline	property command
+lua-5.5.1/ldebug.c	85	function	luaG_getfuncline	property wrapper
+lua-5.5.1/ldebug.c	100	function	getcurrentline	property wrapper
+lua-5.5.1/ldebug.c	116	function	settraps	command
+lua-5.5.1/ldebug.c	133	function	lua_sethook	command
+lua-5.5.1/ldebug.c	147	function	lua_gethook	property
+lua-5.5.1/ldebug.c	152	function	lua_gethookmask	property
+lua-5.5.1/ldebug.c	157	function	lua_gethookcount	property
+lua-5.5.1/ldebug.c	162	function	lua_getstack	property command
+lua-5.5.1/ldebug.c	179	function	upvalname	property wrapper
+lua-5.5.1/ldebug.c	186	function	findvararg	property command
+lua-5.5.1/ldebug.c	198	function	luaG_findlocal	property command
+lua-5.5.1/ldebug.c	222	function	lua_getlocal	property wrapper
+lua-5.5.1/ldebug.c	244	function	lua_setlocal	property command
+lua-5.5.1/ldebug.c	259	function	funcinfo	command
+lua-5.5.1/ldebug.c	284	function	nextline	property wrapper
+lua-5.5.1/ldebug.c	292	function	collectvalidlines	wrapper
+lua-5.5.1/ldebug.c	323	function	getfuncname	property wrapper
+lua-5.5.1/ldebug.c	331	function	auxgetinfo	property command
+lua-5.5.1/ldebug.c	395	function	lua_getinfo	property command
+lua-5.5.1/ldebug.c	433	function	filterpc	property
+lua-5.5.1/ldebug.c	443	function	findsetreg	property wrapper
+lua-5.5.1/ldebug.c	492	function	kname	property command
+lua-5.5.1/ldebug.c	505	function	basicgetobjname	property command
+lua-5.5.1/ldebug.c	539	function	rname	command
+lua-5.5.1/ldebug.c	550	function	isEnv	property wrapper
+lua-5.5.1/ldebug.c	569	function	getobjname	property command
+lua-5.5.1/ldebug.c	615	function	funcnamefromcode	property command
+lua-5.5.1/ldebug.c	659	function	funcnamefromcall	property command
+lua-5.5.1/ldebug.c	685	function	instack	property wrapper
+lua-5.5.1/ldebug.c	701	function	getupvalname	property command
+lua-5.5.1/ldebug.c	715	function	formatvarinfo	property wrapper
+lua-5.5.1/ldebug.c	727	function	varinfo	property wrapper
+lua-5.5.1/ldebug.c	746	function	typeerror	wrapper
+lua-5.5.1/ldebug.c	757	function	luaG_typeerror	wrapper
+lua-5.5.1/ldebug.c	767	function	luaG_callerror	wrapper
+lua-5.5.1/ldebug.c	776	function	luaG_forerror	wrapper
+lua-5.5.1/ldebug.c	782	function	luaG_concaterror	wrapper
+lua-5.5.1/ldebug.c	788	function	luaG_opinterror	wrapper
+lua-5.5.1/ldebug.c	799	function	luaG_tointerror	wrapper
+lua-5.5.1/ldebug.c	807	function	luaG_ordererror	wrapper
+lua-5.5.1/ldebug.c	817	function	luaG_errnnil	wrapper
+lua-5.5.1/ldebug.c	826	function	luaG_addinfo	property wrapper
+lua-5.5.1/ldebug.c	840	function	luaG_errormsg	command
+lua-5.5.1/ldebug.c	857	function	luaG_runerror	command
+lua-5.5.1/ldebug.c	881	function	changedline	property wrapper
+lua-5.5.1/ldebug.c	910	function	luaG_tracecall	property wrapper
+lua-5.5.1/ldebug.c	936	function	luaG_traceexec	property command
+lua-5.5.1/ldo.c	61	struct	lua_longjmp	empty
+lua-5.5.1/ldo.c	81	function	LUAI_TRY	command
+lua-5.5.1/ldo.c	112	function	luaD_seterrorobj	command
+lua-5.5.1/ldo.c	125	function	luaD_throw	command
+lua-5.5.1/ldo.c	150	function	luaD_throwbaselevel	command
+lua-5.5.1/ldo.c	160	function	luaD_rawrunprotected	property command
+lua-5.5.1/ldo.c	215	function	luaD_errerr	command
+lua-5.5.1/ldo.c	228	function	luaD_checkminstack	property wrapper
+lua-5.5.1/ldo.c	260	function	relstack	command
+lua-5.5.1/ldo.c	277	function	correctstack	command
+lua-5.5.1/ldo.c	299	function	relstack	wrapper
+lua-5.5.1/ldo.c	305	function	correctstack	command
+lua-5.5.1/ldo.c	330	function	luaD_reallocstack	property command
+lua-5.5.1/ldo.c	361	function	luaD_growstack	property wrapper
+lua-5.5.1/ldo.c	395	function	stackinuse	property wrapper
+lua-5.5.1/ldo.c	419	function	luaD_shrinkstack	wrapper
+lua-5.5.1/ldo.c	441	function	luaD_hook	command
+lua-5.5.1/ldo.c	478	function	luaD_hookcall	command
+lua-5.5.1/ldo.c	496	function	rethook	command
+lua-5.5.1/ldo.c	525	function	tryfuncTM	property command
+lua-5.5.1/ldo.c	542	function	genmoveresults	command
+lua-5.5.1/ldo.c	563	function	moveresults	command
+lua-5.5.1/ldo.c	607	function	luaD_poscall	command
+lua-5.5.1/ldo.c	630	function	prepCallInfo	property command
+lua-5.5.1/ldo.c	644	function	precallC	property command
+lua-5.5.1/ldo.c	671	function	luaD_pretailcall	property command
+lua-5.5.1/ldo.c	717	function	luaD_precall	property command
+lua-5.5.1/ldo.c	759	function	ccall	command
+lua-5.5.1/ldo.c	777	function	luaD_call	wrapper
+lua-5.5.1/ldo.c	785	function	luaD_callnoyield	wrapper
+lua-5.5.1/ldo.c	806	function	finishpcallk	property command
+lua-5.5.1/ldo.c	839	function	finishCcall	wrapper
+lua-5.5.1/ldo.c	868	function	unroll	wrapper
+lua-5.5.1/ldo.c	886	function	findpcall	property
+lua-5.5.1/ldo.c	901	function	resume_error	property command
+lua-5.5.1/ldo.c	918	function	resume	command
+lua-5.5.1/ldo.c	957	function	precover	property command
+lua-5.5.1/ldo.c	968	function	lua_resume	property command
+lua-5.5.1/ldo.c	1003	function	lua_isyieldable	property wrapper
+lua-5.5.1/ldo.c	1008	function	lua_yieldk	property command
+lua-5.5.1/ldo.c	1042	struct	CloseP	empty
+lua-5.5.1/ldo.c	1051	function	closepaux	wrapper
+lua-5.5.1/ldo.c	1061	function	luaD_closeprotected	property command
+lua-5.5.1/ldo.c	1083	function	luaD_pcall	property command
+lua-5.5.1/ldo.c	1107	struct	SParser	empty
+lua-5.5.1/ldo.c	1116	function	checkmode	wrapper
+lua-5.5.1/ldo.c	1129	function	f_parser	command
+lua-5.5.1/ldo.c	1164	function	luaD_anchorobj	command
+lua-5.5.1/ldo.c	1173	function	luaD_protectedparser	property wrapper
+lua-5.5.1/ldump.c	26	struct		empty
+lua-5.5.1/ldump.c	52	function	dumpBlock	command
+lua-5.5.1/ldump.c	66	function	dumpAlign	wrapper
+lua-5.5.1/ldump.c	80	function	dumpByte	wrapper
+lua-5.5.1/ldump.c	95	function	dumpVarint	wrapper
+lua-5.5.1/ldump.c	105	function	dumpSize	wrapper
+lua-5.5.1/ldump.c	110	function	dumpInt	wrapper
+lua-5.5.1/ldump.c	116	function	dumpNumber	wrapper
+lua-5.5.1/ldump.c	127	function	dumpInteger	wrapper
+lua-5.5.1/ldump.c	143	function	dumpString	command
+lua-5.5.1/ldump.c	171	function	dumpCode	wrapper
+lua-5.5.1/ldump.c	181	function	dumpConstants	wrapper
+lua-5.5.1/ldump.c	207	function	dumpProtos	wrapper
+lua-5.5.1/ldump.c	216	function	dumpUpvalues	wrapper
+lua-5.5.1/ldump.c	227	function	dumpDebug	wrapper
+lua-5.5.1/ldump.c	254	function	dumpFunction	wrapper
+lua-5.5.1/ldump.c	273	function	dumpHeader	wrapper
+lua-5.5.1/ldump.c	288	function	luaU_dump	property command
+lua-5.5.1/lfunc.c	27	function	luaF_newCclosure	property wrapper
+lua-5.5.1/lfunc.c	35	function	luaF_newLclosure	property wrapper
+lua-5.5.1/lfunc.c	48	function	luaF_initupvals	command
+lua-5.5.1/lfunc.c	65	function	newupval	property command
+lua-5.5.1/lfunc.c	87	function	luaF_findupval	property wrapper
+lua-5.5.1/lfunc.c	107	function	callclosemethod	command
+lua-5.5.1/lfunc.c	127	function	checkclosemth	wrapper
+lua-5.5.1/lfunc.c	145	function	prepcallclosemth	command
+lua-5.5.1/lfunc.c	172	function	luaF_newtbcupval	command
+lua-5.5.1/lfunc.c	186	function	luaF_unlinkupval	command
+lua-5.5.1/lfunc.c	197	function	luaF_closeupval	wrapper
+lua-5.5.1/lfunc.c	216	function	poptbclist	command
+lua-5.5.1/lfunc.c	230	function	luaF_close	property wrapper
+lua-5.5.1/lfunc.c	243	function	luaF_newproto	property wrapper
+lua-5.5.1/lfunc.c	270	function	luaF_protosize	property wrapper
+lua-5.5.1/lfunc.c	285	function	luaF_freeproto	wrapper
+lua-5.5.1/lfunc.c	303	function	luaF_getlocalname	property wrapper
+lua-5.5.1/lgc.c	113	function	objsize	property wrapper
+lua-5.5.1/lgc.c	163	function	getgclist	property wrapper
+lua-5.5.1/lgc.c	186	function	linkgclist_	command
+lua-5.5.1/lgc.c	209	function	clearkey	wrapper
+lua-5.5.1/lgc.c	223	function	iscleared	property wrapper
+lua-5.5.1/lgc.c	246	function	luaC_barrier_	wrapper
+lua-5.5.1/lgc.c	268	function	luaC_barrierback_	wrapper
+lua-5.5.1/lgc.c	282	function	luaC_fix	command
+lua-5.5.1/lgc.c	297	function	luaC_newobjdt	property wrapper
+lua-5.5.1/lgc.c	312	function	luaC_newobj	property wrapper
+lua-5.5.1/lgc.c	339	function	reallymarkobject	command
+lua-5.5.1/lgc.c	378	function	markmt	wrapper
+lua-5.5.1/lgc.c	388	function	markbeingfnz	wrapper
+lua-5.5.1/lgc.c	406	function	remarkupvals	wrapper
+lua-5.5.1/lgc.c	429	function	cleargraylists	command
+lua-5.5.1/lgc.c	440	function	restartcollection	command
+lua-5.5.1/lgc.c	470	function	genlink	wrapper
+lua-5.5.1/lgc.c	487	function	traverseweakvalue	wrapper
+lua-5.5.1/lgc.c	514	function	traversearray	property wrapper
+lua-5.5.1/lgc.c	541	function	traverseephemeron	property wrapper
+lua-5.5.1/lgc.c	576	function	traversestrongtable	wrapper
+lua-5.5.1/lgc.c	595	function	getmode	property wrapper
+lua-5.5.1/lgc.c	608	function	traversetable	property wrapper
+lua-5.5.1/lgc.c	631	function	traverseudata	property wrapper
+lua-5.5.1/lgc.c	646	function	traverseproto	property wrapper
+lua-5.5.1/lgc.c	661	function	traverseCclosure	property wrapper
+lua-5.5.1/lgc.c	672	function	traverseLclosure	property wrapper
+lua-5.5.1/lgc.c	695	function	traversethread	property command
+lua-5.5.1/lgc.c	727	function	propagatemark	property command
+lua-5.5.1/lgc.c	743	function	propagateall	wrapper
+lua-5.5.1/lgc.c	755	function	convergeephemerons	command
+lua-5.5.1/lgc.c	789	function	clearbykeys	wrapper
+lua-5.5.1/lgc.c	808	function	clearbyvalues	wrapper
+lua-5.5.1/lgc.c	829	function	freeupval	wrapper
+lua-5.5.1/lgc.c	836	function	freeobj	wrapper
+lua-5.5.1/lgc.c	892	function	sweeplist	property command
+lua-5.5.1/lgc.c	915	function	sweeptolive	property wrapper
+lua-5.5.1/lgc.c	935	function	checkSizes	wrapper
+lua-5.5.1/lgc.c	947	function	udata2finalize	property command
+lua-5.5.1/lgc.c	962	function	dothecall	wrapper
+lua-5.5.1/lgc.c	968	function	GCTM	command
+lua-5.5.1/lgc.c	999	function	callallpendingfinalizers	wrapper
+lua-5.5.1/lgc.c	1009	function	findlast	property
+lua-5.5.1/lgc.c	1023	function	separatetobefnz	command
+lua-5.5.1/lgc.c	1046	function	checkpointer	command
+lua-5.5.1/lgc.c	1056	function	correctpointers	wrapper
+lua-5.5.1/lgc.c	1068	function	luaC_checkfinalizer	command
+lua-5.5.1/lgc.c	1122	function	setpause	wrapper
+lua-5.5.1/lgc.c	1136	function	sweep2old	command
+lua-5.5.1/lgc.c	1172	function	sweepgen	property command
+lua-5.5.1/lgc.c	1227	function	correctgraylist	property command
+lua-5.5.1/lgc.c	1260	function	correctgraylists	command
+lua-5.5.1/lgc.c	1276	function	markold	wrapper
+lua-5.5.1/lgc.c	1292	function	finishgencycle	command
+lua-5.5.1/lgc.c	1306	function	minor2inc	command
+lua-5.5.1/lgc.c	1323	function	checkminormajor	property wrapper
+lua-5.5.1/lgc.c	1335	function	youngcollection	command
+lua-5.5.1/lgc.c	1389	function	atomic2gen	command
+lua-5.5.1/lgc.c	1417	function	setminordebt	wrapper
+lua-5.5.1/lgc.c	1428	function	entergen	wrapper
+lua-5.5.1/lgc.c	1440	function	luaC_changemode	wrapper
+lua-5.5.1/lgc.c	1458	function	fullgen	wrapper
+lua-5.5.1/lgc.c	1471	function	checkmajorminor	property command
+lua-5.5.1/lgc.c	1504	function	entersweep	wrapper
+lua-5.5.1/lgc.c	1516	function	deletelist	wrapper
+lua-5.5.1/lgc.c	1529	function	luaC_freeallobjects	wrapper
+lua-5.5.1/lgc.c	1543	function	atomic	wrapper
+lua-5.5.1/lgc.c	1588	function	sweepstep	command
+lua-5.5.1/lgc.c	1617	function	singlestep	property wrapper
+lua-5.5.1/lgc.c	1694	function	luaC_runtilstate	wrapper
+lua-5.5.1/lgc.c	1710	function	incstep	wrapper
+lua-5.5.1/lgc.c	1740	function	luaC_step	wrapper
+lua-5.5.1/lgc.c	1770	function	fullinc	wrapper
+lua-5.5.1/lgc.c	1786	function	luaC_fullgc	wrapper
+lua-5.5.1/linit.c	46	function	luaL_openselectedlibs	wrapper
+lua-5.5.1/liolib.c	39	function	l_checkmode	property wrapper
+lua-5.5.1/liolib.c	162	function	io_type	property wrapper
+lua-5.5.1/liolib.c	176	function	f_tostring	property wrapper
+lua-5.5.1/liolib.c	186	function	tofile	property wrapper
+lua-5.5.1/liolib.c	200	function	newprefile	property wrapper
+lua-5.5.1/liolib.c	213	function	aux_close	property wrapper
+lua-5.5.1/liolib.c	221	function	f_close	property wrapper
+lua-5.5.1/liolib.c	227	function	io_close	property wrapper
+lua-5.5.1/liolib.c	234	function	f_gc	property wrapper
+lua-5.5.1/liolib.c	245	function	io_fclose	property wrapper
+lua-5.5.1/liolib.c	252	function	newfile	property wrapper
+lua-5.5.1/liolib.c	260	function	opencheck	wrapper
+lua-5.5.1/liolib.c	268	function	io_open	property wrapper
+lua-5.5.1/liolib.c	283	function	io_pclose	property wrapper
+lua-5.5.1/liolib.c	290	function	io_popen	property wrapper
+lua-5.5.1/liolib.c	302	function	io_tmpfile	property wrapper
+lua-5.5.1/liolib.c	310	function	getiofile	property wrapper
+lua-5.5.1/liolib.c	320	function	g_iofile	property wrapper
+lua-5.5.1/liolib.c	337	function	io_input	property wrapper
+lua-5.5.1/liolib.c	342	function	io_output	property wrapper
+lua-5.5.1/liolib.c	365	function	aux_lines	wrapper
+lua-5.5.1/liolib.c	376	function	f_lines	property wrapper
+lua-5.5.1/liolib.c	388	function	io_lines	property wrapper
+lua-5.5.1/liolib.c	429	struct		empty
+lua-5.5.1/liolib.c	440	function	nextc	property command
+lua-5.5.1/liolib.c	456	function	test2	property wrapper
+lua-5.5.1/liolib.c	466	function	readdigits	property wrapper
+lua-5.5.1/liolib.c	479	function	read_number	property wrapper
+lua-5.5.1/liolib.c	513	function	test_eof	property wrapper
+lua-5.5.1/liolib.c	521	function	read_line	property wrapper
+lua-5.5.1/liolib.c	542	function	read_all	wrapper
+lua-5.5.1/liolib.c	555	function	read_chars	property wrapper
+lua-5.5.1/liolib.c	568	function	g_read	property wrapper
+lua-5.5.1/liolib.c	619	function	io_read	property wrapper
+lua-5.5.1/liolib.c	624	function	f_read	property wrapper
+lua-5.5.1/liolib.c	632	function	io_readline	property wrapper
+lua-5.5.1/liolib.c	663	function	g_write	property wrapper
+lua-5.5.1/liolib.c	690	function	io_write	property wrapper
+lua-5.5.1/liolib.c	695	function	f_write	property wrapper
+lua-5.5.1/liolib.c	702	function	f_seek	property wrapper
+lua-5.5.1/liolib.c	722	function	f_setvbuf	property wrapper
+lua-5.5.1/liolib.c	735	function	aux_flush	property wrapper
+lua-5.5.1/liolib.c	741	function	f_flush	property wrapper
+lua-5.5.1/liolib.c	746	function	io_flush	property wrapper
+lua-5.5.1/liolib.c	797	function	createmeta	wrapper
+lua-5.5.1/liolib.c	810	function	io_noclose	property wrapper
+lua-5.5.1/liolib.c	819	function	createstdfile	wrapper
+lua-5.5.1/liolib.c	832	function	luaopen_io	property wrapper
+lua-5.5.1/llex.c	62	function	save	wrapper
+lua-5.5.1/llex.c	75	function	luaX_init	wrapper
+lua-5.5.1/llex.c	87	function	luaX_token2str	property wrapper
+lua-5.5.1/llex.c	104	function	txtToken	property wrapper
+lua-5.5.1/llex.c	116	function	lexerror	wrapper
+lua-5.5.1/llex.c	124	function	luaX_syntaxerror	wrapper
+lua-5.5.1/llex.c	135	function	anchorstr	property wrapper
+lua-5.5.1/llex.c	156	function	luaX_newstring	property wrapper
+lua-5.5.1/llex.c	165	function	inclinenumber	command
+lua-5.5.1/llex.c	176	function	luaX_setinput	command
+lua-5.5.1/llex.c	208	function	check_next1	property wrapper
+lua-5.5.1/llex.c	221	function	check_next2	property wrapper
+lua-5.5.1/llex.c	244	function	read_numeral	property command
+lua-5.5.1/llex.c	282	function	skip_sep	property wrapper
+lua-5.5.1/llex.c	297	function	read_long_string	command
+lua-5.5.1/llex.c	336	function	esccheck	wrapper
+lua-5.5.1/llex.c	345	function	gethexa	property wrapper
+lua-5.5.1/llex.c	352	function	readhexaesc	property wrapper
+lua-5.5.1/llex.c	365	function	readutf8esc	property wrapper
+lua-5.5.1/llex.c	383	function	utf8esc	wrapper
+lua-5.5.1/llex.c	391	function	readdecesc	property wrapper
+lua-5.5.1/llex.c	404	function	read_string	command
+lua-5.5.1/llex.c	467	function	llex	property command
+lua-5.5.1/llex.c	588	function	luaX_next	command
+lua-5.5.1/llex.c	599	function	luaX_lookahead	property command
+lua-5.5.1/llex.h	49	union		empty
+lua-5.5.1/llex.h	56	struct	Token	empty
+lua-5.5.1/llex.h	64	struct	LexState	empty
+lua-5.5.1/lmathlib.c	30	function	math_abs	property wrapper
+lua-5.5.1/lmathlib.c	42	function	math_sin	property wrapper
+lua-5.5.1/lmathlib.c	48	function	math_cos	property wrapper
+lua-5.5.1/lmathlib.c	54	function	math_tan	property wrapper
+lua-5.5.1/lmathlib.c	60	function	math_asin	property wrapper
+lua-5.5.1/lmathlib.c	66	function	math_acos	property wrapper
+lua-5.5.1/lmathlib.c	72	function	math_atan	property wrapper
+lua-5.5.1/lmathlib.c	80	function	math_toint	property wrapper
+lua-5.5.1/lmathlib.c	93	function	pushnumint	wrapper
+lua-5.5.1/lmathlib.c	102	function	math_floor	property wrapper
+lua-5.5.1/lmathlib.c	113	function	math_ceil	property wrapper
+lua-5.5.1/lmathlib.c	124	function	math_fmod	property wrapper
+lua-5.5.1/lmathlib.c	146	function	math_modf	property wrapper
+lua-5.5.1/lmathlib.c	163	function	math_sqrt	property wrapper
+lua-5.5.1/lmathlib.c	169	function	math_ult	property wrapper
+lua-5.5.1/lmathlib.c	177	function	math_log	property wrapper
+lua-5.5.1/lmathlib.c	199	function	math_exp	property wrapper
+lua-5.5.1/lmathlib.c	205	function	math_deg	property wrapper
+lua-5.5.1/lmathlib.c	211	function	math_rad	property wrapper
+lua-5.5.1/lmathlib.c	217	function	math_frexp	property wrapper
+lua-5.5.1/lmathlib.c	226	function	math_ldexp	property wrapper
+lua-5.5.1/lmathlib.c	234	function	math_min	property wrapper
+lua-5.5.1/lmathlib.c	248	function	math_max	property wrapper
+lua-5.5.1/lmathlib.c	262	function	math_type	property wrapper
+lua-5.5.1/lmathlib.c	344	function	rotl	property wrapper
+lua-5.5.1/lmathlib.c	348	function	nextrand	property command
+lua-5.5.1/lmathlib.c	379	function	I2d	property wrapper
+lua-5.5.1/lmathlib.c	400	struct	Rand64	empty
+lua-5.5.1/lmathlib.c	421	function	packI	property
+lua-5.5.1/lmathlib.c	429	function	Ishl	property wrapper
+lua-5.5.1/lmathlib.c	435	function	Ixor	command
+lua-5.5.1/lmathlib.c	441	function	Iadd	property wrapper
+lua-5.5.1/lmathlib.c	449	function	times5	property wrapper
+lua-5.5.1/lmathlib.c	454	function	times9	property wrapper
+lua-5.5.1/lmathlib.c	459	function	rotl	property wrapper
+lua-5.5.1/lmathlib.c	466	function	rotl1	property wrapper
+lua-5.5.1/lmathlib.c	476	function	nextrand	property command
+lua-5.5.1/lmathlib.c	506	function	I2d	property wrapper
+lua-5.5.1/lmathlib.c	529	function	I2d	property wrapper
+lua-5.5.1/lmathlib.c	539	function	I2UInt	property wrapper
+lua-5.5.1/lmathlib.c	544	function	Int2I	property wrapper
+lua-5.5.1/lmathlib.c	554	struct		empty
+lua-5.5.1/lmathlib.c	569	function	project	property wrapper
+lua-5.5.1/lmathlib.c	582	function	math_random	property wrapper
+lua-5.5.1/lmathlib.c	617	function	setseed	command
+lua-5.5.1/lmathlib.c	631	function	math_randomseed	property wrapper
+lua-5.5.1/lmathlib.c	657	function	setrandfunc	wrapper
+lua-5.5.1/lmathlib.c	674	function	math_cosh	property wrapper
+lua-5.5.1/lmathlib.c	679	function	math_sinh	property wrapper
+lua-5.5.1/lmathlib.c	684	function	math_tanh	property wrapper
+lua-5.5.1/lmathlib.c	689	function	math_pow	property wrapper
+lua-5.5.1/lmathlib.c	696	function	math_log10	property wrapper
+lua-5.5.1/lmathlib.c	752	function	luaopen_math	property wrapper
+lua-5.5.1/lmem.c	69	function	firsttry	property wrapper
+lua-5.5.1/lmem.c	97	function	luaM_growaux_	property command
+lua-5.5.1/lmem.c	128	function	luaM_shrinkvector_	property command
+lua-5.5.1/lmem.c	142	function	luaM_toobig	wrapper
+lua-5.5.1/lmem.c	150	function	luaM_free_	wrapper
+lua-5.5.1/lmem.c	162	function	tryagain	property wrapper
+lua-5.5.1/lmem.c	176	function	luaM_realloc_	property wrapper
+lua-5.5.1/lmem.c	192	function	luaM_saferealloc_	property wrapper
+lua-5.5.1/lmem.c	201	function	luaM_malloc_	property wrapper
+lua-5.5.1/loadlib.c	104	function	lsys_unloadlib	wrapper
+lua-5.5.1/loadlib.c	109	function	lsys_load	property wrapper
+lua-5.5.1/loadlib.c	117	function	lsys_sym	property wrapper
+lua-5.5.1/loadlib.c	153	function	setprogdir	wrapper
+lua-5.5.1/loadlib.c	170	function	pusherror	wrapper
+lua-5.5.1/loadlib.c	180	function	lsys_unloadlib	wrapper
+lua-5.5.1/loadlib.c	185	function	lsys_load	property wrapper
+lua-5.5.1/loadlib.c	193	function	lsys_sym	property wrapper
+lua-5.5.1/loadlib.c	216	function	lsys_unloadlib	unclassified
+lua-5.5.1/loadlib.c	221	function	lsys_load	property wrapper
+lua-5.5.1/loadlib.c	228	function	lsys_sym	property wrapper
+lua-5.5.1/loadlib.c	261	function	noenv	property wrapper
+lua-5.5.1/loadlib.c	274	function	setpath	wrapper
+lua-5.5.1/loadlib.c	322	function	checkclib	property wrapper
+lua-5.5.1/loadlib.c	336	function	freelib	property wrapper
+lua-5.5.1/loadlib.c	347	function	createlibstr	wrapper
+lua-5.5.1/loadlib.c	359	function	addtoclib	wrapper
+lua-5.5.1/loadlib.c	384	function	lookforfunc	property wrapper
+lua-5.5.1/loadlib.c	405	function	ll_loadlib	property wrapper
+lua-5.5.1/loadlib.c	428	function	readable	property wrapper
+lua-5.5.1/loadlib.c	441	function	getnextfilename	property command
+lua-5.5.1/loadlib.c	465	function	pusherrornotfound	wrapper
+lua-5.5.1/loadlib.c	475	function	searchpath	property wrapper
+lua-5.5.1/loadlib.c	502	function	ll_searchpath	property wrapper
+lua-5.5.1/loadlib.c	516	function	findfile	property wrapper
+lua-5.5.1/loadlib.c	528	function	checkload	property wrapper
+lua-5.5.1/loadlib.c	539	function	searcher_Lua	property wrapper
+lua-5.5.1/loadlib.c	556	function	loadfunc	property wrapper
+lua-5.5.1/loadlib.c	574	function	searcher_C	property wrapper
+lua-5.5.1/loadlib.c	582	function	searcher_Croot	property wrapper
+lua-5.5.1/loadlib.c	604	function	searcher_preload	property wrapper
+lua-5.5.1/loadlib.c	618	function	findloader	wrapper
+lua-5.5.1/loadlib.c	650	function	ll_require	property wrapper
+lua-5.5.1/loadlib.c	703	function	createsearcherstable	wrapper
+lua-5.5.1/loadlib.c	724	function	luaopen_package	property wrapper
+lua-5.5.1/lobject.c	37	function	luaO_ceillog2	property wrapper
+lua-5.5.1/lobject.c	62	function	luaO_codeparam	property wrapper
+lua-5.5.1/lobject.c	89	function	luaO_applyparam	property
+lua-5.5.1/lobject.c	115	function	intarith	property wrapper
+lua-5.5.1/lobject.c	135	function	numarith	property wrapper
+lua-5.5.1/lobject.c	151	function	luaO_rawarith	property wrapper
+lua-5.5.1/lobject.c	188	function	luaO_arith	wrapper
+lua-5.5.1/lobject.c	197	function	luaO_hexavalue	property wrapper
+lua-5.5.1/lobject.c	204	function	isneg	property
+lua-5.5.1/lobject.c	228	function	lua_strx2number	property command
+lua-5.5.1/lobject.c	291	function	l_str2dloc	property command
+lua-5.5.1/lobject.c	314	function	l_str2d	property wrapper
+lua-5.5.1/lobject.c	339	function	l_str2int	property command
+lua-5.5.1/lobject.c	371	function	luaO_str2num	property wrapper
+lua-5.5.1/lobject.c	386	function	luaO_utf8esc	property command
+lua-5.5.1/lobject.c	427	function	tostringbuffFloat	property command
+lua-5.5.1/lobject.c	449	function	luaO_tostringbuff	property wrapper
+lua-5.5.1/lobject.c	464	function	luaO_tostring	wrapper
+lua-5.5.1/lobject.c	490	struct	BuffFS	empty
+lua-5.5.1/lobject.c	500	function	initbuff	command
+lua-5.5.1/lobject.c	513	function	pushbuff	command
+lua-5.5.1/lobject.c	536	function	clearbuff	property wrapper
+lua-5.5.1/lobject.c	549	function	addstr2buff	command
+lua-5.5.1/lobject.c	585	function	addnum2buff	wrapper
+lua-5.5.1/lobject.c	596	function	luaO_pushvfstring	property wrapper
+lua-5.5.1/lobject.c	662	function	luaO_pushfstring	property wrapper
+lua-5.5.1/lobject.c	682	function	luaO_chunkid	command
+lua-5.5.1/lobject.h	49	union	Value	empty
+lua-5.5.1/lobject.h	67	struct	TValue	empty
+lua-5.5.1/lobject.h	148	union	StackValue	empty
+lua-5.5.1/lobject.h	165	union		empty
+lua-5.5.1/lobject.h	306	struct	GCObject	empty
+lua-5.5.1/lobject.h	406	struct	TString	empty
+lua-5.5.1/lobject.h	482	union	UValue	empty
+lua-5.5.1/lobject.h	492	struct	Udata	empty
+lua-5.5.1/lobject.h	511	struct	Udata0	empty
+lua-5.5.1/lobject.h	549	struct	Upvaldesc	empty
+lua-5.5.1/lobject.h	561	struct	LocVar	empty
+lua-5.5.1/lobject.h	578	struct	AbsLineInfo	empty
+lua-5.5.1/lobject.h	603	struct	Proto	empty
+lua-5.5.1/lobject.h	680	struct	UpVal	empty
+lua-5.5.1/lobject.h	700	struct	CClosure	empty
+lua-5.5.1/lobject.h	707	struct	LClosure	empty
+lua-5.5.1/lobject.h	714	union	Closure	empty
+lua-5.5.1/lobject.h	752	union	Node	empty
+lua-5.5.1/lobject.h	753	struct	NodeKey	empty
+lua-5.5.1/lobject.h	777	struct	Table	empty
+lua-5.5.1/lopcodes.c	120	function	luaP_isIT	property wrapper
+lua-5.5.1/loslib.c	143	function	os_execute	property wrapper
+lua-5.5.1/loslib.c	157	function	os_remove	property wrapper
+lua-5.5.1/loslib.c	164	function	os_rename	property wrapper
+lua-5.5.1/loslib.c	172	function	os_tmpname	property wrapper
+lua-5.5.1/loslib.c	183	function	os_getenv	property wrapper
+lua-5.5.1/loslib.c	189	function	os_clock	property wrapper
+lua-5.5.1/loslib.c	212	function	setfield	wrapper
+lua-5.5.1/loslib.c	222	function	setboolfield	wrapper
+lua-5.5.1/loslib.c	233	function	setallfields	wrapper
+lua-5.5.1/loslib.c	246	function	getboolfield	property wrapper
+lua-5.5.1/loslib.c	254	function	getfield	property wrapper
+lua-5.5.1/loslib.c	275	function	checkoption	property command
+lua-5.5.1/loslib.c	294	function	l_checktime	property wrapper
+lua-5.5.1/loslib.c	305	function	os_date	property wrapper
+lua-5.5.1/loslib.c	348	function	os_time	property wrapper
+lua-5.5.1/loslib.c	374	function	os_difftime	property wrapper
+lua-5.5.1/loslib.c	384	function	os_setlocale	property wrapper
+lua-5.5.1/loslib.c	396	function	os_exit	property wrapper
+lua-5.5.1/loslib.c	428	function	luaopen_os	property wrapper
+lua-5.5.1/lparser.c	49	struct	BlockCnt	empty
+lua-5.5.1/lparser.c	68	function	error_expected	wrapper
+lua-5.5.1/lparser.c	74	function	errorlimit	wrapper
+lua-5.5.1/lparser.c	87	function	luaY_checklimit	wrapper
+lua-5.5.1/lparser.c	95	function	testnext	property wrapper
+lua-5.5.1/lparser.c	107	function	check	wrapper
+lua-5.5.1/lparser.c	116	function	checknext	wrapper
+lua-5.5.1/lparser.c	130	function	check_match	wrapper
+lua-5.5.1/lparser.c	143	function	str_checkname	property wrapper
+lua-5.5.1/lparser.c	152	function	init_exp	command
+lua-5.5.1/lparser.c	159	function	codestring	command
+lua-5.5.1/lparser.c	166	function	codename	wrapper
+lua-5.5.1/lparser.c	175	function	registerlocalvar	property command
+lua-5.5.1/lparser.c	194	function	new_varkind	property wrapper
+lua-5.5.1/lparser.c	211	function	new_localvar	property wrapper
+lua-5.5.1/lparser.c	226	function	getlocalvardesc	property
+lua-5.5.1/lparser.c	236	function	reglevel	property wrapper
+lua-5.5.1/lparser.c	250	function	luaY_nvarstack	property wrapper
+lua-5.5.1/lparser.c	258	function	localdebuginfo	property wrapper
+lua-5.5.1/lparser.c	273	function	init_var	command
+lua-5.5.1/lparser.c	286	function	check_readonly	command
+lua-5.5.1/lparser.c	328	function	adjustlocalvars	wrapper
+lua-5.5.1/lparser.c	346	function	removevars	command
+lua-5.5.1/lparser.c	360	function	searchupvalue	property wrapper
+lua-5.5.1/lparser.c	370	function	allocupvalue	property command
+lua-5.5.1/lparser.c	382	function	newupvalue	property wrapper
+lua-5.5.1/lparser.c	414	function	searchvar	property command
+lua-5.5.1/lparser.c	451	function	markupval	command
+lua-5.5.1/lparser.c	463	function	marktobeclosed	command
+lua-5.5.1/lparser.c	476	function	singlevaraux	wrapper
+lua-5.5.1/lparser.c	502	function	buildglobal	wrapper
+lua-5.5.1/lparser.c	520	function	buildvar	command
+lua-5.5.1/lparser.c	538	function	singlevar	wrapper
+lua-5.5.1/lparser.c	547	function	adjust_assign	wrapper
+lua-5.5.1/lparser.c	580	function	jumpscopeerror	wrapper
+lua-5.5.1/lparser.c	597	function	closegoto	wrapper
+lua-5.5.1/lparser.c	626	function	findlabel	property wrapper
+lua-5.5.1/lparser.c	640	function	newlabelentry	property command
+lua-5.5.1/lparser.c	663	function	newgotoentry	property wrapper
+lua-5.5.1/lparser.c	678	function	createlabel	wrapper
+lua-5.5.1/lparser.c	696	function	solvegotos	wrapper
+lua-5.5.1/lparser.c	720	function	enterblock	command
+lua-5.5.1/lparser.c	737	function	undefgoto	wrapper
+lua-5.5.1/lparser.c	745	function	leaveblock	command
+lua-5.5.1/lparser.c	768	function	addprototype	property wrapper
+lua-5.5.1/lparser.c	792	function	codeclosure	wrapper
+lua-5.5.1/lparser.c	799	function	open_func	command
+lua-5.5.1/lparser.c	829	function	close_func	command
+lua-5.5.1/lparser.c	866	function	block_follow	property
+lua-5.5.1/lparser.c	877	function	statlist	wrapper
+lua-5.5.1/lparser.c	889	function	fieldsel	wrapper
+lua-5.5.1/lparser.c	900	function	yindex	wrapper
+lua-5.5.1/lparser.c	915	struct	ConsControl	empty
+lua-5.5.1/lparser.c	938	function	recfield	command
+lua-5.5.1/lparser.c	957	function	closelistfield	command
+lua-5.5.1/lparser.c	969	function	lastlistfield	command
+lua-5.5.1/lparser.c	985	function	listfield	command
+lua-5.5.1/lparser.c	992	function	field	wrapper
+lua-5.5.1/lparser.c	1019	function	maxtostore	property
+lua-5.5.1/lparser.c	1030	function	constructor	wrapper
+lua-5.5.1/lparser.c	1061	function	setvararg	command
+lua-5.5.1/lparser.c	1067	function	parlist	wrapper
+lua-5.5.1/lparser.c	1105	function	body	wrapper
+lua-5.5.1/lparser.c	1127	function	explist	property wrapper
+lua-5.5.1/lparser.c	1140	function	funcargs	wrapper
+lua-5.5.1/lparser.c	1198	function	primaryexp	wrapper
+lua-5.5.1/lparser.c	1220	function	suffixedexp	wrapper
+lua-5.5.1/lparser.c	1257	function	simpleexp	command
+lua-5.5.1/lparser.c	1312	function	getunopr	property
+lua-5.5.1/lparser.c	1323	function	getbinopr	property
+lua-5.5.1/lparser.c	1377	function	subexpr	property wrapper
+lua-5.5.1/lparser.c	1407	function	expr	wrapper
+lua-5.5.1/lparser.c	1422	function	block	wrapper
+lua-5.5.1/lparser.c	1436	struct	LHS_assign	empty
+lua-5.5.1/lparser.c	1448	function	check_conflict	command
+lua-5.5.1/lparser.c	1487	function	storevartop	wrapper
+lua-5.5.1/lparser.c	1501	function	restassign	wrapper
+lua-5.5.1/lparser.c	1531	function	cond	property wrapper
+lua-5.5.1/lparser.c	1541	function	gotostat	wrapper
+lua-5.5.1/lparser.c	1550	function	breakstat	wrapper
+lua-5.5.1/lparser.c	1568	function	checkrepeated	wrapper
+lua-5.5.1/lparser.c	1576	function	labelstat	wrapper
+lua-5.5.1/lparser.c	1586	function	whilestat	wrapper
+lua-5.5.1/lparser.c	1605	function	repeatstat	wrapper
+lua-5.5.1/lparser.c	1635	function	exp1	wrapper
+lua-5.5.1/lparser.c	1648	function	fixforjump	wrapper
+lua-5.5.1/lparser.c	1662	function	forbody	wrapper
+lua-5.5.1/lparser.c	1688	function	fornum	wrapper
+lua-5.5.1/lparser.c	1710	function	forlist	wrapper
+lua-5.5.1/lparser.c	1737	function	forstat	wrapper
+lua-5.5.1/lparser.c	1755	function	test_then_block	wrapper
+lua-5.5.1/lparser.c	1770	function	ifstat	wrapper
+lua-5.5.1/lparser.c	1784	function	localfunc	wrapper
+lua-5.5.1/lparser.c	1796	function	getvarattribute	property wrapper
+lua-5.5.1/lparser.c	1813	function	checktoclose	wrapper
+lua-5.5.1/lparser.c	1821	function	localstat	wrapper
+lua-5.5.1/lparser.c	1865	function	getglobalattribute	property wrapper
+lua-5.5.1/lparser.c	1879	function	checkglobal	wrapper
+lua-5.5.1/lparser.c	1897	function	initglobal	wrapper
+lua-5.5.1/lparser.c	1918	function	globalnames	wrapper
+lua-5.5.1/lparser.c	1934	function	globalstat	wrapper
+lua-5.5.1/lparser.c	1950	function	globalfunc	wrapper
+lua-5.5.1/lparser.c	1965	function	globalstatfunc	wrapper
+lua-5.5.1/lparser.c	1975	function	funcname	property wrapper
+lua-5.5.1/lparser.c	1989	function	funcstat	wrapper
+lua-5.5.1/lparser.c	2002	function	exprstat	wrapper
+lua-5.5.1/lparser.c	2020	function	retstat	wrapper
+lua-5.5.1/lparser.c	2052	function	statement	command
+lua-5.5.1/lparser.c	2153	function	mainfunc	wrapper
+lua-5.5.1/lparser.c	2171	function	luaY_parser	property command
+lua-5.5.1/lparser.h	78	struct	expdesc	empty
+lua-5.5.1/lparser.h	118	union	Vardesc	empty
+lua-5.5.1/lparser.h	132	struct	Labeldesc	empty
+lua-5.5.1/lparser.h	142	struct	Labellist	empty
+lua-5.5.1/lparser.h	150	struct	Dyndata	empty
+lua-5.5.1/lparser.h	166	struct	FuncState	empty
+lua-5.5.1/lstate.c	61	function	luaE_setdebt	command
+lua-5.5.1/lstate.c	71	function	luaE_extendCI	property command
+lua-5.5.1/lstate.c	93	function	freeCI	command
+lua-5.5.1/lstate.c	109	function	luaE_shrinkCI	command
+lua-5.5.1/lstate.c	136	function	luaE_checkcstack	wrapper
+lua-5.5.1/lstate.c	144	function	luaE_incCstack	command
+lua-5.5.1/lstate.c	151	function	resetCI	command
+lua-5.5.1/lstate.c	163	function	stack_init	command
+lua-5.5.1/lstate.c	177	function	freestack	command
+lua-5.5.1/lstate.c	191	function	init_registry	wrapper
+lua-5.5.1/lstate.c	212	function	f_luaopen	wrapper
+lua-5.5.1/lstate.c	230	function	preinit_thread	command
+lua-5.5.1/lstate.c	251	function	luaE_threadsize	property wrapper
+lua-5.5.1/lstate.c	260	function	close_state	command
+lua-5.5.1/lstate.c	278	function	lua_newthread	property wrapper
+lua-5.5.1/lstate.c	305	function	luaE_freethread	wrapper
+lua-5.5.1/lstate.c	315	function	luaE_resetthread	property command
+lua-5.5.1/lstate.c	329	function	lua_closethread	property command
+lua-5.5.1/lstate.c	341	function	lua_newstate	property wrapper
+lua-5.5.1/lstate.c	396	function	lua_close	wrapper
+lua-5.5.1/lstate.c	403	function	luaE_warning	wrapper
+lua-5.5.1/lstate.c	413	function	luaE_warnerror	wrapper
+lua-5.5.1/lstate.h	167	struct	stringtable	empty
+lua-5.5.1/lstate.h	187	struct	CallInfo	empty
+lua-5.5.1/lstate.h	285	struct	lua_State	empty
+lua-5.5.1/lstate.h	318	struct	LX	empty
+lua-5.5.1/lstate.h	327	struct	global_State	empty
+lua-5.5.1/lstate.h	394	union	GCUnion	empty
+lua-5.5.1/lstring.c	44	function	luaS_eqstr	property wrapper
+lua-5.5.1/lstring.c	53	function	luaS_hash	property wrapper
+lua-5.5.1/lstring.c	61	function	luaS_hashlongstr	property command
+lua-5.5.1/lstring.c	72	function	tablerehash	command
+lua-5.5.1/lstring.c	95	function	luaS_resize	wrapper
+lua-5.5.1/lstring.c	120	function	luaS_clearcache	command
+lua-5.5.1/lstring.c	133	function	luaS_init	wrapper
+lua-5.5.1/lstring.c	149	function	luaS_sizelngstr	property wrapper
+lua-5.5.1/lstring.c	167	function	createstrobj	property wrapper
+lua-5.5.1/lstring.c	179	function	luaS_createlngstrobj	property wrapper
+lua-5.5.1/lstring.c	190	function	luaS_remove	wrapper
+lua-5.5.1/lstring.c	200	function	growstrtab	wrapper
+lua-5.5.1/lstring.c	214	function	internshrstr	property wrapper
+lua-5.5.1/lstring.c	249	function	luaS_newlstr	property wrapper
+lua-5.5.1/lstring.c	269	function	luaS_new	property wrapper
+lua-5.5.1/lstring.c	286	function	luaS_newudata	property wrapper
+lua-5.5.1/lstring.c	303	struct	NewExt	empty
+lua-5.5.1/lstring.c	311	function	f_newext	wrapper
+lua-5.5.1/lstring.c	318	function	luaS_newextlstr	property wrapper
+lua-5.5.1/lstring.c	344	function	luaS_normstr	property wrapper
+lua-5.5.1/lstrlib.c	40	function	str_len	property wrapper
+lua-5.5.1/lstrlib.c	56	function	posrelatI	property
+lua-5.5.1/lstrlib.c	72	function	getendpos	property wrapper
+lua-5.5.1/lstrlib.c	85	function	str_sub	property wrapper
+lua-5.5.1/lstrlib.c	97	function	str_reverse	property wrapper
+lua-5.5.1/lstrlib.c	109	function	str_lower	property wrapper
+lua-5.5.1/lstrlib.c	122	function	str_upper	property wrapper
+lua-5.5.1/lstrlib.c	139	function	str_rep	property wrapper
+lua-5.5.1/lstrlib.c	166	function	str_byte	property wrapper
+lua-5.5.1/lstrlib.c	184	function	str_char	property wrapper
+lua-5.5.1/lstrlib.c	205	struct	str_Writer	empty
+lua-5.5.1/lstrlib.c	211	function	writer	property wrapper
+lua-5.5.1/lstrlib.c	227	function	str_dump	property wrapper
+lua-5.5.1/lstrlib.c	259	function	tonum	property wrapper
+lua-5.5.1/lstrlib.c	279	function	trymt	wrapper
+lua-5.5.1/lstrlib.c	290	function	arith	property wrapper
+lua-5.5.1/lstrlib.c	299	function	arith_add	property wrapper
+lua-5.5.1/lstrlib.c	303	function	arith_sub	property wrapper
+lua-5.5.1/lstrlib.c	307	function	arith_mul	property wrapper
+lua-5.5.1/lstrlib.c	311	function	arith_mod	property wrapper
+lua-5.5.1/lstrlib.c	315	function	arith_pow	property wrapper
+lua-5.5.1/lstrlib.c	319	function	arith_div	property wrapper
+lua-5.5.1/lstrlib.c	323	function	arith_idiv	property wrapper
+lua-5.5.1/lstrlib.c	327	function	arith_unm	property wrapper
+lua-5.5.1/lstrlib.c	360	struct	MatchState	empty
+lua-5.5.1/lstrlib.c	388	function	check_capture	property wrapper
+lua-5.5.1/lstrlib.c	397	function	capture_to_close	property wrapper
+lua-5.5.1/lstrlib.c	405	function	classend	property wrapper
+lua-5.5.1/lstrlib.c	429	function	match_class	property wrapper
+lua-5.5.1/lstrlib.c	449	function	matchbracketclass	property wrapper
+lua-5.5.1/lstrlib.c	472	function	singlematch	property wrapper
+lua-5.5.1/lstrlib.c	488	function	matchbalance	property wrapper
+lua-5.5.1/lstrlib.c	508	function	max_expand	property wrapper
+lua-5.5.1/lstrlib.c	523	function	min_expand	property wrapper
+lua-5.5.1/lstrlib.c	536	function	start_capture	property command
+lua-5.5.1/lstrlib.c	550	function	end_capture	property command
+lua-5.5.1/lstrlib.c	561	function	match_capture	property wrapper
+lua-5.5.1/lstrlib.c	572	function	match	property command
+lua-5.5.1/lstrlib.c	675	function	lmemfind	property wrapper
+lua-5.5.1/lstrlib.c	704	function	get_onecapture	property command
+lua-5.5.1/lstrlib.c	728	function	push_onecapture	wrapper
+lua-5.5.1/lstrlib.c	738	function	push_captures	property wrapper
+lua-5.5.1/lstrlib.c	749	function	nospecials	property wrapper
+lua-5.5.1/lstrlib.c	763	function	prepstate	command
+lua-5.5.1/lstrlib.c	776	function	reprepstate	command
+lua-5.5.1/lstrlib.c	782	function	str_find_aux	property wrapper
+lua-5.5.1/lstrlib.c	828	function	str_find	property wrapper
+lua-5.5.1/lstrlib.c	833	function	str_match	property wrapper
+lua-5.5.1/lstrlib.c	839	struct	GMatchState	empty
+lua-5.5.1/lstrlib.c	847	function	gmatch_aux	property wrapper
+lua-5.5.1/lstrlib.c	863	function	gmatch	property wrapper
+lua-5.5.1/lstrlib.c	880	function	add_s	wrapper
+lua-5.5.1/lstrlib.c	915	function	add_value	property wrapper
+lua-5.5.1/lstrlib.c	951	function	str_gsub	property wrapper
+lua-5.5.1/lstrlib.c	1026	function	adddigit	property command
+lua-5.5.1/lstrlib.c	1034	function	num2straux	property command
+lua-5.5.1/lstrlib.c	1066	function	lua_number2strx	property command
+lua-5.5.1/lstrlib.c	1132	function	addquoted	wrapper
+lua-5.5.1/lstrlib.c	1161	function	quotefloat	property wrapper
+lua-5.5.1/lstrlib.c	1185	function	addliteral	wrapper
+lua-5.5.1/lstrlib.c	1220	function	get2digits	property wrapper
+lua-5.5.1/lstrlib.c	1235	function	checkformat	wrapper
+lua-5.5.1/lstrlib.c	1255	function	getformat	property wrapper
+lua-5.5.1/lstrlib.c	1273	function	addlenmod	command
+lua-5.5.1/lstrlib.c	1283	function	str_format	property wrapper
+lua-5.5.1/lstrlib.c	1428	struct	Header	empty
+lua-5.5.1/lstrlib.c	1457	function	digit	property
+lua-5.5.1/lstrlib.c	1459	function	getnum	property wrapper
+lua-5.5.1/lstrlib.c	1476	function	getnumlimit	property wrapper
+lua-5.5.1/lstrlib.c	1488	function	initheader	command
+lua-5.5.1/lstrlib.c	1498	function	getoption	property command
+lua-5.5.1/lstrlib.c	1551	function	getdetails	property command
+lua-5.5.1/lstrlib.c	1584	function	packint	wrapper
+lua-5.5.1/lstrlib.c	1605	function	copywithendian	wrapper
+lua-5.5.1/lstrlib.c	1617	function	str_pack	property wrapper
+lua-5.5.1/lstrlib.c	1723	function	str_packsize	property wrapper
+lua-5.5.1/lstrlib.c	1752	function	unpackint	property wrapper
+lua-5.5.1/lstrlib.c	1778	function	str_unpack	property wrapper
+lua-5.5.1/lstrlib.c	1878	function	createmetatable	wrapper
+lua-5.5.1/lstrlib.c	1895	function	luaopen_string	property wrapper
+lua-5.5.1/ltable.c	55	struct		empty
+lua-5.5.1/ltable.c	57	union		empty
+lua-5.5.1/ltable.c	145	function	hashint	property wrapper
+lua-5.5.1/ltable.c	168	function	l_hashfloat	property wrapper
+lua-5.5.1/ltable.c	188	function	mainpositionTV	property wrapper
+lua-5.5.1/ltable.c	226	function	mainpositionfromnode	property wrapper
+lua-5.5.1/ltable.c	252	function	equalkey	property wrapper
+lua-5.5.1/ltable.c	291	function	getgeneric	property wrapper
+lua-5.5.1/ltable.c	310	function	checkrange	property wrapper
+lua-5.5.1/ltable.c	333	function	keyinarray	property wrapper
+lua-5.5.1/ltable.c	343	function	findindex	property wrapper
+lua-5.5.1/ltable.c	361	function	luaH_next	property wrapper
+lua-5.5.1/ltable.c	388	function	sizehash	property wrapper
+lua-5.5.1/ltable.c	393	function	freehash	wrapper
+lua-5.5.1/ltable.c	421	struct		empty
+lua-5.5.1/ltable.c	446	function	computesizes	property command
+lua-5.5.1/ltable.c	470	function	countint	command
+lua-5.5.1/ltable.c	479	function	arraykeyisempty	property wrapper
+lua-5.5.1/ltable.c	488	function	numusearray	command
+lua-5.5.1/ltable.c	521	function	numusehash	command
+lua-5.5.1/ltable.c	544	function	concretesize	property
+lua-5.5.1/ltable.c	563	function	resizearray	property wrapper
+lua-5.5.1/ltable.c	602	function	setnodevector	command
+lua-5.5.1/ltable.c	637	function	reinserthash	wrapper
+lua-5.5.1/ltable.c	658	function	exchangehashpart	command
+lua-5.5.1/ltable.c	675	function	reinsertOldSlice	wrapper
+lua-5.5.1/ltable.c	693	function	clearNewSlice	wrapper
+lua-5.5.1/ltable.c	715	function	luaH_resize	command
+lua-5.5.1/ltable.c	750	function	luaH_resizearray	wrapper
+lua-5.5.1/ltable.c	761	function	rehash	wrapper
+lua-5.5.1/ltable.c	798	function	luaH_new	property wrapper
+lua-5.5.1/ltable.c	810	function	luaH_size	property wrapper
+lua-5.5.1/ltable.c	821	function	luaH_free	wrapper
+lua-5.5.1/ltable.c	828	function	getfreepos	property wrapper
+lua-5.5.1/ltable.c	858	function	insertkey	property wrapper
+lua-5.5.1/ltable.c	901	function	newcheckedkey	wrapper
+lua-5.5.1/ltable.c	913	function	luaH_newkey	wrapper
+lua-5.5.1/ltable.c	928	function	getintfromhash	property wrapper
+lua-5.5.1/ltable.c	944	function	hashkeyisempty	property wrapper
+lua-5.5.1/ltable.c	950	function	finishnodeget	property wrapper
+lua-5.5.1/ltable.c	958	function	luaH_getint	property wrapper
+lua-5.5.1/ltable.c	974	function	luaH_Hgetshortstr	property wrapper
+lua-5.5.1/ltable.c	990	function	luaH_getshortstr	property wrapper
+lua-5.5.1/ltable.c	995	function	Hgetlongstr	property wrapper
+lua-5.5.1/ltable.c	1003	function	Hgetstr	property wrapper
+lua-5.5.1/ltable.c	1011	function	luaH_getstr	property wrapper
+lua-5.5.1/ltable.c	1019	function	luaH_get	property wrapper
+lua-5.5.1/ltable.c	1048	function	retpsetcode	property wrapper
+lua-5.5.1/ltable.c	1056	function	finishnodeset	property wrapper
+lua-5.5.1/ltable.c	1066	function	rawfinishnodeset	property wrapper
+lua-5.5.1/ltable.c	1076	function	luaH_psetint	property wrapper
+lua-5.5.1/ltable.c	1082	function	psetint	property wrapper
+lua-5.5.1/ltable.c	1097	function	luaH_psetshortstr	property wrapper
+lua-5.5.1/ltable.c	1123	function	luaH_psetstr	property wrapper
+lua-5.5.1/ltable.c	1131	function	luaH_pset	property wrapper
+lua-5.5.1/ltable.c	1153	function	luaH_finishset	command
+lua-5.5.1/ltable.c	1195	function	luaH_set	wrapper
+lua-5.5.1/ltable.c	1206	function	luaH_setint	wrapper
+lua-5.5.1/ltable.c	1239	function	hash_search	property wrapper
+lua-5.5.1/ltable.c	1271	function	binsearch	property wrapper
+lua-5.5.1/ltable.c	1283	function	newhint	property wrapper
+lua-5.5.1/ltable.c	1301	function	luaH_getn	property wrapper
+lua-5.5.1/ltable.c	1351	function	luaH_mainposition	property wrapper
+lua-5.5.1/ltablib.c	37	function	checkfield	property wrapper
+lua-5.5.1/ltablib.c	47	function	checktab	wrapper
+lua-5.5.1/ltablib.c	64	function	tcreate	property wrapper
+lua-5.5.1/ltablib.c	74	function	tinsert	property wrapper
+lua-5.5.1/ltablib.c	104	function	tremove	property wrapper
+lua-5.5.1/ltablib.c	128	function	tmove	property wrapper
+lua-5.5.1/ltablib.c	160	function	addfield	wrapper
+lua-5.5.1/ltablib.c	169	function	tconcat	property wrapper
+lua-5.5.1/ltablib.c	194	function	tpack	property wrapper
+lua-5.5.1/ltablib.c	207	function	tunpack	property wrapper
+lua-5.5.1/ltablib.c	264	function	set2	wrapper
+lua-5.5.1/ltablib.c	274	function	sort_comp	property wrapper
+lua-5.5.1/ltablib.c	297	function	partition	property wrapper
+lua-5.5.1/ltablib.c	333	function	choosePivot	property wrapper
+lua-5.5.1/ltablib.c	344	function	auxsort	wrapper
+lua-5.5.1/ltablib.c	397	function	sort	property wrapper
+lua-5.5.1/ltablib.c	425	function	luaopen_table	property wrapper
+lua-5.5.1/ltests.c	53	function	setnameval	wrapper
+lua-5.5.1/ltests.c	59	function	pushobject	wrapper
+lua-5.5.1/ltests.c	65	function	badexit	global-command wrapper
+lua-5.5.1/ltests.c	75	function	tpanic	property wrapper
+lua-5.5.1/ltests.c	95	function	warnf	global-command wrapper
+lua-5.5.1/ltests.c	167	union	memHeader	empty
+lua-5.5.1/ltests.c	196	function	freeblock	command
+lua-5.5.1/ltests.c	211	function	debug_realloc	property wrapper
+lua-5.5.1/ltests.c	297	function	testobjref1	property wrapper
+lua-5.5.1/ltests.c	314	function	printobj	wrapper
+lua-5.5.1/ltests.c	324	function	lua_printobj	wrapper
+lua-5.5.1/ltests.c	329	function	lua_printvalue	wrapper
+lua-5.5.1/ltests.c	368	function	testobjref	property wrapper
+lua-5.5.1/ltests.c	381	function	checkobjref	wrapper
+lua-5.5.1/ltests.c	395	function	checkvalref	wrapper
+lua-5.5.1/ltests.c	400	function	checktable	wrapper
+lua-5.5.1/ltests.c	423	function	checkudata	wrapper
+lua-5.5.1/ltests.c	432	function	checkproto	wrapper
+lua-5.5.1/ltests.c	449	function	checkCclosure	wrapper
+lua-5.5.1/ltests.c	457	function	checkLclosure	wrapper
+lua-5.5.1/ltests.c	472	function	lua_checkpc	property wrapper
+lua-5.5.1/ltests.c	483	function	check_stack	wrapper
+lua-5.5.1/ltests.c	505	function	checkrefs	wrapper
+lua-5.5.1/ltests.c	557	function	checkobject	wrapper
+lua-5.5.1/ltests.c	580	function	checkgraylist	property wrapper
+lua-5.5.1/ltests.c	609	function	checkgrays	property wrapper
+lua-5.5.1/ltests.c	626	function	incifingray	wrapper
+lua-5.5.1/ltests.c	643	function	checklist	property wrapper
+lua-5.5.1/ltests.c	671	function	lua_checkmemory	property wrapper
+lua-5.5.1/ltests.c	722	function	buildop	property wrapper
+lua-5.5.1/ltests.c	780	function	listcode	property wrapper
+lua-5.5.1/ltests.c	799	function	printcode	property wrapper
+lua-5.5.1/ltests.c	815	function	listk	property wrapper
+lua-5.5.1/ltests.c	830	function	listabslineinfo	property wrapper
+lua-5.5.1/ltests.c	848	function	listlocals	property wrapper
+lua-5.5.1/ltests.c	865	function	lua_printstack	wrapper
+lua-5.5.1/ltests.c	878	function	lua_printallstack	property wrapper
+lua-5.5.1/ltests.c	900	function	get_limits	property wrapper
+lua-5.5.1/ltests.c	911	function	get_sizes	property wrapper
+lua-5.5.1/ltests.c	922	function	mem_query	property global-command wrapper
+lua-5.5.1/ltests.c	949	function	alloc_count	property global-command wrapper
+lua-5.5.1/ltests.c	958	function	alloc_failnext	property global-command wrapper
+lua-5.5.1/ltests.c	965	function	settrick	property global-command wrapper
+lua-5.5.1/ltests.c	974	function	gc_color	property wrapper
+lua-5.5.1/ltests.c	990	function	gc_age	property wrapper
+lua-5.5.1/ltests.c	1006	function	gc_printobj	property wrapper
+lua-5.5.1/ltests.c	1025	function	gc_state	property wrapper
+lua-5.5.1/ltests.c	1051	function	luai_tracegctest	wrapper
+lua-5.5.1/ltests.c	1067	function	tracegc	property global-command wrapper
+lua-5.5.1/ltests.c	1078	function	hash_query	property wrapper
+lua-5.5.1/ltests.c	1098	function	stacklevel	property wrapper
+lua-5.5.1/ltests.c	1109	function	resetCI	property command
+lua-5.5.1/ltests.c	1121	function	reallocstack	property wrapper
+lua-5.5.1/ltests.c	1130	function	table_query	property wrapper
+lua-5.5.1/ltests.c	1172	function	gc_query	property wrapper
+lua-5.5.1/ltests.c	1186	function	test_codeparam	property wrapper
+lua-5.5.1/ltests.c	1193	function	test_applyparam	property wrapper
+lua-5.5.1/ltests.c	1201	function	string_query	property wrapper
+lua-5.5.1/ltests.c	1223	function	getreftable	property wrapper
+lua-5.5.1/ltests.c	1231	function	tref	property wrapper
+lua-5.5.1/ltests.c	1243	function	getref	property wrapper
+lua-5.5.1/ltests.c	1252	function	unref	property wrapper
+lua-5.5.1/ltests.c	1262	function	upvalue	property wrapper
+lua-5.5.1/ltests.c	1279	function	newuserdata	property wrapper
+lua-5.5.1/ltests.c	1288	function	pushuserdata	property wrapper
+lua-5.5.1/ltests.c	1295	function	udataval	property wrapper
+lua-5.5.1/ltests.c	1301	function	doonnewstack	property wrapper
+lua-5.5.1/ltests.c	1313	function	s2d	property wrapper
+lua-5.5.1/ltests.c	1319	function	d2s	property wrapper
+lua-5.5.1/ltests.c	1326	function	num2int	property wrapper
+lua-5.5.1/ltests.c	1332	function	makeseed	property wrapper
+lua-5.5.1/ltests.c	1338	function	newstate	property wrapper
+lua-5.5.1/ltests.c	1352	function	getstate	property wrapper
+lua-5.5.1/ltests.c	1359	function	loadlib	property wrapper
+lua-5.5.1/ltests.c	1373	function	closestate	property wrapper
+lua-5.5.1/ltests.c	1379	function	doremote	property wrapper
+lua-5.5.1/ltests.c	1404	function	log2_aux	property wrapper
+lua-5.5.1/ltests.c	1411	struct	Aux	empty
+lua-5.5.1/ltests.c	1416	function	panicback	property wrapper
+lua-5.5.1/ltests.c	1427	function	checkpanic	property wrapper
+lua-5.5.1/ltests.c	1456	function	externKstr	property wrapper
+lua-5.5.1/ltests.c	1469	function	externstr	property wrapper
+lua-5.5.1/ltests.c	1500	function	skip	wrapper
+lua-5.5.1/ltests.c	1510	function	getnum_aux	property wrapper
+lua-5.5.1/ltests.c	1545	function	getstring_aux	property command
+lua-5.5.1/ltests.c	1565	function	getindex_aux	property wrapper
+lua-5.5.1/ltests.c	1588	function	regcodes	wrapper
+lua-5.5.1/ltests.c	1617	function	runC	property global-command wrapper
+lua-5.5.1/ltests.c	2023	function	testC	property wrapper
+lua-5.5.1/ltests.c	2042	function	Cfunc	property wrapper
+lua-5.5.1/ltests.c	2047	function	Cfunck	property wrapper
+lua-5.5.1/ltests.c	2056	function	makeCfunc	property wrapper
+lua-5.5.1/ltests.c	2075	function	Chook	wrapper
+lua-5.5.1/ltests.c	2092	function	sethookaux	wrapper
+lua-5.5.1/ltests.c	2111	function	sethook	property wrapper
+lua-5.5.1/ltests.c	2129	function	coresume	property wrapper
+lua-5.5.1/ltests.c	2154	function	nonblock	property wrapper
+lua-5.5.1/ltests.c	2225	function	checkfinalmem	wrapper
+lua-5.5.1/ltests.c	2231	function	luaB_opentests	property wrapper
+lua-5.5.1/ltests.h	53	struct	Memcontrol	empty
+lua-5.5.1/ltests.h	103	struct	L_EXTRA	empty
+lua-5.5.1/ltm.c	38	function	luaT_init	wrapper
+lua-5.5.1/ltm.c	60	function	luaT_gettm	property command
+lua-5.5.1/ltm.c	71	function	luaT_gettmbyobj	property wrapper
+lua-5.5.1/ltm.c	91	function	luaT_objtypename	property wrapper
+lua-5.5.1/ltm.c	103	function	luaT_callTM	command
+lua-5.5.1/ltm.c	119	function	luaT_callTMres	property command
+lua-5.5.1/ltm.c	138	function	callbinTM	property wrapper
+lua-5.5.1/ltm.c	150	function	luaT_trybinTM	wrapper
+lua-5.5.1/ltm.c	173	function	luaT_tryconcatTM	wrapper
+lua-5.5.1/ltm.c	180	function	luaT_trybinassocTM	wrapper
+lua-5.5.1/ltm.c	189	function	luaT_trybiniTM	wrapper
+lua-5.5.1/ltm.c	200	function	luaT_callorderTM	property wrapper
+lua-5.5.1/ltm.c	210	function	luaT_callorderiTM	property wrapper
+lua-5.5.1/ltm.c	231	function	createvarargtab	command
+lua-5.5.1/ltm.c	255	function	buildhiddenargs	command
+lua-5.5.1/ltm.c	272	function	luaT_adjustvarargs	wrapper
+lua-5.5.1/ltm.c	292	function	luaT_getvararg	wrapper
+lua-5.5.1/ltm.c	321	function	getnumargs	property wrapper
+lua-5.5.1/ltm.c	338	function	luaT_getvarargs	command
+lua-5.5.1/lua.c	52	function	setsignal	wrapper
+lua-5.5.1/lua.c	70	function	lstop	wrapper
+lua-5.5.1/lua.c	83	function	laction	wrapper
+lua-5.5.1/lua.c	90	function	print_usage	wrapper
+lua-5.5.1/lua.c	117	function	l_message	wrapper
+lua-5.5.1/lua.c	127	function	report	property wrapper
+lua-5.5.1/lua.c	142	function	msghandler	property wrapper
+lua-5.5.1/lua.c	161	function	docall	property global-command wrapper
+lua-5.5.1/lua.c	175	function	print_version	literal wrapper
+lua-5.5.1/lua.c	191	function	createargtable	wrapper
+lua-5.5.1/lua.c	203	function	dochunk	property wrapper
+lua-5.5.1/lua.c	209	function	dofile	property wrapper
+lua-5.5.1/lua.c	214	function	dostring	property wrapper
+lua-5.5.1/lua.c	224	function	dolibrary	property wrapper
+lua-5.5.1/lua.c	251	function	pushargs	property wrapper
+lua-5.5.1/lua.c	264	function	handle_script	property wrapper
+lua-5.5.1/lua.c	293	function	collectargs	property global-command command
+lua-5.5.1/lua.c	356	function	runargs	property wrapper
+lua-5.5.1/lua.c	386	function	no_getenv	property wrapper
+lua-5.5.1/lua.c	392	function	handle_luainit	property wrapper
+lua-5.5.1/lua.c	485	function	lua_readline	property wrapper
+lua-5.5.1/lua.c	496	function	lua_saveline	wrapper
+lua-5.5.1/lua.c	503	function	lua_freeline	wrapper
+lua-5.5.1/lua.c	515	function	lua_initreadline	global-command wrapper
+lua-5.5.1/lua.c	554	function	get_prompt	property wrapper
+lua-5.5.1/lua.c	574	function	incomplete	property wrapper
+lua-5.5.1/lua.c	588	function	pushline	property wrapper
+lua-5.5.1/lua.c	609	function	addreturn	property wrapper
+lua-5.5.1/lua.c	621	function	checklocal	wrapper
+lua-5.5.1/lua.c	638	function	multiline	property wrapper
+lua-5.5.1/lua.c	661	function	loadline	property wrapper
+lua-5.5.1/lua.c	681	function	l_print	wrapper
+lua-5.5.1/lua.c	698	function	doREPL	global-command wrapper
+lua-5.5.1/lua.c	731	function	pmain	property wrapper
+lua-5.5.1/lua.c	777	function	main	main
+lua-5.5.1/lua.h	487	struct	lua_Debug	empty
+lua-5.5.1/lundump.c	34	struct		empty
+lua-5.5.1/lundump.c	45	function	error	wrapper
+lua-5.5.1/lundump.c	57	function	loadBlock	command
+lua-5.5.1/lundump.c	64	function	loadAlign	wrapper
+lua-5.5.1/lundump.c	76	function	getaddr_	property command
+lua-5.5.1/lundump.c	88	function	loadByte	property command
+lua-5.5.1/lundump.c	97	function	loadVarint	property wrapper
+lua-5.5.1/lundump.c	111	function	loadSize	property wrapper
+lua-5.5.1/lundump.c	116	function	loadInt	property wrapper
+lua-5.5.1/lundump.c	122	function	loadNumber	property wrapper
+lua-5.5.1/lundump.c	129	function	loadInteger	property wrapper
+lua-5.5.1/lundump.c	145	function	loadString	command
+lua-5.5.1/lundump.c	187	function	loadCode	command
+lua-5.5.1/lundump.c	205	function	loadConstants	command
+lua-5.5.1/lundump.c	247	function	loadProtos	command
+lua-5.5.1/lundump.c	268	function	loadUpvalues	command
+lua-5.5.1/lundump.c	283	function	loadDebug	command
+lua-5.5.1/lundump.c	326	function	loadFunction	command
+lua-5.5.1/lundump.c	344	function	checkliteral	wrapper
+lua-5.5.1/lundump.c	353	function	numerror	wrapper
+lua-5.5.1/lundump.c	359	function	checknumsize	wrapper
+lua-5.5.1/lundump.c	365	function	checknumformat	wrapper
+lua-5.5.1/lundump.c	377	function	checkHeader	wrapper
+lua-5.5.1/lundump.c	395	function	luaU_undump	property wrapper
+lua-5.5.1/lutf8lib.c	38	function	u_posrelat	property
+lua-5.5.1/lutf8lib.c	52	function	utf8_decode	property command
+lua-5.5.1/lutf8lib.c	90	function	utflen	property wrapper
+lua-5.5.1/lutf8lib.c	120	function	codepoint	property wrapper
+lua-5.5.1/lutf8lib.c	149	function	pushutfchar	wrapper
+lua-5.5.1/lutf8lib.c	159	function	utfchar	property wrapper
+lua-5.5.1/lutf8lib.c	181	function	byteoffset	property wrapper
+lua-5.5.1/lutf8lib.c	231	function	iter_aux	property wrapper
+lua-5.5.1/lutf8lib.c	252	function	iter_auxstrict	property wrapper
+lua-5.5.1/lutf8lib.c	256	function	iter_auxlax	property wrapper
+lua-5.5.1/lutf8lib.c	261	function	iter_codes	property wrapper
+lua-5.5.1/lutf8lib.c	288	function	luaopen_utf8	property wrapper
+lua-5.5.1/lvm.c	91	function	l_strton	property wrapper
+lua-5.5.1/lvm.c	108	function	luaV_tonumber_	property command
+lua-5.5.1/lvm.c	126	function	luaV_flttointeger	property wrapper
+lua-5.5.1/lvm.c	142	function	luaV_tointegerns	property command
+lua-5.5.1/lvm.c	157	function	luaV_tointeger	property wrapper
+lua-5.5.1/lvm.c	181	function	forlimit	property command
+lua-5.5.1/lvm.c	214	function	forprep	property wrapper
+lua-5.5.1/lvm.c	273	function	floatforloop	property wrapper
+lua-5.5.1/lvm.c	291	function	luaV_finishget	property wrapper
+lua-5.5.1/lvm.c	334	function	luaV_finishset	command
+lua-5.5.1/lvm.c	397	function	l_strcmp	property wrapper
+lua-5.5.1/lvm.c	432	function	LTintfloat	property wrapper
+lua-5.5.1/lvm.c	449	function	LEintfloat	property wrapper
+lua-5.5.1/lvm.c	466	function	LTfloatint	property wrapper
+lua-5.5.1/lvm.c	483	function	LEfloatint	property wrapper
+lua-5.5.1/lvm.c	499	function	LTnum	property wrapper
+lua-5.5.1/lvm.c	521	function	LEnum	property wrapper
+lua-5.5.1/lvm.c	543	function	lessthanothers	property wrapper
+lua-5.5.1/lvm.c	555	function	luaV_lessthan	property wrapper
+lua-5.5.1/lvm.c	565	function	lessequalothers	property wrapper
+lua-5.5.1/lvm.c	577	function	luaV_lessequal	property wrapper
+lua-5.5.1/lvm.c	588	function	luaV_equalobj	property wrapper
+lua-5.5.1/lvm.c	674	function	copy2buff	wrapper
+lua-5.5.1/lvm.c	690	function	luaV_concat	command
+lua-5.5.1/lvm.c	737	function	luaV_objlen	wrapper
+lua-5.5.1/lvm.c	772	function	luaV_idiv	property wrapper
+lua-5.5.1/lvm.c	792	function	luaV_mod	property wrapper
+lua-5.5.1/lvm.c	810	function	luaV_modf	property wrapper
+lua-5.5.1/lvm.c	824	function	luaV_shiftl	property wrapper
+lua-5.5.1/lvm.c	840	function	pushclosure	wrapper
+lua-5.5.1/lvm.c	861	function	luaV_finishOp	command
+lua-5.5.1/lvm.c	1204	function	luaV_execute	command
+lua-5.5.1/lzio.c	24	function	luaZ_fill	property command
+lua-5.5.1/lzio.c	39	function	luaZ_init	command
+lua-5.5.1/lzio.c	50	function	checkbuffer	property command
+lua-5.5.1/lzio.c	63	function	luaZ_read	property command
+lua-5.5.1/lzio.c	79	function	luaZ_getaddr	property command
+lua-5.5.1/lzio.h	23	struct	Mbuffer	empty
+lua-5.5.1/lzio.h	56	struct	Zio	empty
+lua-5.5.1/testes/libs/lib1.c	4	function	id	property wrapper
+lua-5.5.1/testes/libs/lib1.c	16	function	lib1_export	property wrapper
+lua-5.5.1/testes/libs/lib1.c	22	function	onefunction	property wrapper
+lua-5.5.1/testes/libs/lib1.c	30	function	anotherfunc	property wrapper
+lua-5.5.1/testes/libs/lib1.c	38	function	luaopen_lib1_sub	property wrapper
+lua-5.5.1/testes/libs/lib11.c	6	function	luaopen_lib11	property wrapper
+lua-5.5.1/testes/libs/lib2.c	4	function	id	property wrapper
+lua-5.5.1/testes/libs/lib2.c	15	function	luaopen_lib2	property wrapper
+lua-5.5.1/testes/libs/lib21.c	6	function	luaopen_lib21	property wrapper
+lua-5.5.1/testes/libs/lib22.c	8	function	id	property wrapper
+lua-5.5.1/testes/libs/lib22.c	15	struct	STR	empty
+lua-5.5.1/testes/libs/lib22.c	21	function	t_freestr	property wrapper
+lua-5.5.1/testes/libs/lib22.c	28	function	newstr	property wrapper
+lua-5.5.1/testes/libs/lib22.c	51	function	initstr	wrapper
+lua-5.5.1/testes/libs/lib22.c	67	function	luaopen_lib2	property wrapper
