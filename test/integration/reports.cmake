@@ -153,8 +153,9 @@ type_name,type_stereotype,function_name,function_stereotype
     endif()
 endfunction()
 
-# Fails unless a row of the report starts with columns that match the regular expression
-function(expect_row report rowStart)
+# Fails unless a row of the report starts with columns that match the regular expression, given in one or more parts
+function(expect_row report)
+    string(CONCAT rowStart ${ARGN})
     file(READ "${WORK_DIR}/${report}" content)
     if(NOT content MATCHES "\n${rowStart}")
         message(FATAL_ERROR "No row of ${report} starts with\n${rowStart}\n${content}")
@@ -280,6 +281,68 @@ function(check_verbose_csv)
     if(NOT typeColumns STREQUAL expectedTypes)
         message(FATAL_ERROR "The types do not follow the order of the input archive:\n${typeColumns}")
     endif()
+endfunction()
+
+# The verbose CSV report gives the line of each function in an archive that srcml --position writes, the calls of a method to the
+# other methods of its type apart from its other calls, and the attributes of C# and the annotations of Java, with each quote doubled
+#
+# Report.cs                                          Clock.java
+#   public class Report                                public class Clock {
+#   {                                                      private int ticks;
+#       private int total;
+#                                                          @Deprecated
+#       [System.Obsolete("Use Sum")]                       public int ticks() { return ticks; }
+#       public int Total() { return total; }           }
+#
+#       public int Twice() { return Double(Total()); }
+#
+#       private static int Double(int value) { return 2 * value; }
+#   }
+function(check_verbose_csv_details)
+    set(INPUT [=[
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:pos="http://www.srcML.org/srcML/position" revision="1.0.0" pos:tabs="8">
+
+<unit revision="1.0.0" language="C#" filename="Report.cs" pos:tabs="8"><class pos:start="1:1" pos:end="11:1"><specifier pos:start="1:1" pos:end="1:6">public</specifier> class <name pos:start="1:14" pos:end="1:19">Report</name>
+<block pos:start="2:1" pos:end="11:1">{
+    <decl_stmt pos:start="3:5" pos:end="3:22"><decl pos:start="3:5" pos:end="3:21"><type pos:start="3:5" pos:end="3:15"><specifier pos:start="3:5" pos:end="3:11">private</specifier> <name pos:start="3:13" pos:end="3:15">int</name></type> <name pos:start="3:17" pos:end="3:21">total</name></decl>;</decl_stmt>
+
+    <function pos:start="5:5" pos:end="6:40"><attribute pos:start="5:5" pos:end="5:32">[<expr pos:start="5:6" pos:end="5:31"><call pos:start="5:6" pos:end="5:31"><name pos:start="5:6" pos:end="5:20"><name pos:start="5:6" pos:end="5:11">System</name><operator pos:start="5:12" pos:end="5:12">.</operator><name pos:start="5:13" pos:end="5:20">Obsolete</name></name><argument_list pos:start="5:21" pos:end="5:31">(<argument pos:start="5:22" pos:end="5:30"><expr pos:start="5:22" pos:end="5:30"><literal type="string" pos:start="5:22" pos:end="5:30">"Use Sum"</literal></expr></argument>)</argument_list></call></expr>]</attribute>
+    <type pos:start="6:5" pos:end="6:14"><specifier pos:start="6:5" pos:end="6:10">public</specifier> <name pos:start="6:12" pos:end="6:14">int</name></type> <name pos:start="6:16" pos:end="6:20">Total</name><parameter_list pos:start="6:21" pos:end="6:22">()</parameter_list> <block pos:start="6:24" pos:end="6:40">{<block_content pos:start="6:25" pos:end="6:39"> <return pos:start="6:26" pos:end="6:38">return <expr pos:start="6:33" pos:end="6:37"><name pos:start="6:33" pos:end="6:37">total</name></expr>;</return> </block_content>}</block></function>
+
+    <function pos:start="8:5" pos:end="8:50"><type pos:start="8:5" pos:end="8:14"><specifier pos:start="8:5" pos:end="8:10">public</specifier> <name pos:start="8:12" pos:end="8:14">int</name></type> <name pos:start="8:16" pos:end="8:20">Twice</name><parameter_list pos:start="8:21" pos:end="8:22">()</parameter_list> <block pos:start="8:24" pos:end="8:50">{<block_content pos:start="8:25" pos:end="8:49"> <return pos:start="8:26" pos:end="8:48">return <expr pos:start="8:33" pos:end="8:47"><call pos:start="8:33" pos:end="8:47"><name pos:start="8:33" pos:end="8:38">Double</name><argument_list pos:start="8:39" pos:end="8:47">(<argument pos:start="8:40" pos:end="8:46"><expr pos:start="8:40" pos:end="8:46"><call pos:start="8:40" pos:end="8:46"><name pos:start="8:40" pos:end="8:44">Total</name><argument_list pos:start="8:45" pos:end="8:46">()</argument_list></call></expr></argument>)</argument_list></call></expr>;</return> </block_content>}</block></function>
+
+    <function pos:start="10:5" pos:end="10:62"><type pos:start="10:5" pos:end="10:22"><specifier pos:start="10:5" pos:end="10:11">private</specifier> <specifier pos:start="10:13" pos:end="10:18">static</specifier> <name pos:start="10:20" pos:end="10:22">int</name></type> <name pos:start="10:24" pos:end="10:29">Double</name><parameter_list pos:start="10:30" pos:end="10:40">(<parameter pos:start="10:31" pos:end="10:39"><decl pos:start="10:31" pos:end="10:39"><type pos:start="10:31" pos:end="10:33"><name pos:start="10:31" pos:end="10:33">int</name></type> <name pos:start="10:35" pos:end="10:39">value</name></decl></parameter>)</parameter_list> <block pos:start="10:42" pos:end="10:62">{<block_content pos:start="10:43" pos:end="10:61"> <return pos:start="10:44" pos:end="10:60">return <expr pos:start="10:51" pos:end="10:59"><literal type="number" pos:start="10:51" pos:end="10:51">2</literal> <operator pos:start="10:53" pos:end="10:53">*</operator> <name pos:start="10:55" pos:end="10:59">value</name></expr>;</return> </block_content>}</block></function>
+}</block></class>
+</unit>
+
+<unit revision="1.0.0" language="Java" filename="Clock.java" pos:tabs="8"><class pos:start="1:1" pos:end="6:1"><specifier pos:start="1:1" pos:end="1:6">public</specifier> class <name pos:start="1:14" pos:end="1:18">Clock</name> <block pos:start="1:20" pos:end="6:1">{
+    <decl_stmt pos:start="2:5" pos:end="2:22"><decl pos:start="2:5" pos:end="2:21"><type pos:start="2:5" pos:end="2:15"><specifier pos:start="2:5" pos:end="2:11">private</specifier> <name pos:start="2:13" pos:end="2:15">int</name></type> <name pos:start="2:17" pos:end="2:21">ticks</name></decl>;</decl_stmt>
+
+    <function pos:start="4:5" pos:end="5:40"><annotation pos:start="4:5" pos:end="4:15">@<name pos:start="4:6" pos:end="4:15">Deprecated</name></annotation>
+    <type pos:start="5:5" pos:end="5:14"><specifier pos:start="5:5" pos:end="5:10">public</specifier> <name pos:start="5:12" pos:end="5:14">int</name></type> <name pos:start="5:16" pos:end="5:20">ticks</name><parameter_list pos:start="5:21" pos:end="5:22">()</parameter_list> <block pos:start="5:24" pos:end="5:40">{<block_content pos:start="5:25" pos:end="5:39"> <return pos:start="5:26" pos:end="5:38">return <expr pos:start="5:33" pos:end="5:37"><name pos:start="5:33" pos:end="5:37">ticks</name></expr>;</return> </block_content>}</block></function>
+}</block></class>
+</unit>
+
+</unit>
+]=])
+
+    file(WRITE "${WORK_DIR}/input.xml" "${INPUT}")
+
+    run_stereocode(input.xml -f -d -b)
+    expect_exit(0)
+
+    # The columns after the name: stereotypes, line, signature, language, parameters, return type, specifiers, external calls,
+    # internal calls, and attributes
+    set(typeColumns [=["Report.cs","Report","[^"]*","N/A","N/A","False","N/A","Report.cs"]=])
+    expect_row(input.stereotypes.csv "${typeColumns}"
+               [=[,"Total","[^"]*","6","Total\(\)","C#","\(\)","public int","public","N/A","N/A","\[System\.Obsolete\(""Use Sum""\)\]",]=])
+    expect_row(input.stereotypes.csv "${typeColumns}"
+               [=[,"Twice","[^"]*","8","Twice\(\)","C#","\(\)","public int","public","Double\(_\)","Total\(\)","N/A",]=])
+    expect_row(input.stereotypes.csv [=["Clock.java","Clock","[^"]*","N/A","N/A","False","N/A","Clock.java"]=]
+               [=[,"ticks","[^"]*","5","ticks\(\)","Java","\(\)","public int","public","N/A","N/A","@Deprecated",]=])
+    expect_row(input.free_functions.stereotypes.csv [=["N/A","N/A","N/A","N/A","N/A","N/A","N/A","Report.cs"]=]
+               [=[,"Double","[^"]*","10","Double\(int\)","C#","\(int value\)","private static int","private static","N/A","N/A","N/A",]=])
 endfunction()
 
 # Gets a row of a text report, with the first column filled with spaces to 70 characters

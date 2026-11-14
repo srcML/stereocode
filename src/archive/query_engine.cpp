@@ -14,10 +14,11 @@
 
 #include <stdexcept>
 
-// Compiles the XPath of every query of every language and creates the context, which knows the prefix src
+// Compiles the XPath of every query of every language and creates the context, which knows the prefixes src and ts
 //
 queryEngine::queryEngine(const queryRegistry& registry) : context{xmlXPathNewContext(nullptr)} {
-    if (!context || xmlXPathRegisterNs(context.get(), BAD_CAST "src", BAD_CAST srcNamespace) != 0)
+    if (!context || xmlXPathRegisterNs(context.get(), BAD_CAST "src", BAD_CAST srcNamespace) != 0 ||
+        xmlXPathRegisterNs(context.get(), BAD_CAST "ts", BAD_CAST typeScriptNamespace) != 0)
         throw std::runtime_error("cannot create an XPath context");
 
     for (std::size_t language = 0; language < languageCount; ++language) {
@@ -31,11 +32,15 @@ queryEngine::queryEngine(const queryRegistry& registry) : context{xmlXPathNewCon
     }
 }
 
-// Selects the nodes of a query in a document
+// Selects the nodes of a query in a document, which are none for a query that the language lacks
 //
 nodeSet queryEngine::select(xmlDoc* document, queryLanguage language, query name) {
     xmlXPathCompExpr* expression = compiled[static_cast<std::size_t>(language)][static_cast<std::size_t>(name)].get();
-    if (!expression) throw std::logic_error("the language has no query of this kind");
+    if (!expression) {
+        xmlXPathObject* none = xmlXPathNewNodeSet(nullptr);
+        if (!none) throw std::runtime_error("cannot create an empty XPath result");
+        return nodeSet(none);
+    }
 
     // Every evaluation starts from the state of a new context, as in libsrcml, since an evaluation changes the context
     context->doc               = document;

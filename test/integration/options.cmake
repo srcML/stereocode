@@ -19,6 +19,41 @@ function(check_version_without_input)
     endif()
 endfunction()
 
+# A run without the input archive, an input archive whose name does not end in .xml, and a count of -l outside 1 to 2147483647
+# stop with a message and write no output
+function(check_rejected_arguments)
+    run_stereocode()
+    if(RUN_EXIT STREQUAL "0" OR NOT RUN_ERROR MATCHES "input-archive is required")
+        message(FATAL_ERROR "Expected a run without the input archive to fail\nexit: ${RUN_EXIT}\nstderr: ${RUN_ERROR}")
+    endif()
+
+    file(WRITE "${WORK_DIR}/input.srcml" "${SAMPLE_INPUT}")
+    run_stereocode(input.srcml -o rejected.xml)
+    expect_error()
+    if(NOT RUN_ERROR MATCHES "Input archive must have a valid \\.xml extension")
+        message(FATAL_ERROR "Unexpected message for an input archive without .xml: ${RUN_ERROR}")
+    endif()
+    expect_missing("${WORK_DIR}/rejected.xml")
+
+    file(WRITE "${WORK_DIR}/input.xml" "${SAMPLE_INPUT}")
+    expect_rejected_value(-l 0 "0 is not from 1 to 2147483647")
+    expect_rejected_value(-l -3 "-3 is not from 1 to 2147483647")
+    expect_rejected_value(-l 2147483648 "2147483648 is not from 1 to 2147483647")
+    expect_rejected_value(-l abc "abc is not a whole number")
+endfunction()
+
+# --help ends with the form of the files of -p, -c, -s, and -q, in lines that CLI11 wraps at 80 characters
+function(check_help_footer)
+    run_stereocode(--help)
+    expect_exit(0)
+    string(REGEX REPLACE "[ \n]+" " " help "${RUN_OUTPUT}")
+    string(CONCAT footer "The files of -p, -c, -s, and -q hold one entry per line\\. A line \\[C\\+\\+\\],[^.]* limits the entries after it to "
+                         "that language\\. A line that starts with # is a comment\\. ?$")
+    if(NOT help MATCHES "${footer}")
+        message(FATAL_ERROR "--help does not end with the form of the list files:\n${RUN_OUTPUT}")
+    endif()
+endfunction()
+
 # Fails unless the second folder holds the files of the first folder, each with the same content
 function(expect_same_files expectedFolder actualFolder)
     file(GLOB expectedFiles RELATIVE "${WORK_DIR}/${expectedFolder}" "${WORK_DIR}/${expectedFolder}/*")
@@ -256,6 +291,13 @@ function(check_user_list_files)
     file(READ "${WORK_DIR}/c_csharp.xml" csharpSectionOutput)
     if(NOT cppSectionOutput MATCHES "<function st:stereotype=\"literal\">" OR NOT csharpSectionOutput MATCHES "<function st:stereotype=\"literal wrapper\">")
         message(FATAL_ERROR "The C unit does not take the calls of the C++ section alone:\n${cppSectionOutput}\n${csharpSectionOutput}")
+    endif()
+
+    # The help names the section header of each language
+    run_stereocode(--help)
+    expect_exit(0)
+    if(NOT RUN_OUTPUT MATCHES "A line \\[C\\+\\+\\],[ \n]+\\[C#\\],[ \n]+\\[Java\\],[ \n]+\\[Python\\],[ \n]+or[ \n]+\\[JavaScript\\][ \n]+limits")
+        message(FATAL_ERROR "The help does not name the section header of each language:\n${RUN_OUTPUT}")
     endif()
 
     # A header in another case is an entry for every language, which a warning names with its file

@@ -271,10 +271,10 @@ TEST_CASE("an alias leads to the type that it names, also through other aliases,
     index.addAlias(aliasAt("C++", {"Drive"}, 2, "engine.hpp", {"Motor"}));
 
     const typeReference reporter = nameIn("C++", {"IStreamingReporterPtr"}, {"Catch"}, 1, "catch.hpp");
-    CHECK(index.findThroughAliases(reporter, true) == std::optional<std::size_t>(0));
-    CHECK_FALSE(index.findThroughAliases(reporter, false));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Drive"}, {}, 3, "car.cpp"), false) == std::optional<std::size_t>(1));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Engine"}, {}, 3, "car.cpp"), false) == std::optional<std::size_t>(1));
+    CHECK(index.findThroughAliases(reporter, true) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(reporter, false).empty());
+    CHECK(index.findThroughAliases(nameIn("C++", {"Drive"}, {}, 3, "car.cpp"), false) == std::vector<std::size_t>{1});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Engine"}, {}, 3, "car.cpp"), false) == std::vector<std::size_t>{1});
     CHECK_FALSE(index.find(nameIn("C++", {"Drive"}, {}, 3, "car.cpp")));
 }
 
@@ -285,8 +285,8 @@ TEST_CASE("-> reaches the object of the first alias of a pointer on the way, aft
     index.addAlias(aliasAt("C++", {"Motor"}, 1, "engine.hpp", {"EnginePtr"}));
     index.addAlias(aliasAt("C++", {"Slot"}, 1, "engine.hpp", {"std", "unique_ptr"}, {"EnginePtr"}));
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {}, 1, "engine.hpp"), true) == std::optional<std::size_t>(0));
-    CHECK_FALSE(index.findThroughAliases(nameIn("C++", {"Slot"}, {}, 1, "engine.hpp"), true));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {}, 1, "engine.hpp"), true) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Slot"}, {}, 1, "engine.hpp"), true).empty());
 }
 
 TEST_CASE("a cycle of aliases and an alias of a type outside the archive lead to no type") {
@@ -295,8 +295,8 @@ TEST_CASE("a cycle of aliases and an alias of a type outside the archive lead to
     index.addAlias(aliasAt("C++", {"Ring"}, 1, "ring.hpp", {"Loop"}));
     index.addAlias(aliasAt("C++", {"XYPOSITION"}, 1, "ring.hpp", {"double"}));
 
-    CHECK_FALSE(index.findThroughAliases(nameIn("C++", {"Loop"}, {}, 1, "ring.hpp"), false));
-    CHECK_FALSE(index.findThroughAliases(nameIn("C++", {"XYPOSITION"}, {}, 1, "ring.hpp"), false));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Loop"}, {}, 1, "ring.hpp"), false).empty());
+    CHECK(index.findThroughAliases(nameIn("C++", {"XYPOSITION"}, {}, 1, "ring.hpp"), false).empty());
 }
 
 TEST_CASE("a name of an alias in a written type gives way to the type that the alias stands for, also through other aliases and in template arguments") {
@@ -360,7 +360,7 @@ TEST_CASE("an alias that takes the name of the type that it names leads to that 
     index.add(typeAt("C++", {"Engine"}, 1, "garage.hpp"));
     index.addAlias(aliasAt("C++", {"garage", "Engine"}, 1, "garage.hpp", {"Engine"}));
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"Engine"}, {"garage", "Car"}, 1, "garage.hpp"), false) == std::optional<std::size_t>(0));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Engine"}, {"garage", "Car"}, 1, "garage.hpp"), false) == std::vector<std::size_t>{0});
 }
 
 TEST_CASE("an alias that a type declares holds outside the type only for a name that writes the type") {
@@ -370,9 +370,9 @@ TEST_CASE("an alias that a type declares holds outside the type only for a name 
     allocator.enclosingTypes = 1;
     index.addAlias(allocator);
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"Allocator"}, {"store", "Arena"}, 1, "arena.hpp"), false) == std::optional<std::size_t>(0));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Arena", "Allocator"}, {}, 2, "depot.cpp"), false) == std::optional<std::size_t>(0));
-    CHECK_FALSE(index.findThroughAliases(nameIn("C++", {"Allocator"}, {"Vector"}, 2, "vector.hpp"), false));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Allocator"}, {"store", "Arena"}, 1, "arena.hpp"), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Arena", "Allocator"}, {}, 2, "depot.cpp"), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Allocator"}, {"Vector"}, 2, "vector.hpp"), false).empty());
 }
 
 TEST_CASE("an alias of a namespace around the name hides a type that only a farther scope or a using directive reaches, unlike a type of the same or a nearer scope") {
@@ -385,10 +385,10 @@ TEST_CASE("an alias of a namespace around the name hides a type that only a fart
     index.addAlias(aliasAt("C++", {"Pump"}, 1, "plant.hpp", {"Engine"}));
     index.addAlias(aliasAt("C++", {"Point"}, 1, "plant.hpp", {"Engine"}));
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"fleet"}, 1, "plant.hpp"), false) == std::optional<std::size_t>(0));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"depot"}, 1, "plant.hpp"), false) == std::optional<std::size_t>(1));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Pump"}, {"plant"}, 1, "plant.hpp"), false) == std::optional<std::size_t>(2));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Point"}, {}, 1, "plant.hpp"), false) == std::optional<std::size_t>(3));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"fleet"}, 1, "plant.hpp"), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"depot"}, 1, "plant.hpp"), false) == std::vector<std::size_t>{1});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Pump"}, {"plant"}, 1, "plant.hpp"), false) == std::vector<std::size_t>{2});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Point"}, {}, 1, "plant.hpp"), false) == std::vector<std::size_t>{3});
 }
 
 TEST_CASE("an alias hides the types of a farther scope only from the code of its unit after it and from the type that declares it") {
@@ -402,9 +402,9 @@ TEST_CASE("an alias hides the types of a farther scope only from the code of its
     index.addAlias(inNamespace);
     index.addAlias(inType);
 
-    CHECK(index.findThroughAliases(cppNameAt({"Widget"}, {"app", "Panel"}, 1, {4, 2, 0}), false) == std::optional<std::size_t>(0));
-    CHECK(index.findThroughAliases(cppNameAt({"Widget"}, {"app", "Gauge"}, 1, {4, 2, 2}), false) == std::optional<std::size_t>(1));
-    CHECK(index.findThroughAliases(cppNameAt({"Widget"}, {"Truck"}, 1, {6}), false) == std::optional<std::size_t>(1));
+    CHECK(index.findThroughAliases(cppNameAt({"Widget"}, {"app", "Panel"}, 1, {4, 2, 0}), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(cppNameAt({"Widget"}, {"app", "Gauge"}, 1, {4, 2, 2}), false) == std::vector<std::size_t>{1});
+    CHECK(index.findThroughAliases(cppNameAt({"Widget"}, {"Truck"}, 1, {6}), false) == std::vector<std::size_t>{1});
 }
 
 TEST_CASE("an alias of another unit hides the types of a farther scope only where that unit may be included, unlike an alias of a source file") {
@@ -416,9 +416,20 @@ TEST_CASE("an alias of another unit hides the types of a farther scope only wher
     index.addAlias(inHeader);
     index.addAlias(aliasAt("C++", {"app", "Motor"}, 2, "render.cpp", {"Engine"}));
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"fleet", "Van"}, 3, "van.cpp"), false) == std::optional<std::size_t>(1));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"app", "Panel"}, 3, "panel.hpp"), false) == std::optional<std::size_t>(0));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"app", "Panel"}, 2, "render.cpp"), false) == std::optional<std::size_t>(1));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"fleet", "Van"}, 3, "van.cpp"), false) == std::vector<std::size_t>{1});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"app", "Panel"}, 3, "panel.hpp"), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Motor"}, {"app", "Panel"}, 2, "render.cpp"), false) == std::vector<std::size_t>{1});
+}
+
+TEST_CASE("a name that types of one path in several folders fit equally well names each of them, and the nearest folder alone where one is nearer") {
+    typeIndex index;
+    index.add(typeAt("C++", {"priv", "CursorImpl"}, 1, "window/android/CursorImpl.hpp"));
+    index.add(typeAt("C++", {"priv", "CursorImpl"}, 2, "window/win32/CursorImpl.hpp"));
+
+    const typeReference fromApi = nameIn("C++", {"priv", "CursorImpl"}, {}, 3, "window/Cursor.hpp");
+    CHECK(index.findThroughAliases(fromApi, false) == std::vector<std::size_t>{0, 1});
+    CHECK(index.find(fromApi) == std::optional<std::size_t>(0));
+    CHECK(index.findThroughAliases(nameIn("C++", {"priv", "CursorImpl"}, {}, 4, "window/win32/Window.cpp"), false) == std::vector<std::size_t>{1});
 }
 
 TEST_CASE("an alias of the global namespace hides a type that a using directive reaches only in the unit of the alias") {
@@ -427,8 +438,8 @@ TEST_CASE("an alias of the global namespace hides a type that a using directive 
     index.add(typeAt("C++", {"Engine"}, 2, "editor/Buffer.h"));
     index.addAlias(aliasAt("C++", {"Document"}, 2, "editor/Buffer.h", {"Engine"}));
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"Document"}, {}, 3, "boostregex/Search.cxx"), false) == std::optional<std::size_t>(0));
-    CHECK(index.findThroughAliases(nameIn("C++", {"Document"}, {}, 2, "editor/Buffer.h"), false) == std::optional<std::size_t>(1));
+    CHECK(index.findThroughAliases(nameIn("C++", {"Document"}, {}, 3, "boostregex/Search.cxx"), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C++", {"Document"}, {}, 2, "editor/Buffer.h"), false) == std::vector<std::size_t>{1});
 }
 
 TEST_CASE("a C# alias holds only in the unit that declares it") {
@@ -437,8 +448,8 @@ TEST_CASE("a C# alias holds only in the unit that declares it") {
     index.add(typeAt("C#", {"Shop", "Other", "Gauge"}, 2, "Panel.cs"));
     index.addAlias(aliasAt("C#", {"Gauge"}, 1, "Dashboard.cs", {"Shop", "Parts", "Meter"}));
 
-    CHECK(index.findThroughAliases(nameIn("C#", {"Gauge"}, {"Shop", "Cars"}, 1, "Dashboard.cs"), false) == std::optional<std::size_t>(0));
-    CHECK(index.findThroughAliases(nameIn("C#", {"Gauge"}, {"Shop", "Panels"}, 2, "Panel.cs"), false) == std::optional<std::size_t>(1));
+    CHECK(index.findThroughAliases(nameIn("C#", {"Gauge"}, {"Shop", "Cars"}, 1, "Dashboard.cs"), false) == std::vector<std::size_t>{0});
+    CHECK(index.findThroughAliases(nameIn("C#", {"Gauge"}, {"Shop", "Panels"}, 2, "Panel.cs"), false) == std::vector<std::size_t>{1});
 }
 
 TEST_CASE("among copies of an alias, the copy of the unit of the name wins, and its target resolves from the unit of the alias") {
@@ -448,6 +459,54 @@ TEST_CASE("among copies of an alias, the copy of the unit of the name wins, and 
     index.addAlias(aliasAt("C++", {"Catch", "IStreamingReporterPtr"}, 1, "lexilla/test/unit/catch.hpp", {"std", "unique_ptr"}, {"IStreamingReporter"}));
     index.addAlias(aliasAt("C++", {"Catch", "IStreamingReporterPtr"}, 2, "scintilla/test/unit/catch.hpp", {"std", "unique_ptr"}, {"IStreamingReporter"}));
 
-    CHECK(index.findThroughAliases(nameIn("C++", {"IStreamingReporterPtr"}, {"Catch"}, 2, "scintilla/test/unit/catch.hpp"), true) == std::optional<std::size_t>(1));
-    CHECK(index.findThroughAliases(nameIn("C++", {"IStreamingReporterPtr"}, {"Catch"}, 5, "lexilla/test/unit/main.cxx"), true) == std::optional<std::size_t>(0));
+    CHECK(index.findThroughAliases(nameIn("C++", {"IStreamingReporterPtr"}, {"Catch"}, 2, "scintilla/test/unit/catch.hpp"), true) == std::vector<std::size_t>{1});
+    CHECK(index.findThroughAliases(nameIn("C++", {"IStreamingReporterPtr"}, {"Catch"}, 5, "lexilla/test/unit/main.cxx"), true) == std::vector<std::size_t>{0});
+}
+
+TEST_CASE("an import of the unit of a name picks its type among the types of the name in several packages") {
+    typeIndex index;
+    index.add(typeAt("Java", {"model", "Tag"}, 0, "model/Tag.java"));
+    index.add(typeAt("Java", {"query", "Evaluator", "Tag"}, 1, "query/Evaluator.java"));
+    index.add(typeAt("Java", {"parser", "Tag"}, 2, "parser/Tag.java"));
+    const typeReference written = nameIn("Java", {"Tag"}, {"view", "Element"}, 3, "view/Element.java");
+
+    SUBCASE("without an import, the types of several paths leave the name without a type") {
+        CHECK_FALSE(index.find(written));
+    }
+    SUBCASE("an import of one type names the type") {
+        index.addImport({{"model", "Tag"}, false, 3, false});
+        CHECK(index.find(written) == 0);
+    }
+    SUBCASE("an import of a type brings in the types inside it by a name of two parts") {
+        index.addImport({{"query", "Evaluator"}, false, 3, false});
+        CHECK(index.find(nameIn("Java", {"Evaluator", "Tag"}, {"view", "Element"}, 3, "view/Element.java")) == 1);
+        CHECK_FALSE(index.find(written));
+    }
+    SUBCASE("an import of every type of a package or of a type names the type of that path") {
+        index.addImport({{"parser"}, true, 3, false});
+        CHECK(index.find(written) == 2);
+    }
+    SUBCASE("an import of one type comes before an import of every type") {
+        index.addImport({{"parser"}, true, 3, false});
+        index.addImport({{"query", "Evaluator", "Tag"}, false, 3, false});
+        CHECK(index.find(written) == 1);
+    }
+    SUBCASE("an import holds in its own unit alone, unless it holds in every unit") {
+        index.addImport({{"model", "Tag"}, false, 4, false});
+        CHECK_FALSE(index.find(written));
+        index.addImport({{"parser"}, true, 4, true});
+        CHECK(index.find(written) == 2);
+    }
+    SUBCASE("a type of the package of the name comes before an import of every type and after an import of one type") {
+        index.add(typeAt("Java", {"view", "Tag"}, 5, "view/Tag.java"));
+        index.addImport({{"parser"}, true, 3, false});
+        CHECK(index.find(written) == 3);
+        index.addImport({{"model", "Tag"}, false, 3, false});
+        CHECK(index.find(written) == 0);
+    }
+    SUBCASE("a type of the unit of the name comes before an import of one type") {
+        index.add(typeAt("Java", {"view", "Element", "Tag"}, 3, "view/Element.java"));
+        index.addImport({{"model", "Tag"}, false, 3, false});
+        CHECK(index.find(written) == 3);
+    }
 }

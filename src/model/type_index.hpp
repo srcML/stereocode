@@ -23,7 +23,7 @@
 // The place of a type, which name lookups compare with the names that the code writes
 //
 struct indexedType {
-    std::string                 language;               // Language of the queries (C++ for C and C++ units, C#, or Java)
+    std::string                 language;               // Language of the queries, where C units take those of C++
     std::vector<std::string>    path;                   // Enclosing namespaces or package, then the parts of the type name, without generic arguments
     std::string                 arguments;              // Generic argument lists of the last part, such as <int> of a C++ specialization
     int                         arity{0};               // Generic parameters of the last part
@@ -38,6 +38,16 @@ struct usingDirective {
     std::vector<std::string>    name;                   // Parts of the name of the namespace, as the directive writes it
     std::vector<std::string>    scope;                  // Namespaces around the directive, outermost first
     elementPath                 position;               // Place of the directive in its unit
+};
+
+// An import of a unit that brings types into the unit by their names: one type, as import shop.Meter; of Java, or every type of a package,
+// a type, or a namespace, as import shop.*; of Java and using Shop; of C#
+//
+struct typeImport {
+    std::vector<std::string>    path;                   // Parts of the imported name, without the * of every type
+    bool                        everyType{false};       // Brings in every type of the path
+    int                         unitNumber{0};          // Unit of the import
+    bool                        everyUnit{false};       // Holds in every unit, as a C# global using directive does
 };
 
 // A name of a type as the code writes it, such as a parent or the qualifier of a method defined outside its type
@@ -70,23 +80,27 @@ typeReference referenceOf(const std::vector<std::string>&, const std::string&, c
 
 // Finds the type that a written name refers to among the types of an archive, also through the aliases of the archive
 // A name resolves through the namespaces around it, from the innermost, then through the C++ using directives in effect at it,
-// and otherwise to the only type whose path ends with it
+// then through the imports of its unit, and otherwise to the only type whose path ends with it
 //
 class typeIndex {
 public:
     void                        add                 (indexedType);
     void                        addAlias            (indexedAlias);
+    void                        addImport           (typeImport);
     std::optional<std::size_t>  find                (const typeReference&, std::optional<std::size_t> excluded = std::nullopt) const;
-    std::optional<std::size_t>  findThroughAliases  (typeReference, bool) const;
+    std::vector<std::size_t>    findEvery           (const typeReference&, std::optional<std::size_t> excluded = std::nullopt) const;
+    std::vector<std::size_t>    findThroughAliases  (typeReference, bool) const;
     writtenType                 withoutAliases      (const writtenType&, const typeReference&) const;
 private:
     std::optional<std::size_t>  aliasOf             (const typeReference&, std::optional<std::size_t>) const;
+    std::vector<const std::vector<typeImport>*> importsOf (int) const;
     writtenType                 replaceAliases      (const writtenType&, const typeReference&, std::optional<std::size_t>, std::unordered_set<std::size_t>&) const;
 
     std::vector<indexedType>                                    types;          // In the order of add(), which gives their positions
     std::unordered_map<std::string, std::vector<std::size_t>>   byName;         // Positions of the types by language and the last part of their name
     std::vector<indexedAlias>                                   aliases;        // In the order of addAlias()
     std::unordered_map<std::string, std::vector<std::size_t>>   aliasesByName;  // Positions of the aliases by language and name
+    std::unordered_map<int, std::vector<typeImport>>            imports;        // Imports of each unit, with those that hold in every unit under -1
 };
 
 #endif

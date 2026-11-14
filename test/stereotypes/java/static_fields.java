@@ -32,3 +32,14 @@ class Sequel extends Sequence {
     // @stereotype incidental
     void next() { n++; }
 }
+
+// A static data member that its type qualifies is no parameter of the same name
+class Depot {
+    static Crate shared;
+
+    // @stereotype collaborator incidental
+    void keep(Crate shared) { Depot.shared = shared; }
+
+    // @stereotype collaborator incidental
+    void hold(Crate other) { Depot.shared = other; }
+}

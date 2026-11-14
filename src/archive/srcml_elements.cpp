@@ -23,11 +23,24 @@ bool isSrcElement(const xmlNode* node, std::string_view name) {
            name == reinterpret_cast<const char*>(node->name);
 }
 
-// Tells whether an element is a type, such as a class or an enum
+// Tells whether a node is the TypeScript element with a name, such as ts:interface
+//
+bool isTypeScriptElement(const xmlNode* node, std::string_view name) {
+    return node && node->type == XML_ELEMENT_NODE && node->ns && xmlStrEqual(node->ns->href, BAD_CAST typeScriptNamespace) &&
+           name == reinterpret_cast<const char*>(node->name);
+}
+
+// Tells whether an element is a type, such as a class or an enum, where a TypeScript interface is one as well
 //
 bool isTypeElement(const xmlNode* node) {
     return isSrcElement(node, "class") || isSrcElement(node, "struct") || isSrcElement(node, "union") ||
-           isSrcElement(node, "interface") || isSrcElement(node, "enum");
+           isSrcElement(node, "interface") || isSrcElement(node, "enum") || isTypeScriptElement(node, "interface");
+}
+
+// Tells whether a node is an operator element with the text op
+//
+bool isOperator(const xmlNode* node, std::string_view op) {
+    return isSrcElement(node, "operator") && sourceOf(node) == op;
 }
 
 // Gets the first child of an element that is the srcML element with a name, or null
@@ -57,6 +70,16 @@ namespace {
         const std::string_view text = reinterpret_cast<const char*>(before->content);
         return text.find_first_of("*&") == std::string_view::npos;
     }
+}
+
+// Gets the source code of the type of a variable without its attributes and annotations, whose arguments name no type,
+// as int of @Range(min = 0, max = 150) int
+//
+std::string typeSourceOf(const xmlNode* type) {
+    std::string source;
+    for (const xmlNode* child = type->children; child; child = child->next)
+        if (!isSrcElement(child, "attribute") && !isSrcElement(child, "annotation")) source += sourceOf(child);
+    return source;
 }
 
 // Gets the name element of a type, or the typedef name of a C++ class, struct, or union without one, as Point of typedef struct { } *PointPtr, Point;
@@ -209,12 +232,7 @@ namespace {
     // Gets the type of a parameter in a signature, without its name and specifiers, such as int[] of int a[] or int(*)(int) of the function pointer int (*f)(int)
     //
     std::string signatureTypeOf(const xmlNode* parameter) {
-        if (const xmlNode* pointer = firstChildElement(parameter, "function_decl")) {
-            std::string text = typeWithoutSpecifiers(firstChildElement(pointer, "type")) + "(";
-            for (const xmlNode* modifier = firstChildElement(pointer, "modifier"); modifier; modifier = nextNamedSibling(modifier, "modifier"))
-                appendWithoutWhitespace(text, modifier);
-            return text + ")" + signatureTypesOf(firstChildElement(pointer, "parameter_list"));
-        }
+        if (const xmlNode* pointer = firstChildElement(parameter, "function_decl")) return functionPointerTypeOf(pointer);
 
         const xmlNode* declaration = firstChildElement(parameter, "decl");
         const xmlNode* type = declaration ? firstChildElement(declaration, "type") : nullptr;
@@ -289,6 +307,16 @@ std::string signatureTypesOf(const xmlNode* list) {
     return listTypes(list, signatureTypeOf);
 }
 
+// Gets the type of the variable that a function declaration with a declarator in parentheses names, without the name and the specifiers,
+// such as int(*)(int) of the pointer to a function int (*f)(int)
+//
+std::string functionPointerTypeOf(const xmlNode* declaration) {
+    std::string text = typeWithoutSpecifiers(firstChildElement(declaration, "type")) + "(";
+    for (const xmlNode* modifier = firstChildElement(declaration, "modifier"); modifier; modifier = nextNamedSibling(modifier, "modifier"))
+        appendWithoutWhitespace(text, modifier);
+    return text + ")" + signatureTypesOf(firstChildElement(declaration, "parameter_list"));
+}
+
 // Gets the numbers of arguments that a parameter list takes, where a parameter with a default value may get no argument
 //
 argumentRange argumentRangeOf(const xmlNode* list) {
@@ -356,6 +384,44 @@ std::string pointeeTypeOf(const xmlNode* type) {
     const xmlNode* name = firstChildElement(type, "name");
     const std::string pointer = standardSmartPointer(name);
     return pointer == "unique_ptr" || pointer == "shared_ptr" ? namedTypeOf(smartPointerObject(name)) : "";
+}
+
+// Gets the type of the elements of a variable from the type and the name of its declaration, or nothing for a type of several names or
+// without elements. An array or a pointer names the type of its elements before its brackets and its asterisks, as Slot of Slot[],
+// of Slot slots[4], and of Slot**, and a generic container names the type as its last type argument, as Slot of std::vector<Slot>
+//
+elementType elementTypeOf(const xmlNode* type, const xmlNode* declarator) {
+    const xmlNode* name = firstChildElement(type, "name");
+    if (!name || nextNamedSibling(name, "name")) return {};
+
+    const auto countChildren = [](const xmlNode* element, std::string_view child, std::string_view source) {
+        int count = 0;
+        for (const xmlNode* node = element ? firstChildElement(element, child) : nullptr; node; node = nextNamedSibling(node, child))
+            if (source.empty() || sourceOf(node) == source) ++count;
+        return count;
+    };
+    elementType element;
+    element.depth = countChildren(name, "index", "") + countChildren(declarator, "index", "") + countChildren(type, "modifier", "*");
+    if (element.depth > 0) {
+        for (const xmlNode* child = name->children; child; child = child->next)
+            if (!isSrcElement(child, "index")) appendWithoutWhitespace(element.name, child);
+        return element;
+    }
+
+    // The type arguments follow the last name of a qualified name
+    const xmlNode* arguments = firstChildElement(name, "argument_list");
+    for (const xmlNode* part = xmlLastElementChild(const_cast<xmlNode*>(name)); !arguments && isSrcElement(part, "name"); part = nullptr)
+        arguments = firstChildElement(part, "argument_list");
+    const xmlNode* last = nullptr;
+    for (const xmlNode* argument = arguments ? firstChildElement(arguments, "argument") : nullptr; argument; argument = nextNamedSibling(argument, "argument"))
+        last = argument;
+    if (!last) return {};
+
+    appendWithoutWhitespace(element.name, last);
+    const std::size_t end = element.name.find_last_not_of('*');
+    element.depth = 1 + static_cast<int>(element.name.size() - (end == std::string::npos ? 0 : end + 1));
+    element.name.erase(end == std::string::npos ? 0 : end + 1);
+    return element;
 }
 
 // Gets the element whose end ends the scope of a declaration: the block, statement, handler, lambda, function, or type around it

@@ -21,14 +21,17 @@
 class specifiers {
 public:
     void                 removeSpecifiers         (std::string&, const std::string&) const;
-    std::vector<std::string> typeNames            (const std::string&, const std::string&) const;
+    std::vector<std::string> typeNames            (const std::string&, const std::string&, bool qualified = false) const;
+    bool                 namesContainer           (const std::string&, const std::string&) const;
     void                 initializeSpecifiersList ();
     void                 outputSpecifiers         () const;
     friend std::istream& operator>>               (std::istream&, specifiers&);
 private:
     std::unordered_map<std::string, std::unordered_set<std::string>>       specifiersList;          // List of specifiers
+    std::unordered_map<std::string, std::unordered_set<std::string>>       containersList;          // The containers among the specifiers
     userEntries                                                            userSpecifiersList;      // List of user defined specifiers
     std::unordered_map<std::string, specifierPattern>                      specifiersPatterns;      // Pattern of the specifiers of each language
+    std::unordered_map<std::string, specifierPattern>                      containerPatterns;       // Pattern of the containers of each language
 };
 
 #endif

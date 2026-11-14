@@ -29,3 +29,22 @@ public:
 // A call to a method that reads through its own calls reads the object as well
 // @stereotype property
 double Thermometer::rankine() { return fahrenheit() + 459.67; }
+
+// A call that reaches the calling method itself counts by the stereotypes that the method has without the call
+class Limit {
+    int m_limit;
+public:
+    // @stereotype predicate
+    bool accepts(int value) { return value < m_limit; }
+
+    // The call with one argument reaches the two overloads, of which the other one only reads
+    // @stereotype predicate
+    bool accepts(long value) { return accepts(static_cast<int>(value)); }
+
+    // @stereotype property
+    int next(int level) { return level > m_limit ? level : next(level + 1); }
+
+    // A call of a method that changes the object to itself may change the object
+    // @stereotype command
+    void drain(int steps) { if (steps > 0) { m_limit--; drain(steps - 1); } }
+};

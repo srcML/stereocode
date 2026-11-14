@@ -173,8 +173,8 @@ TEST_CASE("A stereotype comment on the first line of a unit before a type withou
 
 TEST_CASE("A unit of a language that stereocode does not analyze keeps its stereotype comments") {
     const std::string content = "<comment type=\"line\">// @stereotype get</comment>\n"
-                                "<function>function <name>size</name><parameter_list>()</parameter_list> <block>{}</block></function>\n";
-    CHECK(commented(content, "JavaScript") == content);
+                                "<function><type><name>int</name></type> <name>size</name><parameter_list>()</parameter_list> <block>{}</block></function>\n";
+    CHECK(commented(content, "Objective-C") == content);
 }
 
 TEST_CASE("A stereotype comment stays above an enum of C++ or C# and a static class of C#, which get no stereotypes, and goes above a Java enum") {
@@ -253,9 +253,54 @@ TEST_CASE("Earlier comments give way in one run, and a second run keeps its outp
     CHECK(commented(once) == once);
 }
 
-TEST_CASE("Only srcML that holds the text // @stereotype may hold stereotype comments") {
+TEST_CASE("A labeled Python element gets a comment that starts with #, above its first decorator and at its indentation") {
+    const std::string method =
+        "    <function st:stereotype=\"property\"><attribute>@<expr><name>staticmethod</name></expr></attribute>\n"
+        "    def <name>area</name><parameter_list>(<parameter><name>side</name></parameter>)</parameter_list><block>:<block_content> "
+        "<return>return <expr><name>side</name></expr></return></block_content></block></function>\n";
+    const std::string once = commented("<class st:stereotype=\"empty\">class <name>Shape</name><block>:<block_content>\n" + method + "</block_content></block></class>\n", "Python");
+
+    CHECK(once == "<comment type=\"line\"># @stereotype empty</comment>\n<class st:stereotype=\"empty\">class <name>Shape</name><block>:<block_content>\n"
+                  "    <comment type=\"line\"># @stereotype property</comment>\n" + method + "</block_content></block></class>\n");
+    CHECK(commented(once, "Python") == once);
+}
+
+TEST_CASE("A Python method that starts its line after the line break in the body of the method before it gets its comment at the start of that line") {
+    const std::string first  = "<function st:stereotype=\"get\">def <name>f</name><parameter_list>()</parameter_list><block>:<block_content>\n        <pass>pass</pass>\n</block_content></block></function>";
+    const std::string second = "<function st:stereotype=\"set\">def <name>g</name><parameter_list>()</parameter_list><block>:<block_content>\n        <pass>pass</pass>\n</block_content></block></function>";
+    const std::string once = commented("<class>class <name>A</name><block>:<block_content>\n    " + first + "    " + second + "</block_content></block></class>\n", "Python");
+
+    CHECK(once == "<class>class <name>A</name><block>:<block_content>\n    <comment type=\"line\"># @stereotype get</comment>\n    " + first +
+                  "    <comment type=\"line\"># @stereotype set</comment>\n    " + second + "</block_content></block></class>\n");
+    CHECK(commented(once, "Python") == once);
+}
+
+TEST_CASE("A Python stereotype comment goes above a method without stereotypes and stays above a function or a class in a function") {
+    const std::string method = "    <function>def <name>f</name><parameter_list>()</parameter_list><block>:<block_content> <pass>pass</pass></block_content></block></function>\n";
+    CHECK(commented("<class>class <name>A</name><block>:<block_content>\n    <comment type=\"line\"># @stereotype get</comment>\n" + method + "</block_content></block></class>\n", "Python") ==
+          "<class>class <name>A</name><block>:<block_content>\n" + method + "</block_content></block></class>\n");
+
+    const std::string local =
+        "<function st:stereotype=\"factory\">def <name>outer</name><parameter_list>()</parameter_list><block>:<block_content>\n"
+        "    <comment type=\"line\"># @stereotype get</comment>\n" + method +
+        "    <comment type=\"line\"># @stereotype empty</comment>\n"
+        "    <class>class <name>Local</name><block>:<block_content>\n"
+        "    <comment type=\"line\"># @stereotype set</comment>\n" + method +
+        "</block_content></block></class></block_content></block></function>\n";
+    CHECK(commented(local, "Python") == "<comment type=\"line\"># @stereotype factory</comment>\n" + local);
+}
+
+TEST_CASE("A comment is a stereotype comment only with the comment start of the language of its unit") {
+    const std::string function = "<function>def <name>f</name><parameter_list>()</parameter_list><block>:<block_content> <pass>pass</pass></block_content></block></function>\n";
+    const std::string other    = "<comment type=\"line\">// @stereotype get</comment>\n" + function;
+    CHECK(commented(other, "Python") == other);
+}
+
+TEST_CASE("Only srcML that holds the start of a stereotype comment of some language may hold stereotype comments") {
     CHECK(mayHoldStereotypeComments(unitStart + "<comment type=\"line\">// @stereotype get</comment></unit>"));
+    CHECK(mayHoldStereotypeComments(unitStartIn("Python") + "<comment type=\"line\"># @stereotype get</comment></unit>"));
     CHECK_FALSE(mayHoldStereotypeComments(unitStart + "<comment type=\"line\">// Returns x</comment></unit>"));
+    CHECK_FALSE(mayHoldStereotypeComments(unitStartIn("Python") + "<comment type=\"line\"># Returns x @stereotype</comment></unit>"));
 }
 
 TEST_CASE("srcML that is not well formed stops the insertion with an error") {

@@ -46,7 +46,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} ${{ matrix.options }}
+          cmake -B build -G Ninja -DCMAKE_CXX_COMPILER=${{ matrix.cxx }} -DSTEREOCODE_REQUIRE_SRCML=ON ${{ matrix.options }}
           cmake --build build
 
       - name: Test

@@ -1,4 +1,10 @@
+# SPDX-License-Identifier: GPL-3.0-only
 # @file run_system.cmake
+#
+# @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
+#
+# This file is part of the Stereocode application.
+#
 # Runs one system test: srcml --position on the zip, stereocode with -f -i -t -e -u, and check_stereotypes table against REFERENCE
 # Inputs: SRCML, SRCML_OPTIONS (may be empty), STEREOCODE, CHECK_STEREOTYPES, ZIP, REFERENCE, WORK_DIR, and UPDATE (ON to write the reference)
 

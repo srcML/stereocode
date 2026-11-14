@@ -9,6 +9,7 @@
 
 #include "output/stereotype_comments.hpp"
 #include "archive/node_text.hpp"
+#include "archive/source_language.hpp"
 #include "archive/srcml_elements.hpp"
 #include "archive/srcml_namespaces.hpp"
 
@@ -25,8 +26,14 @@
 namespace {
     using documentPtr = std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)>;
 
-    const std::string_view commentStart = "// @stereotype";
-    const std::string_view blanks       = " \t";
+    const std::string_view commentTag = " @stereotype";
+    const std::string_view blanks     = " \t";
+
+    // Gets the start of a stereotype comment in a language, such as // @stereotype or, in Python, # @stereotype
+    //
+    std::string commentStartIn(std::string_view language) {
+        return std::string(languageOf(language).lineComment).append(commentTag);
+    }
 
     // The text of the line of an element before the element, and the text node that holds the line break before the line
     //
@@ -46,7 +53,7 @@ namespace {
 
     // Gets the language of a unit, or an empty text for a unit without one
     //
-    std::string languageOf(xmlNode* unit) {
+    std::string unitLanguageOf(xmlNode* unit) {
         xmlChar* language = xmlGetProp(unit, BAD_CAST "language");
         std::string text = language ? reinterpret_cast<const char*>(language) : "";
         xmlFree(language);
@@ -61,13 +68,30 @@ namespace {
         return false;
     }
 
-    // Tells whether stereocode labels the elements of a kind in a language with some option: the types and functions of C, C++, C#, and Java,
-    // where only Java enums get stereotypes, a static C# type holds only free functions, and a C# or Java function outside every type stays out
+    // Tells whether a JavaScript element is a declaration that stereocode labels: a class, an interface, a member of a class, or a function at
+    // the top level of a file or of a namespace, unlike a class or a function in an expression or in an object literal and a function without a body
+    //
+    bool isJavaScriptDeclaration(const xmlNode* node) {
+        if (isSrcElement(node, "class") || isTypeScriptElement(node, "interface")) return !isSrcElement(node->parent, "expr");
+        if ((!isSrcElement(node, "function") && !isSrcElement(node, "constructor")) || !firstChildElement(node, "block")) return false;
+
+        const xmlNode* parent = node->parent;
+        const xmlNode* owner  = parent->parent;
+        return isSrcElement(parent, "unit") || (isSrcElement(parent, "block") && isSrcElement(owner, "class")) ||
+               (isSrcElement(parent, "block_content") && owner && isTypeScriptElement(owner->parent, "namespace"));
+    }
+
+    // Tells whether stereocode labels the elements of a kind in a language with some option: the types and functions of C, C++, C#, Java,
+    // Python, and JavaScript, where only Java enums get stereotypes, a static C# type holds only free functions, and a C# or Java function
+    // outside every type stays out
     //
     bool isLabeledKind(const xmlNode* node, std::string_view language) {
-        const bool cpp = language == "C" || language == "C++";
+        if (language == "JavaScript") return isJavaScriptDeclaration(node);
+        const bool cpp    = language == "C" || language == "C++";
+        const bool python = language == "Python";
         if (isSrcElement(node, "function") || isSrcElement(node, "constructor") || isSrcElement(node, "destructor"))
-            return cpp || ((language == "C#" || language == "Java") && liesInType(node));
+            return cpp || python || ((language == "C#" || language == "Java") && liesInType(node));
+        if (python) return isSrcElement(node, "class");
         if (cpp) return isSrcElement(node, "class") || isSrcElement(node, "struct") || isSrcElement(node, "union");
         if (language == "C#") return (isSrcElement(node, "class") || isSrcElement(node, "struct") || isSrcElement(node, "interface")) && !declaresStatic(node);
         return language == "Java" && (isSrcElement(node, "class") || isSrcElement(node, "interface") || isSrcElement(node, "enum"));
@@ -88,11 +112,15 @@ namespace {
     }
 
     // Tells whether an element lies in a body of code, as local types and functions do, or in a type without a name, whose members get no stereotypes
-    // The block of a C++ extern "C" declaration holds declarations at namespace scope
+    // The block of a C++ extern "C" declaration and the block of a TypeScript namespace hold declarations at namespace scope
+    // In Python, the body of a class or of a branch is a block of statements as well, so only a function around an element makes it local
     //
-    bool liesInBodyOrAnonymousType(const xmlNode* node) {
+    bool liesInBodyOrAnonymousType(const xmlNode* node, std::string_view language) {
+        const bool python = language == "Python";
         for (const xmlNode* parent = node->parent; parent && parent->type == XML_ELEMENT_NODE; parent = parent->parent) {
-            if (isSrcElement(parent, "block_content") && !(parent->parent && isSrcElement(parent->parent->parent, "extern"))) return true;
+            const xmlNode* owner = parent->parent ? parent->parent->parent : nullptr;
+            if (python ? isSrcElement(parent, "function")
+                       : isSrcElement(parent, "block_content") && !isSrcElement(owner, "extern") && !isTypeScriptElement(owner, "namespace")) return true;
             if (isTypeElement(parent) && !isNamedType(parent)) return true;
         }
         return false;
@@ -101,7 +129,7 @@ namespace {
     // Tells whether stereocode labels an element of a unit of a language with some option, so that a stereotype comment above it is its own
     //
     bool isLabelable(const xmlNode* node, std::string_view language) {
-        return isLabeledKind(node, language) && (!isTypeElement(node) || isNamedType(node)) && !liesInBodyOrAnonymousType(node);
+        return isLabeledKind(node, language) && (!isTypeElement(node) || isNamedType(node)) && !liesInBodyOrAnonymousType(node, language);
     }
 
     // Tells whether a node is an element that contains another node
@@ -198,7 +226,7 @@ namespace {
 
     // Gets the stereotype comment on the line before a line start, such as the comment of an earlier run, or null without one
     //
-    xmlNode* earlierComment(const lineStart& start) {
+    xmlNode* earlierComment(const lineStart& start, std::string_view commentStart) {
         if (!start.textNode) return nullptr;
         const std::string_view beforeLineBreak = textOf(start.textNode).substr(0, start.lineBreak);
         if (beforeLineBreak.find_first_not_of(blanks) != std::string_view::npos) return nullptr;
@@ -214,11 +242,11 @@ namespace {
     // Gets the stereotype comments directly above an element, such as those of earlier runs, the nearest first
     // Each comment after the nearest one stands alone on the line directly above the comment before it in the list
     //
-    std::vector<xmlNode*> commentsAbove(xmlNode* element) {
+    std::vector<xmlNode*> commentsAbove(xmlNode* element, std::string_view commentStart) {
         std::vector<xmlNode*> comments;
         lineStart start = findLineStart(element);
         if (!goesAboveLine(start, element)) return comments;
-        for (xmlNode* comment = earlierComment(start); comment; comment = earlierComment(start)) {
+        for (xmlNode* comment = earlierComment(start, commentStart); comment; comment = earlierComment(start, commentStart)) {
             comments.push_back(comment);
             start = findLineStart(comment);
             if (!start.code.empty()) break;
@@ -296,7 +324,7 @@ namespace {
     // Inserts the comment of a labeled element on a line of its own above the element, at the indentation of the line of the element
     // Specifiers and comments that start the line stay with the element, while after other code, such as an earlier member, it starts a new line
     //
-    void insertComment(xmlDoc* document, xmlNode* unit, xmlNode* element, const std::string& stereotypes) {
+    void insertComment(xmlDoc* document, xmlNode* unit, xmlNode* element, std::string_view commentStart, const std::string& stereotypes) {
         const std::string text = std::string(commentStart) + " " + stereotypes;
         xmlNs* srcNs = xmlSearchNsByHref(document, element, BAD_CAST srcNamespace);
         if (!srcNs) throw std::runtime_error("a labeled element lies outside the srcML namespace");
@@ -312,7 +340,7 @@ namespace {
             return;
         }
 
-        if (xmlNode* earlier = earlierComment(start)) {
+        if (xmlNode* earlier = earlierComment(start, commentStart)) {
             xmlNodeSetContentLen(earlier->children, BAD_CAST text.data(), static_cast<int>(text.size()));
             return;
         }
@@ -335,14 +363,22 @@ namespace {
     }
 }
 
-// Tells whether the srcML of a unit may hold stereotype comments, such as those of an earlier run
+// Tells whether the srcML of a unit may hold stereotype comments, such as those of an earlier run, in the form of some language
 //
 bool mayHoldStereotypeComments(std::string_view unitSrcml) {
-    return unitSrcml.find(commentStart) != std::string_view::npos;
+    for (std::size_t tag = unitSrcml.find(commentTag); tag != std::string_view::npos; tag = unitSrcml.find(commentTag, tag + 1)) {
+        const std::string_view before = unitSrcml.substr(0, tag);
+        for (const sourceLanguage& language : sourceLanguages()) {
+            const std::string_view start = language.lineComment;
+            if (before.size() >= start.size() && before.substr(before.size() - start.size()) == start) return true;
+        }
+    }
+    return false;
 }
 
 // Gets the srcML of a unit with a line comment "// @stereotype <labels>" before each element that carries the attribute st:stereotype
 // in the namespace that the srcML declares, as srcml writes the comment for a source file that holds the comment
+// The comment starts as a line comment of the language of the unit does, with # in Python
 // The stereotype comments directly above the elements that stereocode labels with some option give way, so such an element without stereotypes
 // keeps none, while the comments above other elements, such as a C++ enum or a local class, stay
 //
@@ -353,7 +389,8 @@ std::string withStereotypeComments(std::string_view srcml) {
     if (!unit) throw std::runtime_error("cannot parse the srcML of a unit for the stereotype comments");
 
     // The removals and insertions change the tree, so the labeled elements and the elements that stereocode labels with some option are collected first
-    const std::string language = languageOf(unit);
+    const std::string language     = unitLanguageOf(unit);
+    const std::string commentStart = commentStartIn(language);
     std::vector<std::pair<xmlNode*, std::string>> elements;
     for (xmlNode* node = unit; node; node = nextInUnit(node, unit)) {
         if (node->type != XML_ELEMENT_NODE) continue;
@@ -365,11 +402,11 @@ std::string withStereotypeComments(std::string_view srcml) {
 
     // A labeled element keeps the nearest of the comments above it, which takes its stereotypes
     for (const auto& [element, stereotypes] : elements) {
-        const std::vector<xmlNode*> earlier = commentsAbove(element);
+        const std::vector<xmlNode*> earlier = commentsAbove(element, commentStart);
         for (std::size_t position = stereotypes.empty() ? 0 : 1; position < earlier.size(); ++position) removeComment(earlier[position]);
     }
     for (const auto& [element, stereotypes] : elements)
-        if (!stereotypes.empty()) insertComment(document.get(), unit, element, stereotypes);
+        if (!stereotypes.empty()) insertComment(document.get(), unit, element, commentStart, stereotypes);
 
     xmlChar* text = nullptr;
     int size = 0;

@@ -11,6 +11,7 @@
 #include "helper_functions.hpp"
 #include "rules/stereotype_classifier.hpp"
 #include "model/written_type.hpp"
+#include "archive/source_language.hpp"
 
 #include <cstddef>
 #include <iomanip>
@@ -27,9 +28,11 @@ stereotypeRules::stereotypeRules(std::optional<int> largeClassThreshold_) : larg
 
 namespace {
     // Gets the signature that tells a method of a type from the other methods, where a C# accessor takes the name of its property, such as Count.get,
-    // or nothing for a function whose markup lacks a parameter list
+    // or nothing for a function whose markup lacks a parameter list and for a method of a language without #if alternatives, where each
+    // definition is a method of its own, as the methods that the bodies of the constants of a Java enum define under one name
     //
     std::optional<std::string> methodSignature(const functionModel& m) {
+        if (!languageOf(m.getUnitLanguage()).preprocessor) return std::nullopt;
         if (!m.getPropertyName().empty()) return m.getPropertyName() + "." + m.getName()[1];
         if (m.getParametersList().empty()) return std::nullopt;
         return m.getName()[1] + typeListText(m.getParameterTypes()) + (m.isMethodConst() ? "const" : "");
@@ -37,7 +40,7 @@ namespace {
 
     // Reads the facts of a method of a type that the method stereotype rules use, with the methods of the run that its calls may reach
     //
-    methodFacts readMethodFacts(const functionModel& m, std::size_t type, const std::string& unitLanguage, const calledMethods& called) {
+    methodFacts readMethodFacts(const functionModel& m, std::size_t position, std::size_t type, const std::string& unitLanguage, const calledMethods& called) {
         methodFacts facts;
         facts.language                             = unitLanguage;
         facts.constructorOrDestructor              = m.getConstructorOrDestructor();
@@ -45,10 +48,23 @@ namespace {
         facts.declaredReturnType                   = m.getReturnType().getType();
         HELPERS::removeWhitespace(facts.declaredReturnType);
         facts.fieldsModified                       = m.getFieldsModifiedCount();
-        for (const callModel& call : m.getMethodCalls())   facts.callsOnFields.push_back({called.ofCallOnField(type, call), call.isResultWritten()});
-        for (const callModel& call : m.getFunctionCalls()) facts.typeMethodCalls.push_back({called.ofCallToType(type, call), call.isResultWritten()});
-        facts.newConstructorCalls                  = static_cast<int>(m.getNewConstructorCalls().size());
         facts.callsOnFreeFunctions                 = m.getExternalFunctionCallsCount();
+        for (const callModel& call : m.getMethodCalls()) {
+            // The accessor of a record component reads the data member on which it is called, unless the code writes through its result
+            if (!call.isResultWritten() && called.callsImplicitAccessor(type, call)) continue;
+            std::vector<std::size_t> reached = called.ofCallOnField(type, position, call);
+            // An extension method takes the data member as a static method does, as IsEmpty(basket) for basket.IsEmpty()
+            if (reached.empty() && called.callsExtensionMethod(type, call)) {
+                ++facts.callsOnFreeFunctions;
+                continue;
+            }
+            facts.callsOnFields.push_back({std::move(reached), call.isResultWritten()});
+        }
+        for (const callModel& call : m.getFunctionCalls()) {
+            if (called.callsStaticMethod(type, call)) ++facts.callsOnFreeFunctions;
+            else facts.typeMethodCalls.push_back({called.ofCallToType(type, position, call), call.isResultWritten()});
+        }
+        facts.newConstructorCalls                  = static_cast<int>(m.getNewConstructorCalls().size());
         facts.callsToOtherTypeMethods              = m.getExternalMethodCallsCount();
         facts.nonCommentStatements                 = m.getNonCommentStatementsCount();
         facts.fieldUsed                            = m.isFieldUsed();
@@ -89,7 +105,7 @@ namespace {
         return stereotypes;
     }
 
-    // Tells whether a type is a class element of C++, C#, or Java, a Java record included, which no option adds to the run
+    // Tells whether a type is a class element, a Java record included, which no option adds to the run
     //
     bool isClassElement(const typeModel& type) {
         return type.getStructure() == "class" || type.getStructure() == "record";
@@ -125,7 +141,7 @@ void stereotypeRules::computeMethodStereotypes(std::vector<typeModel>& typeColle
     std::vector<methodFacts> facts;
     for (std::size_t type = 0; type < typeCollection.size(); ++type) {
         for (const functionModel& m : typeCollection[type].getMethods())
-            facts.push_back(readMethodFacts(m, type, typeCollection[type].getUnitLanguage(), called));
+            facts.push_back(readMethodFacts(m, facts.size(), type, typeCollection[type].getUnitLanguage(), called));
     }
 
     const std::vector<stereotypeList> labels = classifyMethods(facts);

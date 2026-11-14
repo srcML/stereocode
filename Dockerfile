@@ -23,7 +23,7 @@ RUN --mount=type=bind,from=srcml,source=/srcml,target=/tmp/srcml \
  && rm -rf /var/lib/apt/lists/*
 WORKDIR /stereocode
 COPY . .
-RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+RUN cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DSTEREOCODE_REQUIRE_SRCML=ON \
  && cmake --build build \
  && ctest --test-dir build -j "$(nproc)" --output-on-failure
 

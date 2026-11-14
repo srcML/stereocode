@@ -8,6 +8,7 @@
  */
 
 #include "CLI11.hpp"
+#include "archive/source_language.hpp"
 #include "options.hpp"
 #include "output/output_names.hpp"
 #include "stereotypes_analyzer.hpp"
@@ -43,8 +44,8 @@ int main (int argc, char const *argv[]) try {
     options settings;
     settings.threads = std::clamp(std::thread::hardware_concurrency(), 1u, maxThreads);
 
-    CLI::App app{"Stereocode classifies methods, free functions, and types (e.g., classes) of C, C++, C#, and Java code by their stereotypes.\n"};
-    app.footer("The files of -p, -c, -s, and -q hold one entry per line. A line [C++], [C#], or [Java] limits the entries after it to that language. "
+    CLI::App app{"Stereocode classifies methods, free functions, and types (e.g., classes) of C, C++, C#, Java, Python, JavaScript, and TypeScript code by their stereotypes.\n"};
+    app.footer("The files of -p, -c, -s, and -q hold one entry per line. A line " + sectionHeadersText() + " limits the entries after it to that language. "
                "A line that starts with # is a comment.");
 
     // The descriptions follow the options table of README.md
@@ -59,7 +60,7 @@ int main (int argc, char const *argv[]) try {
     app.add_option("-j,--threads",             settings.threads,                 "Number of threads (default all available, at most 256)")
         ->check(countUpTo(maxThreads, "1 to 256"));
     app.add_flag  ("-f,--free-function",       settings.freeFunctions,           "Stereotypes free functions and static methods");
-    app.add_flag  ("-i,--interface",           settings.interfaces,              "Stereotypes interfaces (C# and Java)");
+    app.add_flag  ("-i,--interface",           settings.interfaces,              "Stereotypes interfaces (C#, Java, and TypeScript)");
     app.add_flag  ("-u,--union",               settings.unions,                  "Stereotypes unions (C and C++)");
     app.add_flag  ("-e,--enum",                settings.enums,                   "Stereotypes enums (Java)");
     app.add_flag  ("-t,--struct",              settings.structs,                 "Stereotypes structs (C, C++, and C#)");
@@ -67,7 +68,7 @@ int main (int argc, char const *argv[]) try {
     app.add_flag  ("-x,--txt-report",          settings.txtReport,               "Writes a text report of the stereotypes");
     app.add_flag  ("-b,--verbose",             settings.verboseReport,           "Writes a detailed CSV report (e.g., the calls of each function) and prints the settings in use");
     app.add_flag  ("-d,--no-srcml-output,--srcmlOutput", settings.disableSrcmlOutput, "Writes no output archive, only the reports of -r, -x, or -b");
-    app.add_flag  ("-m,--comment",             settings.comments,                "Inserts a // @stereotype <labels> comment before each stereotyped element");
+    app.add_flag  ("-m,--comment",             settings.comments,                "Inserts a // @stereotype <labels> comment (# @stereotype <labels> in Python) before each stereotyped element");
     app.set_version_flag("-v,--version",       "Stereocode v" STEREOCODE_VERSION, "Prints the version");
     app.set_help_flag("-h,--help",             "Prints the options");
 

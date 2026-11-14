@@ -75,6 +75,14 @@ std::vector<std::string> specifierPattern::split(const std::string& type) const 
     return pieces;
 }
 
+// Tells whether a specifier of the pattern occurs in a type
+//
+bool specifierPattern::finds(const std::string& type) const {
+    for (std::size_t position = 0; position < type.size(); ++position)
+        if (matchEnd(type, position) != position) return true;
+    return false;
+}
+
 // Reads a default specifier of literal characters and characters escaped with a backslash, optionally followed by \w+,
 // or a word followed by (?=<), which names a container only where a generic argument list follows it
 //

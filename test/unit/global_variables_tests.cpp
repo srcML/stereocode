@@ -130,3 +130,29 @@ TEST_CASE("a global is immutable when every declaration of its name that the uni
     CHECK_FALSE(archive.isImmutable("C++", "kMax", 4));
     CHECK_FALSE(archive.isImmutable("Java", "COUNT", 4));
 }
+
+TEST_CASE("a type holds a global as a static field, unlike a namespace or a module") {
+    globalVariables archive;
+    archive.add(declared("C++", "count", "Registry", false));
+    archive.add(declared("C++", "level", "settings", true));
+    archive.add(declared("Python", "level", "settings", true));
+    archive.add(declared("Python", "total", "Tally", false));
+
+    CHECK(archive.heldByType("C++", "Registry", "count", 2));
+    CHECK(archive.heldByType("Python", "Tally", "total", 2));
+    CHECK_FALSE(archive.heldByType("C++", "settings", "level", 2));
+    CHECK_FALSE(archive.heldByType("Python", "settings", "level", 2));
+    CHECK_FALSE(archive.heldByType("C++", "Registry", "level", 2));
+    CHECK_FALSE(archive.heldByType("Java", "Registry", "count", 2));
+}
+
+TEST_CASE("the types that hold the globals of other units join the globals of the archive") {
+    globalVariables archive;
+    globalVariables unit;
+    unit.add(declared("Java", "shared", "Depot", false, 2));
+    unit.add(declared("Python", "level", "settings", true, 2));
+    archive.merge(unit);
+
+    CHECK(archive.heldByType("Java", "Depot", "shared", 3));
+    CHECK_FALSE(archive.heldByType("Python", "settings", "level", 3));
+}

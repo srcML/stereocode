@@ -1,10 +1,18 @@
+# SPDX-License-Identifier: GPL-3.0-only
 # @file CMakeLists.txt
+#
+# @copyright Copyright (C) 2021-2026 srcML, LLC. (www.srcML.org)
+#
+# This file is part of the Stereocode application.
+#
 # Every test of Stereocode, with the label of its kind: unit, integration, stereotypes, or systems
 
 # The unit tests of the library in one program, with doctest 2.5.3 from https://github.com/doctest/doctest/releases/tag/v2.5.3
 file(GLOB UNIT_TEST_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/unit/*.cpp")
 add_executable(unit_tests ${UNIT_TEST_SOURCES})
 target_link_libraries(unit_tests PRIVATE stereocode_lib)
+# A captured C string then shows its text in the report of a failed check
+target_compile_definitions(unit_tests PRIVATE DOCTEST_CONFIG_TREAT_CHAR_STAR_AS_STRING)
 add_test(NAME unit COMMAND unit_tests)
 set_tests_properties(unit PROPERTIES LABELS unit)
 
@@ -30,14 +38,16 @@ function(add_script_checks folder topic)
     endforeach()
 endfunction()
 
-add_script_checks(integration options CHECKS version_without_input option_names user_list_files readme_options
+add_script_checks(integration options CHECKS version_without_input rejected_arguments help_footer option_names user_list_files
+                                             readme_options
                   DEFINE -DREADME=${PROJECT_SOURCE_DIR}/README.md)
 add_script_checks(integration input CHECKS no_filename no_language invalid_input damaged_input archive_without_code damaged_markup
                                            escape_in_expression declaration_pairs long_expression labeled_input)
 add_script_checks(integration output CHECKS output_is_input unwritable_output position_archive destructor_position)
-add_script_checks(integration reports CHECKS free_function_csv csv_without_srcml_output csv_beside_output csv_type_rows verbose_csv txt_report)
-add_script_checks(integration types CHECKS nested_types unlabeled_enums anonymous_class_objects typedef_types csharp_property large_class_threshold
-                                           return_type_macros)
+add_script_checks(integration reports CHECKS free_function_csv csv_without_srcml_output csv_beside_output csv_type_rows verbose_csv
+                                             verbose_csv_details txt_report)
+add_script_checks(integration types CHECKS nested_types python_local_code unlabeled_enums anonymous_class_objects typedef_types csharp_property
+                                           large_class_threshold return_type_macros)
 add_script_checks(integration threads CHECKS thread_counts)
 
 # The preloaded library makes std::thread::hardware_concurrency() return 0, which glibc allows
@@ -52,32 +62,33 @@ find_program(SRCML_EXECUTABLE srcml HINTS "$ENV{SystemDrive}/srcML/bin" "/usr/lo
 
 add_script_checks(integration comments CHECKS stereotype_comments)
 if(SRCML_EXECUTABLE)
-    add_script_checks(integration comments CHECKS round_trip_cpp round_trip_csharp round_trip_java stale_comments unit_without_labels
-                                                  after_code_cpp after_code_csharp after_code_java
+    add_script_checks(integration comments CHECKS round_trip_cpp round_trip_csharp round_trip_java round_trip_python round_trip_javascript stale_comments
+                                                  unit_without_labels after_code_cpp after_code_csharp after_code_java
                       DEFINE -DSRCML=${SRCML_EXECUTABLE})
 endif()
-add_script_checks(stereotypes check_stereotypes CHECKS comments table DEFINE -DCHECK_STEREOTYPES=$<TARGET_FILE:check_stereotypes>)
+add_script_checks(stereotypes check_stereotypes CHECKS comments unchecked_elements table DEFINE -DCHECK_STEREOTYPES=$<TARGET_FILE:check_stereotypes>)
 
 if(NOT SRCML_EXECUTABLE)
+    if(STEREOCODE_REQUIRE_SRCML)
+        message(FATAL_ERROR "The srcml program is missing, and the comment round trips, the stereotype cases, and the system tests need it")
+    endif()
     message(STATUS "Comment round trips, stereotype cases, and system tests skipped: they need the srcml program")
     return()
 endif()
 
 # Each case of stereotypes/<language>/ is the test stereotypes/<language>/<case>, which compares its "// @stereotype" comments with the labels
-# A case is one source file, or a folder whose files form one archive
-file(GLOB STEREOTYPE_CASES CONFIGURE_DEPENDS LIST_DIRECTORIES true
-    "${CMAKE_CURRENT_SOURCE_DIR}/stereotypes/cpp/*"
-    "${CMAKE_CURRENT_SOURCE_DIR}/stereotypes/csharp/*"
-    "${CMAKE_CURRENT_SOURCE_DIR}/stereotypes/java/*"
-)
+# A case is one source file, or a folder whose files form one archive, and any other entry stops the configuration, since it would never run
+include(stereotypes/case_files.cmake)
+list(TRANSFORM CASE_LANGUAGES REPLACE "(.+)" "${CMAKE_CURRENT_SOURCE_DIR}/stereotypes/\\1/*" OUTPUT_VARIABLE CASE_GLOBS)
+file(GLOB STEREOTYPE_CASES CONFIGURE_DEPENDS LIST_DIRECTORIES true ${CASE_GLOBS})
 
 foreach(CASE_PATH ${STEREOTYPE_CASES})
-    if(NOT IS_DIRECTORY "${CASE_PATH}" AND NOT CASE_PATH MATCHES "\\.(cpp|cs|java)$")
-        continue()
+    if(NOT IS_DIRECTORY "${CASE_PATH}" AND NOT CASE_PATH MATCHES "${CASE_FILE}")
+        message(FATAL_ERROR "${CASE_PATH} is neither a source file of a stereotype case nor a folder of one")
     endif()
 
     file(RELATIVE_PATH CASE_NAME "${CMAKE_CURRENT_SOURCE_DIR}/stereotypes" "${CASE_PATH}")  # e.g., cpp/method_accessors.cpp
-    string(REGEX REPLACE "\\.(cpp|cs|java)$" "" CASE_NAME "${CASE_NAME}")                    # e.g., cpp/method_accessors
+    string(REGEX REPLACE "${CASE_FILE}" "" CASE_NAME "${CASE_NAME}")                         # e.g., cpp/method_accessors
 
     add_test(
         NAME "stereotypes/${CASE_NAME}"
@@ -121,7 +132,8 @@ foreach(ZIP ${SYSTEM_ZIPS})
             -P ${CMAKE_CURRENT_SOURCE_DIR}/stereotypes/run_system.cmake
     )
     # A system takes far longer than a case, so the label systems lets ctest -LE systems leave the systems out
-    set_tests_properties("stereotypes/systems/${SYSTEM}" PROPERTIES LABELS systems TIMEOUT 600)
+    # Each system runs on every thread with up to 1.6 GB of memory, so the lock keeps ctest -j from running two systems at once
+    set_tests_properties("stereotypes/systems/${SYSTEM}" PROPERTIES LABELS systems TIMEOUT 600 RESOURCE_LOCK system_tests)
 
     list(APPEND UPDATE_COMMANDS
         COMMAND ${CMAKE_COMMAND} ${SYSTEM_ARGUMENTS}

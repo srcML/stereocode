@@ -53,16 +53,22 @@ namespace {
     struct callEffect {
         bool    reads{false};       // A method that the call may reach is an accessor
         bool    changes{false};     // A method that the call may reach is no accessor or degenerate method, or no method with stereotypes fits
+        bool    own{false};         // The call reaches only the calling method, whose stereotypes are not given
     };
 
-    // Gets what a call does, where a write through the result of an accessor, as in at(i) = x, changes the object
+    // Gets what a call of a method does, where a write through the result of an accessor, as in at(i) = x, changes the object
+    // The calling method itself, which a recursive call reaches, counts by the stereotypes given for it, or not at all without them
     //
-    callEffect effectOf(const methodCall& call, const std::vector<stereotypeList>& labels) {
+    callEffect effectOf(const methodCall& call, std::size_t caller, const stereotypeList* ofCaller, const std::vector<stereotypeList>& labels) {
         callEffect effect;
         effect.changes = call.callees.empty();
+        effect.own     = !call.callees.empty();
         for (std::size_t callee : call.callees) {
-            effect.reads   = effect.reads || isAccessor(labels[callee]);
-            effect.changes = effect.changes || !keepsObject(labels[callee]);
+            if (callee == caller && !ofCaller) continue;
+            const stereotypeList& reached = callee == caller ? *ofCaller : labels[callee];
+            effect.own     = false;
+            effect.reads   = effect.reads || isAccessor(reached);
+            effect.changes = effect.changes || !keepsObject(reached);
         }
         effect.changes = effect.changes || (effect.reads && call.resultWritten);
         return effect;
@@ -71,15 +77,16 @@ namespace {
     // Gets the facts of a method in which each call counts by what it does: a call to an accessor of the type reads a field,
     // a call that only reaches degenerate methods counts like a call of a free function, and only a call that may change the object stays a call
     // A call on a field reads the field already, as its name does
+    // Without stereotypes for the method itself, the facts leave out what its calls do through the method itself
     //
-    methodFacts withCallEffects(methodFacts f, const std::vector<stereotypeList>& labels) {
+    methodFacts withCallEffects(methodFacts f, std::size_t method, const stereotypeList* ofMethod, const std::vector<stereotypeList>& labels) {
         for (std::vector<methodCall>* calls : {&f.typeMethodCalls, &f.callsOnFields}) {
             std::vector<methodCall> changing;
             for (methodCall& call : *calls) {
-                const callEffect effect = effectOf(call, labels);
+                const callEffect effect = effectOf(call, method, ofMethod, labels);
                 if (effect.reads && calls == &f.typeMethodCalls) f.fieldUsed = true;
                 if (effect.changes)    changing.push_back(std::move(call));
-                else if (!effect.reads) ++f.callsOnFreeFunctions;
+                else if (!effect.reads && !effect.own) ++f.callsOnFreeFunctions;
             }
             *calls = std::move(changing);
         }
@@ -293,11 +300,15 @@ std::vector<stereotypeList> classifyMethods(const std::vector<methodFacts>& meth
     for (const methodFacts& f : methods) labels.push_back(classifyMethod(f));
 
     std::vector<std::vector<std::size_t>> callers(methods.size());
+    std::vector<bool> reachesItself(methods.size(), false);
     std::vector<std::size_t> pending;
     for (std::size_t i = 0; i < methods.size(); ++i) {
         for (const std::vector<methodCall>* calls : {&methods[i].typeMethodCalls, &methods[i].callsOnFields})
             for (const methodCall& call : *calls)
-                for (std::size_t callee : call.callees) callers[callee].push_back(i);
+                for (std::size_t callee : call.callees) {
+                    if (callee == i) reachesItself[i] = true;
+                    else callers[callee].push_back(i);
+                }
         if (!methods[i].typeMethodCalls.empty() || !methods[i].callsOnFields.empty()) pending.push_back(i);
     }
 
@@ -306,7 +317,9 @@ std::vector<stereotypeList> classifyMethods(const std::vector<methodFacts>& meth
     for (int round = 0; round < methodRoundLimit && !pending.empty(); ++round) {
         std::vector<std::pair<std::size_t, stereotypeList>> changed;
         for (std::size_t i : pending) {
-            stereotypeList next = classifyMethod(withCallEffects(methods[i], labels));
+            // A call that reaches the calling method counts by the stereotypes that the method has without such calls
+            const stereotypeList alone = classifyMethod(withCallEffects(methods[i], i, nullptr, labels));
+            stereotypeList next = reachesItself[i] ? classifyMethod(withCallEffects(methods[i], i, &alone, labels)) : alone;
             if (next != labels[i]) changed.emplace_back(i, std::move(next));
         }
 

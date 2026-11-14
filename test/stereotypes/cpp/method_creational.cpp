@@ -24,6 +24,13 @@ public:
     // @stereotype factory stateless
     Matrix* makeSquare(int rows) const { Matrix* result = new Matrix(rows); return result; }
 
+    // An element or a member of a created array is no object that the method returns as created
+    // @stereotype property
+    Matrix firstOf() const { Matrix* made = new Matrix[m_rows]; return made[0]; }
+
+    // @stereotype property
+    int rowsOf() const { Matrix* made = new Matrix[m_rows]; return made->m_rows; }
+
     // A data member passed to a constructor, as this->m_rows is, reads the state of the object
     // @stereotype property factory
     Matrix* makeLike() const { return new Matrix(this->m_rows); }
@@ -31,6 +38,16 @@ public:
     // The object passed to a call other than a constructor call reads the state of the object
     // @stereotype controller
     void attach(Registry& registry) const { registry.add(*this); }
+
+    // The object passed to the constructor of a local reads no state of the object, as the object passed after new does
+    // @stereotype wrapper stateless
+    void bindLocal(int value) const { Binder binder(*this); notify(value); }
+
+    // @stereotype wrapper stateless
+    void bindPointer(int value) const { Binder binder(this); notify(value); }
+
+    // @stereotype wrapper stateless
+    void bindBraced(int value) const { Binder binder{*this}; notify(value); }
 };
 
 // std::make_unique and std::make_shared create the returned object as new does, while each stays a call of a free function

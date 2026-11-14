@@ -17,8 +17,7 @@ std::vector<std::size_t> overloadsTaking(const std::vector<overload>& overloads,
     std::vector<std::size_t> all;
     for (const overload& candidate : overloads) {
         all.push_back(candidate.position);
-        const argumentRange& range = candidate.arguments;
-        if (range.minimum <= arguments && (range.variadic || arguments <= range.maximum)) taking.push_back(candidate.position);
+        if (takes(candidate.arguments, arguments)) taking.push_back(candidate.position);
     }
     return taking.empty() ? all : taking;
 }

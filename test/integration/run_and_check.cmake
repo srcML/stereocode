@@ -68,6 +68,15 @@ function(expect_missing fileName)
     endif()
 endfunction()
 
+# Fails unless the option with the value stops a run on input.xml with the message and writes no output
+function(expect_rejected_value option value expectedMessage)
+    run_stereocode(input.xml ${option} ${value} -o rejected.xml)
+    if(RUN_EXIT STREQUAL "0" OR NOT RUN_ERROR MATCHES "${expectedMessage}")
+        message(FATAL_ERROR "Expected ${option} ${value} to fail with '${expectedMessage}'\nexit: ${RUN_EXIT}\nstderr: ${RUN_ERROR}")
+    endif()
+    expect_missing("${WORK_DIR}/rejected.xml")
+endfunction()
+
 # The srcML of one C++ file with a class and a free function, and what stereocode -f -r writes for it
 #
 # The C++ file:

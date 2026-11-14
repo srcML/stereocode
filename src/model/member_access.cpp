@@ -28,6 +28,7 @@ namespace {
 
     // The splits try the alternatives in the backtracking order of a regular expression such as
     // ^(?:\(\*this\)\.|this->|([^.>-]*)(?:::|\.|->))([^.>-]*) for C++ and ^(?:super|this|([^.]*))\.([^.]*) for Java
+    // The model of a Python function writes this for the name of the object, so Python takes the syntax of Java, as JavaScript does
     const accessSyntax cppSyntax    {{"(*this).", "this->"}, true,  ".>-", {"::", ".", "->"}, ".>-", ".>(){}-"};
     const accessSyntax javaSyntax   {{"super", "this"},      false, ".",   {"."},             ".",   ".()"};
     const accessSyntax csharpSyntax {{"base", "this"},       false, ".>-", {".", "->"},       ".>-", ".>()-"};
@@ -50,9 +51,9 @@ namespace {
 //
 std::optional<memberAccess> splitMemberAccess(const std::string& expression, const std::string& unitLanguage, bool wholeExpression) {
     const accessSyntax* syntax = nullptr;
-    if      (unitLanguage == "C++")  syntax = &cppSyntax;
-    else if (unitLanguage == "Java") syntax = &javaSyntax;
-    else if (unitLanguage == "C#")   syntax = &csharpSyntax;
+    if      (unitLanguage == "C++")                             syntax = &cppSyntax;
+    else if (unitLanguage == "Java" || unitLanguage == "Python" || unitLanguage == "JavaScript") syntax = &javaSyntax;
+    else if (unitLanguage == "C#")                              syntax = &csharpSyntax;
     else return std::nullopt;
 
     for (std::string_view self : syntax->selfObjects) {

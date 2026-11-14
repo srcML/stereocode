@@ -10,6 +10,9 @@ public:
     // A static data member is a global
     // @stereotype incidental
     void add() { s_entries++; }
+    // A namespace that qualifies a global is no class, so the write makes no collaborator
+    // @stereotype incidental
+    void raise() { settings::level++; }
 };
 int Registry::s_entries = 0;
 

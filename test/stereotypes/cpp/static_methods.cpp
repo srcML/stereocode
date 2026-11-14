@@ -60,3 +60,16 @@ public:
 int Overloads::f(double d) const { return x; }
 // @stereotype property
 int Overloads::f(int v) { return v * 2; }
+
+// A definition whose name the class declares only as static is a static method, also where srcML takes the last word of an unnamed
+// parameter of a type with two words, as int of unsigned int, for the name of the parameter
+// @stereotype data-provider data-class small-class
+class Touch {
+    int x;
+public:
+    static bool isDown(unsigned int finger);
+    // @stereotype get
+    int getX() const { return x; }
+};
+// @stereotype literal
+bool Touch::isDown(unsigned int /*finger*/) { return false; }

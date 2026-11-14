@@ -128,7 +128,7 @@ function(check_damaged_input)
     foreach(CASE inside_unit after_unit)
         run_stereocode(${CASE}.xml -f -r)
         expect_exit(1)
-        if(NOT "${RUN_ERROR}" MATCHES "\nError: ${CASE}.xml is not well-formed XML at line [0-9]+: ")
+        if(NOT "${RUN_ERROR}" MATCHES "(^|\n)Error: ${CASE}.xml is not well-formed XML at line [0-9]+: ")
             message(FATAL_ERROR "The error does not name the damaged archive: ${RUN_ERROR}")
         endif()
         expect_missing("${WORK_DIR}/${CASE}.stereotypes.xml")
@@ -137,7 +137,7 @@ function(check_damaged_input)
     endforeach()
 endfunction()
 
-# An archive without a unit in C, C++, C#, or Java gives a warning and an output without stereotypes
+# An archive without a unit in C, C++, C#, Java, or Python gives a warning and an output without stereotypes
 # libsrcml reads an archive without units as one unit without a language and writes revision="" and language=""
 function(check_archive_without_code)
     set(INPUT [=[
@@ -154,7 +154,7 @@ function(check_archive_without_code)
 
     run_stereocode(input.xml -f -r)
     expect_exit(0)
-    if(NOT "${RUN_ERROR}" MATCHES "^Warning: input.xml holds no unit in C, C\\+\\+, C#, or Java\n$")
+    if(NOT "${RUN_ERROR}" MATCHES "^Warning: input.xml holds no unit in C, C\\+\\+, C#, Java, or Python\n$")
         message(FATAL_ERROR "Expected a warning about the missing code, got '${RUN_ERROR}'")
     endif()
     expect_file_content("${WORK_DIR}/input.stereotypes.xml" "${EXPECTED_OUTPUT}")
@@ -168,7 +168,10 @@ endfunction()
 # The files:
 #   counter.h   class Counter { int m_count; public: void setCount(int c); };
 #   counter.cpp void Counter::setCount(int c) { m_count = c; }
-#   Damaged.cs  a function outside every type, as srcML leaves one after a misparse
+#   Damaged.cs  class Stock : Shelf { int Twice() { return 2 * Size(); } } and the functions Size and static Depth outside every type,
+#               as srcML leaves them after a misparse, where the static function gets its stereotype as a free function
+#   Program.cs  System.Console.WriteLine(Twice(2)); int Twice(int x) { return x * 2; }, whose function among top-level statements
+#               is a free function and no damaged markup
 function(check_damaged_markup)
     set(INPUT [=[
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -184,7 +187,13 @@ function(check_damaged_markup)
 <unit revision="1.0.0" language="C++" filename="counter.cpp"><function><type><name>void</name></type> <name><name>Counter</name><operator>::</operator><name>setCount</name></name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>c</name></decl></parameter>)</parameter_list> <block>{<block_content> <expr_stmt><expr><name>m_count</name> <operator>=</operator> <name>c</name></expr>;</expr_stmt> </block_content>}</block></function>
 </unit>
 
-<unit revision="1.0.0" language="C#" filename="Damaged.cs"><function><type><name>int</name></type> <name>Size</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><literal type="number">0</literal></expr>;</return> </block_content>}</block></function>
+<unit revision="1.0.0" language="C#" filename="Damaged.cs"><class>class <name>Stock</name> <super_list>: <super><name>Shelf</name></super></super_list> <block>{ <function><type><name>int</name></type> <name>Twice</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><literal type="number">2</literal> <operator>*</operator> <call><name>Size</name><argument_list>()</argument_list></call></expr>;</return> </block_content>}</block></function> }</block></class>
+<function><type><name>int</name></type> <name>Size</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><literal type="number">0</literal></expr>;</return> </block_content>}</block></function>
+<function><type><specifier>static</specifier> <name>int</name></type> <name>Depth</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><literal type="number">1</literal></expr>;</return> </block_content>}</block></function>
+</unit>
+
+<unit revision="1.0.0" language="C#" filename="Program.cs"><expr_stmt><expr><call><name><name>System</name><operator>.</operator><name>Console</name><operator>.</operator><name>WriteLine</name></name><argument_list>(<argument><expr><call><name>Twice</name><argument_list>(<argument><expr><literal type="number">2</literal></expr></argument>)</argument_list></call></expr></argument>)</argument_list></call></expr>;</expr_stmt>
+<function><type><name>int</name></type> <name>Twice</name><parameter_list>(<parameter><decl><type><name>int</name></type> <name>x</name></decl></parameter>)</parameter_list> <block>{<block_content> <return>return <expr><name>x</name> <operator>*</operator> <literal type="number">2</literal></expr>;</return> </block_content>}</block></function>
 </unit>
 
 </unit>
@@ -210,6 +219,16 @@ function(check_damaged_markup)
     file(READ "${WORK_DIR}/input.stereotypes.xml" output)
     if(NOT output MATCHES "<function st:stereotype=\"unclassified\"><type><name>void</name></type> <name><name>Counter</name>")
         message(FATAL_ERROR "Expected Counter::setCount to be unclassified:\n${output}")
+    endif()
+    # The class around the call may hold the function outside every type, so the call names no method of the parent Shelf outside the archive
+    if(NOT output MATCHES "<function st:stereotype=\"[a-z -]+\"><type><specifier>static</specifier> <name>int</name></type> <name>Depth</name>")
+        message(FATAL_ERROR "Expected the static function Depth outside every type to get a stereotype:\n${output}")
+    endif()
+    if(NOT output MATCHES "<function st:stereotype=\"wrapper stateless\"><type><name>int</name></type> <name>Twice</name>")
+        message(FATAL_ERROR "Expected the call of Size in Twice to stay a call of a function:\n${output}")
+    endif()
+    if(NOT output MATCHES "<function st:stereotype=\"property\"><type><name>int</name></type> <name>Twice</name><parameter_list>\\(<parameter>")
+        message(FATAL_ERROR "Expected the function Twice among the top-level statements of Program.cs to get a stereotype:\n${output}")
     endif()
 endfunction()
 

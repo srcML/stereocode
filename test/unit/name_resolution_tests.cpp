@@ -22,10 +22,11 @@ namespace {
     //
     variableScopes scopesOf(std::unordered_set<std::string> locals, std::unordered_set<std::string> parameters, std::unordered_set<std::string> fields,
                             std::unordered_set<std::string> earlierLocals = {}, globalOwners globals = {}) {
+        const auto isField = [fields](const std::string& name) { return fields.count(name) > 0; };
         return {
             [locals](const std::string& name) { return locals.count(name) > 0; },
             [parameters](const std::string& name) { return parameters.count(name) > 0; },
-            [fields](const std::string& name) { return fields.count(name) > 0; },
+            isField,
             [earlierLocals](const std::string& name) { return earlierLocals.count(name) > 0; },
             [globals](const std::string& name) {
                 for (const auto& [owner, names] : globals)
@@ -35,7 +36,8 @@ namespace {
             [globals](const std::string& owner, const std::string& name) {
                 const auto found = globals.find(owner);
                 return found != globals.end() && found->second.count(name) > 0;
-            }
+            },
+            isField
         };
     }
 
@@ -79,6 +81,19 @@ TEST_CASE("the object itself qualifies a field, which no local or parameter hide
     CHECK(resolve("this.x", "Java", scopes).kind == variableKind::field);
     CHECK(resolve("super.x", "Java", scopes).kind == variableKind::field);
     CHECK(resolve("base.x", "C#", scopes).kind == variableKind::field);
+}
+
+TEST_CASE("the name of an operator function after a variable resolves to the variable, whatever its symbols") {
+    const variableScopes scopes = scopesOf({"held"}, {"out"}, {"m_functor"}, {}, {{"", {"hook"}}});
+
+    CHECK(resolve("held.operator()", "C++", scopes).kind == variableKind::local);
+    CHECK(resolve("out.operator<<", "C++", scopes).kind == variableKind::parameter);
+    CHECK(resolve("out.operator>>", "C++", scopes).kind == variableKind::parameter);
+    CHECK(resolve("this->m_functor.operator()", "C++", scopes).kind == variableKind::field);
+
+    const nameResolution global = resolve("hook.operator()", "C++", scopes);
+    CHECK(global.kind == variableKind::global);
+    CHECK(global.variable == "hook");
 }
 
 TEST_CASE("an expression that starts with a variable resolves to the variable") {
@@ -277,4 +292,39 @@ TEST_CASE("a C++ name before :: names a namespace or a type, never a global") {
     CHECK(resolve("std::transform", "C++", scopes).kind == variableKind::unknown);
     CHECK(resolve("Registry::count", "C++", scopes).variable == "count");
     CHECK(resolve("std.length", "Java", scopes).kind == variableKind::global);
+}
+
+TEST_CASE("no local or parameter hides the field that the name of the own type qualifies") {
+    const variableScopes scopes = scopesOf({"count"}, {"shared"}, {"count", "shared"});
+
+    const nameResolution field = resolve("Foo.shared", "Java", scopes);
+    CHECK(field.kind == variableKind::field);
+    CHECK(field.variable == "shared");
+    CHECK(resolve("Foo.count", "C#", scopes).kind == variableKind::field);
+    CHECK(resolve("Foo::count", "C++", scopes).kind == variableKind::field);
+    CHECK(resolve("shared", "Java", scopes).kind == variableKind::parameter);
+}
+
+TEST_CASE("in a dynamic language, only the object reaches a data member, while the name of the own type reaches a variable of the class") {
+    const variableScopes scopes = scopesOf({}, {"count"}, {"count"}, {}, {{"Foo", {"total"}}});
+
+    CHECK(resolve("this.count", "Python", scopes).kind == variableKind::field);
+    CHECK(resolve("Foo.count", "Python", scopes).kind == variableKind::unknown);
+    CHECK(resolve("count", "Python", scopes).kind == variableKind::parameter);
+
+    const nameResolution classVariable = resolve("Foo.total", "Python", scopes);
+    CHECK(classVariable.kind == variableKind::global);
+    CHECK(classVariable.variable == "total");
+    CHECK(classVariable.holder == "Foo");
+}
+
+TEST_CASE("a cast before a whole expression leaves the variable that the expression names, while a computed value stays no variable") {
+    const variableScopes scopes = scopesOf({}, {}, {"next", "level"});
+
+    CHECK(resolve("(Node) next", "Java", scopes, true).kind == variableKind::field);
+    CHECK(resolve("(const Node*)next", "C++", scopes, true).kind == variableKind::field);
+    CHECK(resolve("(long)(int) level", "C#", scopes, true).kind == variableKind::field);
+    CHECK(resolve("(*this).next", "C++", scopes, true).kind == variableKind::field);
+    CHECK(resolve("(long) level * 2", "Java", scopes, true).kind == variableKind::unknown);
+    CHECK(resolve("(f)(next)", "C++", scopes, true).kind == variableKind::unknown);
 }

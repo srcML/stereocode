@@ -8,21 +8,19 @@
  */
 
 #include "rules/user_lists.hpp"
+#include "archive/source_language.hpp"
 
 #include <algorithm>
-#include <array>
 #include <cctype>
 #include <utility>
 
 namespace {
-    // The languages of the section headers, in the order of the verbose output, where C units take the C++ entries
-    const std::array<const char*, 3> sectionLanguages{"C++", "C#", "Java"};
-
     // Gets the language of a section header, such as C# of [C#], or an empty string for a line that is no header
+    // C units take the C++ entries
     //
     std::string sectionLanguageOf(const std::string& line) {
-        for (const char* language : sectionLanguages)
-            if (line == "[" + std::string(language) + "]") return language;
+        for (const sourceLanguage& language : sourceLanguages())
+            if (line == "[" + std::string(language.name) + "]") return std::string(language.name);
         return "";
     }
 
@@ -34,7 +32,7 @@ namespace {
 }
 
 // Reads the entries of a list file, one per line, without the spaces, tabs, and carriage returns around them
-// Empty lines and lines that start with # hold no entry, and a line [C++], [C#], or [Java] opens the section of its language
+// Empty lines and lines that start with # hold no entry, and a line such as [C++], [C#], or [Java] opens the section of its language
 //
 std::vector<listEntry> readListEntries(std::istream& in) {
     constexpr const char* blank = " \t\r";
@@ -58,8 +56,8 @@ std::vector<listEntry> readListEntries(std::istream& in) {
 std::vector<std::string> headersInOtherCase(std::istream& in) {
     std::vector<std::string> headers;
     for (const listEntry& entry : readListEntries(in)) {
-        for (const char* language : sectionLanguages)
-            if (equalsIgnoringCase(entry.text, "[" + std::string(language) + "]")) headers.push_back(entry.text);
+        for (const sourceLanguage& language : sourceLanguages())
+            if (equalsIgnoringCase(entry.text, "[" + std::string(language.name) + "]")) headers.push_back(entry.text);
     }
     return headers;
 }
@@ -91,7 +89,7 @@ std::vector<std::string> userEntries::entriesOf(const std::string& language) con
 //
 void userEntries::print(std::ostream& out) const {
     std::vector<std::string> sections{""};
-    sections.insert(sections.end(), sectionLanguages.begin(), sectionLanguages.end());
+    for (const sourceLanguage& language : sourceLanguages()) sections.emplace_back(language.name);
     for (const std::string& section : sections) {
         const auto found = entries.find(section);
         if (found == entries.end()) continue;

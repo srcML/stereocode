@@ -4,7 +4,8 @@ public class OutCommandInner
 {
     private string _printerName;
 
-    // @stereotype property collaborator
+    // The cast leaves the local that the method created, so the method is also a factory
+    // @stereotype property factory collaborator
     private LineOutput InstantiateLineOutputInterface()
     {
         PrinterLineOutput printOutput = new(_printerName);

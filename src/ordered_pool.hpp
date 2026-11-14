@@ -10,6 +10,7 @@
 #ifndef ORDERED_POOL_HPP
 #define ORDERED_POOL_HPP
 
+#include <chrono>
 #include <condition_variable>
 #include <cstddef>
 #include <deque>
@@ -34,6 +35,8 @@ public:
     template <typename Job>
     void                                                submit          (Job&&);
     Result                                              next            ();
+    bool                                                nextReady       () const;
+    void                                                waitForRoom     (std::size_t);
     std::size_t                                         pending         () const    { return results.size(); }  // Jobs whose result was not taken
     std::size_t                                         workerCount     () const    { return workers.size(); }  // Workers started so far
 private:
@@ -43,6 +46,7 @@ private:
     std::size_t                                         maxWorkers;             // Workers that the pool starts at most, one per submitted job
     std::mutex                                          mutex;                  // Guards jobs and stopping
     std::condition_variable                             changed;                // Signals a new job or the stop
+    std::condition_variable                             started;                // Signals that a worker took a job
     std::deque<std::packaged_task<Result(std::size_t)>> jobs;                   // Jobs that no worker has started
     bool                                                stopping{false};        // The workers end
     std::deque<std::future<Result>>                     results;                // Results in the order of submission
@@ -88,6 +92,21 @@ Result orderedPool<Result>::next() {
     return result.get();
 }
 
+// Tells whether the oldest job whose result was not taken has ended, so that next() returns at once
+//
+template <typename Result>
+bool orderedPool<Result>::nextReady() const {
+    return !results.empty() && results.front().wait_for(std::chrono::seconds(0)) == std::future_status::ready;
+}
+
+// Waits until fewer jobs than the limit, at least one, wait for a worker, which bounds the jobs in memory and keeps the workers busy
+//
+template <typename Result>
+void orderedPool<Result>::waitForRoom(std::size_t limit) {
+    std::unique_lock<std::mutex> lock(mutex);
+    started.wait(lock, [this, limit] { return jobs.size() < (limit > 0 ? limit : 1); });
+}
+
 // Runs jobs until the pool stops
 //
 template <typename Result>
@@ -102,6 +121,7 @@ void orderedPool<Result>::work(std::size_t worker) {
             job = std::move(jobs.front());
             jobs.pop_front();
         }
+        started.notify_one();
         job(worker);
     }
 }

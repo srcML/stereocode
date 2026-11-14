@@ -25,6 +25,7 @@ public:
 
     std::string                                     replace             (const std::string&) const;
     std::vector<std::string>                        split               (const std::string&) const;
+    bool                                            finds               (const std::string&) const;
 private:
     // A specifier that matches at the start of its text
     struct literalSpecifier {

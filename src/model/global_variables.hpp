@@ -36,11 +36,14 @@ public:
     bool    atNamespaceScope            (const std::string&, const std::string&, int)                       const;
     bool    declaredAtNamespaceScope    (int, const std::string&)                                           const;
     bool    holds                       (const std::string&, const std::string&, const std::string&, int)   const;
+    bool    heldByType                  (const std::string&, const std::string&, const std::string&, int)   const;
     bool    isImmutable                 (const std::string&, const std::string&, int)                       const;
 private:
-    // The types and namespaces that hold the globals of one name, whether a namespace holds one of them, and whether a call may change one of them
+    // The types and namespaces that hold the globals of one name, the types among them, whether a namespace holds one of them,
+    // and whether a call may change one of them
     struct holdersOfName {
         std::unordered_set<std::string> holders;
+        std::unordered_set<std::string> types;
         bool                            namespaceScope{false};
         bool                            changeable{false};
     };

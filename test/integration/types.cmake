@@ -5,8 +5,8 @@
 #
 # This file is part of the Stereocode application.
 #
-# Integration checks of the kinds of types, with nested, anonymous, and typedef types, Java enums without -e, C# properties, large classes,
-# and the macros of C++ return types
+# Integration checks of the kinds of types, with nested, anonymous, and typedef types, the local code of Python, Java enums without -e,
+# C# properties, large classes, and the macros of C++ return types
 # test/CMakeLists.txt registers each function check_<name> as the test integration/types/<name>
 
 include(${CMAKE_CURRENT_LIST_DIR}/run_and_check.cmake)
@@ -84,6 +84,97 @@ type_name,type_stereotype,function_name,function_stereotype
 
     # Outer, getX, Inner, its get, and run in C++, and Holder, Node, its get, and walk in Java
     expect_labeled_elements(9)
+endfunction()
+
+# A Python class in a class is a type of its own, while a class or a function in a function is local code, which gets no stereotype
+#
+# The Python file:
+#   class Outer:
+#       def __init__(self):
+#           self.x = 0
+#
+#       def get_x(self):
+#           return self.x
+#
+#       class Inner:
+#           def __init__(self):
+#               self.v = 0
+#
+#           def get(self):
+#               return self.v
+#
+#       def run(self):
+#           class Local:
+#               def __init__(self):
+#                   self.w = 0
+#
+#               def get(self):
+#                   return self.w
+#
+#           def helper():
+#               return 1
+#           return helper
+#
+#
+#   def build():
+#       def inner():
+#           return 2
+#       return inner
+function(check_python_local_code)
+    set(INPUT [=[
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" revision="1.0.0" language="Python" filename="outer.py"><class>class <name>Outer</name><block>:<block_content>
+    <function>def <name>__init__</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+        <expr_stmt><expr><name><name>self</name><operator>.</operator><name>x</name></name> <operator>=</operator> <literal type="number">0</literal></expr></expr_stmt>
+</block_content></block></function>
+    <function>def <name>get_x</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+        <return>return <expr><name><name>self</name><operator>.</operator><name>x</name></name></expr></return>
+</block_content></block></function>
+    <class>class <name>Inner</name><block>:<block_content>
+        <function>def <name>__init__</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+            <expr_stmt><expr><name><name>self</name><operator>.</operator><name>v</name></name> <operator>=</operator> <literal type="number">0</literal></expr></expr_stmt>
+</block_content></block></function>
+        <function>def <name>get</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+            <return>return <expr><name><name>self</name><operator>.</operator><name>v</name></name></expr></return>
+</block_content></block></function></block_content></block></class>
+    <function>def <name>run</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+        <class>class <name>Local</name><block>:<block_content>
+            <function>def <name>__init__</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+                <expr_stmt><expr><name><name>self</name><operator>.</operator><name>w</name></name> <operator>=</operator> <literal type="number">0</literal></expr></expr_stmt>
+</block_content></block></function>
+            <function>def <name>get</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content>
+                <return>return <expr><name><name>self</name><operator>.</operator><name>w</name></name></expr></return>
+</block_content></block></function></block_content></block></class>
+        <function>def <name>helper</name><parameter_list>()</parameter_list><block>:<block_content>
+            <return>return <expr><literal type="number">1</literal></expr></return>
+</block_content></block></function>        <return>return <expr><name>helper</name></expr></return>
+</block_content></block></function></block_content></block></class>
+
+<function>def <name>build</name><parameter_list>()</parameter_list><block>:<block_content>
+    <function>def <name>inner</name><parameter_list>()</parameter_list><block>:<block_content>
+        <return>return <expr><literal type="number">2</literal></expr></return>
+</block_content></block></function>    <return>return <expr><name>inner</name></expr></return>
+</block_content></block></function></unit>
+]=])
+
+    set(HEADER "type_name,type_stereotype,function_name,function_stereotype\n")
+    set(TYPE_ROWS [=[
+"Outer","data-provider lazy-class small-class","__init__","constructor"
+"Outer","data-provider lazy-class small-class","get_x","get"
+"Outer","data-provider lazy-class small-class","run","incidental"
+"Outer.Inner","data-provider data-class small-class","__init__","constructor"
+"Outer.Inner","data-provider data-class small-class","get","get"
+]=])
+
+    file(WRITE "${WORK_DIR}/input.xml" "${INPUT}")
+
+    run_stereocode(input.xml -f -r)
+    expect_exit(0)
+    expect_file_content("${WORK_DIR}/input.stereotypes.csv" "${HEADER}${TYPE_ROWS}")
+    expect_file_content("${WORK_DIR}/input.free_functions.stereotypes.csv" "${HEADER}\"N/A\",\"N/A\",\"build\",\"literal\"\n")
+
+    # Outer, its three methods, Inner, its two methods, and build
+    expect_labeled_elements(8)
 endfunction()
 
 # Only -e gives a Java enum and its methods stereotypes and rows in the reports, while the other types take in the enum

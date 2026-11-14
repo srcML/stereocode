@@ -83,6 +83,52 @@ TEST_CASE("the names of a type drop namespaces, array brackets, and integer argu
     CHECK(tables.typeSpecifiers.typeNames("[NotNullWhen(true)] out Version?", "C#") == names{"Version"});
 }
 
+TEST_CASE("the names of a type keep their qualifiers on request") {
+    const typeTables tables;
+    CHECK(tables.typeSpecifiers.typeNames("const std::map<std::string, wire::Foo>&", "C++", true) == names{"std::string", "wire::Foo"});
+    CHECK(tables.typeSpecifiers.typeNames("::http::Request*", "C++", true) == names{"::http::Request"});
+    CHECK(tables.typeSpecifiers.typeNames("std::array<int, 3>", "C++", true) == names{"int"});
+    CHECK(tables.typeSpecifiers.typeNames("java.util.List<model.Tag>", "Java", true) == names{"model.Tag"});
+    CHECK(tables.typeSpecifiers.typeNames("global::Wire.Request[]", "C#", true) == names{"global::Wire.Request"});
+}
+
+TEST_CASE("a qualified type is the type of the class only where its qualifiers agree with those of the class") {
+    const typeTables tables;
+    const std::pair<bool, bool> own{true, false};
+    const std::pair<bool, bool> external{true, true};
+    CHECK(tables.facts("http::Request*", "C++", "http::Request") == own);
+    CHECK(tables.facts("const ::http::Request&", "C++", "http::Request") == own);
+    CHECK(tables.facts("Request", "C++", "http::Request") == own);
+    CHECK(tables.facts("wire::Request*", "C++", "http::Request") == external);
+    CHECK(tables.facts("net.Request", "Java", "net.Request") == own);
+    CHECK(tables.facts("Connection.Request", "Java", "net.Request") == external);
+    CHECK(tables.facts("global::Net.Request", "C#", "Net.Request") == own);
+    CHECK(tables.facts("Wire.Request", "C#", "Net.Request") == external);
+
+    SUBCASE("a name ends with the other only at a qualifier") {
+        CHECK(tables.facts("Request", "Java", "net.SubRequest") == external);
+        CHECK(tables.facts("SubRequest", "Java", "net.Request") == external);
+    }
+
+    SUBCASE("a definition outside its class knows the class by its name alone") {
+        CHECK(tables.facts("http::Request*", "C++", "Request") == own);
+        CHECK(tables.facts("Request", "C++", "Request") == own);
+    }
+
+    SUBCASE("a free function has no class") {
+        CHECK(tables.facts("http::Request", "C++", "") == external);
+    }
+}
+
+TEST_CASE("the names of a C++ function type are those of its return type and its parameters") {
+    const typeTables tables;
+    CHECK(tables.typeSpecifiers.typeNames("bool(*)(int)", "C++") == names{"bool", "int"});
+    CHECK(tables.typeSpecifiers.typeNames("Result(*)(const Request&,int)", "C++") == names{"Result", "Request", "int"});
+    CHECK(tables.typeSpecifiers.typeNames("std::function<void(int)>", "C++") == names{"function", "void", "int"});
+    CHECK(tables.facts("bool(*)(int)", "C++", "Holder") == std::pair<bool, bool>{false, false});
+    CHECK(tables.facts("Result(*)(int)", "C++", "Holder") == std::pair<bool, bool>{true, true});
+}
+
 TEST_CASE("a field of the class's own generic type or of a container of primitives is no external object") {
     const typeTables tables;
     CHECK(tables.facts("Node<T>*", "C++", "Node") == std::pair<bool, bool>{true, false});
@@ -125,4 +171,34 @@ TEST_CASE("a primitive or a specifier under a section header holds only for the 
     CHECK(tables.facts("QString", "C#", "Label") == std::pair<bool, bool>{true, true});
     CHECK(tables.typeSpecifiers.typeNames("Q_DECL Size", "C#") == names{"Size"});
     CHECK(tables.typeSpecifiers.typeNames("Q_DECL Size", "C++") == names{"Q_DECLSize"});
+}
+
+TEST_CASE("the wrappers and the containers of Python are specifiers, so the names of a type are those of its arguments") {
+    const typeTables tables;
+    CHECK(tables.typeSpecifiers.typeNames("Optional<pkg.Engine>", "Python") == names{"Engine"});
+    CHECK(tables.typeSpecifiers.typeNames("dict<str, Engine>", "Python") == names{"str", "Engine"});
+    CHECK(tables.typeSpecifiers.typeNames("list<int> | None", "Python") == names{"int", "None"});
+    CHECK(tables.typeSpecifiers.typeNames("Callable<<int>, Engine>", "Python") == names{"int", "Engine"});
+}
+
+TEST_CASE("a Python data member of a built-in type, of a container of built-in types, or of the own class is no external object") {
+    const typeTables tables;
+    for (const char* type : {"int", "str", "Any", "Literal", "list<int>", "dict<str, float> | None", "Optional<bytes>"}) {
+        CAPTURE(type);
+        CHECK(tables.facts(type, "Python", "Car") == std::pair<bool, bool>{false, false});
+    }
+    CHECK(tables.facts("Optional<Car>", "Python", "Car") == std::pair<bool, bool>{true, false});
+    CHECK(tables.facts("list<Engine>", "Python", "Car") == std::pair<bool, bool>{true, true});
+    CHECK(tables.facts("Engine | None", "Python", "Car") == std::pair<bool, bool>{true, true});
+}
+
+TEST_CASE("a TypeScript data member of a primitive type, of an array of primitives, or of the own class is no external object") {
+    const typeTables tables;
+    for (const char* type : {"number", "string", "boolean", "any", "string[]", "number | undefined", "readonly number[]"}) {
+        CAPTURE(type);
+        CHECK(tables.facts(type, "JavaScript", "Car") == std::pair<bool, bool>{false, false});
+    }
+    CHECK(tables.facts("Car | undefined", "JavaScript", "Car") == std::pair<bool, bool>{true, false});
+    CHECK(tables.facts("Engine[]", "JavaScript", "Car") == std::pair<bool, bool>{true, true});
+    CHECK(tables.facts("Map<string, Engine>", "JavaScript", "Car") == std::pair<bool, bool>{true, true});
 }

@@ -36,11 +36,11 @@ function(check_comments)
 <function st:stereotype="get"><type><name>int</name></type> <name>a</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
 <comment type="line">// @stereotype set</comment>
 <function st:stereotype="get"><type><name>int</name></type> <name>b</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
-<comment type="line">// @stereotype get @defect rules-B1</comment>
+<comment type="line">// @stereotype get @defect a misread name</comment>
 <function st:stereotype="get"><type><name>int</name></type> <name>c</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
-<comment type="line">// @stereotype set @defect rules-B2</comment>
+<comment type="line">// @stereotype set @defect a hidden write (#70)</comment>
 <function st:stereotype="get"><type><name>int</name></type> <name>d</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
-<comment type="line">// @stereotype set @spec rules-B3</comment>
+<comment type="line">// @stereotype set @spec a requirement</comment>
 <function st:stereotype="get"><type><name>int</name></type> <name>e</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
 <comment type="line">// @stereotype Get</comment>
 <function st:stereotype="get"><type><name>int</name></type> <name>f</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
@@ -49,7 +49,7 @@ function(check_comments)
 <comment type="line">// @stereotype property</comment>
 <comment type="line">// a note between the expectation and the element</comment>
 <friend>friend <function st:stereotype="property"><type><name>int</name></type> <name>h</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function></friend>
-<comment type="line">// @stereotype get @spec</comment>
+<comment type="line">// @stereotype get @defect</comment>
 <function st:stereotype="get"><type><name>int</name></type> <name>i</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
 <comment type="line">// @stereotype set</comment>
 <function><type><name>void</name></type> <name>j</name><parameter_list>()</parameter_list> <block>{<block_content/>}</block></function>
@@ -65,22 +65,55 @@ function(check_comments)
 <expr_stmt st:stereotype="get"><expr><specifier>public</specifier> <name>int</name> <name>Count</name> <operator>=&gt;</operator> <name>count</name></expr>;</expr_stmt> }</block></class>
 </unit>
 
+<unit revision="1.0.0" language="Python" filename="fourth.py"><comment type="line"># @stereotype get</comment>
+<function st:stereotype="get">def <name>size</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content> <return>return <expr><name><name>self</name><operator>.</operator><name>count</name></name></expr></return></block_content></block></function>
+<comment type="line"># @stereotype set</comment>
+<function st:stereotype="get">def <name>count</name><parameter_list>(<parameter><name>self</name></parameter>)</parameter_list><block>:<block_content> <return>return <expr><name><name>self</name><operator>.</operator><name>count</name></name></expr></return></block_content></block></function>
+</unit>
+
 </unit>
 ]=])
 
     set(EXPECTED_REPORT [=[
 sample.cpp:3: wrong stereotype: expected {set}, got {get}
-sample.cpp:5: unexpected pass, remove @defect rules-B1: expected {get}, got {get}
-sample.cpp:9: spec rules-B3 differs: expected {set}, got {get}
+sample.cpp:5: unexpected pass, remove @defect a misread name: expected {get}, got {get}
+sample.cpp:9: malformed expectation: unknown tag @spec
 sample.cpp:11: malformed expectation: malformed label Get
 sample.cpp:13: wrong stereotype: expected {get}, got no annotatable element after the comment
-sample.cpp:18: malformed expectation: tag without a review id
+sample.cpp:18: malformed expectation: tag without a reason
 sample.cpp:20: wrong stereotype: expected {set}, got no stereotype
-13 expectations: 5 hold, 1 expected failures, 1 spec (0 hold), 6 problems
+fourth.py:3: wrong stereotype: expected {set}, got {get}
+15 expectations: 6 hold, 1 expected failures, 8 problems, 3 labeled elements without an expectation
 ]=])
 
     file(WRITE "${WORK_DIR}/sample.xml" "${ARCHIVE}")
     expect_run(1 "${EXPECTED_REPORT}" comments sample.xml)
+endfunction()
+
+# The mode comments counts the labeled elements that no expectation names without failing, and -v lists each of them
+function(check_unchecked_elements)
+    set(ARCHIVE [=[
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<unit xmlns="http://www.srcML.org/srcML/src" xmlns:st="http://www.srcML.org/srcML/stereotype" revision="1.0.0">
+
+<unit revision="1.0.0" language="Java" filename="Shapes.java"><comment type="line">// @stereotype empty</comment>
+<class st:stereotype="empty">class <name>Dot</name> <block>{ }</block></class>
+<class st:stereotype="data-provider">class <name>Box</name> <block>{
+    <function st:stereotype="get"><type><name>int</name></type> <name>size</name><parameter_list>()</parameter_list> <block>{<block_content> <return>return <expr><name>size</name></expr>;</return> </block_content>}</block></function> }</block></class>
+</unit>
+
+</unit>
+]=])
+
+    set(EXPECTED_REPORT [=[
+Shapes.java:1: holds: expected {empty}, got {empty}
+Shapes.java:3: no expectation for the class Box {data-provider}
+Shapes.java:4: no expectation for the function size {get}
+1 expectations: 1 hold, 0 expected failures, 0 problems, 2 labeled elements without an expectation
+]=])
+
+    file(WRITE "${WORK_DIR}/shapes.xml" "${ARCHIVE}")
+    expect_run(0 "${EXPECTED_REPORT}" comments -v shapes.xml)
 endfunction()
 
 # The mode table writes the table of a stereocode output archive of srcml --position, finds no difference from the same table,

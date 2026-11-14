@@ -21,4 +21,11 @@ public class Matrix
 
     // @stereotype factory stateless
     public Matrix MakeSquare(int count) { Matrix result = new Matrix(count); return result; }
+
+    // An element or a member of a created array is no object that the method returns as created
+    // @stereotype property
+    public Matrix FirstOf() { Matrix[] made = new Matrix[rows]; return made[0]; }
+
+    // @stereotype property
+    public int LengthOf() { Matrix[] made = new Matrix[rows]; return made.Length; }
 }

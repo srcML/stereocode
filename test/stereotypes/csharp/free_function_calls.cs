@@ -9,6 +9,13 @@ public struct Point
     public void Move() { X++; }
 }
 
+public struct Slot<T>
+{
+    public T Item;
+    public int Hits;
+    public void Touch() { Hits++; }
+}
+
 public enum Color { Red, Green }
 
 public static class Lists
@@ -24,7 +31,7 @@ public static class Lists
     // @stereotype command
     public static void Bump(ref Counter counter) { counter.Increment(); }
 
-    // A struct or an enum of the archive passed by value and an in parameter hold no object of the caller that a call may change
+    // A struct or an enum of the archive passed by value or as an in parameter holds no object of the caller that a call may change
     // @stereotype wrapper
     public static void MoveCopy(Point point) { point.Move(); }
 
@@ -33,6 +40,20 @@ public static class Lists
 
     // @stereotype command
     public static void MoveRef(ref Point point) { point.Move(); }
+
+    // An array holds the elements of the caller
+    // @stereotype command
+    public static void Reset(int[] items) { items.SetValue(0, 0); }
+
+    // An in parameter of a class holds the object of the caller, whose reference alone is read-only
+    // @stereotype command
+    public static void FillIn(in List<int> items, int value) { items.Add(value); }
+
+    // @stereotype wrapper
+    public static void TouchCopy(Slot<string> slot) { slot.Touch(); }
+
+    // @stereotype command
+    public static void TouchRef(ref Slot<string> slot) { slot.Touch(); }
 
     // @stereotype predicate wrapper
     public static bool IsRed(Color color) { return color.HasFlag(Color.Red); }
