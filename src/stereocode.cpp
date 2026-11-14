@@ -13,7 +13,6 @@
 #include "output/output_names.hpp"
 #include "stereotypes_analyzer.hpp"
 
-#include <algorithm>
 #include <charconv>
 #include <exception>
 #include <iostream>
@@ -42,7 +41,7 @@ namespace {
 
 int main (int argc, char const *argv[]) try {
     options settings;
-    settings.threads = std::clamp(std::thread::hardware_concurrency(), 1u, maxThreads);
+    settings.threads = defaultThreads(std::thread::hardware_concurrency());
 
     CLI::App app{"Stereocode classifies methods, free functions, and types (e.g., classes) of C, C++, C#, Java, Python, JavaScript, and TypeScript code by their stereotypes.\n"};
     app.footer("The files of -p, -c, -s, and -q hold one entry per line. A line " + sectionHeadersText() + " limits the entries after it to that language. "
@@ -57,7 +56,7 @@ int main (int argc, char const *argv[]) try {
     app.add_option("-q,--query-file",          settings.queryMethodsFile,        "File of extra methods whose calls leave the object unchanged (e.g., size)")->check(CLI::ExistingFile);
     app.add_option("-l,--large-class",         settings.largeClassThreshold,     "Method count above which a type can be a large-class (default mean plus standard deviation over all types)")
         ->check(countUpTo(std::numeric_limits<int>::max(), "POSITIVE"));
-    app.add_option("-j,--threads",             settings.threads,                 "Number of threads (default all available, at most 256)")
+    app.add_option("-j,--threads",             settings.threads,                 "Number of threads (default all available up to 8, at most 256)")
         ->check(countUpTo(maxThreads, "1 to 256"));
     app.add_flag  ("-f,--free-function",       settings.freeFunctions,           "Stereotypes free functions and static methods");
     app.add_flag  ("-i,--interface",           settings.interfaces,              "Stereotypes interfaces (C#, Java, and TypeScript)");

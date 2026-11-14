@@ -132,7 +132,7 @@ foreach(ZIP ${SYSTEM_ZIPS})
             -P ${CMAKE_CURRENT_SOURCE_DIR}/stereotypes/run_system.cmake
     )
     # A system takes far longer than a case, so the label systems lets ctest -LE systems leave the systems out
-    # Each system runs on every thread with up to 1.6 GB of memory, so the lock keeps ctest -j from running two systems at once
+    # Each system runs on up to 8 threads with up to 1 GB of memory, and the lock keeps ctest -j from running two systems at once
     set_tests_properties("stereotypes/systems/${SYSTEM}" PROPERTIES LABELS systems TIMEOUT 600 RESOURCE_LOCK system_tests)
 
     list(APPEND UPDATE_COMMANDS

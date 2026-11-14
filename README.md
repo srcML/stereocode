@@ -81,7 +81,7 @@ In the output archive `my_project.stereotypes.xml`, code elements (e.g., classes
 | `-b`, `--verbose` | Writes a detailed CSV report (e.g., the calls of each function) and prints the settings in use |
 | `-m`, `--comment` | Inserts a `// @stereotype <labels>` comment (`# @stereotype <labels>` in Python) before each stereotyped element |
 | `-d`, `--no-srcml-output`, `--srcmlOutput` | Writes no output archive, only the reports of `-r`, `-x`, or `-b` |
-| `-j`, `--threads` | Number of threads (default all available, at most 256) |
+| `-j`, `--threads` | Number of threads (default all available up to 8, at most 256) |
 | `-l`, `--large-class` | Method count above which a type can be a `large-class` (default mean plus standard deviation over all types) |
 | `-p`, `--primitive-file` | File of extra types that count as primitive (e.g., a typedef of `int`) |
 | `-c`, `--call-file` | File of extra calls to ignore (e.g., a logging function) |
@@ -90,7 +90,7 @@ In the output archive `my_project.stereotypes.xml`, code elements (e.g., classes
 | `-v`, `--version` | Prints the version |
 | `-h`, `--help` | Prints the options |
 
-⚡ **Speed.** Stereocode takes about 2.5 s to annotate a srcML archive of 100 MB on 24 threads.
+⚡ **Speed.** Stereocode annotates the 231 MB srcML archive of PowerShell 7.5.4 in about 5 s on its default of eight threads.
 
 ### List files
 
@@ -127,7 +127,7 @@ Each test name starts with the folder of its files under `test/`.
 - **Stereotype cases** (`stereotypes`) are small C, C++, C#, Java, Python, JavaScript, and TypeScript files whose expected stereotypes are written by hand in `@stereotype` comments.
 - **System tests** (`systems`) compare every label of Notepad++ (C++), Lua (C), PowerShell (C#), RxJava (Java), Rich (Python), Knex (JavaScript), and TypeORM (TypeScript) with a table recorded from earlier runs.
 
-The stereotype cases, the system tests, and the integration tests of the option `-m` convert source files to srcML with the `srcml` program. Without this program, the configuration skips these tests and names them in a status message. The system tests run one at a time, also under `ctest -j 8`, since each one runs on every thread.
+The stereotype cases, the system tests, and the integration tests of the option `-m` convert source files to srcML with the `srcml` program. Without this program, the configuration skips these tests and names them in a status message. The system tests run one at a time, also under `ctest -j 8`, since each one runs on up to eight threads.
 
 ### Commands
 
