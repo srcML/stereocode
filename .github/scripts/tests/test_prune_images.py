@@ -26,19 +26,15 @@ def version(number, name, tags=()):
 class KeptTagsTest(unittest.TestCase):
     def test_latest_and_the_tags_of_existing_releases_keep_an_image(self):
         releases = {"2.0.0"}
-        self.assertTrue(prune.kept(["latest"], releases, False))
-        self.assertTrue(prune.kept(["2.0.0"], releases, False))
-        self.assertTrue(prune.kept(["2.0.0-srcml1.2.0"], releases, False))
+        self.assertTrue(prune.kept(["latest"], releases))
+        self.assertTrue(prune.kept(["2.0.0"], releases))
+        self.assertTrue(prune.kept(["2.0.0-srcml1.2.0"], releases))
 
-    def test_a_removed_release_a_staging_tag_and_no_tag_keep_no_published_image(self):
+    def test_a_removed_release_another_tag_and_no_tag_keep_no_image(self):
         releases = {"2.0.0"}
-        self.assertFalse(prune.kept(["1.0.0", "1.0.0-srcml1.1.0"], releases, False))
-        self.assertFalse(prune.kept(["build-amd64"], releases, False))
-        self.assertFalse(prune.kept([], releases, False))
-
-    def test_any_tag_keeps_a_staging_image(self):
-        self.assertTrue(prune.kept(["build-arm64"], set(), True))
-        self.assertFalse(prune.kept([], set(), True))
+        self.assertFalse(prune.kept(["1.0.0", "1.0.0-srcml1.1.0"], releases))
+        self.assertFalse(prune.kept(["build-amd64"], releases))
+        self.assertFalse(prune.kept([], releases))
 
 
 class VersionsToDeleteTest(unittest.TestCase):
@@ -46,11 +42,7 @@ class VersionsToDeleteTest(unittest.TestCase):
         versions = [version(1, "sha256:index", ["2.0.0", "latest"]), version(2, "sha256:amd64"), version(3, "sha256:arm64"),
                     version(4, "sha256:old-index"), version(5, "sha256:build", ["build-amd64"])]
         needed = prune.listed_digests({"manifests": [{"digest": "sha256:amd64"}, {"digest": "sha256:arm64"}]})
-        self.assertEqual([v["id"] for v in prune.to_delete(versions, {"2.0.0"}, False, needed)], [4, 5])
-
-    def test_the_staging_package_loses_only_its_untagged_images(self):
-        versions = [version(1, "sha256:new", ["build-amd64"]), version(2, "sha256:old"), version(3, "sha256:older")]
-        self.assertEqual([v["id"] for v in prune.to_delete(versions, set(), True, set())], [2, 3])
+        self.assertEqual([v["id"] for v in prune.to_delete(versions, {"2.0.0"}, needed)], [4, 5])
 
     def test_a_single_image_lists_no_digest(self):
         self.assertEqual(prune.listed_digests({"config": {}, "layers": []}), set())
@@ -69,8 +61,8 @@ class DeleteTest(unittest.TestCase):
 
 
 class MainTest(unittest.TestCase):
-    def run_offline(self, published, staging):
-        """Run main() on two packages without network access and return the deleted URLs and the GET requests."""
+    def run_offline(self, published):
+        """Run main() on the package without network access and return the deleted URLs and the GET requests."""
         indexes = {"2.0.0": {"manifests": [{"digest": "sha256:amd64"}, {"digest": "sha256:arm64"}]}}
         requests = []
 
@@ -78,8 +70,6 @@ class MainTest(unittest.TestCase):
             requests.append((url, headers))
             if url.startswith(f"{PACKAGES}/stereocode/versions"):
                 return published
-            if url.startswith(f"{PACKAGES}/stereocode-staging/versions"):
-                return staging
             if "/repos/srcML/stereocode/tags" in url:
                 return [{"name": "v2.0.0"}]
             if url.startswith("https://ghcr.io/token"):
@@ -93,25 +83,24 @@ class MainTest(unittest.TestCase):
             return io.BytesIO()
 
         environment = {"GITHUB_TOKEN": "offline", "GITHUB_ACTOR": "someone", "GITHUB_REPOSITORY": "srcML/stereocode",
-                       "IMAGE": "ghcr.io/srcml/stereocode", "STAGING": "ghcr.io/srcml/stereocode-staging"}
+                       "IMAGE": "ghcr.io/srcml/stereocode"}
         with mock.patch.dict(os.environ, environment), mock.patch.object(prune, "fetch", fetch), \
                 mock.patch.object(prune.urllib.request, "urlopen", urlopen), mock.patch("builtins.print"):
             prune.main()
         return deleted, requests
 
-    def test_each_package_loses_the_images_that_no_kept_tag_needs(self):
+    def test_the_package_loses_the_images_that_no_kept_tag_needs(self):
         published = [version(1, "sha256:index", ["2.0.0", "latest"]), version(2, "sha256:amd64"), version(3, "sha256:arm64"),
                      version(4, "sha256:old-index"), version(5, "sha256:old-amd64"), version(6, "sha256:build", ["build-arm64"])]
-        staging = [version(7, "sha256:new", ["build-amd64"]), version(8, "sha256:old")]
-        deleted, _ = self.run_offline(published, staging)
+        deleted, _ = self.run_offline(published)
         self.assertEqual(deleted, [f"{PACKAGES}/stereocode/versions/4", f"{PACKAGES}/stereocode/versions/5",
-                                   f"{PACKAGES}/stereocode/versions/6", f"{PACKAGES}/stereocode-staging/versions/8"])
+                                   f"{PACKAGES}/stereocode/versions/6"])
 
     def test_the_registry_takes_the_token_of_the_workflow_for_a_private_package(self):
-        _, requests = self.run_offline([version(1, "sha256:index", ["2.0.0"])], [])
+        _, requests = self.run_offline([version(1, "sha256:index", ["2.0.0"])])
         token_requests = [headers for url, headers in requests if url.startswith("https://ghcr.io/token")]
-        self.assertEqual(len(token_requests), 2)
-        self.assertTrue(all(headers["Authorization"].startswith("Basic ") for headers in token_requests))
+        self.assertEqual(len(token_requests), 1)
+        self.assertTrue(token_requests[0]["Authorization"].startswith("Basic "))
 
 
 if __name__ == "__main__":

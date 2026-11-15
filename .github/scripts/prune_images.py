@@ -1,4 +1,4 @@
-"""Deletes the images of the Docker workflow on GitHub that no tag of a release, of the newest build, or of the staging needs.
+"""Deletes the images of the Docker workflow on GitHub that no tag of a release or of the newest build needs.
 
 An image of several architectures lists the image of each architecture, which carries no tag of its own and stays with it."""
 
@@ -15,16 +15,14 @@ INDEX_TYPES = ("application/vnd.oci.image.index.v1+json, application/vnd.docker.
 RELEASE_TAG = re.compile(r"^(\d+\.\d+\.\d+)(-srcml[\d.]+)?$")
 
 
-def kept(tags: list[str], releases: set[str], staging: bool) -> bool:
-    """Tell whether its tags keep an image, namely any tag in the staging package and else latest or a tag of an existing release."""
-    if staging:
-        return bool(tags)
+def kept(tags: list[str], releases: set[str]) -> bool:
+    """Tell whether its tags keep an image, namely latest or a tag of a release that exists, such as 2.0.0-srcml1.2.0."""
     return any(tag == "latest" or ((match := RELEASE_TAG.match(tag)) is not None and match.group(1) in releases) for tag in tags)
 
 
-def to_delete(versions: list[dict], releases: set[str], staging: bool, needed: set[str]) -> list[dict]:
+def to_delete(versions: list[dict], releases: set[str], needed: set[str]) -> list[dict]:
     """Return the versions that their tags do not keep and whose digest no kept image lists."""
-    return [v for v in versions if not kept(v["metadata"]["container"]["tags"], releases, staging) and v["name"] not in needed]
+    return [v for v in versions if not kept(v["metadata"]["container"]["tags"], releases) and v["name"] not in needed]
 
 
 def listed_digests(manifest: dict) -> set[str]:
@@ -60,34 +58,33 @@ def delete(url: str, headers: dict[str, str]) -> bool:
     return True
 
 
-def prune(image: str, releases: set[str], staging: bool, github: dict[str, str], login: str) -> None:
+def prune(image: str, releases: set[str], github: dict[str, str], login: str) -> None:
     """Delete the versions of one package, such as ghcr.io/srcml/stereocode, that no kept image needs, and print each deleted digest."""
     _, owner, package = image.split("/")
     api = f"https://api.github.com/orgs/{owner}/packages/container/{package}/versions"
     versions = fetch_all(api, github)
-    # The packages are private until an owner makes them public, therefore the registry takes the token of the workflow
+    # A package is private until an owner makes it public, therefore the registry takes the token of the workflow
     pull = fetch(f"https://ghcr.io/token?service=ghcr.io&scope=repository:{owner}/{package}:pull", {"Authorization": f"Basic {login}"})["token"]
     registry = {"Authorization": f"Bearer {pull}", "Accept": INDEX_TYPES}
     needed = set()
     for version in versions:
         tags = version["metadata"]["container"]["tags"]
-        if kept(tags, releases, staging):
+        if kept(tags, releases):
             for tag in tags:
                 needed |= listed_digests(fetch(f"https://ghcr.io/v2/{owner}/{package}/manifests/{tag}", registry))
-    for version in to_delete(versions, releases, staging, needed):
+    for version in to_delete(versions, releases, needed):
         if delete(f"{api}/{version['id']}", github):
             print(f"deleted {package} {version['name']}")
 
 
 def main() -> None:
-    """Prune the published package and the staging package that the Docker workflow names in IMAGE and STAGING."""
+    """Prune the package that the Docker workflow names in IMAGE."""
     token = os.environ["GITHUB_TOKEN"]
     github = {"Authorization": f"Bearer {token}", "Accept": "application/vnd.github+json"}
     login = base64.b64encode(f"{os.environ['GITHUB_ACTOR']}:{token}".encode()).decode()
     tags = fetch_all(f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/tags", github)
     releases = {tag["name"].removeprefix("v") for tag in tags}
-    prune(os.environ["IMAGE"], releases, False, github, login)
-    prune(os.environ["STAGING"], releases, True, github, login)
+    prune(os.environ["IMAGE"], releases, github, login)
 
 
 if __name__ == "__main__":
