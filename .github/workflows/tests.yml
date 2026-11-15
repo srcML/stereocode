@@ -1,4 +1,4 @@
-# Builds Stereocode and runs every test on each push and pull request to main and develop
+# Builds Stereocode and runs every test on each push and pull request to main and develop, with the tests of the workflow scripts
 name: Tests
 
 on:
@@ -52,3 +52,12 @@ jobs:
       - name: Test
         working-directory: build
         run: ctest -j 4 --output-on-failure
+
+  scripts:
+    name: Workflow scripts
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Test the deletion of the images that lost their tag
+        run: python3 -m unittest discover -s .github/scripts/tests -v

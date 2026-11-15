@@ -1,5 +1,5 @@
 # Builds the Docker image of Stereocode with the newest srcML release and the newest Ubuntu packages,
-# runs the tests of Stereocode and a small project in the image, and publishes the image of the newest release on Docker Hub
+# runs the tests of Stereocode and a small project in the image, and publishes the image of the newest release on GitHub
 name: Docker
 
 on:
@@ -22,8 +22,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # The private package of GitHub holds the image of each architecture until the publish joins them on Docker Hub
-  STAGING: ghcr.io/srcml/stereocode
+  IMAGE: ghcr.io/srcml/stereocode
+  # A private package holds the image of each architecture until the publish joins them under the tags of the release
+  STAGING: ghcr.io/srcml/stereocode-staging
 
 jobs:
   versions:
@@ -34,6 +35,7 @@ jobs:
       srcml: ${{ steps.find.outputs.srcml }}
       newest: ${{ steps.find.outputs.newest }}
       publish: ${{ steps.find.outputs.publish }}
+      revision: ${{ steps.find.outputs.revision }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -62,6 +64,7 @@ jobs:
             echo "srcml=${srcml#v}"
             echo "newest=$([ "$ref" = "$newest" ] && echo true || echo false)"
             echo "publish=$publish"
+            echo "revision=$(git rev-parse "$ref^{commit}")"
           } | tee -a "$GITHUB_OUTPUT"
 
   image:
@@ -111,28 +114,32 @@ jobs:
     if: needs.versions.outputs.publish == 'true'
     runs-on: ubuntu-24.04
     steps:
-      - name: Publish the image of both architectures on Docker Hub under its tags
+      - uses: actions/checkout@v7
+      - name: Publish the image of both architectures under its tags
         env:
           GITHUB_TOKEN: ${{ github.token }}
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
           VERSION: ${{ needs.versions.outputs.version }}
           SRCML: ${{ needs.versions.outputs.srcml }}
           NEWEST: ${{ needs.versions.outputs.newest }}
+          REVISION: ${{ needs.versions.outputs.revision }}
         run: |
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          echo "$DOCKERHUB_TOKEN" | docker login docker.io -u "$DOCKERHUB_USERNAME" --password-stdin
-          image="docker.io/$DOCKERHUB_USERNAME/stereocode"
-          tags=(--tag "$image:$VERSION")
-          # The tag of a release with one srcML release keeps its first build
-          pinned="$image:$VERSION-srcml$SRCML"
-          if ! docker buildx imagetools inspect "$pinned" > /dev/null 2>&1; then
+          tags=(--tag "$IMAGE:$VERSION")
+          # The tag of a release with one srcML release keeps its first build of the commit of the release, also where the release tag moves
+          pinned="$IMAGE:$VERSION-srcml$SRCML"
+          built=$(docker buildx imagetools inspect --raw "$pinned" 2>/dev/null | jq -r '.annotations["org.opencontainers.image.revision"] // empty' || true)
+          if [ "$built" != "$REVISION" ]; then
             tags+=(--tag "$pinned")
           fi
           if [ "$NEWEST" = true ]; then
-            tags+=(--tag "$image:latest")
+            tags+=(--tag "$IMAGE:latest")
           fi
-          docker buildx imagetools create "${tags[@]}" "$STAGING:build-amd64" "$STAGING:build-arm64"
+          docker buildx imagetools create "${tags[@]}" --annotation "index:org.opencontainers.image.revision=$REVISION" \
+            "$STAGING:build-amd64" "$STAGING:build-arm64"
+      - name: Delete the images that lost their tag
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python3 .github/scripts/prune_images.py
 
   keepalive:
     # GitHub stops the schedule of a public repository after 60 days without activity, while enabling it again restarts that count
