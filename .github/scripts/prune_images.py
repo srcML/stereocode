@@ -12,12 +12,12 @@ from typing import Any
 
 INDEX_TYPES = ("application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, "
                "application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json")
-RELEASE_TAG = re.compile(r"^(\d+\.\d+\.\d+)(-srcml[\d.]+)?$")
+RELEASE_TAG = re.compile(r"^\d+\.\d+\.\d+$")
 
 
 def kept(tags: list[str], releases: set[str]) -> bool:
-    """Tell whether its tags keep an image, namely latest or a tag of a release that exists, such as 2.0.0-srcml1.2.0."""
-    return any(tag == "latest" or ((match := RELEASE_TAG.match(tag)) is not None and match.group(1) in releases) for tag in tags)
+    """Tell whether its tags keep an image, namely latest or the tag of a release that exists, such as 2.0.0."""
+    return any(tag == "latest" or (RELEASE_TAG.match(tag) is not None and tag in releases) for tag in tags)
 
 
 def to_delete(versions: list[dict], releases: set[str], needed: set[str]) -> list[dict]:

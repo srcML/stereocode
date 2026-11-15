@@ -33,7 +33,6 @@ jobs:
       srcml: ${{ steps.find.outputs.srcml }}
       newest: ${{ steps.find.outputs.newest }}
       publish: ${{ steps.find.outputs.publish }}
-      revision: ${{ steps.find.outputs.revision }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -62,7 +61,6 @@ jobs:
             echo "srcml=${srcml#v}"
             echo "newest=$([ "$ref" = "$newest" ] && echo true || echo false)"
             echo "publish=$publish"
-            echo "revision=$(git rev-parse "$ref^{commit}")"
           } | tee -a "$GITHUB_OUTPUT"
 
   image:
@@ -135,25 +133,16 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.versions.outputs.version }}
-          SRCML: ${{ needs.versions.outputs.srcml }}
           NEWEST: ${{ needs.versions.outputs.newest }}
-          REVISION: ${{ needs.versions.outputs.revision }}
           AMD64: ${{ needs.image.outputs.amd64 }}
           ARM64: ${{ needs.image.outputs.arm64 }}
         run: |
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           tags=(--tag "$IMAGE:$VERSION")
-          # The tag of a release with one srcML release keeps its first build of the commit of the release, also where the release tag moves
-          pinned="$IMAGE:$VERSION-srcml$SRCML"
-          built=$(docker buildx imagetools inspect --raw "$pinned" 2>/dev/null | jq -r '.annotations["org.opencontainers.image.revision"] // empty' || true)
-          if [ "$built" != "$REVISION" ]; then
-            tags+=(--tag "$pinned")
-          fi
           if [ "$NEWEST" = true ]; then
             tags+=(--tag "$IMAGE:latest")
           fi
-          docker buildx imagetools create "${tags[@]}" --annotation "index:org.opencontainers.image.revision=$REVISION" \
-            "$IMAGE@$AMD64" "$IMAGE@$ARM64"
+          docker buildx imagetools create "${tags[@]}" "$IMAGE@$AMD64" "$IMAGE@$ARM64"
       - name: Delete the images that lost their tag
         env:
           GITHUB_TOKEN: ${{ github.token }}
