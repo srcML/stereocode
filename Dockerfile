@@ -37,7 +37,7 @@ COPY --from=build /stereocode/build/stereocode /usr/local/bin/
 COPY docker/entrypoint.sh /usr/local/bin/
 WORKDIR /data
 LABEL org.opencontainers.image.source="https://github.com/srcML/stereocode" \
-      org.opencontainers.image.description="Stereocode and srcML, which classify the methods and types of C, C++, C#, and Java code by their stereotypes" \
+      org.opencontainers.image.description="Stereocode and srcML, which classify the methods and types of code in multiple languages by their stereotypes" \
       org.opencontainers.image.licenses="GPL-3.0-only"
 ENTRYPOINT ["entrypoint.sh"]
 CMD ["stereocode", "--help"]

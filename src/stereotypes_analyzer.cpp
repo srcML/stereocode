@@ -128,7 +128,7 @@ void stereotypesAnalyzer::run() {
         wellFormed.get();
         throw;
     }
-    if (analyzedUnits == 0) std::cerr << "Warning: " << settings.inputFile << " holds no unit in C, C++, C#, Java, or Python\n";
+    if (analyzedUnits == 0) std::cerr << "Warning: " << settings.inputFile << " holds no unit in C, C++, C#, Java, Python, JavaScript, or TypeScript\n";
     input.reset();
     wellFormed.get();
     indexTypes();
