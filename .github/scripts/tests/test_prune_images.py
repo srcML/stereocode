@@ -28,11 +28,11 @@ class KeptTagsTest(unittest.TestCase):
         releases = {"2.0.0"}
         self.assertTrue(prune.kept(["latest"], releases))
         self.assertTrue(prune.kept(["2.0.0"], releases))
-        self.assertTrue(prune.kept(["2.0.0-srcml1.2.0"], releases))
 
-    def test_a_removed_release_another_tag_and_no_tag_keep_no_image(self):
+    def test_a_removed_release_a_tag_of_a_srcml_release_and_no_tag_keep_no_image(self):
         releases = {"2.0.0"}
-        self.assertFalse(prune.kept(["1.0.0", "1.0.0-srcml1.1.0"], releases))
+        self.assertFalse(prune.kept(["1.0.0"], releases))
+        self.assertFalse(prune.kept(["2.0.0-srcml1.2.0"], releases))
         self.assertFalse(prune.kept(["build-amd64"], releases))
         self.assertFalse(prune.kept([], releases))
 

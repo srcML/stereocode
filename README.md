@@ -29,7 +29,7 @@ cmake --install build                              # copy stereocode to the syst
 
 ## 🐳 Docker
 
-The image [`ghcr.io/srcml/stereocode`](https://github.com/srcML/stereocode/pkgs/container/stereocode) on GitHub holds srcML and Stereocode for Intel and ARM machines, ready to run without the requirements or the build. GitHub Actions rebuilds the image with each release of Stereocode and every week with the newest srcML release and Ubuntu packages.
+The image [`ghcr.io/srcml/stereocode`](https://github.com/srcML/stereocode/pkgs/container/stereocode) on GitHub holds srcML and Stereocode for Intel and ARM machines, ready to run without the requirements or the build. GitHub Actions rebuilds the image with each release of Stereocode and every week with the newest srcML release and Ubuntu packages. The tags `latest` and `2.0.0` always name the newest build.
 
 ```bash
 docker pull ghcr.io/srcml/stereocode                                  # get or update the image
@@ -42,8 +42,6 @@ The commands of the usage example then run in the image, on the files of the cur
 run srcml --register-ext h=C++ my_project -o my_project.xml  # turn the code into a srcML archive
 run stereocode my_project.xml -f -r                          # add stereotypes and write CSV reports
 ```
-
-The tags `latest` and `2.0.0` follow the weekly builds. A tag such as `2.0.0-srcml1.2.0` keeps the first build of one release of Stereocode with one release of srcML.
 
 ## 🚀 Usage
 
