@@ -16,15 +16,13 @@ permissions:
   contents: read
   packages: write
 
-# The runs that publish wait for each other, since they share the staging images
+# The runs that publish wait for each other, since the deletion of the images without a tag would remove the new images of another run
 concurrency:
   group: ${{ (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') && 'docker-publish' || format('docker-{0}', github.ref) }}
   cancel-in-progress: false
 
 env:
   IMAGE: ghcr.io/srcml/stereocode
-  # A private package holds the image of each architecture until the publish joins them under the tags of the release
-  STAGING: ghcr.io/srcml/stereocode-staging
 
 jobs:
   versions:
@@ -77,37 +75,55 @@ jobs:
           - arch: arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
+    # Each architecture sets the output of its own name, and the outputs of the matrix combine
+    outputs:
+      amd64: ${{ steps.build.outputs.amd64 }}
+      arm64: ${{ steps.build.outputs.arm64 }}
     steps:
       - uses: actions/checkout@v7
         with:
           ref: ${{ needs.versions.outputs.ref }}
+      - uses: docker/setup-buildx-action@v4
+      - name: Log in to the GitHub Container Registry
+        if: needs.versions.outputs.publish == 'true'
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
       - name: Build the image, which runs the tests of Stereocode
+        id: build
         env:
           GITHUB_AUTH: 'Authorization: Bearer ${{ github.token }}'
-        run: >-
-          docker build --pull --no-cache
-          --build-arg SRCML_VERSION=${{ needs.versions.outputs.srcml }}
-          --secret id=github_auth,env=GITHUB_AUTH
-          --tag stereocode:test .
+          PUBLISH: ${{ needs.versions.outputs.publish }}
+        run: |
+          # A run that publishes pushes the image by its digest alone, which the publish joins with the other architecture under the tags
+          if [ "$PUBLISH" = true ]; then
+            output=(--output "type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true")
+          else
+            output=(--load --tag stereocode:test)
+          fi
+          # Without the provenance record, which GitHub lists as a third platform, unknown/unknown
+          docker buildx build --pull --no-cache --provenance=false \
+            --build-arg SRCML_VERSION=${{ needs.versions.outputs.srcml }} \
+            --secret id=github_auth,env=GITHUB_AUTH \
+            --metadata-file "$RUNNER_TEMP/build.json" "${output[@]}" .
+          if [ "$PUBLISH" = true ]; then
+            digest=$(jq -r '."containerimage.digest"' "$RUNNER_TEMP/build.json")
+            echo "${{ matrix.arch }}=$digest" >> "$GITHUB_OUTPUT"
+            echo "TESTED=$IMAGE@$digest" >> "$GITHUB_ENV"
+          else
+            echo "TESTED=stereocode:test" >> "$GITHUB_ENV"
+          fi
       - name: Run the image on a small C++ project
         run: |
           mkdir -p sample/my_project
           printf 'class Point {\n    int x;\npublic:\n    int getX() const { return x; }\n};\n' > sample/my_project/point.cpp
-          docker run --rm -v "$PWD/sample:/data" stereocode:test srcml my_project -o my_project.xml
-          docker run --rm -v "$PWD/sample:/data" stereocode:test stereocode my_project.xml -r
+          docker run --rm -v "$PWD/sample:/data" "$TESTED" srcml my_project -o my_project.xml
+          docker run --rm -v "$PWD/sample:/data" "$TESTED" stereocode my_project.xml -r
           grep -q 'st:stereotype="get"' sample/my_project.stereotypes.xml
           test -s sample/my_project.stereotypes.csv
           # The entrypoint keeps the owner of the mounted folder as the owner of the output
           test "$(stat -c %u sample/my_project.stereotypes.xml)" = "$(id -u)"
-          docker run --rm stereocode:test stereocode --version
-      - name: Push the image of this architecture
-        if: needs.versions.outputs.publish == 'true'
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
-          docker tag stereocode:test "$STAGING:build-${{ matrix.arch }}"
-          docker push "$STAGING:build-${{ matrix.arch }}"
+          docker run --rm "$TESTED" stereocode --version
 
   publish:
     needs: [versions, image]
@@ -122,6 +138,8 @@ jobs:
           SRCML: ${{ needs.versions.outputs.srcml }}
           NEWEST: ${{ needs.versions.outputs.newest }}
           REVISION: ${{ needs.versions.outputs.revision }}
+          AMD64: ${{ needs.image.outputs.amd64 }}
+          ARM64: ${{ needs.image.outputs.arm64 }}
         run: |
           echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
           tags=(--tag "$IMAGE:$VERSION")
@@ -135,7 +153,7 @@ jobs:
             tags+=(--tag "$IMAGE:latest")
           fi
           docker buildx imagetools create "${tags[@]}" --annotation "index:org.opencontainers.image.revision=$REVISION" \
-            "$STAGING:build-amd64" "$STAGING:build-arm64"
+            "$IMAGE@$AMD64" "$IMAGE@$ARM64"
       - name: Delete the images that lost their tag
         env:
           GITHUB_TOKEN: ${{ github.token }}
