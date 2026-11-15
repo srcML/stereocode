@@ -137,7 +137,7 @@ function(check_damaged_input)
     endforeach()
 endfunction()
 
-# An archive without a unit in C, C++, C#, Java, or Python gives a warning and an output without stereotypes
+# An archive without a unit in C, C++, C#, Java, Python, JavaScript, or TypeScript gives a warning and an output without stereotypes
 # libsrcml reads an archive without units as one unit without a language and writes revision="" and language=""
 function(check_archive_without_code)
     set(INPUT [=[
@@ -154,7 +154,7 @@ function(check_archive_without_code)
 
     run_stereocode(input.xml -f -r)
     expect_exit(0)
-    if(NOT "${RUN_ERROR}" MATCHES "^Warning: input.xml holds no unit in C, C\\+\\+, C#, Java, or Python\n$")
+    if(NOT "${RUN_ERROR}" MATCHES "^Warning: input.xml holds no unit in C, C\\+\\+, C#, Java, Python, JavaScript, or TypeScript\n$")
         message(FATAL_ERROR "Expected a warning about the missing code, got '${RUN_ERROR}'")
     endif()
     expect_file_content("${WORK_DIR}/input.stereotypes.xml" "${EXPECTED_OUTPUT}")
